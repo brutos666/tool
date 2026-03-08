@@ -1,0 +1,17 @@
+# Backend
+backend-tool/target/
+backend-tool/.mvn/
+backend-tool/*.log
+
+# Frontend
+frontend-vanilla-tool/node_modules/
+
+# IntelliJ
+.idea/
+*.iml
+
+# VSCode
+.vscode/
+
+# Système
+.DS_Store

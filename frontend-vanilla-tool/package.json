@@ -1,0 +1,16 @@
+{
+  "name": "frontend-vanilla-tool",
+  "version": "1.0.0",
+  "description": "Outil de gestion de tâches",
+  "repository": {
+    "type": "git",
+    "url": "tool"
+  },
+  "license": "ISC",
+  "author": "brutos666",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "test command: jest"
+  }
+}
