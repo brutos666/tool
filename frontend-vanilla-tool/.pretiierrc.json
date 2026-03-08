@@ -1,0 +1,9 @@
+{
+  "singleQuote": false,
+  "printWidth": 20000,
+  "trailingComma": "none",
+  "bracketSameLine": true,
+  "arrowParens": "avoid",
+  "vueIndentScriptAndStyle": true,
+  "endOfLine": "crlf"
+}

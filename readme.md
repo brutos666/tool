@@ -4,14 +4,14 @@ Pour l'instant, il s'agit de me former à l'utilisation de Spring boot et aussi 
 
 Je souhaite m'en servir de modèle, je vais donc me concentrer à bien tout séparer même si chaque répertoire ne doit contenir qu'un seul répertoire.
 
-Le projet utilise donc le framework Spring Boot et la partie front sera dans un premier temps le plus léger possible (pas de framework react, peut d'utlisation de bibliothèques.
+Le projet utilise donc le framework Spring Boot et la partie front sera dans un premier temps le plus léger possible (pas de framework react, peut d’utilisation de bibliothèques.
 La connexion à la base de données arrivera ensuite.
 
 Le but est également de coder en étant le plus éco-responsable possible : une formation viendra après et j'espère que ce repo me permettra de mettre en application ce que j'aurais appris.
 
 ## Prérequis
 
-- Java 25+
+- Java 21+
 - Maven 3.8.7
 - Node.js v26.0.0-nightly20260308f38a739623
 
@@ -19,18 +19,27 @@ Le but est également de coder en étant le plus éco-responsable possible : une
 
 ### Backend
 
+```shell
 cd backend-tool
 mvn spring-boot:run
+```
 
 ### Frontend
+
 Ouvrir `frontend-vanilla-tool/index.html` dans un navigateur.
 
 ## Tests
 
 ### Backend
+
+```shell
 cd backend-tool
 mvn test
+```
 
 ### Frontend
+
+```shell
 cd frontend-vanilla-tool
 npm test
+```
