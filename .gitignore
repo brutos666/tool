@@ -4,7 +4,7 @@ backend-tool/.mvn/
 backend-tool/*.log
 
 # Frontend
-frontend-vanilla-tool/node_modules/
+node_modules/
 
 # IntelliJ
 .idea/

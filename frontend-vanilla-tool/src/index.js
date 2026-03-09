@@ -1,9 +1,11 @@
-import createHomePage from "./components/homePage.js";
+'use strict';
+
+import HomePage from './components/HomePage.js';
 
 function loadApp() {
-  const appRoot = document.getElementById("app-root");
+  const appRoot = document.getElementById('app-root');
+  const homePage = new HomePage();
 
-  const { root } = createHomePage();
-  appRoot.appendChild(root);
+  appRoot.appendChild(homePage.getNodeView());
 }
-window.addEventListener("load", loadApp);
+window.addEventListener('load', loadApp);

@@ -1,25 +1,37 @@
-import { URL_ROOT } from '../tools/constants';
+'use strict';
 
-async function callRequestApi(api, data) {
-  var response, responseData;
-  try {
-    response = await fetch(URL_ROOT + api, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+import { URL_ROOT_API } from '../tools/Constants.js';
+
+/**
+ * Appel d'une requête
+ * @param {NodeElement} element - noeud de l'élément à l'origine de la requête
+ * @param {string} requestName - Nom de la requête ("task/xxx")
+ * @param {string} method - Type de requête ("GET", "POST", "PUT", "DELETE")
+ * @param {Object} data - Données de la requête
+ * @returns {Object} contenant les données attendues
+ */
+async function callRequestApi(element, requestName, method = 'POST', data = {}) {
+  let response;
+
+  if (method === 'GET') {
+    response = await fetch(URL_ROOT_API + requestName);
+  } else {
+    response = await fetch(URL_ROOT_API + requestName, {
+      method,
+      headers: { 'Content-Type': 'application/json', },
       body: JSON.stringify(data),
     });
-
-    if (!response.ok) {
-      throw new Error(`Erreur HTTP : ${response.status}`);
-    }
-
-    responseData = await response.json();
-    console.log(responseData);
-  } catch (error) {
-    console.error('Erreur :', error);
   }
+  const responseData = await response.json();
+
+  if (!response.ok) {
+    // Mettre à jour un message d'erreur sur l'élément
+    const message = `Erreur HTTP ${ response.status } : ${ responseData.error } (${ responseData.path })`;
+
+    element.setErrorMess(message);
+    return Promise.resolve([]);
+  }
+  element.setErrorMess('');
   return responseData;
 }
 

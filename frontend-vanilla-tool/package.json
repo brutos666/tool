@@ -11,6 +11,10 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "test command: jest"
+    "test": "test command: jest",
+    "start": "cd ../backend-tool/ && mvn spring-boot:run -Dspring-boot.run.profiles=dev",
+    "open": "firefox http://localhost:5500/frontend-vanilla-tool/index.html",
+    "lint": "eslint src/**/*.{js} --quiet"
   }
 }
+

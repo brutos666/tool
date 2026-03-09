@@ -1,15 +1,18 @@
 package com.brutos.tool.entity;
 
-
 import java.util.Objects;
 
-public class Todo {
-    String what = "";
-    String when = "";
-    DatePrecision datePrecision = DatePrecision.DAY;
-    State state = State.TODO;
+public class Task extends AbstractEntity {
+    private String what = "";
+    private String when = "";
+    // A faire dans la journée, dans la semaine, dans le mois, dans l'année du jour indiqué
+    private TimeIndicator goal = TimeIndicator.DAY;
+    private State state = State.TODO;
 
-    public Todo(String what, String when) {
+    public Task() {
+    }
+
+    public Task(String what, String when) {
         this.what = what;
         this.when = when;
     }
@@ -30,10 +33,6 @@ public class Todo {
         this.when = when;
     }
 
-    public boolean isDone() {
-        return state.isDone();
-    }
-
     public State getState() {
         return state;
     }
@@ -42,38 +41,38 @@ public class Todo {
         this.state = state;
     }
 
-    public DatePrecision getDatePrecision() {
-        return datePrecision;
+    public TimeIndicator getGoal() {
+        return goal;
     }
 
-    public void setDatePrecision(DatePrecision datePrecision) {
-        this.datePrecision = datePrecision;
+    public void setGoal(TimeIndicator goal) {
+        this.goal = goal;
     }
 
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
 
-        Todo todo = (Todo) o;
-        return Objects.equals(what, todo.what) && Objects.equals(when, todo.when) && datePrecision == todo.datePrecision && state == todo.state;
+        Task task = (Task) o;
+        return Objects.equals(what, task.what) && Objects.equals(when, task.when) && goal == task.goal && state == task.state;
     }
 
     @Override
     public int hashCode() {
         int result = Objects.hashCode(what);
         result = 31 * result + Objects.hashCode(when);
-        result = 31 * result + datePrecision.hashCode();
-        result = 31 * result + state.hashCode();
+        result = 31 * result + Objects.hashCode(goal);
+        result = 31 * result + Objects.hashCode(state);
         return result;
     }
 
     @Override
     public String toString() {
-        return "Todo{" +
+        return "Task{" +
                 "what='" + what + '\'' +
                 ", when='" + when + '\'' +
-                ", datePrecision=" + datePrecision +
+                ", goal=" + goal +
                 ", state=" + state +
-                '}';
+                "} " + super.toString();
     }
 }
