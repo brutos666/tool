@@ -1,0 +1,38 @@
+#!/bin/bash
+
+COMMIT_MSG_FILE=$1
+ESLINT_LOG_FILE=./git-config/logs/eslint.log
+
+# Lire le message de commit
+COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+
+# Passer les messages de commit temporaire
+if [[ $COMMIT_MSG == TMP* ]]; then
+    echo >&2 "Commit temporaire détecté."
+else
+    # Utiliser npx pour exécuter commitlint
+    npx commitlint --edit "$COMMIT_MSG_FILE" --config ./commitlint.config.js
+    EXIT_CODE=$?
+
+    # Vérifier le code de sortie de commitlint
+    if [ $EXIT_CODE -ne 0 ]; then
+        echo >&2 "Votre commit est invalide. Veuillez suivre les conventions de commit GIT."
+        exit $EXIT_CODE
+    fi
+fi
+
+modifedJsFiles=$(git diff --cached --name-only --diff-filter=ACMRT | grep ".js$")
+if [ "$modifedJsFiles" != "" ]; then
+   # modifedJsFiles peut contenir beaucoup de fichiers et la taille d'une commande est limitée en nombre de caractères. xargs permet de dépasser cette limite
+   # L'utilisation de tee vient du fait que npx n'affiche pas le résultat dans la console stderr ou stdout (il ouvre directement /dev/tty pour écrire dedans)
+   echo "$modifedJsFiles" | xargs -I{} npx eslint {} -c ./eslint.config.js | tee $ESLINT_LOG_FILE
+   if [ -s $ESLINT_LOG_FILE ]; then
+      echo "===========================================================================" >&2
+      echo "Il y a des erreurs ESLINT. Voir le détail dans $ESLINT_LOG_FILE" >&2
+      echo "===========================================================================" >&2
+      exit 1
+   fi
+fi
+
+   
+

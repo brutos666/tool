@@ -1,0 +1,7 @@
+[core]
+   autocrlf = false
+   hooksPath = ./git-config/hooks
+[pull]
+   rebase = true
+[rebase]
+   autoStash = true

@@ -15,3 +15,7 @@ node_modules/
 
 # Système
 .DS_Store
+
+# Git Logs
+git-config/logs/*.log
+      

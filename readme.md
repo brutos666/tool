@@ -13,7 +13,7 @@ Le but est également de coder en étant le plus éco-responsable possible : une
 
 - Java 21+
 - Maven 3.8.7
-- Node.js v26.0.0-nightly20260308f38a739623
+- Node.js v24.14.0
 
 ## Lancer le projet en local
 
