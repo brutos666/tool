@@ -6,8 +6,8 @@ import org.springframework.data.relational.core.mapping.Table;
 public class TaskModel extends AbstractModel {
     private String what;
     private String when;
-    private String goal;
-    private String state;
+    private String delay;
+    private char state;
 
     public String getWhat() {
         return what;
@@ -25,19 +25,19 @@ public class TaskModel extends AbstractModel {
         this.when = when;
     }
 
-    public String getGoal() {
-        return goal;
+    public String getDelay() {
+        return delay;
     }
 
-    public void setGoal(String goal) {
-        this.goal = goal;
+    public void setDelay(String delay) {
+        this.delay = delay;
     }
 
-    public String getState() {
+    public char getState() {
         return state;
     }
 
-    public void setState(String state) {
+    public void setState(char state) {
         this.state = state;
     }
 }

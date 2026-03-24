@@ -1,19 +1,14 @@
 'use strict';
 
 import { ACTION } from '../tools/Constants.js';
+import { saveTask } from '../requests/taskRequests.js';
 import Button from './Button.js';
 import Composite from './Composite.js';
 import Task from './Task.js';
 /** @import { TaskInfos } from './Task.js' */
+/** @import NodeElement from './NodeElement.js' */
 
 class TaskCard extends Composite {
-
-  /**
-   * @callback ActionFunction - Fonction à appeler lorsqu'une action (création, suppression, ...) est effectuée
-   * @param {Element} element - Element à l'origine de l'action
-   * @param {ACTION} action - Action effectuée
-   * @param {TaskInfos} taskInfos - Informations sur la tâche
-   */
 
   /**
    * Constructeur de la classe Task
@@ -21,78 +16,60 @@ class TaskCard extends Composite {
    * @param {string} data.label - Label de la tâche
    * @param {TaskInfos} data.taskInfos - Informations sur la tache
    * @param {ACTION} data.action - Action de création, modification ou suppression
-   * @param {ActionFunction} data.actionFunction - Fonction à appeler lorsqu'une action est effectuée
+   * @param {Function} data.callback - Fonction appelée lorsqu'une action est effectuée sur la tache
    */
   constructor(data) {
     super(data);
+
     this.createView(String.raw`
     <div class="task-card">
       <header class="task-card__header"><h2>${ data.label }</h2></header>
       <div id="childrenSpace"></div>
-      <footer class="task-card__footer"><button class="task-card__action">Valider</button></footer>
     </div>`);
-    /** @type {TaskInfos} */
-    this.taskInfos = data.taskInfos;
 
+    const deleteAction = data.action === ACTION.Create ? ACTION.Clear : ACTION.Delete;
+
+    this.actionButton = new Button({
+      label: ACTION.getActionLabel(data.action),
+      id: 'submitButton',
+      onClick: onClickAction.bind(this, 'submitButton', data.action, data.callback)
+    });
+    this.deleteButton = new Button({
+      label: ACTION.getActionLabel(deleteAction),
+      id: 'deleteButton',
+      onClick: onClickAction.bind(this, 'deleteButton', deleteAction, data.callback)
+    });
     this.task = new Task({ taskInfos: data.taskInfos });
-    this.actionButton = new Button({ label: 'Valider', id: 'submitButton', onClick: onClickActionButton.bind(this, data.taskInfos.id, data.action, data.actionFunction) });
 
     this.addChild(this.actionButton);
+    this.addChild(this.deleteButton);
     this.addChild(this.task);
   }
 
-  getWhen() {
-    return this.when.value;
-  }
-
-  getWhat() {
-    return this.what.value;
-  }
-
-  getGoal() {
-    return this.goal.querySelector('input:checked').value;
-  }
-
-  getState() {
-    return this.state.querySelector('input:checked').value;
-  }
-
-  /**
-   * Positionne l'action du button
-   * @param {ACTION} action - Action de création, modification ou suppression
-   * @param {Function} callback - Fonction à appeler lorsque le button est cliqué
-   */
-  setAction(action, callback) {
-    this.button.innerHTML = ACTION.getActionLabel(action);
-    this.button.classList.remove('.hidden');
-    this.button.addEventListener('click', callback.bind(this));
-  }
-
-  removeAction() {
-    this.button.innerHTML = '';
-    this.button.classList.add('.hidden');
-    this.button.removeAllEventListeners();
+  getTaskInfos() {
+    return this.task.getTaskInfos();
   }
 
 }
 
 /**
- * Fonction appelée lorsque le button de la tâche est cliqué.
+ * Fonction appelée lorsqu'une action est effectuée sur la tache
  * Elle appelle la fonction actionFunction avec les informations de la tâche.
- * @param {number} id - Identifiant de la tâche
+ * @param {string} idElement - Identifiant de l'élément qui a déclenché l'action
  * @param {ACTION} action - Action de création, modification ou suppression
- * @param {ActionFunction} actionFunction - Fonction à appeler lorsque le button est cliqué
+ * @param {Function} callback - Fonction appelée lorsque le button de la tâche est cliqué
+ *
+ * @this {TaskCard}
  */
-function onClickActionButton(id, action, actionFunction) {
-  const taskInfos = {
-    id,
-    what: this.getWhat(),
-    when: this.getWhen(),
-    goal: this.getGoal(),
-    state: this.getState()
-  };
+function onClickAction(idElement, action, callback) {
+  const taskInfos = this.task.getTaskInfos();
+  /** @type {NodeElement} */
+  const element = this.getChildById(idElement);
 
-  actionFunction.call(null, this.button, action, taskInfos);
+  if (action === ACTION.Create) {
+    saveTask(element, taskInfos.what, taskInfos.when);
+  }
+  callback(this, element, action);
 }
 
 export default TaskCard;

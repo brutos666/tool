@@ -22,7 +22,7 @@ import static org.mockito.Mockito.when;
 public class TaskServiceTest {
     public static final String TODO_TEXT = "Tâche à faire";
     public static final String DATE = "20230101";
-    
+
     @Mock
     private TaskRepository taskRepository;
 
@@ -39,17 +39,16 @@ public class TaskServiceTest {
     @Test
     void shouldSaveTask() {
         // Given
-
         TaskModel savedTask = new TaskModel();
         savedTask.setId(1L);
         savedTask.setWhat(TODO_TEXT);
         savedTask.setWhen(DATE);
-        savedTask.setGoal(TimeIndicator.DAY.name());
-        savedTask.setState(State.TODO.name());
+        savedTask.setDelay(TimeIndicator.DAY.name());
+        savedTask.setState(State.TODO.getModelValue());
         when(taskRepository.save(any())).thenReturn(savedTask);
 
         // When
-        Task actual = taskService.save(TODO_TEXT, DATE);
+        Task actual = taskService.save(new Task(TODO_TEXT, DATE));
 
         // Then
         assertNotNull(actual.getId());

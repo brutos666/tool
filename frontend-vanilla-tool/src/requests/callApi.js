@@ -18,7 +18,7 @@ async function callRequestApi(element, requestName, method = 'POST', data = {}) 
   } else {
     response = await fetch(URL_ROOT_API + requestName, {
       method,
-      headers: { 'Content-Type': 'application/json', },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
   }

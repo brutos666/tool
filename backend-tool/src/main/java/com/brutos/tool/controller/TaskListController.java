@@ -5,14 +5,16 @@ import com.brutos.tool.handler.webResult.TaskWebResult;
 import com.brutos.tool.mapper.TaskMapper;
 import com.brutos.tool.service.DateService;
 import com.brutos.tool.service.TaskService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/task")
 public class TaskListController {
+    private static final Logger logger = LogManager.getLogger(TaskListController.class);
 
     private final DateService dateService;
     private final TaskService taskService;
@@ -33,17 +35,14 @@ public class TaskListController {
 
     @GetMapping("/taskTodo")
     public List<TaskWebResult> getTaskToDo() {
-        String today = this.dateService.getToday();
-        List<Task> tasks = new ArrayList<>(2);
-        tasks.add(this.taskService.giveMeTask("Faire à manger", today));
-        tasks.add(this.taskService.giveMeTask("Faire du sport", today));
+        List<Task> tasks = this.taskService.findAllTasks();
         return this.taskMapper.toWebResult(tasks);
     }
 
     @PostMapping("/save")
-    public TaskWebResult saveTask(@RequestParam(value = "what", defaultValue = "") String what) {
-        String today = this.dateService.getToday();
-        Task task = this.taskService.save(what, today);
+    public TaskWebResult saveTask(@RequestBody TaskWebResult taskWebRequest) {
+        this.dateService.controlDate(taskWebRequest.getWhen());
+        Task task = this.taskService.save(this.taskMapper.toEntity(taskWebRequest));
         return this.taskMapper.toWebResult(task);
     }
 

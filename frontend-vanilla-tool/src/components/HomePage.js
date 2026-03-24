@@ -1,11 +1,9 @@
 'use strict';
 
-import { getTodayTasks, saveTask } from '../requests/taskRequests.js';
+import { getTodayTasks } from '../requests/taskRequests.js';
 import Button from './Button.js';
 import Composite from './Composite.js';
 import TaskContainer from './TaskContainer.js';
-import TaskCard from './TaskCard.js';
-import { ACTION } from '../tools/Constants.js';
 
 class HomePage extends Composite {
 
@@ -45,37 +43,13 @@ class HomePage extends Composite {
       .then(dataTasks => {
         this.taskContainer.removeAllChildren();
         dataTasks.forEach(dataTask => {
-          this.taskContainer.addChild(new TaskCard({
-            label: `Tâche n°${ dataTask.id }`,
-            taskInfos: dataTask,
-            action: ACTION.Update,
-            actionFunction: this.onActionTaskClick
-          }));
+          this.taskContainer.displayTask(dataTask);
         });
       });
   }
 
   onAddTaskClick() {
-    this.taskContainer.addChild(new TaskCard({
-      label: 'Nouvelle tâche',
-      taskInfos: {
-        goal: 'DAY',
-        state: 'TODO',
-      },
-      action: ACTION.Create,
-      actionFunction: this.onActionTaskClick
-    }));
-  }
-  /**
-   * Méthode appelée lorsque l'action d'une tâche est faite
-   * @param {Element} element - Element à l'origine de la requête (bouton par exemple)
-   * @param {ACTION} action - Action qui a été faite (Create, Update, Delete, Clear)
-   * @param {TaskInfos} taskInfos - Informations sur la tâche
-   */
-  onActionTaskClick(element, action, taskInfos) {
-    if (action === ACTION.Create) {
-      saveTask(element, taskInfos.what, taskInfos.when);
-    }
+    this.taskContainer.addNewTask();
   }
 
 }

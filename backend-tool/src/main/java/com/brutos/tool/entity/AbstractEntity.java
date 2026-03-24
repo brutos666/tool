@@ -1,7 +1,7 @@
 package com.brutos.tool.entity;
 
 public abstract class AbstractEntity {
-    private Long id = 0L;
+    private Long id = null;
 
     public Long getId() {
         return id;

@@ -15,20 +15,34 @@ Le but est également de coder en étant le plus éco-responsable possible : une
 - Maven 3.8.7
 - Node.js v26.0.0-nightly20260308f38a739623
 
-## Lancer le projet
+## Lancer le projet en local
+
+Récupérer le projet par un clone du repo GitHub
+
+```shell
+git clone https://github.com/brutos666/tool
+```
 
 ### Backend
+
+Lancer la partie back
 
 ```shell
 cd backend-tool
 mvn spring-boot:run
 ```
 
+ou
+
+```shell
+npm run start
+```
+
 ### Frontend
 
-Ouvrir `frontend-vanilla-tool/index.html` dans un navigateur.
+Installer l'extension [Live Server](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer) dabs Visual Studio Code et cliquer sur "Go Live" dans la barre d'état de l'IDE
 
-## Tests
+## Lancer les tests
 
 ### Backend
 
@@ -43,3 +57,4 @@ mvn test
 cd frontend-vanilla-tool
 npm test
 ```
+

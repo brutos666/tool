@@ -36,9 +36,23 @@ class Composite extends NodeElement {
     this.#spaceChildren.appendChild(element.getNodeView());
   }
 
+  removeChild(element) {
+    const index = this.#children.indexOf(element);
+
+    if (index !== -1) {
+      this.#children.splice(index, 1);
+      this.#spaceChildren.removeChild(element.getNodeView());
+    }
+  }
+
   removeAllChildren() {
     this.#children = [];
     this.#spaceChildren.innerHTML = '';
+  }
+
+  getChildById(idElement) {
+    return this.#children.find(child => child.getNodeView()
+      .querySelector(`[id='${ idElement }']`));
   }
 
 }

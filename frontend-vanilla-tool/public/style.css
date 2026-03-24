@@ -23,10 +23,6 @@
   display: flex;
   flex-direction: column;
 }
-.task-card__footer {
-  text-align: center;
-  height: 50px;
-}
 
 .tasks__header {
   text-align: center;
@@ -36,11 +32,11 @@
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  background-color: var(--darkreader-background-efeff4, #202224);
+  background-color: #202224;
   background-repeat: repeat;
   background-image: none;
   background-size: auto;
   background-clip: border-box;
-  color: var(--darkreader-text-000000, #e8e6e3);
+  color: #e8e6e3;
 }
 

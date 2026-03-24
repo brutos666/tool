@@ -9,7 +9,7 @@ public class TaskWebResult extends AbstractWebResultEntity {
     private String what = "";
     private String when = "";
     // A faire dans la journée, dans la semaine, dans le mois, dans l'année du jour indiqué
-    private TimeIndicator goal = TimeIndicator.DAY;
+    private TimeIndicator delay = TimeIndicator.DAY;
     private State state = State.TODO;
 
     public TaskWebResult() {
@@ -22,12 +22,12 @@ public class TaskWebResult extends AbstractWebResultEntity {
         this.when = when;
     }
 
-    public TaskWebResult(Long id, String what, String when, TimeIndicator goal, State state) {
+    public TaskWebResult(Long id, String what, String when, TimeIndicator delay, State state) {
         super();
         super.setId(id);
         this.what = what;
         this.when = when;
-        this.goal = goal;
+        this.delay = delay;
         this.state = state;
     }
 
@@ -47,12 +47,12 @@ public class TaskWebResult extends AbstractWebResultEntity {
         this.when = when;
     }
 
-    public TimeIndicator getGoal() {
-        return goal;
+    public TimeIndicator getDelay() {
+        return delay;
     }
 
-    public void setGoal(TimeIndicator goal) {
-        this.goal = goal;
+    public void setDelay(TimeIndicator delay) {
+        this.delay = delay;
     }
 
     public State getState() {
@@ -68,14 +68,14 @@ public class TaskWebResult extends AbstractWebResultEntity {
         if (o == null || getClass() != o.getClass()) return false;
 
         TaskWebResult that = (TaskWebResult) o;
-        return Objects.equals(what, that.what) && Objects.equals(when, that.when) && goal == that.goal && state == that.state;
+        return Objects.equals(what, that.what) && Objects.equals(when, that.when) && delay == that.delay && state == that.state;
     }
 
     @Override
     public int hashCode() {
         int result = Objects.hashCode(what);
         result = 31 * result + Objects.hashCode(when);
-        result = 31 * result + Objects.hashCode(goal);
+        result = 31 * result + Objects.hashCode(delay);
         result = 31 * result + Objects.hashCode(state);
         return result;
     }
@@ -85,7 +85,7 @@ public class TaskWebResult extends AbstractWebResultEntity {
         return "TaskWebResult{" +
                 "what='" + what + '\'' +
                 ", when='" + when + '\'' +
-                ", goal=" + goal +
+                ", delay=" + delay +
                 ", state=" + state +
                 "} " + super.toString();
     }

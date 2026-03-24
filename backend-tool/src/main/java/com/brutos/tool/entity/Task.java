@@ -6,7 +6,7 @@ public class Task extends AbstractEntity {
     private String what = "";
     private String when = "";
     // A faire dans la journée, dans la semaine, dans le mois, dans l'année du jour indiqué
-    private TimeIndicator goal = TimeIndicator.DAY;
+    private TimeIndicator delay = TimeIndicator.DAY;
     private State state = State.TODO;
 
     public Task() {
@@ -41,12 +41,12 @@ public class Task extends AbstractEntity {
         this.state = state;
     }
 
-    public TimeIndicator getGoal() {
-        return goal;
+    public TimeIndicator getDelay() {
+        return delay;
     }
 
-    public void setGoal(TimeIndicator goal) {
-        this.goal = goal;
+    public void setDelay(TimeIndicator delay) {
+        this.delay = delay;
     }
 
     @Override
@@ -54,14 +54,14 @@ public class Task extends AbstractEntity {
         if (o == null || getClass() != o.getClass()) return false;
 
         Task task = (Task) o;
-        return Objects.equals(what, task.what) && Objects.equals(when, task.when) && goal == task.goal && state == task.state;
+        return Objects.equals(what, task.what) && Objects.equals(when, task.when) && delay == task.delay && state == task.state;
     }
 
     @Override
     public int hashCode() {
         int result = Objects.hashCode(what);
         result = 31 * result + Objects.hashCode(when);
-        result = 31 * result + Objects.hashCode(goal);
+        result = 31 * result + Objects.hashCode(delay);
         result = 31 * result + Objects.hashCode(state);
         return result;
     }
@@ -71,7 +71,7 @@ public class Task extends AbstractEntity {
         return "Task{" +
                 "what='" + what + '\'' +
                 ", when='" + when + '\'' +
-                ", goal=" + goal +
+                ", delay=" + delay +
                 ", state=" + state +
                 "} " + super.toString();
     }

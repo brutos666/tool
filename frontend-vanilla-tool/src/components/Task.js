@@ -7,7 +7,7 @@ import Component from './Component.js';
  * @property {number} id - Identifiant de la tâche
  * @property {string} what - Ce qu'il faut faire
  * @property {string} when - Date à laquelle à partir de laquelle il faut faire la tâche
- * @property {TimeIndicator} goal - Indicateur de temps pour faire la tâche
+ * @property {TimeIndicator} delay - Indicateur de temps pour faire la tâche
  *                          - WEEK : Faire dans la semaine
  *                          - MONTH : Faire dans le mois
  *                          - YEAR : Faire dans l'année
@@ -25,47 +25,48 @@ class Task extends Component {
    */
   constructor(data) {
     super(data);
+    const taskInfos = data.taskInfos;
+    const id = taskInfos.id;
+
     this.createView(String.raw`
-      <section class="task-card__content" id="${ data.taskInfos.id }">
+      <section class="task-card__content" id="${ id }">
         <label>What <input type="text" id="what" placeholder="Que dois-je faire"/></label>
         <label>When <input type="text" id="when" placeholder="Quand dois-je le faire" /></label>
-        <fieldset id="goal">
+        <fieldset id="delay">
           <legend>A faire dans :</legend>
-          <div><input type="radio" id="goal-day" value="DAY" /><label for="goal-day">La journée</label></div>
-          <div><input type="radio" id="goal-week" value="WEEK" /><label for="goal-week">La semaine</label></div>
-          <div><input type="radio" id="goal-month" value="MONTH" /><label for="goal-month">Le mois</label></div>
-          <div><input type="radio" id="goal-year" value="YEAR" /><label for="goal-year">L'année'</label></div>
+          <div><input type="radio" id="delay-day" value="DAY" name="delay-${ id }" /><label for="delay-day">La journée</label></div>
+          <div><input type="radio" id="delay-week" value="WEEK" name="delay-${ id }"/><label for="delay-week">La semaine</label></div>
+          <div><input type="radio" id="delay-month" value="MONTH" name="delay-${ id }" /><label for="delay-month">Le mois</label></div>
+          <div><input type="radio" id="delay-year" value="YEAR" name="delay-${ id }" /><label for="delay-year">L'année'</label></div>
         </fieldset>
         <fieldset id="state">
           <legend>État de la tâche</legend>
-          <div><input type="radio" id="todo" value="TODO" /><label for="todo">A faire</label></div>
-          <div><input type="radio" id="progress" value="IN_PROGRESS" /><label for="progress">En cours</label></div>
-          <div><input type="radio" id="done" value="DONE" /><label for="done">Fait</label></div>
+          <div><input type="radio" id="todo" value="TODO" name="state-${ id }" /><label for="todo">A faire</label></div>
+          <div><input type="radio" id="progress" value="IN_PROGRESS" name="state-${ id }" /><label for="progress">En cours</label></div>
+          <div><input type="radio" id="done" value="DONE" name/><label for="done">Fait</label></div>
         </fieldset>
       </section>`);
 
-    /** @type {TaskInfos} */
-    this.taskInfos = data.taskInfos;
     this.what = this.getNodeView()
       .querySelector('#what');
     this.when = this.getNodeView()
       .querySelector('#when');
-    this.goal = this.getNodeView()
-      .querySelector('#goal');
+    this.delay = this.getNodeView()
+      .querySelector('#delay');
     this.state = this.getNodeView()
       .querySelector('#state');
 
-    if (data.taskInfos.what) {
-      this.what.value = data.taskInfos.what;
+    if (taskInfos.what) {
+      this.what.value = taskInfos.what;
     }
-    if (data.taskInfos.when) {
-      this.when.value = data.taskInfos.when;
+    if (taskInfos.when) {
+      this.when.value = taskInfos.when;
     }
-    if (data.taskInfos.goal) {
-      this.goal.querySelector(`input[value="${ data.taskInfos.goal }"]`).checked = true;
+    if (taskInfos.delay) {
+      this.delay.querySelector(`input[value="${ taskInfos.delay }"]`).checked = true;
     }
-    if (data.taskInfos.state) {
-      this.state.querySelector(`input[value="${ data.taskInfos.state }"]`).checked = true;
+    if (taskInfos.state) {
+      this.state.querySelector(`input[value="${ taskInfos.state }"]`).checked = true;
     }
   }
 
@@ -77,8 +78,8 @@ class Task extends Component {
     return this.what.value;
   }
 
-  getGoal() {
-    return this.goal.querySelector('input:checked').value;
+  getDelay() {
+    return this.delay.querySelector('input:checked').value;
   }
 
   getState() {
@@ -91,7 +92,7 @@ class Task extends Component {
         .getAttribute('id'),
       what: this.getWhat(),
       when: this.getWhen(),
-      goal: this.getGoal(),
+      delay: this.getDelay(),
       state: this.getState()
     };
   }

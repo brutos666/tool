@@ -19,5 +19,7 @@ public interface Mapper<Entity extends AbstractEntity, Model extends AbstractMod
 
     Entity toEntity(Model model);
 
-    List<Entity> toEntity(List<Model> models);
+    List<Entity> toEntity(Iterable<Model> models);
+
+    Entity toEntity(WebResult webResult);
 }

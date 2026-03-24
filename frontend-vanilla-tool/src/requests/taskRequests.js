@@ -7,7 +7,7 @@ import { callRequestApi } from './callApi.js';
  * @property {number} id - Identifiant de la tâche
  * @property {string} what - Ce qu'il faut faire
  * @property {string} when - Date à laquelle à partir de laquelle il faut faire la tâche
- * @property {TimeIndicator} goal - Indicateur de temps pour faire la tâche
+ * @property {TimeIndicator} delay - Indicateur de temps pour faire la tâche
  *                          - WEEK : Faire le dans la semaine
  *                          - MONTH : Faire le dans le mois
  *                          - YEAR : Faire le dans l'année
