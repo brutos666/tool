@@ -1,6 +1,7 @@
 'use strict';
 
 const URL_ROOT_API = 'http://localhost:8080/api/';
+const NOTIFICATION_TIMEOUT = 3000;
 
 const ACTION = {
   Create: 'Create',
@@ -18,4 +19,4 @@ const ACTION_LABEL = {
   Clear: 'Effacer'
 };
 
-export { URL_ROOT_API, ACTION };
+export { URL_ROOT_API, ACTION, NOTIFICATION_TIMEOUT };

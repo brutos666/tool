@@ -4,8 +4,15 @@ import NodeElement from './NodeElement.js';
 
 class Component extends NodeElement {
 
-  constructor(data) {
-    super(data);
+  /**
+   * Constructeur de la classe
+   */
+  constructor() {
+    super();
+  }
+
+  createView(htmlText) {
+    super.createView(htmlText);
   }
 
 }

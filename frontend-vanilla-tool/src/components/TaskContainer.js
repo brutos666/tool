@@ -7,10 +7,10 @@ import { ACTION } from '../tools/Constants.js';
 class TaskContainer extends Composite {
 
   constructor() {
-    super({ id: 'taskContainer' });
-    this.createView(String.raw`<div id="taskContainer" class="tasks">
+    super();
+    this.createView(String.raw`<div class="tasks">
       <header class="tasks__header"><h1>Conteneur de tâches</h1></header>
-      <section id="childrenSpace" class="tasks__space"></section></div>`);
+      <section id="spaceChildren" class="tasks__space"></section></div>`);
   }
 
   addNewTask() {
@@ -38,12 +38,11 @@ class TaskContainer extends Composite {
 /**
  * Méthode appelée lorsqu'une action est effectuée sur une tâche.
  * @param {TaskCard} taskCard - La tâche qui a été supprimée
- * @param {NodeElement} element - Element à l'origine de l'action
  * @param {ACTION} action - L'action de suppression (Delete ou Clear)
  *
  * @this {TaskContainer}
  */
-function onActionOnTask(taskCard, element, action) {
+function onActionOnTask(taskCard, action) {
   if (action === ACTION.Delete || action === ACTION.Clear) {
     this.removeChild(taskCard);
   }

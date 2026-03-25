@@ -1,49 +1,31 @@
 'use strict';
 
 import { callRequestApi } from './callApi.js';
+/** @import { TaskInfos } from '../components/Task.js' */
 
 /**
- * @typedef {Object} Task - Tâche
- * @property {number} id - Identifiant de la tâche
- * @property {string} what - Ce qu'il faut faire
- * @property {string} when - Date à laquelle à partir de laquelle il faut faire la tâche
- * @property {TimeIndicator} delay - Indicateur de temps pour faire la tâche
- *                          - WEEK : Faire le dans la semaine
- *                          - MONTH : Faire le dans le mois
- *                          - YEAR : Faire le dans l'année
- * @property {State} state - État de la tâche
- *                          - TODO : La tâche n'a pas encore été faite
- *                          - IN_PROGRESS : La tâche est en cours de réalisation
- *                          - DONE : La tâche a été faite
- *
- */
-/**
  * Retourne la tâche du jour
- * @param {Element} element - Element à l'origine de la requête (bouton par exemple)
- * @returns {Task} - Tâche du jour
+ * @returns {TaskInfos} - Tâche du jour
  */
-async function getTodayTask(element) {
-  return callRequestApi(element, 'task/today');
+async function getTodayTask() {
+  return callRequestApi('task/today');
 }
 
 /**
  * Retourne la liste des tâches du jour
- * @param {Element} element - Element à l'origine de la requête (bouton par exemple)
- * @returns {Array<Task>} - Liste des tâches du jour
+ * @returns {Array<TaskInfos>} - Liste des tâches du jour
  */
-async function getTodayTasks(element) {
-  return callRequestApi(element, 'task/taskTodo', 'GET');
+async function getTodayTasks() {
+  return callRequestApi('task/taskTodo', 'GET');
 }
 
 /**
  * Sauvegarde une tâche
- * @param {Element} element - Element à l'origine de la requête (bouton par exemple)
- * @param {string} what - Ce qu'il faut faire
- * @param {string} when - Date à laquelle à partir de laquelle il faut faire la tâche
- * @returns {Promise<Object>} - Promesse contenant les données attendues
+ * @param {TaskInfos} taskInfos - Tâche à sauvegarder
+ * @returns {Promise<TaskInfos>} - Promesse contenant la tache sauvegardée
  */
-async function saveTask(element, what, when) {
-  return callRequestApi(element, 'task/save', 'POST', { what, when });
+async function saveTask(taskInfos) {
+  return callRequestApi('task/save', 'POST', taskInfos);
 }
 
 export { getTodayTasks, getTodayTask, saveTask };

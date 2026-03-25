@@ -19,12 +19,12 @@ class TaskCard extends Composite {
    * @param {Function} data.callback - Fonction appelée lorsqu'une action est effectuée sur la tache
    */
   constructor(data) {
-    super(data);
+    super();
 
     this.createView(String.raw`
     <div class="task-card">
       <header class="task-card__header"><h2>${ data.label }</h2></header>
-      <div id="childrenSpace"></div>
+      <div id="spaceChildren"></div>
     </div>`);
 
     const deleteAction = data.action === ACTION.Create ? ACTION.Clear : ACTION.Delete;
@@ -32,18 +32,23 @@ class TaskCard extends Composite {
     this.actionButton = new Button({
       label: ACTION.getActionLabel(data.action),
       id: 'submitButton',
-      onClick: onClickAction.bind(this, 'submitButton', data.action, data.callback)
+      onClickCallback: onClickAction.bind(this, 'submitButton', data.action, data.callback)
     });
     this.deleteButton = new Button({
       label: ACTION.getActionLabel(deleteAction),
       id: 'deleteButton',
-      onClick: onClickAction.bind(this, 'deleteButton', deleteAction, data.callback)
+      onClickCallback: onClickAction.bind(this, 'deleteButton', deleteAction, data.callback)
     });
-    this.task = new Task({ taskInfos: data.taskInfos });
+    this.task = new Task({
+      taskInfos: data.taskInfos,
+      onChangeCallback: onTaskChange.bind(this, this.actionButton)
+    });
 
     this.addChild(this.actionButton);
     this.addChild(this.deleteButton);
     this.addChild(this.task);
+
+    this.actionButton.setDisabled();
   }
 
   getTaskInfos() {
@@ -63,13 +68,36 @@ class TaskCard extends Composite {
  */
 function onClickAction(idElement, action, callback) {
   const taskInfos = this.task.getTaskInfos();
-  /** @type {NodeElement} */
-  const element = this.getChildById(idElement);
+  /** @type {Button} */
+  const button = this.getChildById(idElement);
 
-  if (action === ACTION.Create) {
-    saveTask(element, taskInfos.what, taskInfos.when);
+  switch (action) {
+    case ACTION.Create:
+    case ACTION.Update:
+      saveTask(taskInfos)
+        .then(task => {
+          button.setSuccess('La tâche a bien été sauvegardée');
+          button.setDisabled();
+          return task;
+        }, errorMessage => {
+          button.setError(errorMessage);
+        });
+      break;
+
+    default:
+      break;
   }
-  callback(this, element, action);
+  callback(this, action);
+}
+
+/**
+ * Fonction appelée lorsqu'une tache est modifiée
+ * Elle activer le bouton de modification
+ * @param {Button} actionButton - Bouton de modification
+ */
+function onTaskChange(actionButton) {
+  // Activer le bouton de modification
+  actionButton.setEnabled();
 }
 
 export default TaskCard;

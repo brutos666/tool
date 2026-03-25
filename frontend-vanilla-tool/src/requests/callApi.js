@@ -4,13 +4,12 @@ import { URL_ROOT_API } from '../tools/Constants.js';
 
 /**
  * Appel d'une requête
- * @param {NodeElement} element - noeud de l'élément à l'origine de la requête
  * @param {string} requestName - Nom de la requête ("task/xxx")
  * @param {string} method - Type de requête ("GET", "POST", "PUT", "DELETE")
  * @param {Object} data - Données de la requête
  * @returns {Object} contenant les données attendues
  */
-async function callRequestApi(element, requestName, method = 'POST', data = {}) {
+async function callRequestApi(requestName, method = 'POST', data = {}) {
   let response;
 
   if (method === 'GET') {
@@ -28,11 +27,9 @@ async function callRequestApi(element, requestName, method = 'POST', data = {}) 
     // Mettre à jour un message d'erreur sur l'élément
     const message = `Erreur HTTP ${ response.status } : ${ responseData.error } (${ responseData.path })`;
 
-    element.setErrorMess(message);
-    return Promise.resolve([]);
+    return Promise.reject(message);
   }
-  element.setErrorMess('');
-  return responseData;
+  return Promise.resolve(responseData);
 }
 
 export { callRequestApi };

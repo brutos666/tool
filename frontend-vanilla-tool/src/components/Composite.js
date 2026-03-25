@@ -2,20 +2,34 @@
 
 import NodeElement from './NodeElement.js';
 
+/**
+ * Cette classe représente un composant qui peut avoir plusieurs enfants. L'espace dédié à l'ajout d'enfants est identifié par l'attribut id="spaceChildren"
+ */
 class Composite extends NodeElement {
 
   #spaceChildren;
   #children = [];
 
   constructor() {
-    super({ id: 'childrenSpace' });
-    // this.createView(String.raw`<div id="childrenSpace"></div>`);
+    super();
+    // this.createView(String.raw`<div></div>`);
   }
 
+  /**
+   * Création de la vue du composant
+   * @param {string} htmlText - Code HTML du composant. Identifier l'espace dédié aux enfants du composant par l'attribut id="spaceChildren"
+   */
   createView(htmlText) {
     super.createView(htmlText);
-    this.#spaceChildren = this.getNodeView()
-      .querySelector('[id=\'childrenSpace\']');
+    const spaceChildren = this.getNodeView()
+      .querySelector('[id=\'spaceChildren\']');
+
+    if (spaceChildren) {
+      this.#spaceChildren = spaceChildren;
+    } else {
+      this.#spaceChildren = this.getNodeView();
+      this.#spaceChildren.setAttribute('id', 'spaceChildren');
+    }
   }
 
   getSpaceChildren() {
