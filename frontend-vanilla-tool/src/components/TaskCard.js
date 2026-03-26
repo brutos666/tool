@@ -1,25 +1,27 @@
 'use strict';
 
 import { ACTION } from '../tools/Constants.js';
-import { saveTask } from '../requests/taskRequests.js';
 import Button from './Button.js';
 import Composite from './Composite.js';
 import Task from './Task.js';
 /** @import { TaskInfos } from './Task.js' */
-/** @import NodeElement from './NodeElement.js' */
 
 class TaskCard extends Composite {
+
+  #executeActionCallback;
+  #action;
 
   /**
    * Constructeur de la classe Task
    * @param {object} data - Informations à stocker dans la tâche
    * @param {string} data.label - Label de la tâche
    * @param {TaskInfos} data.taskInfos - Informations sur la tache
-   * @param {ACTION} data.action - Action de création, modification ou suppression
-   * @param {Function} data.callback - Fonction appelée lorsqu'une action est effectuée sur la tache
+   * @param {ACTION} data.action - Action de création ou de modification
+   * @param {Function} data.actionCallback - Fonction appelée lorsqu'une action est effectuée sur la tache
    */
   constructor(data) {
     super();
+    this.#executeActionCallback = data.actionCallback;
 
     this.createView(String.raw`
     <div class="task-card">
@@ -27,77 +29,62 @@ class TaskCard extends Composite {
       <div id="spaceChildren"></div>
     </div>`);
 
-    const deleteAction = data.action === ACTION.Create ? ACTION.Clear : ACTION.Delete;
+    this.submitButton = new Button({ id: 'submitButton', label: '' });
+    this.deleteButton = new Button({ id: 'deleteButton', label: '' });
 
-    this.actionButton = new Button({
-      label: ACTION.getActionLabel(data.action),
-      id: 'submitButton',
-      onClickCallback: onClickAction.bind(this, 'submitButton', data.action, data.callback)
-    });
-    this.deleteButton = new Button({
-      label: ACTION.getActionLabel(deleteAction),
-      id: 'deleteButton',
-      onClickCallback: onClickAction.bind(this, 'deleteButton', deleteAction, data.callback)
-    });
     this.task = new Task({
       taskInfos: data.taskInfos,
-      onChangeCallback: onTaskChange.bind(this, this.actionButton)
+      onChangeCallback: onTaskChange.bind(this, this.submitButton)
     });
 
-    this.addChild(this.actionButton);
+    this.addChild(this.submitButton);
     this.addChild(this.deleteButton);
     this.addChild(this.task);
 
-    this.actionButton.setDisabled();
+    this.setAction(data.action);
+    this.submitButton.setDisabled();
   }
 
   getTaskInfos() {
     return this.task.getTaskInfos();
   }
 
-}
-
-/**
- * Fonction appelée lorsqu'une action est effectuée sur la tache
- * Elle appelle la fonction actionFunction avec les informations de la tâche.
- * @param {string} idElement - Identifiant de l'élément qui a déclenché l'action
- * @param {ACTION} action - Action de création, modification ou suppression
- * @param {Function} callback - Fonction appelée lorsque le button de la tâche est cliqué
- *
- * @this {TaskCard}
- */
-function onClickAction(idElement, action, callback) {
-  const taskInfos = this.task.getTaskInfos();
-  /** @type {Button} */
-  const button = this.getChildById(idElement);
-
-  switch (action) {
-    case ACTION.Create:
-    case ACTION.Update:
-      saveTask(taskInfos)
-        .then(task => {
-          button.setSuccess('La tâche a bien été sauvegardée');
-          button.setDisabled();
-          return task;
-        }, errorMessage => {
-          button.setError(errorMessage);
-        });
-      break;
-
-    default:
-      break;
+  setAction(action) {
+    this.#action = action;
+    changeActionButton(this, this.submitButton, action, this.#executeActionCallback);
+    changeActionButton(this, this.deleteButton, action === ACTION.Create ? ACTION.Clear : ACTION.Delete, this.#executeActionCallback);
   }
-  callback(this, action);
+
+  getAction() {
+    return this.#action;
+  }
+
+  setBased() {
+    this.setAction(ACTION.Update);
+  }
+
 }
 
 /**
  * Fonction appelée lorsqu'une tache est modifiée
- * Elle activer le bouton de modification
- * @param {Button} actionButton - Bouton de modification
+ * Elle active le bouton de modification
+ * @param {Button} submitButton - Bouton de modification
  */
-function onTaskChange(actionButton) {
+function onTaskChange(submitButton) {
   // Activer le bouton de modification
-  actionButton.setEnabled();
+  submitButton.setEnabled();
+}
+
+/**
+ * Change l'action d'un bouton
+ * @param {TaskCard} taskCard - Tache
+ * @param {Button} button - Bouton
+ * @param {string} action - Nouvelle action
+ * @param {Function} executeActionCallback - Fonction à exécuter sur le click du bouton
+ */
+function changeActionButton(taskCard, button, action, executeActionCallback) {
+  button.changeLabel(ACTION.getActionLabel(action));
+  button.setOnclickEvent(executeActionCallback.bind(null, action, taskCard));
 }
 
 export default TaskCard;

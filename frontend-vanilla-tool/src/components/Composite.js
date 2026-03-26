@@ -50,6 +50,13 @@ class Composite extends NodeElement {
     this.#spaceChildren.appendChild(element.getNodeView());
   }
 
+  replaceChild(elementToRemove, elementToAdd) {
+    const index = this.#children.indexOf(elementToRemove);
+
+    this.#children[index] = elementToAdd;
+    this.#spaceChildren.replaceChild(elementToAdd.getNodeView(), elementToRemove.getNodeView());
+  }
+
   removeChild(element) {
     const index = this.#children.indexOf(element);
 

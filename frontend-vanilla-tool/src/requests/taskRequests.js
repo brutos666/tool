@@ -28,4 +28,13 @@ async function saveTask(taskInfos) {
   return callRequestApi('task/save', 'POST', taskInfos);
 }
 
-export { getTodayTasks, getTodayTask, saveTask };
+/**
+ * Supprime une tâche
+ * @param {TaskInfos} taskInfos - Tâche à supprimer
+ * @returns {Promise<TaskInfos>} - Promesse contenant la tâche supprimée
+ */
+async function deleteTask(taskInfos) {
+  return callRequestApi('task/delete', 'POST', taskInfos);
+}
+
+export { getTodayTasks, getTodayTask, saveTask, deleteTask };

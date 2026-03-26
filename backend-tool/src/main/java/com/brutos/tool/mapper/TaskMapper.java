@@ -67,7 +67,7 @@ public class TaskMapper implements Mapper<Task, TaskModel, TaskWebResult> {
 
     @Override
     public List<Task> toEntity(Iterable<TaskModel> taskModels) {
-        List<Task> tasks = new ArrayList();
+        List<Task> tasks = new ArrayList<>();
         taskModels.forEach(taskModel -> tasks.add(this.toEntity(taskModel)));
         return tasks;
     }

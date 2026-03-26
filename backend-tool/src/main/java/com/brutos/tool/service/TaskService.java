@@ -37,4 +37,13 @@ public class TaskService {
         return taskMapper.toEntity(taskRepository.findAll());
     }
 
+    public void deleteTask(Long id) {
+        taskRepository.deleteById(id);
+    }
+
+    public void controlTask(Task task) {
+        if (task.getId() == null) {
+            throw new IllegalArgumentException("id (ID de la tâche) est obligatoire");
+        }
+    }
 }

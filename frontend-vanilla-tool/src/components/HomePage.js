@@ -17,16 +17,12 @@ class HomePage extends Composite {
       <div id="spaceChildren"></div>
     </div>`);
 
-    this.button = new Button({
-      id: 'task-button',
-      label: 'Afficher les tâches',
-      onClickCallback: this.onTaskClick.bind(this)
-    });
-    this.addTaskButton = new Button({
-      id: 'add-task-button',
-      label: 'Ajouter une tâche',
-      onClickCallback: this.onAddTaskClick.bind(this)
-    });
+    this.button = new Button({ id: 'task-button', label: 'Afficher les tâches' });
+    this.button.setOnclickEvent(onTaskClick.bind(this));
+
+    this.addTaskButton = new Button({ id: 'add-task-button', label: 'Ajouter une tâche' });
+    this.addTaskButton.setOnclickEvent(onAddTaskClick.bind(this));
+
     this.taskContainer = new TaskContainer();
 
     this.addChild(this.button);
@@ -34,25 +30,28 @@ class HomePage extends Composite {
     this.addChild(this.taskContainer);
   }
 
-  /**
-   * Méthode appelée lorsque le bouton est cliqué.
-   * Elle met à jour le contenu de la zone de texte avec les tâches du jour.
-   */
-  onTaskClick() {
-    getTodayTasks()
-      .then(dataTasks => {
-        this.taskContainer.removeAllChildren();
-        dataTasks.forEach(dataTask => {
-          this.taskContainer.displayTask(dataTask);
-        }, errorMessage => {
-          this.button.setError(errorMessage);
-        });
-      });
-  }
-
-  onAddTaskClick() {
-    this.taskContainer.addNewTask();
-  }
-
 }
+
+/**
+ * Méthode appelée lorsque le bouton est cliqué.
+ * Elle met à jour le contenu de la zone de texte avec les tâches du jour.
+ */
+function onTaskClick() {
+  getTodayTasks()
+    .then(dataTasks => {
+      this.taskContainer.removeAllChildren();
+      dataTasks.forEach(dataTask => {
+        this.taskContainer.displayTask(dataTask);
+      }, errorMessage => {
+        this.button.setError(errorMessage);
+      });
+    });
+}
+/**
+ * Méthode appelée lorsque le bouton d'ajout d'une tache est cliqué.
+ */
+function onAddTaskClick() {
+  this.taskContainer.addNewTask();
+}
+
 export default HomePage;

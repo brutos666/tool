@@ -46,4 +46,12 @@ public class TaskListController {
         return this.taskMapper.toWebResult(task);
     }
 
+    @PostMapping("/delete")
+    public TaskWebResult deleteTask(@RequestBody TaskWebResult taskWebRequest) {
+        Task task = this.taskMapper.toEntity(taskWebRequest);
+        this.taskService.controlTask(task);
+        this.taskService.deleteTask(task.getId());
+        return taskWebRequest;
+    }
+
 }

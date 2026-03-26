@@ -40,19 +40,26 @@ class Task extends Component {
     this.createView(String.raw`
       <section class="task-card__content">
         <label>What <input type="text" id="what" placeholder="Que dois-je faire"/></label>
-        <label>When <input type="text" id="when" placeholder="Quand dois-je le faire" /></label>
+        <label>When <input type="text" id="when" placeholder="Quand dois-je le faire"/></label>
         <fieldset id="delay">
           <legend>A faire dans :</legend>
-          <div><input type="radio" id="delay-day" value="DAY" name="delay-${ id }" /><label for="delay-day">La journée</label></div>
-          <div><input type="radio" id="delay-week" value="WEEK" name="delay-${ id }"/><label for="delay-week">La semaine</label></div>
-          <div><input type="radio" id="delay-month" value="MONTH" name="delay-${ id }" /><label for="delay-month">Le mois</label></div>
-          <div><input type="radio" id="delay-year" value="YEAR" name="delay-${ id }" /><label for="delay-year">L'année'</label></div>
+          <div><input type="radio" id="delay-day-${ id }" value="DAY" name="delay-${ id }"/>
+          <label for="delay-day-${ id }">La journée</label></div>
+          <div><input type="radio" id="delay-week-${ id }" value="WEEK" name="delay-${ id }"/>
+          <label for="delay-week-${ id }">La semaine</label></div>
+          <div><input type="radio" id="delay-month-${ id }" value="MONTH" name="delay-${ id }"/>
+          <label for="delay-month-${ id }">Le mois</label></div>
+          <div><input type="radio" id="delay-year-${ id }" value="YEAR" name="delay-${ id }"/>
+          <label for="delay-year-${ id }">L'année'</label></div>
         </fieldset>
         <fieldset id="state">
           <legend>État de la tâche</legend>
-          <div><input type="radio" id="todo" value="TODO" name="state-${ id }" /><label for="todo">A faire</label></div>
-          <div><input type="radio" id="progress" value="IN_PROGRESS" name="state-${ id }" /><label for="progress">En cours</label></div>
-          <div><input type="radio" id="done" value="DONE" name="state-${ id }" /><label for="done">Fait</label></div>
+          <div><input type="radio" id="todo-${ id }" value="TODO" name="state-${ id }"/>
+          <label for="todo-${ id }">A faire</label></div>
+          <div><input type="radio" id="progress-${ id }" value="IN_PROGRESS" name="state-${ id }"/>
+          <label for="progress-${ id }">En cours</label></div>
+          <div><input type="radio" id="done-${ id }" value="DONE" name="state-${ id }"/>
+          <label for="done-${ id }">Fait</label></div>
         </fieldset>
       </section>`);
 
@@ -82,25 +89,25 @@ class Task extends Component {
     what.addEventListener('change', setPropertyValue.bind(this, 'what'));
     when.addEventListener('change', setPropertyValue.bind(this, 'when'));
     delay
-      .querySelector('#delay-day')
+      .querySelector(`#delay-day-${ id }`)
       .addEventListener('change', setPropertyValue.bind(this, 'delay'));
     delay
-      .querySelector('#delay-week')
+      .querySelector(`#delay-week-${ id }`)
       .addEventListener('change', setPropertyValue.bind(this, 'delay'));
     delay
-      .querySelector('#delay-month')
+      .querySelector(`#delay-month-${ id }`)
       .addEventListener('change', setPropertyValue.bind(this, 'delay'));
     delay
-      .querySelector('#delay-year')
+      .querySelector(`#delay-year-${ id }`)
       .addEventListener('change', setPropertyValue.bind(this, 'delay'));
     state
-      .querySelector('#todo')
+      .querySelector(`#todo-${ id }`)
       .addEventListener('change', setPropertyValue.bind(this, 'state'));
     state
-      .querySelector('#progress')
+      .querySelector(`#progress-${ id }`)
       .addEventListener('change', setPropertyValue.bind(this, 'state'));
     state
-      .querySelector('#done')
+      .querySelector(`#done-${ id }`)
       .addEventListener('change', setPropertyValue.bind(this, 'state'));
   }
 
