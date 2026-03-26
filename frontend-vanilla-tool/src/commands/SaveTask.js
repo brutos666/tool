@@ -1,10 +1,8 @@
 import Command from './Command.js';
 import { saveTask } from '../requests/taskRequests.js';
-import { ACTION } from '../tools/Constants.js';
-/** @import { TaskInfos } from '../components/Task.js' */
 /** @import TaskCard from '../components/TaskCard.js' */
 
-class SaveNewTask extends Command {
+class SaveTask extends Command {
 
   #taskCard;
   #taskContainer;
@@ -13,11 +11,13 @@ class SaveNewTask extends Command {
    * Constructeur de la classe CreateTask
    * @param {TaskContainer} taskContainer - Conteneur des tâches
    * @param {TaskCard} taskCard - Carte de tache
+   * @param {string} successMessage - Message de success
+   * @param {string} errorMessage - Message d'erreur
    */
-  constructor(taskContainer, taskCard) {
+  constructor(taskContainer, taskCard, successMessage, errorMessage) {
     super(taskCard,
-          `La tâche a bien été ${ taskCard.getAction() === ACTION.Update ? ' modifiée' : 'créée' }`,
-          `Une erreur est survenue lors de la ${ taskCard.getAction() === ACTION.Update ? ' modification' : 'création' } de la tâche`,
+          successMessage,
+          errorMessage,
           saveTask.bind(null, taskCard.getTaskInfos())
     );
 
@@ -28,11 +28,11 @@ class SaveNewTask extends Command {
   async execute() {
     super.execute()
       .then(task => {
-        // Remplacer la carte pour une nouvelle carte
+        // Remplacer la carte pour la nouvelle carte ou la carte modifiée
         this.#taskContainer.replaceTask(this.#taskCard, task);
       });
   }
 
 }
 
-export default SaveNewTask;
+export default SaveTask;

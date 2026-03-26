@@ -20,13 +20,14 @@ class Task extends Component {
 
   /** @type {TaskInfos} */
   #taskInfos = null;
+  #updates = {};
   #onChangeCallback = null;
 
   /**
    * Constructeur de la classe Task
    * @param {object} data - Informations à stocker dans la tâche
    * @param {TaskInfos} data.taskInfos - Informations sur la tache
-   * @param {Function} data.onChangeCallback - Fonction appelée lorsqu'une action est effectuée sur la tache
+   * @param {Function} data.onChangeCallback - Fonction appelée lorsqu'une modification a lieu
    */
   constructor(data) {
     super();
@@ -86,8 +87,8 @@ class Task extends Component {
     }
 
     // Écoute des changements pour mettre à jour le modèle
-    what.addEventListener('change', setPropertyValue.bind(this, 'what'));
-    when.addEventListener('change', setPropertyValue.bind(this, 'when'));
+    what.addEventListener('input', setPropertyValue.bind(this, 'what'));
+    when.addEventListener('input', setPropertyValue.bind(this, 'when'));
     delay
       .querySelector(`#delay-day-${ id }`)
       .addEventListener('change', setPropertyValue.bind(this, 'delay'));
@@ -112,11 +113,27 @@ class Task extends Component {
   }
 
   getTaskInfos() {
-    return this.#taskInfos;
+    // Prise en compte des modifications en cours
+    return { ...this.#taskInfos, ...this.#updates };
   }
+
+  setTaskInfos(taskInfos) {
+    this.#taskInfos = taskInfos;
+    this.#updates = {};
+    this.#onChangeCallback(this);
+  }
+
   setTaskInfosProperty(property, value) {
-    this.#taskInfos[property] = value;
-    this.#onChangeCallback();
+    if (this.#taskInfos[property] === value) {
+      delete this.#updates[property];
+    } else {
+      this.#updates[property] = value;
+    }
+    this.#onChangeCallback(this);
+  }
+
+  isModified() {
+    return Object.keys(this.#updates).length > 0;
   }
 
 }

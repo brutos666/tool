@@ -69,10 +69,14 @@ class TaskCard extends Composite {
  * Fonction appelée lorsqu'une tache est modifiée
  * Elle active le bouton de modification
  * @param {Button} submitButton - Bouton de modification
+ * @param {Task} task - Tache
  */
-function onTaskChange(submitButton) {
-  // Activer le bouton de modification
-  submitButton.setEnabled();
+function onTaskChange(submitButton, task) {
+  if (task.isModified()) {
+    submitButton.setEnabled();
+  } else {
+    submitButton.setDisabled();
+  }
 }
 
 /**

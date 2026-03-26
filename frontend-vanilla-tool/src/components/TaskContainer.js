@@ -4,8 +4,9 @@ import Composite from './Composite.js';
 import TaskCard from './TaskCard.js';
 import { ACTION } from '../tools/Constants.js';
 import DeleteTask from '../commands/DeleteTask.js';
-import SaveNewTask from '../commands/SaveNewTask.js';
+import CreateTask from '../commands/CreateTask.js';
 import ModifyTask from '../commands/ModifyTask.js';
+import ClearTask from '../commands/ClearTask.js';
 
 class TaskContainer extends Composite {
 
@@ -29,7 +30,7 @@ class TaskContainer extends Composite {
   }
 
   displayTask(taskInfos) {
-    this.addChild(getBasedTask(taskInfos, onActionOnTask.bind(this)));
+    super.addChild(getBasedTask(taskInfos, onActionOnTask.bind(this)));
   }
 
   replaceTask(taskCard, taskInfos) {
@@ -47,20 +48,20 @@ class TaskContainer extends Composite {
 function onActionOnTask(action, taskCard) {
   switch (action) {
     case ACTION.Create:
-      new SaveNewTask(this, taskCard, taskCard.getTaskInfos())
+      new CreateTask(this, taskCard)
         .execute();
       break;
     case ACTION.Update:
-      new ModifyTask(taskCard, taskCard.getTaskInfos())
+      new ModifyTask(this, taskCard)
         .execute();
       break;
     case ACTION.Delete:
-      new DeleteTask(this, taskCard.getTaskInfos())
+      new DeleteTask(this, taskCard)
         .execute();
-      this.removeChild(taskCard);
       break;
     case ACTION.Clear:
-      this.removeChild(taskCard);
+      new ClearTask(this, taskCard)
+        .execute();
       break;
 
     default:

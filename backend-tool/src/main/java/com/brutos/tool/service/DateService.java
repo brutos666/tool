@@ -24,6 +24,9 @@ public class DateService {
      * @throws DateTimeParseException si la date n'est pas une date existante
      */
     public void controlDate(String date) throws DateTimeParseException {
+        if (date.isEmpty()) {
+            return;
+        }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
         LocalDate localDate = LocalDate.parse(date, formatter);
     }

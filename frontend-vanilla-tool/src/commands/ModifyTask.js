@@ -1,31 +1,20 @@
-import Command from './Command.js';
-import { saveTask } from '../requests/taskRequests.js';
-/** @import { TaskInfos } from '../components/Task.js' */
+import SaveTask from './SaveTask.js';
 /** @import TaskCard from '../components/TaskCard.js' */
+/** @import TaskContainer from '../components/TaskContainer.js' */
 
-class ModifyTask extends Command {
-
-  #taskCard;
+class ModifyTask extends SaveTask {
 
   /**
    * Constructeur de la classe CreateTask
+   * @param {TaskContainer} taskContainer - Conteneur des tâches
    * @param {TaskCard} taskCard - Carte de tache
    */
-  constructor(taskCard) {
-    super(taskCard,
+  constructor(taskContainer, taskCard) {
+    super(taskContainer,
+          taskCard,
           'La tâche a bien été modifiée',
-          'Une erreur est survenue lors de la modification de la tâche',
-          saveTask.bind(null, taskCard.getTaskInfos())
+          'Une erreur est survenue lors de la modification de la tâche'
     );
-
-    this.#taskCard = taskCard;
-  }
-
-  async execute() {
-    super.execute()
-      .then(() => {
-        this.#taskCard.setBased();
-      });
   }
 
 }
