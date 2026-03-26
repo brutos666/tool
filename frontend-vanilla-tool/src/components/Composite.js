@@ -1,39 +1,25 @@
 'use strict';
 
 import NodeElement from './NodeElement.js';
+import CompositeView from './views/CompositeView.js';
 
 /**
  * Cette classe représente un composant qui peut avoir plusieurs enfants. L'espace dédié à l'ajout d'enfants est identifié par l'attribut id="spaceChildren"
  */
 class Composite extends NodeElement {
 
-  #spaceChildren;
   #children = [];
-
-  constructor() {
-    super();
-    // this.createView(String.raw`<div></div>`);
-  }
-
   /**
-   * Création de la vue du composant
-   * @param {string} htmlText - Code HTML du composant. Identifier l'espace dédié aux enfants du composant par l'attribut id="spaceChildren"
+   * Constructeur
+   * @param {CompositeView} view - objet donnant l'affichage du composant. Peut définir plusieurs affichages
    */
-  createView(htmlText) {
-    super.createView(htmlText);
-    const spaceChildren = this.getNodeView()
-      .querySelector('[id=\'spaceChildren\']');
-
-    if (spaceChildren) {
-      this.#spaceChildren = spaceChildren;
-    } else {
-      this.#spaceChildren = this.getNodeView();
-      this.#spaceChildren.setAttribute('id', 'spaceChildren');
-    }
+  constructor(view) {
+    super(view === undefined ? new CompositeView() : view);
   }
 
   getSpaceChildren() {
-    return this.#spaceChildren;
+    return this.getView()
+      .getSpaceChildren();
   }
 
   getChildren() {
@@ -47,14 +33,16 @@ class Composite extends NodeElement {
   addChild(element) {
     this.#children.push(element);
     // Ajout au DOM
-    this.#spaceChildren.appendChild(element.getNodeView());
+    this.getView()
+      .addView(element.getView());
   }
 
   replaceChild(elementToRemove, elementToAdd) {
     const index = this.#children.indexOf(elementToRemove);
 
     this.#children[index] = elementToAdd;
-    this.#spaceChildren.replaceChild(elementToAdd.getNodeView(), elementToRemove.getNodeView());
+    this.getView()
+      .replaceView(elementToAdd.getView(), elementToRemove.getView());
   }
 
   removeChild(element) {
@@ -62,18 +50,15 @@ class Composite extends NodeElement {
 
     if (index !== -1) {
       this.#children.splice(index, 1);
-      this.#spaceChildren.removeChild(element.getNodeView());
+      this.getView()
+        .removeView(element.getView());
     }
   }
 
   removeAllChildren() {
     this.#children = [];
-    this.#spaceChildren.innerHTML = '';
-  }
-
-  getChildById(idElement) {
-    return this.#children.find(child => child.getNodeView()
-      .querySelector(`[id='${ idElement }']`));
+    this.getView()
+      .removeAllViews();
   }
 
 }

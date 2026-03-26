@@ -5,10 +5,11 @@ import NodeElement from './NodeElement.js';
 class Component extends NodeElement {
 
   /**
-   * Constructeur de la classe
+   * Constructeur
+   * @param {View} view - objet donnant l'affichage du composant. Peut définir plusieurs affichages
    */
-  constructor() {
-    super();
+  constructor(view) {
+    super(view);
   }
 
   createView(htmlText) {

@@ -1,49 +1,42 @@
 'use strict';
 
-import { createNode } from '../tools/NodeUtilities.js';
-import { NOTIFICATION_TIMEOUT } from '../tools/Constants.js';
+import View from './views/View.js';
 
 class NodeElement {
 
-  #nodeView;
-  #elementView;
-  #messageView;
+  #view;
 
-  constructor() {
-    // this.createView(String.raw`<div></div>`);
+  /**
+   * Constructeur
+   * @param {View} view - objet donnant l'affichage du composant. Peut définir plusieurs affichages
+   */
+  constructor(view) {
+    this.#view = view === undefined ? new View() : view;
+  }
+
+  /** Donne la vue pour permettre de modifier l'affichage si besoin */
+  getView() {
+    return this.#view;
   }
 
   createView(htmlText) {
-    this.#elementView = createNode(htmlText);
-
-    this.#messageView = document.createElement('div');
-    this.#messageView.classList.add('message');
-
-    this.#nodeView = document.createElement('div');
-    this.#nodeView.appendChild(this.#elementView);
-    this.#nodeView.appendChild(this.#messageView);
+    this.#view.createView(htmlText);
   }
 
   getNodeView() {
-    return this.#nodeView;
+    return this.#view.getNodeView();
   }
 
   getElementView() {
-    return this.#elementView;
+    return this.#view.getElementView();
   }
 
   setError(value) {
-    this.#messageView.textContent = value;
-    this.#messageView.classList.add('error-mess');
-    this.#messageView.classList.remove('success-mess');
+    this.#view.setError(value);
   }
 
   setSuccess(value) {
-    this.#messageView.textContent = value;
-    this.#messageView.classList.remove('error-mess');
-    this.#messageView.classList.add('success-mess');
-    // Effacer le message au bout d'un peu de temps
-    setTimeout(() => this.#messageView.textContent = '', NOTIFICATION_TIMEOUT);
+    this.#view.setSuccess(value);
   }
 
 }
