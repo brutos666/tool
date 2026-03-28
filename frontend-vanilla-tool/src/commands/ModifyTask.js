@@ -5,7 +5,7 @@ import SaveTask from './SaveTask.js';
 class ModifyTask extends SaveTask {
 
   /**
-   * Constructeur de la classe CreateTask
+   * @constructor de la classe CreateTask
    * @param {TaskContainer} taskContainer - Conteneur des tâches
    * @param {TaskCard} taskCard - Carte de tache
    */

@@ -8,22 +8,28 @@ import CompositeView from './views/CompositeView.js';
  */
 class Composite extends NodeElement {
 
+  /** @type {NodeElement[]} */
   #children = [];
   /**
-   * Constructeur
+   * @constructor
    * @param {CompositeView} view - objet donnant l'affichage du composant. Peut définir plusieurs affichages
    */
   constructor(view) {
     super(view === undefined ? new CompositeView() : view);
   }
 
-  getSpaceChildren() {
-    return this.getView()
-      .getSpaceChildren();
-  }
-
+  /**
+   * Retourne la liste des enfants
+   * @returns {Array<NodeElement>} - liste des enfants
+   */
   getChildren() {
     return this.#children;
+  }
+
+  setChildren(children) {
+    this.#children = children;
+    this.getView()
+      .refreshView(children.map(child => child.getView()));
   }
 
   /**
@@ -32,17 +38,8 @@ class Composite extends NodeElement {
    */
   addChild(element) {
     this.#children.push(element);
-    // Ajout au DOM
     this.getView()
       .addView(element.getView());
-  }
-
-  replaceChild(elementToRemove, elementToAdd) {
-    const index = this.#children.indexOf(elementToRemove);
-
-    this.#children[index] = elementToAdd;
-    this.getView()
-      .replaceView(elementToAdd.getView(), elementToRemove.getView());
   }
 
   removeChild(element) {

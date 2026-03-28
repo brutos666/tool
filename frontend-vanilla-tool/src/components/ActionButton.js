@@ -5,13 +5,13 @@ import ActionButtonView from './views/ActionButtonView.js';
 class ActionButton extends Component {
 
   /**
-   * Constructeur de la classe Button
-   * @param {object} data - Informations à stocker dans le bouton
+   * @constructor de la classe Button
+   * @param {object} data - Informations pour afficher le bouton
    * @param {string} data.id - Identifiant du bouton
    * @param {string} data.label - Label du bouton
    */
   constructor(data) {
-    super(new ActionButtonView(data.id, data.label));
+    super(new ActionButtonView(data));
   }
 
   setDoActionCallback(callback) {
@@ -19,11 +19,6 @@ class ActionButton extends Component {
     const actionView = this.getView();
 
     actionView.setDoActionCallback(callback);
-  }
-
-  changeLabel(label) {
-    this.getView()
-      .changeLabel(label);
   }
 
   setDisabled() {

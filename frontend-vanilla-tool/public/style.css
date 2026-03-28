@@ -1,30 +1,61 @@
+:root {
+  color-scheme: light dark;
+  --text-color: light-dark(#202222, #959595);
+  --background-color: light-dark(#959595, #202222);
+  --error-text-color: light-dark(red, red);
+  --success-text-color: light-dark(green, green);
+  --sample-post-it-color: light-dark(#cadf58, #cadf58);
+  --story-post-it-color: light-dark(#fff9b2, #fff9b2);
+  --rules-post-it-color: light-dark(#a7cdf5, #a7cdf5);
+  --question-post-it-color: light-dark(#f0949e, #f0949e);
+  --task-post-it-color: light-dark(#fff9b2, #fff9b2);
+  --text-post-it-color: light-dark(#202222, #202222);
+}
 .error-mess {
-  color: red;
+  color: var(--error-text-color);
   font-weight: bold;
 }
 .success-mess {
-  color: green;
+  color: var(--success-text-color);
   font-weight: bold;
-}
-.hidden {
-  display: none;
 }
 .disabled {
   pointer-events: none;
   opacity: 0.5;
 }
 
+.toolbar__space {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
 .task-card {
-  color: #000000;
-  background: #efeff4;
-  border-radius: 0.5em;
-  min-width: 400px;
-  padding: 10px;
-  margin: 10px;
+  min-width: 200px;
+}
+.task-card__content--post-it {
+  color: var(--text-post-it-color);
+  background: var(--task-post-it-color);
+}
+.task-card__text {
+  color: inherit;
+  background: inherit;
+}
+.task-card__content {
+  display: flex;
+  flex-direction: column;
 }
 .task-card__header {
-  text-align: center;
-  height: 50px;
+  text-align: left;
+}
+.task-card__content {
+  display: flex;
+  flex-direction: row;
+}
+.task-card__content > * {
+  margin: 5px;
+  display: flex;
+  flex-direction: column;
 }
 .task-card__content {
   display: flex;
@@ -33,17 +64,10 @@
 
 .tasks__header {
   text-align: center;
-  height: 100px;
 }
 .tasks__space {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  background-color: #202224;
-  background-repeat: repeat;
-  background-image: none;
-  background-size: auto;
-  background-clip: border-box;
-  color: #e8e6e3;
 }
 

@@ -8,7 +8,7 @@ class ClearTask extends Command {
   #taskContainer;
 
   /**
-   * Constructeur de la classe
+   * @constructor de la classe
    * @param {TaskContainer} taskContainer - Conteneur des tâches
    * @param {TaskCard} taskCard - Carte de tache
    * @param {Function} executeCallback - Fonction appelée lorsque la commande est exécutée

@@ -119,7 +119,8 @@ export default [
       ],
       '@stylistic/padding-line-between-statements': [
         'error',
-        { blankLine: 'always', prev: [ 'const', 'let', 'var' ], next: '*' },
+        // { blankLine: 'always', prev: [ 'const', 'let', 'var' ], next: '*' },
+        { blankLine: 'always', prev: ['var'], next: '*' },
         {
           blankLine: 'any',
           prev: [ 'const', 'let', 'var' ],

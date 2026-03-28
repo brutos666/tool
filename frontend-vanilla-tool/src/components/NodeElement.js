@@ -7,7 +7,7 @@ class NodeElement {
   #view;
 
   /**
-   * Constructeur
+   * @constructor
    * @param {View} view - objet donnant l'affichage du composant. Peut définir plusieurs affichages
    */
   constructor(view) {
@@ -19,16 +19,20 @@ class NodeElement {
     return this.#view;
   }
 
-  createView(htmlText) {
-    this.#view.createView(htmlText);
-  }
-
   getNodeView() {
     return this.#view.getNodeView();
   }
 
   getElementView() {
     return this.#view.getElementView();
+  }
+
+  /**
+   * Met à jour les données d'un enfant
+   * @param {Object} data - Données à mettre à jour
+   */
+  updateData(data) {
+    this.#view.refreshView(data);
   }
 
   setError(value) {

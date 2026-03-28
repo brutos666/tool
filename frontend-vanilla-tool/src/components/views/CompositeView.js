@@ -1,27 +1,43 @@
 import View from './View.js';
+import { createNode } from '../../tools/NodeUtilities.js';
 
 class CompositeView extends View {
 
+  /** @type {Element} */
   #spaceChildren;
 
-  constructor() {
-    super();
+  constructor(data) {
+    super(data);
+    const spaceChildren = determinateSpaceChildren(this.getNodeView());
+    this.#spaceChildren = spaceChildren;
   }
 
-  createView(htmlText) {
-    super.createView(htmlText);
-    const spaceChildren = this.getNodeView()
-      .querySelector('[id=\'spaceChildren\']');
-
-    if (spaceChildren) {
-      this.#spaceChildren = spaceChildren;
-    } else {
-      this.#spaceChildren = this.getNodeView();
-      this.#spaceChildren.setAttribute('id', 'spaceChildren');
+  /**
+   * @override {@link View.refreshView}
+   * @param {Object} data - Données à utiliser pour redessiner la vue
+   */
+  refreshView(data) {
+    const nodeElement = createNode(this.getHtmlView(data));
+    const spaceChildren = determinateSpaceChildren(nodeElement);
+    if (nodeElement === spaceChildren) {
+      return;
     }
+    const oldSpaceChildren = this.#spaceChildren;
+    // Conserver l'espace dédié aux enfants
+    spaceChildren.replaceWith(oldSpaceChildren);
+    this.getElementView().parentNode.replaceChild(nodeElement, this.getElementView());
+    this.setElementView(nodeElement);
   }
-  getSpaceChildren() {
-    return this.#spaceChildren;
+
+  /**
+   * Redessine le composant pour afficher les vues des enfants
+   * @param {Array<View>} childrenViews - Vues des enfants
+   */
+  refreshViews(childrenViews) {
+    this.removeAllViews();
+    for (const view of childrenViews) {
+      this.addView(view);
+    }
   }
 
   /**
@@ -33,15 +49,6 @@ class CompositeView extends View {
     this.#spaceChildren.appendChild(view.getNodeView());
   }
 
-  /**
-   * ReplaceView : remplace une vue par une autre dans le DOM
-   * @param {View} viewToAdd - La vue à ajouter
-   * @param {View} viewToRemove - La vue à supprimer
-   */
-  replaceView(viewToAdd, viewToRemove) {
-    this.#spaceChildren.replaceChild(viewToAdd.getNodeView(), viewToRemove.getNodeView());
-  }
-
   removeView(view) {
     this.#spaceChildren.removeChild(view.getNodeView());
   }
@@ -50,6 +57,21 @@ class CompositeView extends View {
     this.#spaceChildren.innerHTML = '';
   }
 
+}
+/**
+ * Détermine et retourne l'espace contenant les enfants
+ * @param {Element} nodeView
+ * @returns {Element}
+ */
+function determinateSpaceChildren(nodeView) {
+  const spaceChildren = nodeView
+    .querySelector('[id=\'spaceChildren\']');
+
+  if (spaceChildren) {
+    return spaceChildren;
+  }
+  nodeView.setAttribute('id', 'spaceChildren');
+  return nodeView;
 }
 
 export default CompositeView;

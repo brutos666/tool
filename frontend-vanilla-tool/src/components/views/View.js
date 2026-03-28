@@ -5,26 +5,35 @@ import { NOTIFICATION_TIMEOUT } from '../../tools/Constants.js';
 
 class View {
 
-  #htmlView;
   #nodeView;
   #elementView;
   #messageView;
 
-  constructor() {
-    this.#htmlView = '<div></div>';
+  /**
+   * @constructor. Crée la vue à partir des données passées en paramètre
+   * @param {Object} data - Données à utiliser pour créer la vue
+   */
+  constructor(data) {
+    this.createView(data);
   }
 
   /**
-   * Définit la fonction à appeler lorsqu'une modification est effectuée sur le composant
-   * @param {Function} updateCallback - Fonction à appeler pour modifier le modèle
+   * Retourne le code HTML de la vue
+   * @param {Object} [data] - Données à utiliser pour créer la vue
+   * @returns {string} - Code HTML de la vue
    */
-  setUpdateCallback(/* updateCallback */) {
+  getHtmlView(/* data */) {
+    return '<div></div>';
   }
 
-  createView(htmlView) {
-    this.#htmlView = htmlView;
+  /**
+   * Crée la vue à partir des données passées en paramètre
+   * @param {Object} data - Données à utiliser pour créer la vue
+   */
+  createView(data) {
+    const htmlView = this.getHtmlView(data);
 
-    this.#elementView = createNode(this.#htmlView);
+    this.#elementView = createNode(htmlView);
 
     this.#messageView = document.createElement('div');
     this.#messageView.classList.add('message');
@@ -34,12 +43,29 @@ class View {
     this.#nodeView.appendChild(this.#messageView);
   }
 
+  /**
+   * Redessine la vue en fonction des données passées en paramètre.
+   * NOTE : pour un champ de saisie, on perdre l'historique des saisies (Ctrl+Z/Ctrl+Y)
+   * Pour y remédier, il faut override cette fonction
+   * @param {Object} data - Données à utiliser pour redessiner la vue
+   */
+  refreshView(data) {
+    const htmlView = this.getHtmlView(data);
+    const nodeElement = createNode(htmlView);
+    this.#elementView.parentNode.replaceChild(nodeElement, this.#elementView);
+    this.#elementView = nodeElement;
+  }
+
   getNodeView() {
     return this.#nodeView;
   }
 
   getElementView() {
     return this.#elementView;
+  }
+
+  setElementView(value) {
+    this.#elementView = value;
   }
 
   setError(value) {

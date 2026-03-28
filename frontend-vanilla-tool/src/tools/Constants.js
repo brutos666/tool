@@ -4,19 +4,38 @@ const URL_ROOT_API = 'http://localhost:8080/api/';
 const NOTIFICATION_TIMEOUT = 3000;
 
 const ACTION = {
-  Create: 'Create',
-  Update: 'Update',
+  Save: 'Save',
   Delete: 'Delete',
-  Clear: 'Clear',
   getActionLabel(action) {
     return ACTION_LABEL[action];
   }
 };
 const ACTION_LABEL = {
-  Create: 'Valider',
-  Update: 'Modifier',
-  Delete: 'Supprimer',
-  Clear: 'Effacer'
+  Save: 'Valider',
+  Delete: 'Supprimer'
 };
 
-export { URL_ROOT_API, ACTION, NOTIFICATION_TIMEOUT };
+const VIEW_CHOICE = {
+  Detail: 'Detail',
+  SampleMapping: 'SampleMapping',
+  TodoList: 'TodoList',
+  Hierarchy: 'Hierarchy',
+  getOptions() {
+    const options = [{ label: '-- Sélectionner la vue --', value: '' }];
+    for (const key in VIEW_CHOICE) {
+      const label = VIEW_CHOICE_LABEL[key];
+      if (label) {
+        options.push({ label, value: key });
+      }
+    }
+    return options;
+  }
+};
+const VIEW_CHOICE_LABEL = {
+  Detail: 'Vue détaillée',
+  SampleMapping: 'Sample Mapping',
+  TodoList: 'Todo List',
+  Hierarchy: 'Arbre'
+};
+
+export { URL_ROOT_API, ACTION, VIEW_CHOICE, NOTIFICATION_TIMEOUT };

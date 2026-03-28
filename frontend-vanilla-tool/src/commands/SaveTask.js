@@ -1,14 +1,16 @@
 import Command from './Command.js';
 import { saveTask } from '../requests/taskRequests.js';
 /** @import TaskCard from '../components/TaskCard.js' */
+/** @import TaskContainer from '../components/TaskContainer.js' */
 
 class SaveTask extends Command {
 
   #taskCard;
+  /** @type {TaskContainer} */
   #taskContainer;
 
   /**
-   * Constructeur de la classe CreateTask
+   * @constructor de la classe CreateTask
    * @param {TaskContainer} taskContainer - Conteneur des tâches
    * @param {TaskCard} taskCard - Carte de tache
    * @param {string} successMessage - Message de success
@@ -27,9 +29,9 @@ class SaveTask extends Command {
 
   async execute() {
     super.execute()
-      .then(task => {
+      .then(taskInfos => {
         // Remplacer la carte pour la nouvelle carte ou la carte modifiée
-        this.#taskContainer.replaceTask(this.#taskCard, task);
+        this.#taskContainer.updateData(this.#taskCard, taskInfos);
       });
   }
 

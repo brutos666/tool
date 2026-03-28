@@ -6,7 +6,7 @@ import ClearTask from './ClearTask.js';
 class DeleteTask extends ClearTask {
 
   /**
-   * Constructeur de la classe DeleteTask
+   * @constructor de la classe DeleteTask
    * @param {TaskContainer} taskContainer - Conteneur des tâches
    * @param {TaskCard} taskCard - Carte de tache
    */

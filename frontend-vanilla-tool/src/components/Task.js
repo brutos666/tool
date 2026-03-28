@@ -2,6 +2,7 @@
 
 import Component from './Component.js';
 import TaskView from './views/TaskView.js';
+/** @import { VIEW_CHOICE } from '../tools/Constants.js' */
 
 /**
  * @typedef {Object} TaskInfos - Informations sur une tâche
@@ -21,20 +22,40 @@ class Task extends Component {
 
   /** @type {TaskInfos} */
   #taskInfos = null;
+  #viewChoice = null;
   #updates = {};
   #updateCallback = null;
 
   /**
-   * Constructeur de la classe Task
-   * @param {TaskInfos} taskInfos - Informations sur la tache
+   * @constructor de la classe Task
+   * @param {Object} data - Données à utiliser pour créer la vue
+   * @param {TaskInfos} data.taskInfos - Informations sur la tache
+   * @param {VIEW_CHOICE} data.viewChoice - Affichage souhaité
    */
-  constructor(taskInfos) {
-    super(new TaskView(taskInfos));
+  constructor(data) {
+    super(new TaskView(data));
     /** @type {TaskView} */
     const taskView = this.getView();
 
     taskView.setUpdateCallback(this.setPropertyValue.bind(this));
-    this.#taskInfos = taskInfos;
+    this.#taskInfos = data.taskInfos;
+    this.#viewChoice = data.viewChoice;
+  }
+  /**
+   * @override
+   * @param {Object} data - Données à utiliser pour modifier la vue
+   * @param {TaskInfos} data.taskInfos - Informations sur la tache
+   * @param {VIEW_CHOICE} data.viewChoice - Affichage souhaité
+   */
+  updateData(data) {
+    if (data.taskInfos) {
+      this.#taskInfos = data.taskInfos;
+      this.#updates = {};
+    }
+    if (data.viewChoice) {
+      this.#viewChoice = data.viewChoice;
+    }
+    super.updateData({ taskInfos: this.getTaskInfos(), viewChoice: this.#viewChoice });
   }
 
   /**
@@ -68,6 +89,10 @@ class Task extends Component {
 
   isModified() {
     return Object.keys(this.#updates).length > 0;
+  }
+
+  isNew() {
+    return this.getTaskInfos().id === null;
   }
 
 }

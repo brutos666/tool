@@ -4,11 +4,26 @@ class ActionButtonView extends View {
 
   #doActionCallback;
 
-  constructor(id, label) {
-    super();
-    this.createView(String.raw`<button id="${ id }">${ label }</button>`);
+  /**
+   * @param {Object} data - Données à utiliser pour créer la vue
+   * @param {string} data.id - Identifiant du bouton
+   * @param {string} data.label - Label du bouton
+   */
+  constructor(data) {
+    super(data);
     this.getElementView()
       .addEventListener('click', this.callDoActionCallback.bind(this));
+  }
+
+  /**
+   * @override {@link View.getHtmlView}
+   * @param {Object} data - Données à utiliser pour créer la vue
+   * @param {string} data.id - Identifiant du bouton
+   * @param {string} data.label - Label du bouton
+   * @returns {string} - Code HTML du bouton
+   */
+  getHtmlView(data) {
+    return String.raw`<button id="${ data.id }">${ data.label }</button>`;
   }
 
   setDoActionCallback(callback) {
@@ -21,10 +36,6 @@ class ActionButtonView extends View {
 
   callDoActionCallback() {
     this.#doActionCallback();
-  }
-
-  changeLabel(label) {
-    this.getElementView().innerHTML = label;
   }
 
   setDisabled() {
