@@ -29,39 +29,26 @@
   flex-direction: row;
   justify-content: space-between;
 }
-
-.task-card {
-  min-width: 200px;
-}
-.task-card__content--post-it {
+.task-card__text--post-it {
   color: var(--text-post-it-color);
   background: var(--task-post-it-color);
+  border: none;
+  width: 150px;
+  height: 80px;
 }
-.task-card__text {
-  color: inherit;
-  background: inherit;
-}
-.task-card__content {
-  display: flex;
-  flex-direction: column;
-}
+
 .task-card__header {
   text-align: left;
 }
 .task-card__content {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
 }
 .task-card__content > * {
   margin: 5px;
   display: flex;
   flex-direction: column;
 }
-.task-card__content {
-  display: flex;
-  flex-direction: column;
-}
-
 .tasks__header {
   text-align: center;
 }

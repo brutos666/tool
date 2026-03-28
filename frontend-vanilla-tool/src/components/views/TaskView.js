@@ -12,6 +12,7 @@ class TaskView extends View {
   #state;
 
   #updateCallback;
+  #focusCallback;
 
   /**
    * @param {Object} data - Données à utiliser pour créer la vue
@@ -59,6 +60,10 @@ class TaskView extends View {
       const property = event.target.getAttribute('id');
       const value = event.target.value;
       updateCallback(property, value);
+      if (property === 'what' && this.#what instanceof HTMLTextAreaElement) {
+        this.#what.style.height = 'auto';
+        this.#what.style.height = `${ this.#what.scrollHeight }px`;
+      }
     };
     this.addEventListeners();
   }
@@ -91,16 +96,27 @@ class TaskView extends View {
     this.#when.addEventListener('input', this.#updateCallback);
     this.#delay.addEventListener('change', this.#updateCallback);
     this.#state.addEventListener('change', this.#updateCallback);
+    if (this.#what instanceof HTMLTextAreaElement) {
+      this.#focusCallback = () => {
+        const scrollHeight = this.#what.scrollHeight;
+        if (scrollHeight > this.#what.clientHeight) {
+          this.#what.style.height = `${ scrollHeight }px`;
+        }
+      };
+      this.#what.addEventListener('focus', this.#focusCallback);
+    }
   }
 
   removeEventListeners() {
-    if (!this.#updateCallback) {
-      return;
+    if (this.#updateCallback) {
+      this.#what.removeEventListener('input', this.#updateCallback);
+      this.#when.removeEventListener('input', this.#updateCallback);
+      this.#delay.removeEventListener('change', this.#updateCallback);
+      this.#state.removeEventListener('change', this.#updateCallback);
     }
-    this.#what.removeEventListener('input', this.#updateCallback);
-    this.#when.removeEventListener('input', this.#updateCallback);
-    this.#delay.removeEventListener('change', this.#updateCallback);
-    this.#state.removeEventListener('change', this.#updateCallback);
+    if (this.#focusCallback) {
+      this.#what.removeEventListener('focus', this.#focusCallback);
+    }
   }
 
 }
@@ -112,8 +128,8 @@ class TaskView extends View {
 function getDetailView() {
   return String.raw`
       <section class="task-card__content">
-        <label for="what">What <input type="text" id="what" placeholder="Que dois-je faire"/></label>
-        <label for="when">When <input type="text" id="when" placeholder="Quand dois-je le faire"/></label>
+        <textarea class="task-card__text" type="text" id="what" placeholder="Que dois-je faire ?"></textarea>
+        <label for="when">Quand <input type="text" id="when" placeholder="Saisir un date"/></label>
         <label for="delay">A faire dans :
           <select id="delay">
             <option value="">--Please choose an option--</option>
@@ -140,8 +156,8 @@ function getDetailView() {
  */
 function getPostItView() {
   return String.raw`
-      <section class="task-card__content task-card__content--post-it">
-        <textarea class="task-card__text" type="text" id="what"></textarea>
+      <section class="task-card__content">
+        <textarea class="task-card__text--post-it" type="text" id="what"></textarea>
         <div>
           <input hidden type="text" id="when"/>
           <input hidden type="text" id="delay"/>
