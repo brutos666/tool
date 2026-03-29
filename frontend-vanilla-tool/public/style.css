@@ -8,7 +8,7 @@
   --story-post-it-color: light-dark(#fff9b2, #fff9b2);
   --rules-post-it-color: light-dark(#a7cdf5, #a7cdf5);
   --question-post-it-color: light-dark(#f0949e, #f0949e);
-  --task-post-it-color: light-dark(#fff9b2, #fff9b2);
+  --item-post-it-color: light-dark(#fff9b2, #fff9b2);
   --text-post-it-color: light-dark(#202222, #202222);
 }
 .error-mess {
@@ -29,32 +29,61 @@
   flex-direction: row;
   justify-content: space-between;
 }
-.task-card__text--post-it {
+.item-card__text--post-it {
   color: var(--text-post-it-color);
-  background: var(--task-post-it-color);
+  background: var(--item-post-it-color);
   border: none;
   width: 150px;
   height: 80px;
 }
 
-.task-card__header {
+.item-card__header {
   text-align: left;
 }
-.task-card__content {
+.item-card__content {
   display: flex;
   flex-direction: column;
 }
-.task-card__content > * {
+.item-card__content > * {
   margin: 5px;
   display: flex;
   flex-direction: column;
 }
-.tasks__header {
+.items__header {
   text-align: center;
 }
-.tasks__space {
+.items__space {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
+}
+
+.todo-item__space {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+}
+
+.todo-item {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.todo-item__text {
+  border: none;
+}
+
+.post-it-item {
+  display: flex;
+  flex-direction: column;
+  width: 150px;
+}
+.post-it-item__text {
+  color: var(--text-post-it-color);
+  background: var(--item-post-it-color);
+  border: none;
+  width: 150px;
+  height: 80px;
 }
 

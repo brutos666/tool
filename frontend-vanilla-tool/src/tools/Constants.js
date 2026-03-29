@@ -2,6 +2,7 @@
 
 const URL_ROOT_API = 'http://localhost:8080/api/';
 const NOTIFICATION_TIMEOUT = 3000;
+const SAVE_TIMEOUT = 5000;
 
 const ACTION = {
   Save: 'Save',
@@ -37,5 +38,10 @@ const VIEW_CHOICE_LABEL = {
   TodoList: 'Todo List',
   Hierarchy: 'Arbre'
 };
+const STATE = {
+  TODO: 'TODO',
+  IN_PROGRESS: 'IN_PROGRESS',
+  DONE: 'DONE'
+};
 
-export { URL_ROOT_API, ACTION, VIEW_CHOICE, NOTIFICATION_TIMEOUT };
+export { URL_ROOT_API, ACTION, STATE, VIEW_CHOICE, NOTIFICATION_TIMEOUT, SAVE_TIMEOUT };

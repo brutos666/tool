@@ -21,16 +21,6 @@ class ActionButton extends Component {
     actionView.setDoActionCallback(callback);
   }
 
-  setDisabled() {
-    this.getView()
-      .setDisabled();
-  }
-
-  setEnabled() {
-    this.getView()
-      .setEnabled();
-  }
-
 }
 
 export default ActionButton;

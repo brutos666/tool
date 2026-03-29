@@ -38,13 +38,5 @@ class ActionButtonView extends View {
     this.#doActionCallback();
   }
 
-  setDisabled() {
-    this.getElementView().classList.add('disabled');
-  }
-
-  setEnabled() {
-    this.getElementView().classList.remove('disabled');
-  }
-
 }
 export default ActionButtonView;

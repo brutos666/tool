@@ -20,11 +20,13 @@ class NodeElement {
   }
 
   getNodeView() {
-    return this.#view.getNodeView();
+    return this.getView()
+      .getNodeView();
   }
 
   getElementView() {
-    return this.#view.getElementView();
+    return this.getView()
+      .getElementView();
   }
 
   /**
@@ -32,15 +34,18 @@ class NodeElement {
    * @param {Object} data - Données à mettre à jour
    */
   updateData(data) {
-    this.#view.refreshView(data);
+    this.getView()
+      .refreshView(data);
   }
 
   setError(value) {
-    this.#view.setError(value);
+    this.getView()
+      .setError(value);
   }
 
   setSuccess(value) {
-    this.#view.setSuccess(value);
+    this.getView()
+      .setSuccess(value);
   }
 
 }

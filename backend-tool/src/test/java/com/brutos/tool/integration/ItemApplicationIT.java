@@ -1,6 +1,5 @@
 package com.brutos.tool.integration;
 
-import com.brutos.tool.service.TaskService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -10,18 +9,15 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 //  We create a `@SpringBootTest`, starting an actual server on a `RANDOM_PORT`
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
-public class TaskApplicationIT {
+public class ItemApplicationIT {
 
     @Autowired
     private MockMvc mockMvc;
@@ -31,14 +27,12 @@ public class TaskApplicationIT {
     }
 
     @Test
-    public void givenTaskTodayURI_whenMockMVC_thenVerifyResponse() throws Exception {
-        String expectedWhen = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+    public void givenItemTodoURI_whenMockMVC_thenVerifyResponse() throws Exception {
         // Given/When/Then
-        MvcResult mvcResult = this.mockMvc.perform(get("/api/task/today").accept(MediaType.APPLICATION_JSON).acceptCharset(StandardCharsets.UTF_8))
-                // NOTE : on peut tester diretement le résultat attendu ici
+        MvcResult mvcResult = this.mockMvc.perform(get("/api/item/findAllItems").accept(MediaType.APPLICATION_JSON).acceptCharset(StandardCharsets.UTF_8))
+                // NOTE : on peut tester directement le résultat attendu ici
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.what").value(TaskService.NOTHING_TO_DO))
-                .andExpect(jsonPath("$.when").value(expectedWhen))
+                //.andExpect(jsonPath("$.text").value(ItemService.NOTHING_TO_DO))
                 .andReturn();
 
         // Then

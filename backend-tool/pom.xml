@@ -11,7 +11,7 @@
     <groupId>com.brutos</groupId>
     <artifactId>backend-tool</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>task</name>
+    <name>item</name>
     <description>Petite application de tâches à faire</description>
     <url/>
 

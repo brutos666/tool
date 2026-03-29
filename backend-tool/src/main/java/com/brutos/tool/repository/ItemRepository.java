@@ -1,9 +1,9 @@
 package com.brutos.tool.repository;
 
-import com.brutos.tool.model.TaskModel;
+import com.brutos.tool.model.ItemModel;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface TaskRepository extends CrudRepository<TaskModel, Long> {
+public interface ItemRepository extends CrudRepository<ItemModel, Long> {
 }

@@ -15,13 +15,20 @@ class Command {
    * @param {NodeElement} targetNodeElement - Element cible
    * @param {string} successMessage - Message en cas de succès
    * @param {string} errorMessage - Message en cas d'échec
-   * @param {Function|undefined} executeCallback - Fonction appelée lorsque la commande est exécutée
    */
-  constructor(targetNodeElement, successMessage, errorMessage, executeCallback) {
+  constructor(targetNodeElement, successMessage, errorMessage) {
     this.#targetNodeElement = targetNodeElement;
     this.#successMessage = successMessage;
     this.#errorMessage = errorMessage;
-    this.#executeCallback = executeCallback ? executeCallback : () => { return Promise.resolve(); };
+    this.#executeCallback = () => { return Promise.resolve(); };
+  }
+
+  /**
+   * Positionne la fonction à appeler lorsque la commande est exécutée
+   * @param {Function} executeCallback - Fonction appelée lorsque la commande est exécutée
+   */
+  setExecuteCallback(executeCallback) {
+    this.#executeCallback = executeCallback;
   }
 
   setSuccessMessage(successMessage) {
@@ -34,12 +41,12 @@ class Command {
 
   async execute() {
     return this.#executeCallback()
-      .then(task => {
+      .then(response => {
         this.#targetNodeElement.setSuccess(this.#successMessage);
-        return task;
+        return Promise.resolve(response);
       }, errorResponse => {
         this.#targetNodeElement.setError(`${ this.#errorMessage } : ${ errorResponse }`);
-        return errorResponse;
+        return Promise.reject(errorResponse);
       });
   }
 

@@ -3,17 +3,11 @@ package com.brutos.tool.entity;
 import java.util.Optional;
 
 public enum State {
-    TODO('T'), IN_PROGRESS('I'), DONE('D');
+    TODO, IN_PROGRESS, DONE;
 
-    final char modelValue;
-
-    State(char modelValue) {
-        this.modelValue = modelValue;
-    }
-
-    public static Optional<State> convertModelToEnum(char modelValue) {
+    public static Optional<State> convertStringToEnum(String value) {
         for (State state : State.values()) {
-            if (state.getModelValue() == modelValue) {
+            if (state.name().equals(value)) {
                 return Optional.of(state);
             }
         }
@@ -32,7 +26,4 @@ public enum State {
         return this == TODO;
     }
 
-    public char getModelValue() {
-        return modelValue;
-    }
 }

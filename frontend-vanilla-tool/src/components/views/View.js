@@ -82,6 +82,14 @@ class View {
     setTimeout(() => this.#messageView.textContent = '', NOTIFICATION_TIMEOUT);
   }
 
+  setDisabled() {
+    this.getElementView().classList.add('disabled');
+  }
+
+  setEnabled() {
+    this.getElementView().classList.remove('disabled');
+  }
+
 }
 
 export default View;
