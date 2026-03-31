@@ -7,8 +7,9 @@ import Basics from './Basics.js';
 import Composite from './Composite.js';
 import ScreenLayout from './ScreenLayout.js';
 import Select from './Select.js';
-import TodoList from './TodoList.js';
+import TodoListLayout from './TodoListLayout.js';
 import Toolbar from './Toolbar.js';
+import TreeLayout from './TreeLayout.js';
 
 class HomePage extends Composite {
 
@@ -48,7 +49,10 @@ class HomePage extends Composite {
     let screenLayout;
     switch (viewChoice) {
       case VIEW_CHOICE.TodoList:
-        screenLayout = new TodoList();
+        screenLayout = new TodoListLayout();
+        break;
+      case VIEW_CHOICE.Tree:
+        screenLayout = new TreeLayout();
         break;
       case VIEW_CHOICE.Detail:
         screenLayout = new Basics();

@@ -3,7 +3,7 @@ import ActionButton from './ActionButton.js';
 import Toolbar from './Toolbar.js';
 import ItemContainer from './ItemContainer.js';
 import ScreenLayout from './ScreenLayout.js';
-/* @import { Item } from './Item.js' */
+/** @import Item from './Item.js' */
 
 class Basics extends ScreenLayout {
 

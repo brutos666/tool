@@ -2,29 +2,19 @@ package com.brutos.tool.handler.webResult;
 
 import com.brutos.tool.entity.State;
 
+import java.util.List;
 import java.util.Objects;
 
 public class ItemWebResult extends AbstractWebResultEntity {
     private String title = "";
     private String text = "";
     private State state = State.TODO;
+    private Long parentId;
+    private Long nextId;
+    private List<ItemWebResult> children;
 
     public ItemWebResult() {
         super();
-    }
-
-    public ItemWebResult(String title, String text) {
-        super();
-        this.title = title;
-        this.text = text;
-    }
-
-    public ItemWebResult(Long id, String title, String text, State state) {
-        super();
-        super.setId(id);
-        this.title = title;
-        this.text = text;
-        this.state = state;
     }
 
     public String getTitle() {
@@ -51,12 +41,36 @@ public class ItemWebResult extends AbstractWebResultEntity {
         this.state = state;
     }
 
+    public Long getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(Long parentId) {
+        this.parentId = parentId;
+    }
+
+    public Long getNextId() {
+        return nextId;
+    }
+
+    public void setNextId(Long nextId) {
+        this.nextId = nextId;
+    }
+
+    public List<ItemWebResult> getChildren() {
+        return children;
+    }
+
+    public void setChildren(List<ItemWebResult> children) {
+        this.children = children;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
 
         ItemWebResult that = (ItemWebResult) o;
-        return Objects.equals(title, that.title) && Objects.equals(text, that.text) && state == that.state;
+        return Objects.equals(title, that.title) && Objects.equals(text, that.text) && state == that.state && Objects.equals(parentId, that.parentId) && Objects.equals(nextId, that.nextId) && Objects.equals(children, that.children);
     }
 
     @Override
@@ -64,6 +78,9 @@ public class ItemWebResult extends AbstractWebResultEntity {
         int result = Objects.hashCode(title);
         result = 31 * result + Objects.hashCode(text);
         result = 31 * result + Objects.hashCode(state);
+        result = 31 * result + Objects.hashCode(parentId);
+        result = 31 * result + Objects.hashCode(nextId);
+        result = 31 * result + Objects.hashCode(children);
         return result;
     }
 
@@ -73,6 +90,9 @@ public class ItemWebResult extends AbstractWebResultEntity {
                 "title='" + title + '\'' +
                 ", text='" + text + '\'' +
                 ", state=" + state +
+                ", parentId=" + parentId +
+                ", nextId=" + nextId +
+                ", children=" + children +
                 "} " + super.toString();
     }
 }

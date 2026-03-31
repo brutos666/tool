@@ -26,6 +26,13 @@ class Composite extends Component {
     return this.#children;
   }
 
+  getLastChild() {
+    if (this.getChildren().length > 0) {
+      return this.getChildren()[this.getChildren().length - 1];
+    }
+    return null;
+  }
+
   setChildren(children) {
     this.#children = children;
 

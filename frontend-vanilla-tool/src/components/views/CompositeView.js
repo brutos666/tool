@@ -13,6 +13,20 @@ class CompositeView extends View {
   }
 
   /**
+   * @override
+   */
+  getHtmlView(/* data */) {
+    return '<div id="spaceChildren"></div>';
+  }
+
+  getSpaceChildren() {
+    return this.#spaceChildren;
+  }
+  setSpaceChildren(spaceChildren) {
+    this.#spaceChildren = spaceChildren;
+  }
+
+  /**
    * @override {@link View.refreshView}
    * @param {Object} data - Données à utiliser pour redessiner la vue
    */
@@ -49,6 +63,10 @@ class CompositeView extends View {
     this.#spaceChildren.appendChild(view.getNodeView());
   }
 
+  /**
+   * Supprime un enfant. La vue du composant est supprimé du DOM dans l'espace dédié (#spaceChildren)
+   * @param {View} view : vue
+   */
   removeView(view) {
     this.#spaceChildren.removeChild(view.getNodeView());
   }

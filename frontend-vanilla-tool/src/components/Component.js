@@ -1,6 +1,7 @@
 'use strict';
 
 import NodeElement from './NodeElement.js';
+/** @import Composite from './Composite.js' */
 
 class Component extends NodeElement {
 
@@ -28,7 +29,14 @@ class Component extends NodeElement {
   removed() {
     this.#parent = null;
   }
-
+  getPrevious() {
+    const index = this.#parent.getChildren()
+      .indexOf(this);
+    if (index === 0) {
+      return null;
+    }
+    return this.#parent.getChildren()[index - 1];
+  }
   /**
    * Retire le composant du parent
    */

@@ -1,4 +1,5 @@
 import { VIEW_CHOICE } from '../../tools/Constants.js';
+import { convertLeafToDetails, convertDetailsToLeaf } from '../../tools/NodeUtilities.js';
 import CompositeView from './CompositeView.js';
 
 class ItemView extends CompositeView {
@@ -7,12 +8,15 @@ class ItemView extends CompositeView {
   #title;
   #text;
   #done;
-  #delete;
+  #details;
+  #doAddChild;
+  #doDelete;
 
   #updateCallback = () => {};
-  #deleteCallback = () => {};
-  #focusCallback = () => {};
   #doneCallback = () => {};
+
+  #doAddChildCallback = () => {};
+  #doDeleteCallback = () => {};
 
   /**
    * @param {Object} data - Données à utiliser pour créer la vue
@@ -34,18 +38,38 @@ class ItemView extends CompositeView {
    * @returns {string} - Code HTML du bouton
    */
   getHtmlView(data) {
-    switch (data.viewChoice) {
-      case VIEW_CHOICE.Detail:
-        return getPostItView();
-      case VIEW_CHOICE.SampleMapping:
-        return getPostItView();
-      case VIEW_CHOICE.TodoList:
-        return getTodoItemView();
-      case VIEW_CHOICE.Hierarchy:
-        return getPostItView();
-      default:
-        return getPostItView();
+    return getHtmlItemView(data);
+  }
+
+  /**
+   * @override
+   * @param {ItemView} view - enfant ajouté
+   */
+  addView(view) {
+    if (!this.#details) {
+      const detailsNode = convertLeafToDetails(this.getElementView());
+      this.setElementView(detailsNode);
+      this.#details = detailsNode;
+      this.setSpaceChildren(this.#details.querySelector('#spaceChildren'));
     }
+    this.#details.open = true;
+    super.addView(view);
+  }
+
+  /**
+   * @override
+   * @param {ItemView} view - enfant supprimé
+   */
+  removeView(view) {
+    super.removeView(view);
+
+    if (!(this.#details && !this.getSpaceChildren()
+      .hasChildNodes())) {
+      return;
+    }
+    const leafNode = convertDetailsToLeaf(this.getElementView());
+    this.setElementView(leafNode);
+    this.#details = null;
   }
 
   /**
@@ -62,15 +86,34 @@ class ItemView extends CompositeView {
     this.addEventListeners();
   }
 
-  setDeleteCallback(deleteCallback) {
-    this.#delete.removeEventListener('click', this.#deleteCallback);
-    this.#deleteCallback = deleteCallback;
-    this.#delete.addEventListener('click', this.#deleteCallback);
+  /**
+   * Positionne la fonction à appeler lorsqu'une action d'ajout d'enfant est effectuée
+   * @param {Function} doAddChildCallback - Fonction appelée lorsqu'une action d'ajout d'enfant est effectuée
+   */
+  setDoAddChildCallback(doAddChildCallback) {
+    if (!this.#doAddChild) {
+      return;
+    }
+    this.#doAddChild.removeEventListener('click', this.#doAddChildCallback);
+    this.#doAddChildCallback = doAddChildCallback;
+    this.#doAddChild.addEventListener('click', this.#doAddChildCallback);
+  }
+  /**
+   * Positionne la fonction à appeler lorsqu'une action de suppression est effectuée
+   * @param {Function} doDeleteCallback - Fonction appelée lorsqu'une action de suppression est effectuée
+   */
+  setDoDeleteCallback(doDeleteCallback) {
+    if (!this.#doDelete) {
+      return;
+    }
+    this.#doDelete.removeEventListener('click', this.#doDeleteCallback);
+    this.#doDeleteCallback = doDeleteCallback;
+    this.#doDelete.addEventListener('click', this.#doDeleteCallback);
   }
 
   /**
-   * Positionne la fonction à appeler lorsqu'une modification est effectuée sur la tache
-   * @param {Function} updateCallback - Fonction appelée lorsqu'une modification est effectuée sur la tache
+   * Positionne la fonction à appeler lorsqu'une modification est effectuée (titre, texte, statut)
+   * @param {Function} updateCallback - Fonction appelée lorsqu'une modification est effectuée
    */
   setUpdateCallback(updateCallback) {
     this.#title.removeEventListener('input', this.#updateCallback);
@@ -79,12 +122,8 @@ class ItemView extends CompositeView {
 
     this.#updateCallback = event => {
       const property = event.target.getAttribute('id');
-      const value = event.target.value;
+      const value = property === 'text' || property === 'title' ? event.target.innerHTML : event.target.value;
       updateCallback(property, value);
-      if (property === 'text' && this.#text instanceof HTMLTextAreaElement) {
-        this.#text.style.height = 'auto';
-        this.#text.style.height = `${ this.#text.scrollHeight }px`;
-      }
     };
     this.#doneCallback = event => {
       const value = event.target.checked ? 'DONE' : 'TODO';
@@ -102,18 +141,19 @@ class ItemView extends CompositeView {
     this.#title = mainNode.querySelector('#title');
     this.#text = mainNode.querySelector('#text');
     this.#done = mainNode.querySelector('#done');
-    this.#delete = mainNode.querySelector('#delete');
+    this.#details = mainNode.querySelector('details');
+    this.#doAddChild = mainNode.querySelector('#doAddChild');
+    this.#doDelete = mainNode.querySelector('#doDelete');
   }
 
   setItemValues(itemInfos) {
-    if (itemInfos.id) {
-      this.#identify.textContent = itemInfos.id;
-    }
+    this.setIdentify(itemInfos.id);
+
     if (itemInfos.title) {
-      this.#title.value = itemInfos.title;
+      this.#title.innerHTML = itemInfos.title;
     }
     if (itemInfos.text) {
-      this.#text.value = itemInfos.text;
+      this.#text.innerHTML = itemInfos.text;
     }
     if (itemInfos.state) {
       this.#done.checked = itemInfos.state === 'DONE';
@@ -121,60 +161,103 @@ class ItemView extends CompositeView {
   }
 
   setIdentify(identify) {
-    this.#identify.value = identify;
+    this.#identify.textContent = identify === undefined ? '' : identify;
   }
 
   addEventListeners() {
     this.#title.addEventListener('input', this.#updateCallback);
     this.#text.addEventListener('input', this.#updateCallback);
     this.#done.addEventListener('change', this.#doneCallback);
-    this.#delete.addEventListener('click', this.#deleteCallback);
-    this.#focusCallback = () => {
-      const scrollHeight = this.#text.scrollHeight;
-      if (scrollHeight > this.#text.clientHeight) {
-        this.#text.style.height = `${ scrollHeight }px`;
-      }
-    };
-    this.#text.addEventListener('focus', this.#focusCallback);
+    if (this.#doAddChild) {
+      this.#doAddChild.addEventListener('click', this.#doAddChildCallback);
+    }
+    this.#doDelete.addEventListener('click', this.#doDeleteCallback);
   }
 
   removeEventListeners() {
     this.#title.removeEventListener('input', this.#updateCallback);
     this.#text.removeEventListener('input', this.#updateCallback);
     this.#done.removeEventListener('change', this.#doneCallback);
-    this.#text.removeEventListener('focus', this.#focusCallback);
-    this.#delete.removeEventListener('click', this.#deleteCallback);
+    if (this.#doAddChild) {
+      this.#doAddChild.removeEventListener('click', this.#doAddChildCallback);
+    }
+    this.#doDelete.removeEventListener('click', this.#doDeleteCallback);
   }
 
 }
+
+/**
+ * Construction du code html d'un item
+ * @param {Object} data - Données à utiliser pour créer la vue
+ * @param {ItemInfos} data.itemInfos - Informations sur la tache
+ * @param {VIEW_CHOICE} data.viewChoice - Affichage souhaité
+ * @returns {string} - Code HTML de l'item
+ */
+function getHtmlItemView(data) {
+  const isRoot = data.itemInfos.parentId === -1;
+  const isLeaf = !data.itemInfos.children || data.itemInfos.children.length === 0;
+
+  if (isLeaf) {
+    const classList = (isRoot ? ' tree__root' : '') + (isLeaf ? ' tree__leaf' : '');
+    return String.raw`<div class="${ classList }" id="spaceChildren">${ getHtmlArticle(data.itemInfos.id, data.viewChoice) }</div>`;
+  }
+  const classList = isRoot ? ' tree__root' : ' tree__node';
+  return getHtmlNodeItemView(getHtmlArticle(data.itemInfos.id, data.viewChoice), classList);
+}
 /**
  * Création de la vue HTML d'une tâche
+ * @param {string} itemHTML - HTML de l'item
+ * @param {string} classList - Liste des classes de l'item
  * @returns {string} - Vue HTML de la tâche
  */
-function getTodoItemView() {
-  return String.raw`
-      <section class="todo-item">
-        <span id="identify"></span>
-        <input type="checkbox" id="done"/>
-        <input type="text" id="title"/>
-        <textarea class="todo-item__text" id="text"></textarea>
-        <button id="delete">Supprimer</button>
-      </section>`;
+function getHtmlNodeItemView(itemHTML, classList) {
+  return String.raw`<details class="${ classList }">
+    <summary>${ itemHTML }</summary>
+    <section id="spaceChildren"></section>
+  </details>`;
 }
 
 /**
- * Création de la vue HTML d'une tâche
- * @returns {string} - Vue HTML de la tâche
+ * Partie HTML décrivant l'item
+ * @param {string} identify - Identifiant de la tâche
+ * @param {VIEW_CHOICE} viewChoice - Affichage souhaité
+ * @returns {string} - Vue HTML de l'item
  */
-function getPostItView() {
-  return String.raw`
-      <section class="post-it-item">
-        <span id="identify"></span>
-        <input type="checkbox" id="done"/>
-        <input type="text" id="title"/>
-        <textarea class="post-it-item__text" id="text"></textarea>
-        <button id="delete">Supprimer</button>
-      </section>`;
+function getHtmlArticle(identify, viewChoice) {
+  const viewChoiceClass = getClassForViewChoice(viewChoice);
+  return String.raw`<section id="item" class="item__content ${ viewChoiceClass }">
+    <article class="item__article">
+        <span id="identify" class="item__identify">${ identify }</span>
+        <input type="checkbox" id="done" class="item__done"/>
+        <div contenteditable="true" class="item__title" id="title"></div>
+        <div contenteditable="true" class="item__text" id="text"></div>
+    </article>
+    <aside class="item__toolbar">
+        <button id="doAddChild" class="item__doAddChild"> + </button>
+        <button id="doDelete" class="item__doDelete"> - </button>
+        <button id="doView" class="item__doView">O</button>
+      </aside>
+    </section>`;
+}
+/**
+ * Retourne la classe CSS correspondant à la vue demandée
+ * @param {VIEW_CHOICE} viewChoice - Vue demandée
+ * @returns {string} - Classe CSS correspondante
+ * @example
+ */
+function getClassForViewChoice(viewChoice) {
+  switch (viewChoice) {
+    case VIEW_CHOICE.Detail:
+      return 'item--post-it';
+    case VIEW_CHOICE.SampleMapping:
+      return 'item--post-it';
+    case VIEW_CHOICE.TodoList:
+      return 'item--todo';
+    case VIEW_CHOICE.Tree:
+      return 'item--tree';
+    default:
+      return 'item--block';
+  }
 }
 
 export default ItemView;

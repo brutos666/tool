@@ -6,7 +6,8 @@ import com.brutos.tool.model.ItemModel;
 import com.brutos.tool.repository.ItemRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ItemService {
@@ -28,6 +29,18 @@ public class ItemService {
         return itemMapper.toEntity(itemRepository.findAll());
     }
 
+    public Map<Long, List<Item>> sortItems(List<Item> items) {
+        // Regrouper par parent
+        Map<Long, List<Item>> groupedByParent = items.stream()
+                .collect(Collectors.groupingBy(Item::getParentId));
+        // Trier les enfants directs entre eux
+        Map<Long, List<Item>> sortedItems = new HashMap<>();
+        for (Map.Entry<Long, List<Item>> entry : groupedByParent.entrySet()) {
+            sortedItems.put(entry.getKey(), sortSameParentItems(entry.getValue()));
+        }
+        return sortedItems;
+    }
+
     public void deleteItem(Long id) {
         itemRepository.deleteById(id);
     }
@@ -36,5 +49,26 @@ public class ItemService {
         if (item.getId() == null) {
             throw new IllegalArgumentException("id (ID de la tâche) est obligatoire");
         }
+    }
+
+    private List<Item> sortSameParentItems(List<Item> items) {
+        List<Item> sortedItems = new ArrayList<>();
+        Item item = getLast(items);
+        while (item != null) {
+            sortedItems.addFirst(item);
+            item = getPrev(item, items);
+        }
+        return sortedItems;
+    }
+
+    private Item getLast(List<Item> items) {
+        return items.stream().filter(item -> item.getNextId() == null).findFirst().orElse(items.getFirst());
+    }
+
+    private Item getPrev(Item itemNext, List<Item> items) {
+        Optional<Item> optionalItem = items.stream()
+                .filter(item -> itemNext.getId().equals(item.getNextId()))
+                .findFirst();
+        return optionalItem.orElse(null);
     }
 }

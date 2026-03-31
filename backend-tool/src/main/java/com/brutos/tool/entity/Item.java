@@ -6,6 +6,8 @@ public class Item extends AbstractEntity {
     private String title = "";
     private String text = "";
     private State state = State.TODO;
+    private Long parentId;
+    private Long nextId;
 
     public Item() {
     }
@@ -39,12 +41,28 @@ public class Item extends AbstractEntity {
         this.state = state;
     }
 
+    public Long getParentId() {
+        return parentId == null ? -1L : parentId;
+    }
+
+    public void setParentId(Long parentId) {
+        this.parentId = parentId;
+    }
+
+    public Long getNextId() {
+        return nextId;
+    }
+
+    public void setNextId(Long nextId) {
+        this.nextId = nextId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
 
         Item item = (Item) o;
-        return Objects.equals(title, item.title) && Objects.equals(text, item.text) && state == item.state;
+        return Objects.equals(title, item.title) && Objects.equals(text, item.text) && state == item.state && Objects.equals(parentId, item.parentId) && Objects.equals(nextId, item.nextId);
     }
 
     @Override
@@ -52,6 +70,8 @@ public class Item extends AbstractEntity {
         int result = Objects.hashCode(title);
         result = 31 * result + Objects.hashCode(text);
         result = 31 * result + Objects.hashCode(state);
+        result = 31 * result + Objects.hashCode(parentId);
+        result = 31 * result + Objects.hashCode(nextId);
         return result;
     }
 
@@ -61,6 +81,8 @@ public class Item extends AbstractEntity {
                 "title='" + title + '\'' +
                 ", text='" + text + '\'' +
                 ", state=" + state +
+                ", parentId=" + parentId +
+                ", nextId=" + nextId +
                 "} " + super.toString();
     }
 }

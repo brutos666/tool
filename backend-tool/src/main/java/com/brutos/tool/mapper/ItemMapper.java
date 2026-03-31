@@ -9,13 +9,21 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Component
 public class ItemMapper implements Mapper<Item, ItemModel, ItemWebResult> {
     @Override
     public ItemWebResult toWebResult(Item item) {
-        return new ItemWebResult(item.getId(), item.getTitle(), item.getText(), item.getState());
+        ItemWebResult itemWebResult = new ItemWebResult();
+        itemWebResult.setId(item.getId());
+        itemWebResult.setTitle(item.getTitle());
+        itemWebResult.setText(item.getText());
+        itemWebResult.setState(item.getState());
+        itemWebResult.setParentId(item.getParentId());
+        itemWebResult.setNextId(item.getNextId());
+        return itemWebResult;
     }
 
     @Override
@@ -25,12 +33,29 @@ public class ItemMapper implements Mapper<Item, ItemModel, ItemWebResult> {
         item.setTitle(webResult.getTitle());
         item.setText(webResult.getText());
         item.setState(webResult.getState());
+        item.setParentId(webResult.getParentId());
+        item.setNextId(webResult.getNextId());
         return item;
     }
 
     @Override
     public List<ItemWebResult> toWebResult(List<Item> items) {
+        // Pas de prise en compte des enfants
         return items.stream().map(this::toWebResult).toList();
+    }
+
+    public List<ItemWebResult> toWebResult(Long itemId, Map<Long, List<Item>> sortedItems) {
+        List<Item> childrenItems = sortedItems.get(itemId);
+        if (childrenItems == null) {
+            return new ArrayList<>();
+        }
+        List<ItemWebResult> webResultItems = new ArrayList<>();
+        for (Item childItem : childrenItems) {
+            ItemWebResult rootWebResult = this.toWebResult(childItem);
+            rootWebResult.setChildren(this.toWebResult(childItem.getId(), sortedItems));
+            webResultItems.add(rootWebResult);
+        }
+        return webResultItems;
     }
 
     @Override
@@ -40,6 +65,8 @@ public class ItemMapper implements Mapper<Item, ItemModel, ItemWebResult> {
         itemModel.setTitle(item.getTitle());
         itemModel.setText(item.getText());
         itemModel.setState(item.getState().name());
+        itemModel.setParentId(item.getParentId());
+        itemModel.setNextId(item.getNextId());
         return itemModel;
     }
 
@@ -60,6 +87,8 @@ public class ItemMapper implements Mapper<Item, ItemModel, ItemWebResult> {
                 throw new InvalidModelValueException("state (État de l'item)", itemModel.getState(), "TODO, IN_PROGESS, DONE");
             });
         }
+        item.setParentId(itemModel.getParentId());
+        item.setNextId(itemModel.getNextId());
         return item;
     }
 

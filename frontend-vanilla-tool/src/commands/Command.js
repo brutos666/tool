@@ -11,15 +11,11 @@ class Command {
   #executeCallback;
 
   /**
-   *
+   * @constructor
    * @param {NodeElement} targetNodeElement - Element cible
-   * @param {string} successMessage - Message en cas de succès
-   * @param {string} errorMessage - Message en cas d'échec
    */
-  constructor(targetNodeElement, successMessage, errorMessage) {
+  constructor(targetNodeElement) {
     this.#targetNodeElement = targetNodeElement;
-    this.#successMessage = successMessage;
-    this.#errorMessage = errorMessage;
     this.#executeCallback = () => { return Promise.resolve(); };
   }
 
@@ -31,14 +27,24 @@ class Command {
     this.#executeCallback = executeCallback;
   }
 
+  /**
+   * Positionne le message de success
+   * @param {string} successMessage - Message de success
+   */
   setSuccessMessage(successMessage) {
     this.#successMessage = successMessage;
   }
-
+  /**
+   * Positionne le message d'erreur
+   * @param {string} errorMessage - Message d'erreur
+   */
   setErrorMessage(errorMessage) {
     this.#errorMessage = errorMessage;
   }
-
+  /**
+   * Exécuter la commande
+   * @returns {Promise}
+   */
   async execute() {
     return this.#executeCallback()
       .then(response => {

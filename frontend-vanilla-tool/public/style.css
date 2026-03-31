@@ -4,6 +4,7 @@
   --background-color: light-dark(#959595, #202222);
   --error-text-color: light-dark(red, red);
   --success-text-color: light-dark(green, green);
+  --box-shadow-color: light-dark(#5d5d5d, black);
   --sample-post-it-color: light-dark(#cadf58, #cadf58);
   --story-post-it-color: light-dark(#fff9b2, #fff9b2);
   --rules-post-it-color: light-dark(#a7cdf5, #a7cdf5);
@@ -23,32 +24,166 @@
   pointer-events: none;
   opacity: 0.5;
 }
+/* -- gestion des arbres -- */
+details > summary {
+  /* permet de supprimer l'icône d'ouverture fermeture par défaut pour éviter des soucis de positionnement*/
+  display: grid;
+  grid-template-columns: 30px auto;
+  align-items: center;
+}
+details > summary::before {
+  content: "►";
+  float: left;
+  font-size: 1em;
+  font-weight: bold;
+  text-align: center;
+  width: 30px;
+  cursor: pointer;
+}
+details[open] > summary::before {
+  content: "▼";
+}
+.tree__root {
+  box-shadow: 3px 3px 4px var(--box-shadow-color);
+}
+.tree__node {
+  padding-left: 20px;
+}
+.tree__leaf:not(.tree__root) {
+  display: block;
+  padding-left: 40px;
+}
+/* -- fin gestion des arbres -- */
 
 .toolbar__space {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
 }
-.item-card__text--post-it {
-  color: var(--text-post-it-color);
-  background: var(--item-post-it-color);
-  border: none;
-  width: 150px;
-  height: 80px;
+
+/* -- Affichage commun des items -- */
+/* 
+.item__content {
+  border: #f0949e solid 2px;
+}
+.item__article {
+  border: #1dec0a solid 1px;
+}
+.item__title {
+  border: #ec0ac6 solid 1px;
+}
+.item__text {
+  border: #1dec0a solid 1px;
+}
+*/
+.item__done {
+  cursor: pointer;
+}
+.item__doAddChild {
+  cursor: pointer;
+}
+.item__doDelete {
+  cursor: pointer;
+}
+.item__doView {
+  cursor: pointer;
 }
 
-.item-card__header {
-  text-align: left;
+/* -- Affichage comme un todo -- */
+.item--todo.item__content {
+  display: flex;
+  flex-direction: row;
 }
-.item-card__content {
+.item--todo .item__article {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  overflow: auto;
+}
+.item--todo .item__toolbar {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+.item--todo .item__identify {
+  display: none;
+}
+.item--todo .item__title {
+  flex: 1;
+}
+.item--todo .item__text {
+  display: none;
+}
+/* -- Affichage item en mode consultation arbre */
+.item--tree.item__content {
+  display: flex;
+  flex-direction: row;
+}
+.item--tree .item__article {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  overflow: auto;
+}
+.item--tree .item__toolbar {
+  display: none;
+}
+.item--tree .item__title {
+  flex: 1;
+}
+.item--tree .item__identify {
+  display: none;
+}
+.item--tree .item__done {
+  display: none;
+}
+.item--tree .item__text {
+  display: none;
+}
+
+/* -- Affichage comme un post-it -- */
+.item--post-it.item__content {
   display: flex;
   flex-direction: column;
+  align-items: stretch;
+  width: 200px;
+  min-height: 150px;
 }
-.item-card__content > * {
-  margin: 5px;
+.item--post-it .item__article {
+  flex: 1;
   display: flex;
   flex-direction: column;
+  color: var(--text-post-it-color);
+  background: var(--item-post-it-color);
 }
+.item--post-it .item__toolbar {
+  display: flex;
+  flex-direction: row;
+}
+.item--post-it .item__title {
+  font-weight: bold;
+}
+.item--post-it .item__text {
+  border: grey solid 1px;
+}
+
+/* -- Affichage check list -- */
+.todo-list__header {
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.5em;
+  margin: 14px;
+}
+.todo-list__space {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  overflow: auto;
+}
+
+/* -- A retravailler -- */
 .items__header {
   text-align: center;
 }
@@ -56,34 +191,5 @@
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-}
-
-.todo-item__space {
-  display: flex;
-  flex-direction: column;
-  flex-wrap: wrap;
-}
-
-.todo-item {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-}
-
-.todo-item__text {
-  border: none;
-}
-
-.post-it-item {
-  display: flex;
-  flex-direction: column;
-  width: 150px;
-}
-.post-it-item__text {
-  color: var(--text-post-it-color);
-  background: var(--item-post-it-color);
-  border: none;
-  width: 150px;
-  height: 80px;
 }
 

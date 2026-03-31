@@ -20,7 +20,7 @@ const VIEW_CHOICE = {
   Detail: 'Detail',
   SampleMapping: 'SampleMapping',
   TodoList: 'TodoList',
-  Hierarchy: 'Hierarchy',
+  Tree: 'Tree',
   getOptions() {
     const options = [{ label: '-- Sélectionner la vue --', value: '' }];
     for (const key in VIEW_CHOICE) {
@@ -36,7 +36,7 @@ const VIEW_CHOICE_LABEL = {
   Detail: 'Vue détaillée',
   SampleMapping: 'Sample Mapping',
   TodoList: 'Todo List',
-  Hierarchy: 'Arbre'
+  Tree: 'Arbre hiérarchique'
 };
 const STATE = {
   TODO: 'TODO',

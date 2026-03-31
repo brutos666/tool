@@ -16,13 +16,27 @@ class SaveItem extends Command {
     super(item, successMessage, errorMessage);
     this.#item = item;
 
+    if (item.isNew()) {
+      this.setSuccessMessage('La tâche a bien été crée');
+      this.setErrorMessage('Une erreur est survenue lors de la crée de la tâche');
+    } else {
+      this.setSuccessMessage('La tâche a bien été modifiée');
+      this.setErrorMessage('Une erreur est survenue lors de la modification de la tâche');
+    }
+
     this.setExecuteCallback(new ItemCallsRequests().saveItem.bind(null, item.getItemInfos()));
   }
 
-  async execute() {
-    super.execute()
+  /**
+   * @override
+   */
+  execute() {
+    this.#item.saveInProgress();
+    return super.execute()
       .then(itemInfos => {
-        this.#item.updateData({ itemInfos });
+        this.#item.saveDone(itemInfos);
+      }, () => {
+        this.#item.saveFailed();
       });
   }
 
