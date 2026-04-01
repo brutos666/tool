@@ -13,12 +13,16 @@ class Select extends Component {
   constructor(data) {
     super(new SelectView(data));
   }
-
+  /**
+   * @override
+   * @returns {SelectView}
+   */
+  getView() {
+    return super.getView();
+  }
   setDoSelectCallback(callback) {
-    /** @type {SelectView} */
-    const selectView = this.getView();
-
-    selectView.setDoSelectCallback(callback);
+    this.getView()
+      .setDoSelectCallback(callback);
   }
 
 }

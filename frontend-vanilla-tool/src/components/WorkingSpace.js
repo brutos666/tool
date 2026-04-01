@@ -19,6 +19,13 @@ class WorkingSpace extends Composite {
     this.#treeLayout.loadItems();
     this.#todoListLayout.loadItems();
   }
+  /**
+   * @override
+   * @returns {WorkingSpaceView}
+   */
+  getView() {
+    return super.getView();
+  }
 
 }
 

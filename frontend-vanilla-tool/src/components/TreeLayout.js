@@ -13,12 +13,13 @@ class TreeLayout extends ItemsLayout {
     addNewItemAction.setDoActionCallback(this.addNewItem.bind(this));
     this.setStaticChild('addNewSpace', addNewItemAction);
   }
+
   /**
    * @override
-   * @param {Item} item - item
+   * @returns {TreeLayoutView}
    */
-  addItem(item) {
-    super.addItem(item);
+  getView() {
+    return super.getView();
   }
 
 }

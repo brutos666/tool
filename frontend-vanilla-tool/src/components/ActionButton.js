@@ -14,11 +14,17 @@ class ActionButton extends Component {
     super(new ActionButtonView(data));
   }
 
-  setDoActionCallback(callback) {
-    /** @type {ActionButtonView} */
-    const actionView = this.getView();
+  /**
+   * @override
+   * @returns {ActionButtonView}
+   */
+  getView() {
+    return super.getView();
+  }
 
-    actionView.setDoActionCallback(callback);
+  setDoActionCallback(callback) {
+    this.getView()
+      .setDoActionCallback(callback);
   }
 
 }

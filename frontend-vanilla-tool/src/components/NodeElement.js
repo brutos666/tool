@@ -14,16 +14,27 @@ class NodeElement {
     this.#view = view === undefined ? new View() : view;
   }
 
-  /** Donne la vue pour permettre de modifier l'affichage si besoin */
+  /**
+   * Donne la vue pour permettre de modifier l'affichage si besoin
+   * @returns {View}
+   */
   getView() {
     return this.#view;
   }
 
+  /**
+   * Retourne le noeud HTML contenant l'élément et des balises propres à tous les éléments
+   * @returns {HTMLElement}
+   */
   getNodeView() {
     return this.getView()
       .getNodeView();
   }
 
+  /**
+   * Retourne le noeud HTML contenant l'élément
+   * @returns {HTMLElement}
+   */
   getElementView() {
     return this.getView()
       .getElementView();

@@ -17,6 +17,13 @@ class Composite extends Component {
   constructor(view) {
     super(view === undefined ? new CompositeView() : view);
   }
+  /**
+   * @override
+   * @returns {CompositeView}
+   */
+  getView() {
+    return super.getView();
+  }
 
   /**
    * Retourne la liste des enfants
@@ -36,9 +43,8 @@ class Composite extends Component {
   setChildren(children) {
     this.#children = children;
 
-    /** @type {CompositeView} */
-    const compositeView = this.getView();
-    compositeView.refreshViews(children.map(child => child.getView()));
+    this.getView()
+      .refreshViews(children.map(child => child.getView()));
 
     children.forEach((/** @type {Component} */ child) => child.added(this));
   }
@@ -49,9 +55,7 @@ class Composite extends Component {
    */
   addChild(element) {
     this.#children.push(element);
-    /** @type {CompositeView} */
-    const compositeView = this.getView();
-    compositeView
+    this.getView()
       .addView(element.getView());
 
     element.added(this);

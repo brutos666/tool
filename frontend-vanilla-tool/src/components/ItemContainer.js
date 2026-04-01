@@ -9,6 +9,13 @@ class ItemContainer extends Composite {
   constructor() {
     super(new ItemContainerView());
   }
+  /**
+   * @override
+   * @returns {ItemContainerView}
+   */
+  getView() {
+    return super.getView();
+  }
 
 }
 

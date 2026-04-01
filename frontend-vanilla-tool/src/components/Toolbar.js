@@ -6,6 +6,13 @@ class Toolbar extends Composite {
   constructor() {
     super(new ToolbarView());
   }
+  /**
+   * @override
+   * @returns {ToolbarView}
+   */
+  getView() {
+    return super.getView();
+  }
 
 }
 

@@ -44,7 +44,6 @@ class Item extends Composite {
     this.#itemInfos = data.itemInfos;
     this.#viewChoice = data.viewChoice;
 
-    /** @type {ItemView} */
     const itemView = this.getView();
     itemView.setUpdateCallback(this.setPropertyValue.bind(this));
     itemView.setDoAddChildCallback(this.doAddChild.bind(this));
@@ -55,6 +54,13 @@ class Item extends Composite {
         this.addChild(new Item({ itemInfos: child, viewChoice: this.#viewChoice }));
       }
     }
+  }
+  /**
+   * @override
+   * @returns {ItemView}
+   */
+  getView() {
+    return super.getView();
   }
   /**
    * @override
@@ -135,9 +141,7 @@ class Item extends Composite {
 
   majIdentify(identify) {
     this.#itemInfos.id = identify;
-    /** @type {ItemView} */
-    const itemView = this.getView();
-    itemView
+    this.getView()
       .setIdentify(identify);
     this.majPrevious(identify);
   }

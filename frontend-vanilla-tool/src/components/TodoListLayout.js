@@ -15,6 +15,14 @@ class TodoListLayout extends ItemsLayout {
   }
   /**
    * @override
+   * @returns {TodoListLayoutView}
+   */
+  getView() {
+    return super.getView();
+  }
+
+  /**
+   * @override
    * @param {Item} item - item
    */
   addItem(item) {
