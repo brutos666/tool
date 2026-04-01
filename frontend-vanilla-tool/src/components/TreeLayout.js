@@ -1,17 +1,28 @@
 import { VIEW_CHOICE } from '../tools/Constants.js';
 import ActionButton from './ActionButton.js';
-import ItemsLayout from './ItemsLayout.js';
+import Component from './Component.js';
+import CommandItemsDecorator from './decorators/CommandItemsDecorator.js';
+import Items from './Items.js';
 import TreeLayoutView from './views/TreeLayoutView.js';
 /** @import Item from './Item.js' */
 
-class TreeLayout extends ItemsLayout {
+class TreeLayout extends Component {
+
+  name = 'TreeLayout';
 
   constructor() {
-    super(VIEW_CHOICE.Tree, new TreeLayoutView());
+    super(new TreeLayoutView());
+
+    const items = new Items(VIEW_CHOICE.Tree);
+    const itemsWithCommands = new CommandItemsDecorator(items);
+    this.setStaticChild('treeItems', itemsWithCommands);
+    // Application d'un décorateur pour gérer les commandes
 
     const addNewItemAction = new ActionButton({ id: 'addNewSpace', label: '< Ajouter un espace >' });
-    addNewItemAction.setDoActionCallback(this.addNewItem.bind(this));
+    addNewItemAction.setDoActionCallback(items.addNewItem.bind(this));
     this.setStaticChild('addNewSpace', addNewItemAction);
+
+    itemsWithCommands.loadItems();
   }
 
   /**

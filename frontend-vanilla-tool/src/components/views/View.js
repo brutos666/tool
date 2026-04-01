@@ -1,13 +1,11 @@
 'use strict';
 
 import { createNode } from '../../tools/NodeUtilities.js';
-import { NOTIFICATION_TIMEOUT } from '../../tools/Constants.js';
 
 class View {
 
   #nodeView;
   #elementView;
-  #messageView;
 
   /** @type {Object.<string, View>} */
   #staticViews = {};
@@ -55,16 +53,8 @@ class View {
    */
   createView(data) {
     const htmlView = this.getHtmlView(data);
-
     this.#elementView = createNode(htmlView);
-
-    this.#messageView = document.createElement('div');
-    this.#messageView.classList.add('message');
-
-    this.#nodeView = document.createElement('div');
-    this.#nodeView.classList.add('node-view');
-    this.#nodeView.appendChild(this.#elementView);
-    this.#nodeView.appendChild(this.#messageView);
+    this.#nodeView = this.#elementView;
   }
 
   /**
@@ -88,30 +78,8 @@ class View {
     return this.#elementView;
   }
 
-  setElementView(value) {
-    this.#elementView = value;
-  }
-
-  setError(value) {
-    this.#messageView.textContent = value;
-    this.#messageView.classList.add('error-mess');
-    this.#messageView.classList.remove('success-mess');
-  }
-
-  setSuccess(value) {
-    this.#messageView.textContent = value;
-    this.#messageView.classList.remove('error-mess');
-    this.#messageView.classList.add('success-mess');
-    // Effacer le message au bout d'un peu de temps
-    setTimeout(() => this.#messageView.textContent = '', NOTIFICATION_TIMEOUT);
-  }
-
-  showSpinner() {
-    this.getElementView().classList.add('loading');
-  }
-
-  hideSpinner() {
-    this.getElementView().classList.remove('loading');
+  setElementView(view) {
+    this.#elementView = view;
   }
 
   setDisabled() {

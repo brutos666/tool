@@ -1,15 +1,14 @@
 import { VIEW_CHOICE } from '../../tools/Constants.js';
-import { convertLeafToDetails, convertDetailsToLeaf } from '../../tools/NodeUtilities.js';
 import CompositeView from './CompositeView.js';
 
 class ItemView extends CompositeView {
 
-  #item;
+  name = 'ItemView';
+
   #identify;
   #title;
   #text;
   #done;
-  #details;
   #doAddChild;
   #doDelete;
 
@@ -45,38 +44,11 @@ class ItemView extends CompositeView {
    * @returns {string} - Code HTML du bouton
    */
   getHtmlView(data) {
-    return getHtmlItemView(data);
+    return getHtmlArticle(data.itemInfos.id, data.viewChoice);
   }
-
-  /**
-   * @override
-   * @param {ItemView} view - enfant ajouté
-   */
-  addView(view) {
-    if (!this.#details) {
-      const detailsNode = convertLeafToDetails(this.getElementView());
-      this.setElementView(detailsNode);
-      this.#details = detailsNode;
-      this.setSpaceChildren(this.#details.querySelector('#spaceChildren'));
-    }
-    this.#details.open = true;
-    super.addView(view);
-  }
-
-  /**
-   * @override
-   * @param {ItemView} view - enfant supprimé
-   */
-  removeView(view) {
-    super.removeView(view);
-
-    if (!(this.#details && !this.getSpaceChildren()
-      .hasChildNodes())) {
-      return;
-    }
-    const leafNode = convertDetailsToLeaf(this.getElementView());
-    this.setElementView(leafNode);
-    this.#details = null;
+  /** @override */
+  getSpaceChildren() {
+    return document.createElement('div');
   }
 
   /**
@@ -144,12 +116,10 @@ class ItemView extends CompositeView {
 
   majNodes() {
     const mainNode = this.getNodeView();
-    this.#item = mainNode.querySelector('#item');
     this.#identify = mainNode.querySelector('#identify');
     this.#title = mainNode.querySelector('#title');
     this.#text = mainNode.querySelector('#text');
     this.#done = mainNode.querySelector('#done');
-    this.#details = mainNode.querySelector('details');
     this.#doAddChild = mainNode.querySelector('#doAddChild');
     this.#doDelete = mainNode.querySelector('#doDelete');
   }
@@ -176,12 +146,12 @@ class ItemView extends CompositeView {
   setContentEditable() {
     const contentEditable = this.#viewChoice === VIEW_CHOICE.Tree && !this.#isNew ? false : true;
     if (contentEditable) {
-      this.#item.classList.remove('item--readonly');
+      this.getElementView().classList.remove('item--readonly');
       this.#title.contenteditable = 'true';
       this.#text.contenteditable = 'true';
       this.#done.disabled = true;
     } else {
-      this.#item.classList.add('item--readonly');
+      this.getElementView().classList.add('item--readonly');
       this.#title.contenteditable = 'false';
       this.#text.contenteditable = 'false';
       this.#done.disabled = false;
@@ -208,37 +178,6 @@ class ItemView extends CompositeView {
     this.#doDelete.removeEventListener('click', this.#doDeleteCallback);
   }
 
-}
-
-/**
- * Construction du code html d'un item
- * @param {Object} data - Données à utiliser pour créer la vue
- * @param {ItemInfos} data.itemInfos - Informations sur la tache
- * @param {VIEW_CHOICE} data.viewChoice - Affichage souhaité
- * @returns {string} - Code HTML de l'item
- */
-function getHtmlItemView(data) {
-  const isRoot = data.itemInfos.parentId === -1 || data.itemInfos.parentId === undefined;
-  const isLeaf = !data.itemInfos.children || data.itemInfos.children.length === 0;
-
-  if (isLeaf) {
-    const classList = (isRoot ? ' tree__root' : '') + (isLeaf ? ' tree__leaf' : '');
-    return String.raw`<div class="${ classList }">${ getHtmlArticle(data.itemInfos.id, data.viewChoice) }</div>`;
-  }
-  const classList = isRoot ? ' tree__root' : ' tree__node';
-  return getHtmlNodeItemView(getHtmlArticle(data.itemInfos.id, data.viewChoice), classList);
-}
-/**
- * Création de la vue HTML d'une tâche
- * @param {string} itemHTML - HTML de l'item
- * @param {string} classList - Liste des classes de l'item
- * @returns {string} - Vue HTML de la tâche
- */
-function getHtmlNodeItemView(itemHTML, classList) {
-  return String.raw`<details class="${ classList }">
-    <summary>${ itemHTML }</summary>
-    <section id="spaceChildren"></section>
-  </details>`;
 }
 
 /**

@@ -15,9 +15,6 @@ class WorkingSpace extends Composite {
     this.#todoListLayout = new TodoListLayout();
     this.setStaticChild('treeLayout', this.#treeLayout);
     this.setStaticChild('panelLayout', this.#todoListLayout);
-
-    this.#treeLayout.loadItems();
-    this.#todoListLayout.loadItems();
   }
   /**
    * @override

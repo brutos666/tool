@@ -1,17 +1,27 @@
 import { VIEW_CHOICE } from '../tools/Constants.js';
 import ActionButton from './ActionButton.js';
-import ItemsLayout from './ItemsLayout.js';
+import Component from './Component.js';
+import CommandItemsDecorator from './decorators/CommandItemsDecorator.js';
+import Items from './Items.js';
 import TodoListLayoutView from './views/TodoListLayoutView.js';
 /** @import Item from './Item.js' */
 
-class TodoListLayout extends ItemsLayout {
+class TodoListLayout extends Component {
+
+  name = 'TodoListLayout';
 
   constructor() {
-    super(VIEW_CHOICE.TodoList, new TodoListLayoutView());
+    super(new TodoListLayoutView());
+
+    const items = new Items(VIEW_CHOICE.TodoList);
+    const itemsWithCommands = new CommandItemsDecorator(items);
+    this.setStaticChild('todoItems', itemsWithCommands);
 
     const loadItemsAction = new ActionButton({ id: 'loadItems', label: 'Rafraîchir' });
-    loadItemsAction.setDoActionCallback(this.loadItems.bind(this));
+    loadItemsAction.setDoActionCallback(itemsWithCommands.loadItems.bind(itemsWithCommands));
     this.setStaticChild('loadItems', loadItemsAction);
+
+    itemsWithCommands.loadItems();
   }
   /**
    * @override
@@ -19,14 +29,6 @@ class TodoListLayout extends ItemsLayout {
    */
   getView() {
     return super.getView();
-  }
-
-  /**
-   * @override
-   * @param {Item} item - item
-   */
-  addItem(item) {
-    super.addItem(item);
   }
 
 }

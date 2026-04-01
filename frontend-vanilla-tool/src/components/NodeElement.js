@@ -13,7 +13,15 @@ class NodeElement {
   constructor(view) {
     this.#view = view === undefined ? new View() : view;
   }
-
+  /**
+   * Ajoute un enfant statique
+   * @param {String} id
+   * @param {Component} child
+   */
+  setStaticChild(id, child) {
+    this.getView()
+      .setStaticView(id, child.getView());
+  }
   /**
    * Donne la vue pour permettre de modifier l'affichage si besoin
    * @returns {View}
@@ -47,48 +55,6 @@ class NodeElement {
   updateData(data) {
     this.getView()
       .refreshView(data);
-  }
-
-  setError(value) {
-    this.getView()
-      .setError(value);
-  }
-
-  setSuccess(value) {
-    this.getView()
-      .setSuccess(value);
-  }
-
-  /**
-   * Cette méthode est appelée lorsque la commande est en cours
-   * @param {string} name - Nom de la commande
-   */
-  // eslint-disable-next-line no-unused-vars
-  commandInProgress(name) {
-    this.getView()
-      .showSpinner();
-  }
-
-  /**
-   * Cette méthode est appelée lorsque la commande est terminée
-   * @param {string} name - Nom de la commande
-   * @param {Object} response - Résultat de la commande
-   */
-  // eslint-disable-next-line no-unused-vars
-  commandDone(name, response) {
-    this.getView()
-      .hideSpinner();
-  }
-
-  /**
-   * Cette méthode est appelée lorsque la commande a échoué
-   * @param {string} name - Nom de la commande
-   * @param {string} error - Résultat de la commande
-   */
-  // eslint-disable-next-line no-unused-vars
-  commandFailed(name, error) {
-    this.getView()
-      .showSpinner();
   }
 
 }

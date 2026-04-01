@@ -1,11 +1,11 @@
 'use strict';
 
-import Composite from './Composite.js';
 import DeleteItem from '../commands/DeleteItem.js';
 import SaveItem from '../commands/SaveItem.js';
 import ItemView from './views/ItemView.js';
 import ActionButton from './ActionButton.js';
 import { SAVE_TIMEOUT, NOTIFICATION_TIMEOUT } from '../tools/Constants.js';
+import Composite from './Composite.js';
 /** @import { VIEW_CHOICE, STATE } from '../tools/Constants.js' */
 
 /**
@@ -22,6 +22,8 @@ import { SAVE_TIMEOUT, NOTIFICATION_TIMEOUT } from '../tools/Constants.js';
  * @property {Array<ItemInfos>} children - Enfants (arbre)
  */
 class Item extends Composite {
+
+  name = 'Item';
 
   /** @type {ItemInfos} */
   #itemInfos = null;
@@ -236,6 +238,10 @@ class Item extends Composite {
    */
   isModified() {
     return Object.keys(this.#updates).length > 0;
+  }
+
+  isLeaf() {
+    return !this.getItemInfos().children || this.getItemInfos().children.length === 0;
   }
 
 }

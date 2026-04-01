@@ -1,6 +1,6 @@
 import ItemCallsRequests from '../requests/ItemCallsRequests.js';
 import Command from './Command.js';
-/** @import ItemsLayout from '../components/ItemsLayout.js'; */
+/** @import Items from '../components/Items.js'; */
 
 class LoadItems extends Command {
 
@@ -8,10 +8,10 @@ class LoadItems extends Command {
 
   /**
    * @constructor
-   * @param {ItemsLayout} itemsLayout - itemsLayout
+   * @param {Items} items - Items
    */
-  constructor(itemsLayout) {
-    super(itemsLayout);
+  constructor(items) {
+    super(items);
 
     this.setSuccessMessage('Chargement effectué');
     this.setErrorMessage('Une erreur est survenue lors du chargement des éléments');

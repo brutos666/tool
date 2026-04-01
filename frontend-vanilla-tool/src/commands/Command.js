@@ -1,4 +1,5 @@
 /** @import NodeElement from './NodeElement.js' */
+/** @import CommandDecorator from './CommandDecorator.js' */
 
 /**
  * Cette classe permet d'isoler les actions des composants. Cela permet qu'une touche de raccourci puisse faire la même chose qu'un bouton. Ici on va gérer les erreurs et on gérera le spinner
@@ -7,17 +8,17 @@ class Command {
 
   name = 'Command';
 
-  #targetNodeElement;
+  #commandDecoratorElement;
   #successMessage;
   #errorMessage;
   #executeCallback;
 
   /**
    * @constructor
-   * @param {NodeElement} targetNodeElement - Element cible
+   * @param {CommandDecorator} commandDecoratorElement - Element cible
    */
-  constructor(targetNodeElement) {
-    this.#targetNodeElement = targetNodeElement;
+  constructor(commandDecoratorElement) {
+    this.#commandDecoratorElement = commandDecoratorElement;
     this.#executeCallback = () => { return Promise.resolve(); };
   }
 
@@ -48,15 +49,15 @@ class Command {
    * @returns {Promise}
    */
   async execute() {
-    this.#targetNodeElement.commandInProgress(this.name);
+    this.#commandDecoratorElement.commandInProgress(this.name);
     return this.#executeCallback()
       .then(response => {
-        this.#targetNodeElement.commandDone(this.name, response);
-        this.#targetNodeElement.setSuccess(this.#successMessage);
+        this.#commandDecoratorElement.commandDone(this.name, response);
+        this.#commandDecoratorElement.setSuccess(this.#successMessage);
         return Promise.resolve(response);
       }, errorResponse => {
-        this.#targetNodeElement.commandFailed(this.name);
-        this.#targetNodeElement.setError(`${ this.#errorMessage } : ${ errorResponse }`);
+        this.#commandDecoratorElement.commandFailed(this.name);
+        this.#commandDecoratorElement.setError(`${ this.#errorMessage } : ${ errorResponse }`);
         return Promise.reject(errorResponse);
       });
   }

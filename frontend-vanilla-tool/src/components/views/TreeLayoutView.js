@@ -2,6 +2,8 @@ import CompositeView from './CompositeView.js';
 
 class TreeLayoutView extends CompositeView {
 
+  name = 'TreeLayoutView';
+
   constructor(data) {
     super(data);
   }
@@ -9,7 +11,7 @@ class TreeLayoutView extends CompositeView {
   getHtmlView() {
     return String.raw`<div class="tree-layout">
       <header class="tree-layout__header"><template id="addNewSpace"></template></header>
-      <div id="spaceChildren" class="tree-layout__space"></div>
+      <template id="treeItems" class="tree-layout__space"></template>
     </div>`;
   }
 
