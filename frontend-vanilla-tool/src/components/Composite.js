@@ -49,7 +49,9 @@ class Composite extends Component {
    */
   addChild(element) {
     this.#children.push(element);
-    this.getView()
+    /** @type {CompositeView} */
+    const compositeView = this.getView();
+    compositeView
       .addView(element.getView());
 
     element.added(this);

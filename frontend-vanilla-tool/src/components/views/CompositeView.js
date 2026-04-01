@@ -8,8 +8,7 @@ class CompositeView extends View {
 
   constructor(data) {
     super(data);
-    const spaceChildren = determinateSpaceChildren(this.getNodeView());
-    this.#spaceChildren = spaceChildren;
+    this.#spaceChildren = this.determinateSpaceChildren(this.getNodeView());
   }
 
   /**
@@ -20,7 +19,11 @@ class CompositeView extends View {
   }
 
   getSpaceChildren() {
-    return this.#spaceChildren;
+    if (this.#spaceChildren) {
+      return this.#spaceChildren;
+    }
+    window.alert(`Erreur de conception : on tente d'accéder à l'espace des enfants alors qu'il n'a pas été défini`);
+    return document.createElement('div');
   }
   setSpaceChildren(spaceChildren) {
     this.#spaceChildren = spaceChildren;
@@ -28,15 +31,18 @@ class CompositeView extends View {
 
   /**
    * @override {@link View.refreshView}
+   * Cette méthode s'occupe de redessiner la vue tout en conservant l'espace dédié aux enfants et son contenu actuel
+   * Si l'espace dédié aux enfants est la racine, alors il n'y a rien à redessiner
    * @param {Object} data - Données à utiliser pour redessiner la vue
+   *
    */
   refreshView(data) {
     const nodeElement = createNode(this.getHtmlView(data));
-    const spaceChildren = determinateSpaceChildren(nodeElement);
+    const spaceChildren = this.determinateSpaceChildren(nodeElement);
     if (nodeElement === spaceChildren) {
       return;
     }
-    const oldSpaceChildren = this.#spaceChildren;
+    const oldSpaceChildren = this.getSpaceChildren();
     // Conserver l'espace dédié aux enfants
     spaceChildren.replaceWith(oldSpaceChildren);
     this.getElementView().parentNode.replaceChild(nodeElement, this.getElementView());
@@ -55,41 +61,43 @@ class CompositeView extends View {
   }
 
   /**
-   * Ajoute un enfant. La vue du composant est ajouté au DOM dans l'espace dédié (#spaceChildren)
+   * Ajoute un enfant. La vue du composant est ajouté au DOM dans l'espace dédié (id='spaceChildren')
    * @param {View} view : vue
    */
   addView(view) {
     // Ajout au DOM
-    this.#spaceChildren.appendChild(view.getNodeView());
+    this.getSpaceChildren()
+      .appendChild(view.getNodeView());
   }
 
   /**
-   * Supprime un enfant. La vue du composant est supprimé du DOM dans l'espace dédié (#spaceChildren)
+   * Supprime un enfant. La vue du composant est supprimé du DOM dans l'espace dédié (id='spaceChildren)
    * @param {View} view : vue
    */
   removeView(view) {
-    this.#spaceChildren.removeChild(view.getNodeView());
+    this.getSpaceChildren()
+      .removeChild(view.getNodeView());
   }
 
   removeAllViews() {
-    this.#spaceChildren.innerHTML = '';
+    this.getSpaceChildren().innerHTML = '';
   }
 
-}
-/**
- * Détermine et retourne l'espace contenant les enfants
- * @param {Element} nodeView
- * @returns {Element}
- */
-function determinateSpaceChildren(nodeView) {
-  const spaceChildren = nodeView
-    .querySelector('[id=\'spaceChildren\']');
+  /**
+   * Détermine et retourne l'espace contenant les enfants (id='spaceChildren')
+   * @param {Element} nodeView
+   * @returns {Element}
+   */
+  determinateSpaceChildren(nodeView) {
+    const spaceChildren = nodeView
+      .querySelector('[id=\'spaceChildren\']');
 
-  if (spaceChildren) {
-    return spaceChildren;
+    if (spaceChildren) {
+      return spaceChildren;
+    }
+    return null;
   }
-  nodeView.setAttribute('id', 'spaceChildren');
-  return nodeView;
+
 }
 
 export default CompositeView;

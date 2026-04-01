@@ -4,6 +4,7 @@ import CompositeView from './CompositeView.js';
 
 class ItemView extends CompositeView {
 
+  #item;
   #identify;
   #title;
   #text;
@@ -11,6 +12,9 @@ class ItemView extends CompositeView {
   #details;
   #doAddChild;
   #doDelete;
+
+  #isNew;
+  #viewChoice;
 
   #updateCallback = () => {};
   #doneCallback = () => {};
@@ -25,9 +29,12 @@ class ItemView extends CompositeView {
    */
   constructor(data) {
     super(data);
+    this.#viewChoice = data.viewChoice;
+    this.#isNew = data.itemInfos.id === undefined;
 
     this.majNodes();
     this.setItemValues(data.itemInfos);
+    this.setContentEditable();
   }
 
   /**
@@ -52,7 +59,7 @@ class ItemView extends CompositeView {
       this.#details = detailsNode;
       this.setSpaceChildren(this.#details.querySelector('#spaceChildren'));
     }
-    this.#details.open = true;
+    this.#details.open = false;
     super.addView(view);
   }
 
@@ -137,6 +144,7 @@ class ItemView extends CompositeView {
 
   majNodes() {
     const mainNode = this.getNodeView();
+    this.#item = mainNode.querySelector('#item');
     this.#identify = mainNode.querySelector('#identify');
     this.#title = mainNode.querySelector('#title');
     this.#text = mainNode.querySelector('#text');
@@ -161,7 +169,23 @@ class ItemView extends CompositeView {
   }
 
   setIdentify(identify) {
+    this.#isNew = identify === undefined;
     this.#identify.textContent = identify === undefined ? '' : identify;
+  }
+
+  setContentEditable() {
+    const contentEditable = this.#viewChoice === VIEW_CHOICE.Tree && !this.#isNew ? false : true;
+    if (contentEditable) {
+      this.#item.classList.remove('item--readonly');
+      this.#title.contenteditable = 'true';
+      this.#text.contenteditable = 'true';
+      this.#done.disabled = true;
+    } else {
+      this.#item.classList.add('item--readonly');
+      this.#title.contenteditable = 'false';
+      this.#text.contenteditable = 'false';
+      this.#done.disabled = false;
+    }
   }
 
   addEventListeners() {
@@ -194,12 +218,12 @@ class ItemView extends CompositeView {
  * @returns {string} - Code HTML de l'item
  */
 function getHtmlItemView(data) {
-  const isRoot = data.itemInfos.parentId === -1;
+  const isRoot = data.itemInfos.parentId === -1 || data.itemInfos.parentId === undefined;
   const isLeaf = !data.itemInfos.children || data.itemInfos.children.length === 0;
 
   if (isLeaf) {
     const classList = (isRoot ? ' tree__root' : '') + (isLeaf ? ' tree__leaf' : '');
-    return String.raw`<div class="${ classList }" id="spaceChildren">${ getHtmlArticle(data.itemInfos.id, data.viewChoice) }</div>`;
+    return String.raw`<div class="${ classList }">${ getHtmlArticle(data.itemInfos.id, data.viewChoice) }</div>`;
   }
   const classList = isRoot ? ' tree__root' : ' tree__node';
   return getHtmlNodeItemView(getHtmlArticle(data.itemInfos.id, data.viewChoice), classList);

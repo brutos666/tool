@@ -117,6 +117,8 @@ class Item extends Composite {
    * @override
    */
   commandInProgress(name) {
+    super.commandInProgress(name);
+
     if (name === 'SaveItem') {
       this.#saveUpdates = this.#updates;
       this.#updates = {};
@@ -130,6 +132,8 @@ class Item extends Composite {
    * @override
    */
   commandDone(name, itemInfos) {
+    super.commandDone(name, itemInfos);
+
     if (name === 'SaveItem') {
       if (this.isNew()) {
         this.majIdentify(itemInfos.id);
@@ -148,6 +152,8 @@ class Item extends Composite {
    * @override
    */
   commandFailed(name) {
+    super.commandFailed(name);
+
     if (name === 'SaveItem') {
       this.#updates = { ...this.#saveUpdates, ...this.#updates };
       this.#saveUpdates = {};

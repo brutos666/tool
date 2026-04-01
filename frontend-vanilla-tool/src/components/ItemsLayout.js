@@ -1,9 +1,10 @@
 import Composite from './Composite.js';
 import Item from './Item.js';
 import { VIEW_CHOICE } from '../tools/Constants.js';
+import LoadItems from '../commands/LoadItems.js';
 /** @import { ItemInfos } from './Item.js' */
 
-class ScreenLayout extends Composite {
+class ItemsLayout extends Composite {
 
   #layout = VIEW_CHOICE.Detail;
 
@@ -21,10 +22,14 @@ class ScreenLayout extends Composite {
   }
 
   /**
-   * Met à jour le contenu de la zone de texte avec les tâches du jour.
-   * @param {Array<ItemInfos>} itemInfosList - Liste des tâches du jour
+   * @override
    */
-  displayItems(itemInfosList) {
+  commandDone(name, itemInfosList) {
+    super.commandDone(name, itemInfosList);
+
+    if (name !== 'LoadItems') {
+      return;
+    }
     this.removeAllItems();
     if (itemInfosList.length === 0) {
       this.addNewItem();
@@ -32,6 +37,11 @@ class ScreenLayout extends Composite {
     }
     const allItemsCards = itemInfosList.map(itemInfos => new Item({ itemInfos, viewChoice: this.getLayout() }));
     this.setItems(allItemsCards);
+  }
+
+  loadItems() {
+    new LoadItems(this)
+      .execute();
   }
 
   addNewItem() {
@@ -61,4 +71,4 @@ class ScreenLayout extends Composite {
 
 }
 
-export default ScreenLayout;
+export default ItemsLayout;

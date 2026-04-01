@@ -1,10 +1,13 @@
 'use strict';
 
-import HomePage from './components/HomePage.js';
+import WorkingSpace from './components/WorkingSpace.js';
 
+/**
+ * Chargement de l'application
+ */
 function loadApp() {
   const appRoot = document.getElementById('app-root');
-  const homePage = new HomePage();
+  const homePage = new WorkingSpace();
 
   appRoot.appendChild(homePage.getNodeView());
 }

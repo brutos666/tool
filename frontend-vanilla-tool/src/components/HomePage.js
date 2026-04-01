@@ -3,9 +3,9 @@
 import ItemCallsRequests from '../requests/ItemCallsRequests.js';
 import { VIEW_CHOICE } from '../tools/Constants.js';
 import ActionButton from './ActionButton.js';
-import Basics from './Basics.js';
+import BasicLayout from './BasicLayout.js';
 import Composite from './Composite.js';
-import ScreenLayout from './ScreenLayout.js';
+import ItemsLayout from './ItemsLayout.js';
 import Select from './Select.js';
 import TodoListLayout from './TodoListLayout.js';
 import Toolbar from './Toolbar.js';
@@ -34,7 +34,7 @@ class HomePage extends Composite {
     toolbar.addChild(viewSelect);
     toolbar.addChild(loadItemsAction);
 
-    this.#screenLayout = new ScreenLayout(VIEW_CHOICE.Detail);
+    this.#screenLayout = new ItemsLayout(VIEW_CHOICE.Detail);
     this.addChild(toolbar);
     this.addChild(this.#screenLayout);
   }
@@ -55,10 +55,10 @@ class HomePage extends Composite {
         screenLayout = new TreeLayout();
         break;
       case VIEW_CHOICE.Detail:
-        screenLayout = new Basics();
+        screenLayout = new BasicLayout();
         break;
       default:
-        screenLayout = new ScreenLayout();
+        screenLayout = new ItemsLayout();
         break;
     }
     this.replaceChild(screenLayout, this.#screenLayout);

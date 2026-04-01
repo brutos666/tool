@@ -2,10 +2,10 @@ import { VIEW_CHOICE } from '../tools/Constants.js';
 import ActionButton from './ActionButton.js';
 import Toolbar from './Toolbar.js';
 import ItemContainer from './ItemContainer.js';
-import ScreenLayout from './ScreenLayout.js';
+import ItemsLayout from './ItemsLayout.js';
 /** @import Item from './Item.js' */
 
-class Basics extends ScreenLayout {
+class BasicLayout extends ItemsLayout {
 
   #itemContainer;
 
@@ -45,4 +45,4 @@ class Basics extends ScreenLayout {
 
 }
 
-export default Basics;
+export default BasicLayout;
