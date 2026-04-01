@@ -48,6 +48,38 @@ class NodeElement {
       .setSuccess(value);
   }
 
+  /**
+   * Cette méthode est appelée lorsque la commande est en cours
+   * @param {string} name - Nom de la commande
+   */
+  // eslint-disable-next-line no-unused-vars
+  commandInProgress(name) {
+    this.getView()
+      .showSpinner();
+  }
+
+  /**
+   * Cette méthode est appelée lorsque la commande est terminée
+   * @param {string} name - Nom de la commande
+   * @param {Object} response - Résultat de la commande
+   */
+  // eslint-disable-next-line no-unused-vars
+  commandDone(name, response) {
+    this.getView()
+      .hideSpinner();
+  }
+
+  /**
+   * Cette méthode est appelée lorsque la commande a échoué
+   * @param {string} name - Nom de la commande
+   * @param {string} error - Résultat de la commande
+   */
+  // eslint-disable-next-line no-unused-vars
+  commandFailed(name, error) {
+    this.getView()
+      .showSpinner();
+  }
+
 }
 
 export default NodeElement;

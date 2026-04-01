@@ -4,18 +4,14 @@ import ItemCallsRequests from '../requests/ItemCallsRequests.js';
 
 class SaveItem extends Command {
 
-  #item;
+  name = 'SaveItem';
 
   /**
    * @constructor de la classe CreateItem
    * @param {Item} item - Item
-   * @param {string} successMessage - Message de success
-   * @param {string} errorMessage - Message d'erreur
    */
-  constructor(item, successMessage, errorMessage) {
-    super(item, successMessage, errorMessage);
-    this.#item = item;
-
+  constructor(item) {
+    super(item);
     if (item.isNew()) {
       this.setSuccessMessage('La tâche a bien été crée');
       this.setErrorMessage('Une erreur est survenue lors de la crée de la tâche');
@@ -25,19 +21,6 @@ class SaveItem extends Command {
     }
 
     this.setExecuteCallback(new ItemCallsRequests().saveItem.bind(null, item.getItemInfos()));
-  }
-
-  /**
-   * @override
-   */
-  execute() {
-    this.#item.saveInProgress();
-    return super.execute()
-      .then(itemInfos => {
-        this.#item.saveDone(itemInfos);
-      }, () => {
-        this.#item.saveFailed();
-      });
   }
 
 }

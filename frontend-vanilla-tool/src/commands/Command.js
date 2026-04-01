@@ -5,6 +5,8 @@
  */
 class Command {
 
+  name = 'Command';
+
   #targetNodeElement;
   #successMessage;
   #errorMessage;
@@ -46,11 +48,14 @@ class Command {
    * @returns {Promise}
    */
   async execute() {
+    this.#targetNodeElement.commandInProgress(this.name);
     return this.#executeCallback()
       .then(response => {
+        this.#targetNodeElement.commandDone(this.name, response);
         this.#targetNodeElement.setSuccess(this.#successMessage);
         return Promise.resolve(response);
       }, errorResponse => {
+        this.#targetNodeElement.commandFailed(this.name);
         this.#targetNodeElement.setError(`${ this.#errorMessage } : ${ errorResponse }`);
         return Promise.reject(errorResponse);
       });

@@ -39,13 +39,14 @@ class View {
     this.#messageView.classList.add('message');
 
     this.#nodeView = document.createElement('div');
+    this.#nodeView.classList.add('node-view');
     this.#nodeView.appendChild(this.#elementView);
     this.#nodeView.appendChild(this.#messageView);
   }
 
   /**
    * Redessine la vue en fonction des données passées en paramètre.
-   * NOTE : pour un champ de saisie, on perdre l'historique des saisies (Ctrl+Z/Ctrl+Y)
+   * NOTE : pour un champ de saisie, on peut perdre l'historique des saisies (Ctrl+Z/Ctrl+Y)
    * Pour y remédier, il faut override cette fonction
    * @param {Object} data - Données à utiliser pour redessiner la vue
    */
@@ -80,6 +81,14 @@ class View {
     this.#messageView.classList.add('success-mess');
     // Effacer le message au bout d'un peu de temps
     setTimeout(() => this.#messageView.textContent = '', NOTIFICATION_TIMEOUT);
+  }
+
+  showSpinner() {
+    this.getElementView().classList.add('loading');
+  }
+
+  hideSpinner() {
+    this.getElementView().classList.remove('loading');
   }
 
   setDisabled() {

@@ -114,31 +114,54 @@ class Item extends Composite {
   }
 
   /**
-   * Survient lorsque la sauvegarde d'un item va commencer
+   * @override
    */
-  saveInProgress() {
-    this.#saveUpdates = this.#updates;
-    this.#updates = {};
+  commandInProgress(name) {
+    if (name === 'SaveItem') {
+      this.#saveUpdates = this.#updates;
+      this.#updates = {};
+    } else if (name === 'DeleteItem') {
+      this.#deleteInProgress = true;
+    }
     this.doStopSave();
   }
+
   /**
-   * Survient lorsque la sauvegarde d'un item a fonctionné
-   * @param {ItemInfos} itemInfos - Informations sur l'item sauvegardé
+   * @override
    */
-  saveDone(itemInfos) {
-    if (this.isNew()) {
-      this.majIdentify(itemInfos.id);
+  commandDone(name, itemInfos) {
+    if (name === 'SaveItem') {
+      if (this.isNew()) {
+        this.majIdentify(itemInfos.id);
+      }
+      this.#itemInfos = itemInfos;
+      this.#saveUpdates = {};
+      this.doRestartSave();
+    } else if (name === 'DeleteItem') {
+      this.setDisabled(true);
+      setTimeout(() => this.doRemoveFromParent(), NOTIFICATION_TIMEOUT);
+      this.#deleteInProgress = false;
     }
-    this.#itemInfos = itemInfos;
-    this.#saveUpdates = {};
-    this.doRestartSave();
   }
+
   /**
-   * Survient lorsque la sauvegarde d'un item a échoué
+   * @override
    */
-  saveFailed() {
-    this.#updates = { ...this.#saveUpdates, ...this.#updates };
-    this.#saveUpdates = {};
+  commandFailed(name) {
+    if (name === 'SaveItem') {
+      this.#updates = { ...this.#saveUpdates, ...this.#updates };
+      this.#saveUpdates = {};
+      this.displaySaveButton();
+    } else if (name === 'DeleteItem') {
+      this.#deleteInProgress = false;
+      this.doRestartSave();
+    }
+  }
+
+  /**
+   * Ajout d'un bouton pour lancer la sauvegarde manuellement
+   */
+  displaySaveButton() {
     /*
      * Si la sauvegarde a échouée, c'est qu'il y a un problème à résoudre. On ne peut pas relancer la sauvegarde automatique tant que le problème est pas résolu. Ajout d'un bouton pour relancer la sauvegarde
      */
@@ -152,28 +175,7 @@ class Item extends Composite {
     });
     this.addChild(saveButton);
   }
-  /**
-   * Survient lorsque la suppression d'un item va commencer
-   */
-  deleteInProgress() {
-    this.#deleteInProgress = true;
-    this.doStopSave();
-  }
-  /**
-   * Survient lorsque la suppression d'un item a fonctionné
-   */
-  deleteDone() {
-    this.setDisabled(true);
-    setTimeout(() => this.doRemoveFromParent(), NOTIFICATION_TIMEOUT);
-    this.#deleteInProgress = false;
-  }
-  /**
-   * Survient lorsque la suppression d'un item a échoué
-   */
-  deleteFailed() {
-    this.#deleteInProgress = false;
-    this.doRestartSave();
-  }
+
   doStopSave() {
     this.#stopSave = true;
     clearTimeout(this.#saveTimeoutId);
