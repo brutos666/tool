@@ -207,6 +207,8 @@ details[open] > summary::before {
 
 /* -- Affichage check list -- */
 .todo-list__header {
+  display: grid;
+  grid-template-columns: 1fr auto;
   text-align: center;
   font-weight: bold;
   font-size: 1.5em;

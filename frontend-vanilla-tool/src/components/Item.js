@@ -58,6 +58,16 @@ class Item extends Composite {
   }
   /**
    * @override
+   */
+  doRemoveFromParent() {
+    const nextId = this.getItemInfos().nextId;
+    if (nextId !== undefined) {
+      this.majPrevious(nextId);
+    }
+    super.doRemoveFromParent();
+  }
+  /**
+   * @override
    * @param {Object} data - Données à utiliser pour modifier la vue
    * @param {ItemInfos} data.itemInfos - Informations sur la tache
    * @param {VIEW_CHOICE} data.viewChoice - Affichage souhaité
@@ -72,47 +82,6 @@ class Item extends Composite {
     }
     super.updateData({ itemInfos: this.getItemInfos(), viewChoice: this.#viewChoice });
   }
-
-  majIdentify(identify) {
-    this.#itemInfos.id = identify;
-    /** @type {ItemView} */
-    const itemView = this.getView();
-    itemView
-      .setIdentify(identify);
-
-    // Mettre à jour l'enfant précédent
-    /** @type {Item} */
-    const previous = this.getPrevious();
-    if (previous) {
-      previous.setPropertyValue('nextId', identify);
-    }
-  }
-
-  /**
-   * Retourne les informations de la tâche
-   * @returns {ItemInfos} - Informations sur la tache
-   */
-  getItemInfos() {
-    // Prise en compte des modifications en cours
-    return { ...this.#itemInfos, ...this.#updates };
-  }
-
-  /**
-   * Met à jour la tâche en fonction de l'événement reçu
-   * @param {string} property - Propriété de la tâche à mettre à jour
-   * @param {string} value - Valeur de la propriété
-   *
-   * @this {Item}
-   */
-  setPropertyValue(property, value) {
-    if (this.#itemInfos[property] === value) {
-      delete this.#updates[property];
-    } else {
-      this.#updates[property] = value;
-    }
-    this.doSaveAfterDelay();
-  }
-
   /**
    * @override
    */
@@ -157,31 +126,57 @@ class Item extends Composite {
     if (name === 'SaveItem') {
       this.#updates = { ...this.#saveUpdates, ...this.#updates };
       this.#saveUpdates = {};
-      this.displaySaveButton();
+      this.addChild(getRelaunchSaveButton());
     } else if (name === 'DeleteItem') {
       this.#deleteInProgress = false;
       this.doRestartSave();
     }
   }
 
-  /**
-   * Ajout d'un bouton pour lancer la sauvegarde manuellement
-   */
-  displaySaveButton() {
-    /*
-     * Si la sauvegarde a échouée, c'est qu'il y a un problème à résoudre. On ne peut pas relancer la sauvegarde automatique tant que le problème est pas résolu. Ajout d'un bouton pour relancer la sauvegarde
-     */
-    const saveButton = new ActionButton({
-      id: 'saveButton',
-      label: 'Relancer la sauvegarde'
-    });
-    saveButton.setDoActionCallback(() => {
-      this.doSave()
-        .then(() => saveButton.doRemoveFromParent());
-    });
-    this.addChild(saveButton);
+  majIdentify(identify) {
+    this.#itemInfos.id = identify;
+    /** @type {ItemView} */
+    const itemView = this.getView();
+    itemView
+      .setIdentify(identify);
+    this.majPrevious(identify);
   }
 
+  majPrevious(nextId) {
+    // Mettre à jour l'enfant précédent
+    /** @type {Item} */
+    const previous = this.getPrevious();
+    if (previous) {
+      previous.setPropertyValue('nextId', nextId);
+    }
+  }
+
+  /**
+   * Retourne les informations de la tâche
+   * @returns {ItemInfos} - Informations sur la tache
+   */
+  getItemInfos() {
+    // Prise en compte des modifications en cours
+    return { ...this.#itemInfos, ...this.#updates };
+  }
+
+  /**
+   * Met à jour la tâche en fonction de l'événement reçu
+   * @param {string} property - Propriété de la tâche à mettre à jour
+   * @param {string} value - Valeur de la propriété
+   *
+   * @this {Item}
+   */
+  setPropertyValue(property, value) {
+    if (this.#itemInfos[property] === value) {
+      delete this.#updates[property];
+    } else {
+      this.#updates[property] = value;
+    }
+    this.doSaveAfterDelay();
+  }
+
+  /** -- fonction de sauvegarde avec timer */
   doStopSave() {
     this.#stopSave = true;
     clearTimeout(this.#saveTimeoutId);
@@ -213,7 +208,6 @@ class Item extends Composite {
    * Suppression d'un item
    */
   doDelete() {
-    clearTimeout(this.timeoutID);
     return new DeleteItem(this)
       .execute();
   }
@@ -240,6 +234,22 @@ class Item extends Composite {
     return Object.keys(this.#updates).length > 0;
   }
 
+}
+/**
+ * Ajout d'un bouton pour lancer la sauvegarde manuellement
+ */
+function getRelaunchSaveButton() {
+  /*
+   * Si la sauvegarde a échouée, c'est qu'il y a un problème à résoudre. On ne peut pas relancer la sauvegarde automatique tant que le problème est pas résolu. Ajout d'un bouton pour relancer la sauvegarde
+   */
+  const saveButton = new ActionButton({
+    id: 'saveButton',
+    label: 'Relancer la sauvegarde'
+  });
+  saveButton.setDoActionCallback(() => {
+    this.doSave()
+      .then(() => saveButton.doRemoveFromParent());
+  });
 }
 
 export default Item;

@@ -59,7 +59,7 @@ class ItemView extends CompositeView {
       this.#details = detailsNode;
       this.setSpaceChildren(this.#details.querySelector('#spaceChildren'));
     }
-    this.#details.open = false;
+    this.#details.open = true;
     super.addView(view);
   }
 
