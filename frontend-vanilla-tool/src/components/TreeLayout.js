@@ -9,9 +9,9 @@ class TreeLayout extends ItemsLayout {
   constructor() {
     super(VIEW_CHOICE.Tree, new TreeLayoutView());
 
-    const addNewItemAction = new ActionButton({ id: 'add-new-item-action', label: '< Ajouter un espace >' });
+    const addNewItemAction = new ActionButton({ id: 'addNewSpace', label: '< Ajouter un espace >' });
     addNewItemAction.setDoActionCallback(this.addNewItem.bind(this));
-    this.addChild(addNewItemAction);
+    this.setStaticChild('addNewSpace', addNewItemAction);
   }
   /**
    * @override

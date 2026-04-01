@@ -9,9 +9,9 @@ class TodoListLayout extends ItemsLayout {
   constructor() {
     super(VIEW_CHOICE.TodoList, new TodoListLayoutView());
 
-    const loadItemsAction = new ActionButton({ id: 'load-items-action', label: 'Rafraîchir' });
+    const loadItemsAction = new ActionButton({ id: 'loadItems', label: 'Rafraîchir' });
     loadItemsAction.setDoActionCallback(this.loadItems.bind(this));
-    this.addChild(loadItemsAction);
+    this.setStaticChild('loadItems', loadItemsAction);
   }
   /**
    * @override

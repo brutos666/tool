@@ -7,6 +7,10 @@ class Component extends NodeElement {
 
   /** @type {Composite} */
   #parent;
+  /**
+   * @type {Object.<string, Component>}
+   */
+  #staticChildren = {};
 
   /**
    * @constructor
@@ -14,6 +18,20 @@ class Component extends NodeElement {
    */
   constructor(view) {
     super(view);
+  }
+
+  /**
+   * Ajoute un enfant statique
+   * @param {String} id
+   * @param {Component} child
+   */
+  setStaticChild(id, child) {
+    this.#staticChildren[id] = child;
+    this.getView()
+      .setStaticView(id, child.getView());
+  }
+  getStaticChild(id) {
+    return this.#staticChildren[id];
   }
 
   /**

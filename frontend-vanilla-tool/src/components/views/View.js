@@ -9,6 +9,9 @@ class View {
   #elementView;
   #messageView;
 
+  /** @type {Object.<string, View>} */
+  #staticViews = {};
+
   /**
    * @constructor. Crée la vue à partir des données passées en paramètre
    * @param {Object} data - Données à utiliser pour créer la vue
@@ -24,6 +27,26 @@ class View {
    */
   getHtmlView(/* data */) {
     return '<div></div>';
+  }
+
+  /**
+   * Positionne la vue statique
+   * @param {string} id - Identifiant de la vue statique. Il s'agit de l'attribut id de l'element HTML
+   * @param {View} view - Vue statique
+   */
+  setStaticView(id, view) {
+    const oldView = this.getNodeView()
+      .querySelector(`#${ id }`);
+    if (!oldView) {
+      window.alert(`Erreur de conception : on tente d'accéder à un élément qui n'a pas été défini [${ id }]`);
+      return;
+    }
+    oldView.parentNode.replaceChild(view.getNodeView(), oldView);
+    this.#staticViews[id] = view;
+  }
+
+  getStaticView(id) {
+    return this.#staticViews[id];
   }
 
   /**

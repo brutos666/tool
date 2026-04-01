@@ -22,7 +22,7 @@ class CompositeView extends View {
     if (this.#spaceChildren) {
       return this.#spaceChildren;
     }
-    window.alert(`Erreur de conception : on tente d'accéder à l'espace des enfants alors qu'il n'a pas été défini`);
+    window.alert(`Erreur de conception : on tente d'accéder à un élément qui n'a pas été défini [spaceChildren]`);
     return document.createElement('div');
   }
   setSpaceChildren(spaceChildren) {

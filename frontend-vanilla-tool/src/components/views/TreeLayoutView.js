@@ -1,25 +1,15 @@
-import PlacedCompositeView from './PlacedCompositeView.js';
+import CompositeView from './CompositeView.js';
 
-class TreeLayoutView extends PlacedCompositeView {
+class TreeLayoutView extends CompositeView {
 
   constructor(data) {
     super(data);
   }
-  /**
-   * @override
-   * Cette classe s'occupe de disposer les 2 enfants
-   * @param {View} view
-   */
-  addView(view) {
-    if (this.getView('treeToolbar') === undefined) {
-      super.setView('treeToolbar', view);
-    } else {
-      super.addView(view);
-    }
-  }
+
   getHtmlView() {
-    return String.raw`<div class="tree"><div id="treeToolbar" class="tree__toolbar"></div>
-      <div id="spaceChildren" class="tree__space"></div>
+    return String.raw`<div class="tree-layout">
+      <header class="tree-layout__header"><template id="addNewSpace"></template></header>
+      <div id="spaceChildren" class="tree-layout__space"></div>
     </div>`;
   }
 
