@@ -35,10 +35,11 @@ class TreeList extends Composite {
    * @param {Composite} element : élément ajouté à la liste
    */
   getTreeElement(element) {
-    if (element.getChildren().length === 0) {
-      return new Leaf(element);
+    const treeElement = element.getChildren().length === 0 ? new Leaf(element) : new Tree(element);
+    if (!element.getParent()) {
+      treeElement.setRoot();
     }
-    return new Tree(element);
+    return treeElement;
   }
 
 }

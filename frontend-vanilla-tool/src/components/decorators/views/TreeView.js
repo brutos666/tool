@@ -10,18 +10,22 @@ class TreeView extends DecoratorView {
    * @param {View} view
    */
   constructor(view) {
-    super('tree', view);
+    super(view);
   }
 
   getHtmlView() {
-    return String.raw`<details class="tree__root">
-      <summary><template id="tree"></template></summary>
+    return String.raw`<details class="tree__node">
+      <summary><template></template></summary>
       <section id="treeList" class="tree__list"></section>
     </details>`;
   }
 
   setOpen() {
-    this.getElementView().open = true;
+    this.getNodeView().open = true;
+  }
+  setRoot() {
+    this.getNodeView().classList.remove('tree__node');
+    this.getNodeView().classList.add('tree__root');
   }
 
 }

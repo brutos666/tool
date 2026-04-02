@@ -29,6 +29,10 @@ class Component extends NodeElement {
   removed() {
     this.#parent = null;
   }
+
+  getParent() {
+    return this.#parent;
+  }
   getPrevious() {
     const index = this.#parent.getChildren()
       .indexOf(this);

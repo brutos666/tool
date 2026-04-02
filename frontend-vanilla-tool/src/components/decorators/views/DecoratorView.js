@@ -7,18 +7,33 @@ class DecoratorView extends CompositeView {
 
   /**
    * @constructor
-   * @param {string} id
    * @param {View} view
    */
-  constructor(id, view) {
+  constructor(view) {
     super();
-    this.setStaticView(id, view);
-    this.setElementView(this.getStaticView(id)
-      .getNodeView());
+    this.setDecoratedView(view);
+  }
+
+  /**
+   * Positionne la vue statique
+   * @param {View} view - Vue statique
+   */
+  setDecoratedView(view) {
+    /** @type {Element} */
+    const oldView = this.getNodeView()
+      .querySelector('template');
+    if (!oldView) {
+      window.alert(`Erreur de conception : il manque <template></template> dans le decorator [${ view.name }]`);
+      return;
+    }
+    const newView = view.getNodeView();
+    oldView.parentNode.replaceChild(newView, oldView);
+
+    super.setElementView(newView);
   }
 
   getHtmlView(/* data */) {
-    return String.raw`<div class="decorator"><template id="element"></template></div>`;
+    return String.raw`<div class="decorator"><template></template></div>`;
   }
 
 }

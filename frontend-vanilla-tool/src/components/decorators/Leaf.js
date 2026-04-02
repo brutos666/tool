@@ -7,6 +7,10 @@ class Leaf extends Decorator {
   constructor(element) {
     super(new LeafView(element.getView()), element);
   }
+  setRoot() {
+    this.getView()
+      .setRoot();
+  }
 
 }
 

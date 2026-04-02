@@ -1,9 +1,10 @@
 :root {
   color-scheme: light dark;
-  --text-color: light-dark(#202222, #959595);
+  --color: light-dark(#202222, #e0e0e0);
   --background-color: light-dark(#959595, #202222);
-  --error-text-color: light-dark(red, red);
-  --success-text-color: light-dark(green, green);
+  --border-color: light-dark(#5d5d5d, #5d5d5d);
+  --error-color: light-dark(red, red);
+  --success-color: light-dark(green, green);
   --box-shadow-color: light-dark(#5d5d5d, black);
   --sample-post-it-color: light-dark(#cadf58, #cadf58);
   --story-post-it-color: light-dark(#fff9b2, #fff9b2);
@@ -12,24 +13,39 @@
   --item-post-it-color: light-dark(#fff9b2, #fff9b2);
   --text-post-it-color: light-dark(#202222, #202222);
 }
-html,
-body,
-.app-root {
-  height: 100%;
+
+body {
+  background-color: var(--background-color);
+  color: var(--color);
+  margin: 0;
 }
-.command--decorator {
+/** espace de travail */
+.working-space {
+  flex: 1;
+  display: grid;
+  grid-template-columns: auto 5px 1fr;
+  position: absolute;
   width: 100%;
   height: 100%;
-  display: flex;
-  flex-direction: column;
+}
+.working-space__nav {
+  overflow: auto;
+  width: 300px;
+}
+.working-space__splitter {
+  background-color: var(--border-color);
+  cursor: ew-resize;
+}
+.working-space__main {
+  overflow: auto;
 }
 
 .error-mess {
-  color: var(--error-text-color);
+  color: var(--error-color);
   font-weight: bold;
 }
 .success-mess {
-  color: var(--success-text-color);
+  color: var(--success-color);
   font-weight: bold;
 }
 .disabled {
@@ -67,27 +83,35 @@ details[open] > summary::before {
   padding-left: 50px;
 }
 /* -- fin gestion des arbres -- */
-
+.toolbar {
+  flex: 1;
+}
 .toolbar__space {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
 }
-.working__space {
+.toolbar__space > * {
   flex: 1;
+}
+/* -- Affichage des espaces de dispositions des items -- */
+/** -- Navigation arbre -- */
+.nav-tree__header {
+  display: flex;
+}
+/** -- Affichage Check list -- */
+.check-list__header {
   display: grid;
-  grid-template-columns: auto 5px 1fr;
-  grid-template-rows: 1fr;
+  grid-template-columns: 1fr auto;
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.5em;
+  margin: 14px;
 }
-.working-tree__space {
-  overflow: auto;
-  width: 300px;
-}
-.vertical-splitter {
-  background-color: var(--text-color);
-  cursor: ew-resize;
-}
-.working-panel__space {
+.check-list__space {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
   overflow: auto;
 }
 
@@ -121,43 +145,16 @@ details[open] > summary::before {
   flex-wrap: wrap;
 }
 .item__content:not(.item--readonly) .item__title {
-  border: var(--text-color) solid 1px;
+  border: var(--border-color) solid 1px;
 }
 
-.item__done {
-  cursor: pointer;
-}
-.item__doAddChild {
-  cursor: pointer;
-}
-.item__doDelete {
-  cursor: pointer;
-}
+.item__done,
+.item__doAddChild,
+.item__doDelete,
 .item__doView {
   cursor: pointer;
 }
 
-/* -- Affichage comme un todo -- */
-.item--todo.item__content {
-  display: flex;
-  flex-direction: row;
-}
-.item--todo .item__article {
-  flex: 1;
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  overflow: auto;
-}
-.item--todo .item__identify {
-  display: none;
-}
-.item--todo .item__title {
-  flex: 1;
-}
-.item--todo .item__text {
-  display: none;
-}
 /* -- Affichage item en mode consultation arbre */
 .item--tree.item__content {
   display: flex;
@@ -183,7 +180,7 @@ details[open] > summary::before {
   display: none;
 }
 
-/* -- Affichage comme un post-it -- */
+/* -- Affichage item comme un post-it -- */
 .item--post-it.item__content {
   display: flex;
   flex-direction: column;
@@ -205,29 +202,25 @@ details[open] > summary::before {
   border: grey solid 1px;
 }
 
-/* -- Affichage check list -- */
-.todo-list-layout__header {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  text-align: center;
-  font-weight: bold;
-  font-size: 1.5em;
-  margin: 14px;
+/* -- Affichage comme un todo -- */
+.item--todo.item__content {
+  display: flex;
+  flex-direction: row;
 }
-.todo-list-layout__space {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-  overflow: auto;
-}
-
-/* -- A retravailler -- */
-.items__header {
-  text-align: center;
-}
-.items__space {
+.item--todo .item__article {
+  flex: 1;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
+  overflow: auto;
+}
+.item--todo .item__identify {
+  display: none;
+}
+.item--todo .item__title {
+  flex: 1;
+}
+.item--todo .item__text {
+  display: none;
 }
 

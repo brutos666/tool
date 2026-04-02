@@ -9,24 +9,23 @@ class WorkingSpaceView extends CompositeView {
   }
 
   getHtmlView() {
-    return String.raw`<div id="workingSpace" class="working__space">
-    <aside id="workingTreeSpace" class="working-tree__space"><template id="treeLayout"></template></aside>
-    <div id="splitter" class="vertical-splitter">&nbsp;</div>
-    <main id="workingPanelSpace"class="working-panel__space"><template id="panelLayout"></template></main>
+    return String.raw`<div id="workingSpace" class="working-space">
+    <nav id="navSpace" class="working-space__nav"><template id="nav"></template></nav>
+    <div id="splitter" class="working-space__splitter">&nbsp;</div>
+    <main id="mainSpace"class="working-space__main"><template id="main"></template></main>
   </div>`;
   }
 
   activateSplitter() {
-    const workingSpace = this.getNodeView()
-      .querySelector('#workingSpace');
-    const workingTreeSpace = this.getNodeView()
-      .querySelector('#workingTreeSpace');
+    const workingSpace = this.getNodeView();
+    const navSpace = this.getNodeView()
+      .querySelector('#navSpace');
     const splitter = this.getNodeView()
       .querySelector('#splitter');
 
     const moveSplitter = event => {
       const offset = workingSpace.getBoundingClientRect().left;
-      workingTreeSpace.style.width = `${ event.clientX - offset }px`;
+      navSpace.style.width = `${ event.clientX - offset }px`;
     };
     splitter.addEventListener('pointerdown', event => {
       event.preventDefault();

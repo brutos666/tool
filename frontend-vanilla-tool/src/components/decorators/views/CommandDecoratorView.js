@@ -12,13 +12,13 @@ class CommandDecoratorView extends DecoratorView {
    * @param {View} view
    */
   constructor(view) {
-    super('component', view);
+    super(view);
     this.#messageView = this.getNodeView()
       .querySelector('.message');
   }
 
   getHtmlView() {
-    return String.raw`<div class="command--decorator"><template id="component"></template>
+    return String.raw`<div class="command--decorator"><template></template>
       <div class="message"></div></div>`;
   }
 

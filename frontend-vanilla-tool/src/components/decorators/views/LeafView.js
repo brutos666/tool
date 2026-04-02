@@ -9,7 +9,7 @@ class LeafView extends DecoratorView {
    * @param {DecoratorView} view
    */
   constructor(view) {
-    super('leaf', view);
+    super(view);
   }
   /** @override */
   getSpaceChildren() {
@@ -17,7 +17,10 @@ class LeafView extends DecoratorView {
   }
 
   getHtmlView() {
-    return String.raw`<div class="tree__leaf"><template id="leaf"></template></div>`;
+    return String.raw`<div class="tree__leaf"><template></template></div>`;
+  }
+  setRoot() {
+    this.getNodeView().classList.add('tree__root');
   }
 
 }

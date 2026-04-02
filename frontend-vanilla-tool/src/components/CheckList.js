@@ -3,15 +3,15 @@ import ActionButton from './ActionButton.js';
 import Component from './Component.js';
 import CommandItemsDecorator from './decorators/CommandItemsDecorator.js';
 import Items from './Items.js';
-import TodoListLayoutView from './views/TodoListLayoutView.js';
+import CheckListView from './views/CheckListView.js';
 /** @import Item from './Item.js' */
 
-class TodoListLayout extends Component {
+class CheckList extends Component {
 
-  name = 'TodoListLayout';
+  name = 'CheckList';
 
   constructor() {
-    super(new TodoListLayoutView());
+    super(new CheckListView());
 
     const items = new Items(VIEW_CHOICE.TodoList);
     const itemsWithCommands = new CommandItemsDecorator(items);
@@ -25,7 +25,7 @@ class TodoListLayout extends Component {
   }
   /**
    * @override
-   * @returns {TodoListLayoutView}
+   * @returns {CheckListView}
    */
   getView() {
     return super.getView();
@@ -33,4 +33,4 @@ class TodoListLayout extends Component {
 
 }
 
-export default TodoListLayout;
+export default CheckList;

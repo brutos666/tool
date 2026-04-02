@@ -1,7 +1,7 @@
-import Composite from '../Composite.js';
+import Component from '../Component.js';
 /** @import DecoratorView from './views/DecoratorView.js'; */
 
-class Decorator extends Composite {
+class Decorator extends Component {
 
   #targetElement;
   /**

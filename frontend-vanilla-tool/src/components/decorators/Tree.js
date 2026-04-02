@@ -32,6 +32,11 @@ class Tree extends Decorator {
       .setOpen();
   }
 
+  setRoot() {
+    this.getView()
+      .setRoot();
+  }
+
 }
 
 export default Tree;

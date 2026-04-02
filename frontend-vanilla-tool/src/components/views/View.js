@@ -33,18 +33,22 @@ class View {
    * @param {View} view - Vue statique
    */
   setStaticView(id, view) {
-    const oldView = this.getNodeView()
+    const oldView = this.#staticViews[id];
+    if (oldView) {
+      oldView.getNodeView().parentNode.replaceChild(view.getNodeView(), oldView.getNodeView());
+      this.#staticViews[id] = view;
+      return;
+    }
+    /** @type {Element} */
+    const templateNode = this.getNodeView()
       .querySelector(`#${ id }`);
-    if (!oldView) {
+    if (!templateNode) {
       window.alert(`Erreur de conception : on tente d'accéder à un élément qui n'a pas été défini [${ id }]`);
       return;
     }
-    oldView.parentNode.replaceChild(view.getNodeView(), oldView);
+    templateNode.classList.forEach(classItem => view.getElementView().classList.add(classItem));
+    templateNode.parentNode.replaceChild(view.getNodeView(), templateNode);
     this.#staticViews[id] = view;
-  }
-
-  getStaticView(id) {
-    return this.#staticViews[id];
   }
 
   /**
