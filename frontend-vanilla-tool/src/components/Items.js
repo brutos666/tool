@@ -21,6 +21,23 @@ class Items extends TreeList {
     this.addChild(new Item({ itemInfos: {}, viewChoice: this.getLayout() }));
   }
 
+  addItem(itemInfos) {
+    this.addChild(new Item({ itemInfos, viewChoice: this.getLayout() }));
+  }
+  /**
+   * Ajout des items
+   * @param {Array<ItemInfos>} itemInfosList
+   */
+  addItems(itemInfosList) {
+    this.removeAllChildren();
+    if (itemInfosList.length === 0) {
+      this.addNewItem();
+      return;
+    }
+    const allItemsCards = itemInfosList.map(itemInfos => new Item({ itemInfos, viewChoice: this.getLayout() }));
+    this.setChildren(allItemsCards);
+  }
+
 }
 
 export default Items;

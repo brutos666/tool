@@ -10,13 +10,28 @@ class Composite extends Component {
 
   /** @type {Component[]} */
   #children = [];
+  #isCompositeView;
+
+  /** @type {Function} */
+  #getNewChildCallback = () => { return new Component(); };
+
   /**
    * @constructor
    * @param {CompositeView} view - objet donnant l'affichage du composant. Peut définir plusieurs affichages
    */
   constructor(view) {
     super(view === undefined ? new CompositeView() : view);
+    this.#isCompositeView = view instanceof CompositeView;
   }
+
+  /**
+   * Positionne la méthode appelée lors de la création du nouvel enfant "vide" à ajouter
+   * @param {Function} callback
+   */
+  setGetNewChildCallback(callback) {
+    this.#getNewChildCallback = callback;
+  }
+
   /**
    * @override
    * @returns {CompositeView}
@@ -43,8 +58,10 @@ class Composite extends Component {
   setChildren(children) {
     this.#children = children;
 
-    this.getView()
-      .refreshViews(children.map(child => child.getView()));
+    if (this.#isCompositeView) {
+      this.getView()
+        .refreshViews(children.map(child => child.getView()));
+    }
 
     children.forEach((/** @type {Component} */ child) => child.added(this));
   }
@@ -52,13 +69,25 @@ class Composite extends Component {
   /**
    * Ajoute un enfant. La vue du composant est ajouté au DOM dans l'espace dédié (#spaceChildren)
    * @param {Component} element : noeud
+   * @returns {Component} l'élément ajouté
    */
   addChild(element) {
     this.#children.push(element);
-    this.getView()
-      .addView(element.getView());
+    if (this.#isCompositeView) {
+      this.getView()
+        .addView(element.getView());
+    }
 
     element.added(this);
+    return element;
+  }
+
+  /**
+   * Ajout un nouvel élément en appelant la méthode qui définit le composant "vide" à ajouter
+   * @returns {Component} l'élément ajouté
+   */
+  addNewChild() {
+    return this.addChild(this.#getNewChildCallback());
   }
 
   replaceChild(element, oldElement) {
@@ -67,11 +96,11 @@ class Composite extends Component {
       return;
     }
     this.#children[index] = element;
-    this.getView()
-      .removeView(oldElement.getView());
-    oldElement.removed();
-    this.getView()
-      .addView(element.getView());
+    if (this.#isCompositeView) {
+      this.getView()
+        .replaceView(element.getView(), oldElement.getView());
+      oldElement.removed();
+    }
     element.added(this);
   }
 
@@ -81,8 +110,10 @@ class Composite extends Component {
       return;
     }
     this.#children.splice(index, 1);
-    this.getView()
-      .removeView(element.getView());
+    if (this.#isCompositeView) {
+      this.getView()
+        .removeView(element.getView());
+    }
     element.removed();
   }
 
@@ -93,8 +124,10 @@ class Composite extends Component {
         child.removeAllChildren();
       }
     });
-    this.getView()
-      .removeAllViews();
+    if (this.#isCompositeView) {
+      this.getView()
+        .removeAllViews();
+    }
     this.#children = [];
   }
 

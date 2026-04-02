@@ -1,7 +1,8 @@
 import LoadItems from '../../commands/LoadItems.js';
-import Item from '../Item.js';
 import CommandDecorator from './CommandDecorator.js';
 import CommandDecoratorView from './views/CommandDecoratorView.js';
+/** @import Items from '../Items.js'; */
+/** @typedef {import('../Item.js').ItemInfos} ItemInfos */
 
 class CommandItemsDecorator extends CommandDecorator {
 
@@ -9,28 +10,32 @@ class CommandItemsDecorator extends CommandDecorator {
 
   /**
    * @constructor
-   * @param {Component} element
+   * @param {Items} items
    */
-  constructor(element) {
-    super(new CommandDecoratorView(element.getView()), element);
+  constructor(items) {
+    super(new CommandDecoratorView(items.getView()), items);
   }
 
   /**
    * @override
+   * @returns {Items}
+   */
+  getDecoratedElement() {
+    return super.getDecoratedElement();
+  }
+
+  /**
+   * @override
+   * @param {string} name
+   * @param {Array<ItemInfos>} itemInfosList
    */
   commandDone(name, itemInfosList) {
     super.commandDone(name, itemInfosList);
     if (name !== 'LoadItems') {
       return;
     }
-    const targetElement = this.getTargetElement();
-    targetElement.removeAllChildren();
-    if (itemInfosList.length === 0) {
-      targetElement.addNewItem();
-      return;
-    }
-    const allItemsCards = itemInfosList.map(itemInfos => new Item({ itemInfos, viewChoice: targetElement.getLayout() }));
-    targetElement.setChildren(allItemsCards);
+    this.getDecoratedElement()
+      .addItems(itemInfosList);
   }
 
   loadItems() {

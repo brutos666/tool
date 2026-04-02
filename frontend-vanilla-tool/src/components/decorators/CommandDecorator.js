@@ -8,10 +8,10 @@ class CommandDecorator extends Decorator {
   /**
    * @constructor
    * @param {CommandDecoratorView} view
-   * @param {Component} element
+   * @param {Component} decoratedElement
    */
-  constructor(view, element) {
-    super(view, element);
+  constructor(view, decoratedElement) {
+    super(view, decoratedElement);
   }
 
   /**

@@ -23,7 +23,7 @@ class ActionButtonView extends View {
    * @returns {string} - Code HTML du bouton
    */
   getHtmlView(data) {
-    return String.raw`<button id="${ data.id }">${ data.label }</button>`;
+    return String.raw`<button id="${ data.id }" class="clickable">${ data.label }</button>`;
   }
 
   setDoActionCallback(callback) {

@@ -28,20 +28,32 @@ class TreeList extends Composite {
    * @param {Array<Composite>} children
    */
   setChildren(children) {
-    super.setChildren(children.map(child => this.getTreeElement(child)));
+    super.setChildren(children.map(child => {
+      const treeElement = this.getTreeElement(child);
+      if (!child.getParent()) {
+        treeElement.setRoot();
+      }
+      return treeElement;
+    }));
   }
   /**
    * @override
    * @param {Composite} element : élément ajouté à la liste
    */
   getTreeElement(element) {
-    const treeElement = element.getChildren().length === 0 ? new Leaf(element) : new Tree(element);
-    if (!element.getParent()) {
-      treeElement.setRoot();
-    }
-    return treeElement;
+    return element.getChildren().length === 0 ? new Leaf(element, addElementToLeaf) : new Tree(element);
   }
 
+}
+/**
+ * Méthode pour ajouter un élément à une feuille
+ * @this {Leaf}
+ */
+function addElementToLeaf() {
+  const tree = new Tree(this.getDecoratedElement());
+  tree.addNewChild();
+  this.getParent()
+    .replaceChild(tree, this);
 }
 
 export default TreeList;

@@ -17,7 +17,7 @@ class LeafView extends DecoratorView {
   }
 
   getHtmlView() {
-    return String.raw`<div class="tree__leaf"><template></template></div>`;
+    return String.raw`<div class="tree__leaf"><div class="tree__item"><template></template><menu id="toolbar"></menu></div></div>`;
   }
   setRoot() {
     this.getNodeView().classList.add('tree__root');

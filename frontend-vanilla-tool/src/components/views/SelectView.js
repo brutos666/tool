@@ -39,7 +39,7 @@ class SelectView extends View {
    * @param {Array<Option>} data.options - Liste des options du select
    */
   getHtmlView(data) {
-    let htmlText = String.raw`<select id="${ data.id }">`;
+    let htmlText = String.raw`<select id="${ data.id }" class="clickable">`;
     for (const option of data.options) {
       htmlText += String.raw`<option value="${ option.value }">${ option.label }</option>`;
     }

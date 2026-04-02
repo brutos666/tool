@@ -74,6 +74,10 @@ class View {
     this.#elementView = nodeElement;
   }
 
+  /**
+   *
+   * @returns {HTMLElement}
+   */
   getNodeView() {
     return this.#nodeView;
   }

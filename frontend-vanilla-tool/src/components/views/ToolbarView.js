@@ -9,7 +9,7 @@ class ToolbarView extends CompositeView {
    * @override {@link View.getHtmlView}
    */
   getHtmlView() {
-    return String.raw`<div class="toolbar"><section id="spaceChildren" class="toolbar__space"></section></div>`;
+    return String.raw`<div id="spaceChildren" class="toolbar toolbar__space"></div>`;
   }
 
 }

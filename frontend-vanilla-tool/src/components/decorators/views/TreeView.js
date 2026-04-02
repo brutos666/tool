@@ -15,7 +15,7 @@ class TreeView extends DecoratorView {
 
   getHtmlView() {
     return String.raw`<details class="tree__node">
-      <summary><template></template></summary>
+      <summary><div class="tree__item"><template></template><menu id="toolbar"></menu></div></summary>
       <section id="treeList" class="tree__list"></section>
     </details>`;
   }

@@ -79,6 +79,16 @@ class CompositeView extends View {
       .removeChild(view.getNodeView());
   }
 
+  /**
+   * Remplace un enfant. La vue du composant est remplacée du DOM dans l'espace dédié (id='spaceChildren)
+   * @param {View} view : vue
+   * @param {View} oldView : vue
+   */
+  replaceView(view, oldView) {
+    this.getSpaceChildren()
+      .replaceChild(view.getNodeView(), oldView.getNodeView());
+  }
+
   removeAllViews() {
     this.getSpaceChildren().innerHTML = '';
   }
@@ -89,6 +99,9 @@ class CompositeView extends View {
    * @returns {Element}
    */
   determinateSpaceChildren(nodeView) {
+    if (nodeView.id === 'spaceChildren') {
+      return nodeView;
+    }
     const spaceChildren = nodeView
       .querySelector('[id=\'spaceChildren\']');
 

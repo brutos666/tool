@@ -1,7 +1,8 @@
 import { VIEW_CHOICE } from '../../tools/Constants.js';
-import CompositeView from './CompositeView.js';
+import View from './View.js';
+/** @typedef {import('../Item.js').ItemInfos} ItemInfos */
 
-class ItemView extends CompositeView {
+class ItemView extends View {
 
   name = 'ItemView';
 
@@ -9,7 +10,6 @@ class ItemView extends CompositeView {
   #title;
   #text;
   #done;
-  #doAddChild;
   #doDelete;
 
   #isNew;
@@ -18,7 +18,6 @@ class ItemView extends CompositeView {
   #updateCallback = () => {};
   #doneCallback = () => {};
 
-  #doAddChildCallback = () => {};
   #doDeleteCallback = () => {};
 
   /**
@@ -46,10 +45,6 @@ class ItemView extends CompositeView {
   getHtmlView(data) {
     return getHtmlArticle(data.itemInfos.id, data.viewChoice);
   }
-  /** @override */
-  getSpaceChildren() {
-    return document.createElement('div');
-  }
 
   /**
    * @override {@link View.refreshView}
@@ -65,18 +60,6 @@ class ItemView extends CompositeView {
     this.addEventListeners();
   }
 
-  /**
-   * Positionne la fonction à appeler lorsqu'une action d'ajout d'enfant est effectuée
-   * @param {Function} doAddChildCallback - Fonction appelée lorsqu'une action d'ajout d'enfant est effectuée
-   */
-  setDoAddChildCallback(doAddChildCallback) {
-    if (!this.#doAddChild) {
-      return;
-    }
-    this.#doAddChild.removeEventListener('click', this.#doAddChildCallback);
-    this.#doAddChildCallback = doAddChildCallback;
-    this.#doAddChild.addEventListener('click', this.#doAddChildCallback);
-  }
   /**
    * Positionne la fonction à appeler lorsqu'une action de suppression est effectuée
    * @param {Function} doDeleteCallback - Fonction appelée lorsqu'une action de suppression est effectuée
@@ -120,7 +103,6 @@ class ItemView extends CompositeView {
     this.#title = mainNode.querySelector('#title');
     this.#text = mainNode.querySelector('#text');
     this.#done = mainNode.querySelector('#done');
-    this.#doAddChild = mainNode.querySelector('#doAddChild');
     this.#doDelete = mainNode.querySelector('#doDelete');
   }
 
@@ -162,9 +144,6 @@ class ItemView extends CompositeView {
     this.#title.addEventListener('input', this.#updateCallback);
     this.#text.addEventListener('input', this.#updateCallback);
     this.#done.addEventListener('change', this.#doneCallback);
-    if (this.#doAddChild) {
-      this.#doAddChild.addEventListener('click', this.#doAddChildCallback);
-    }
     this.#doDelete.addEventListener('click', this.#doDeleteCallback);
   }
 
@@ -172,9 +151,6 @@ class ItemView extends CompositeView {
     this.#title.removeEventListener('input', this.#updateCallback);
     this.#text.removeEventListener('input', this.#updateCallback);
     this.#done.removeEventListener('change', this.#doneCallback);
-    if (this.#doAddChild) {
-      this.#doAddChild.removeEventListener('click', this.#doAddChildCallback);
-    }
     this.#doDelete.removeEventListener('click', this.#doDeleteCallback);
   }
 
@@ -188,19 +164,12 @@ class ItemView extends CompositeView {
  */
 function getHtmlArticle(identify, viewChoice) {
   const viewChoiceClass = getClassForViewChoice(viewChoice);
-  return String.raw`<section id="item" class="item__content ${ viewChoiceClass }">
-    <article class="item__article">
+  return String.raw`<article class="item__article ${ viewChoiceClass }">
         <span id="identify" class="item__identify">${ identify }</span>
         <input type="checkbox" id="done" class="item__done"/>
         <div contenteditable="true" class="item__title" id="title"></div>
         <div contenteditable="true" class="item__text" id="text"></div>
-    </article>
-    <aside class="item__toolbar">
-        <button id="doAddChild" class="item__doAddChild"> + </button>
-        <button id="doDelete" class="item__doDelete"> - </button>
-        <button id="doView" class="item__doView">O</button>
-      </aside>
-    </section>`;
+    </article>`;
 }
 /**
  * Retourne la classe CSS correspondant à la vue demandée

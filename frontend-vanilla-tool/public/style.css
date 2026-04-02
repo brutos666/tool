@@ -3,6 +3,8 @@
   --color: light-dark(#202222, #e0e0e0);
   --background-color: light-dark(#959595, #202222);
   --border-color: light-dark(#5d5d5d, #5d5d5d);
+  --focus-color: light-dark(blue, blue);
+  --selected-color: light-dark(orange, orange);
   --error-color: light-dark(red, red);
   --success-color: light-dark(green, green);
   --box-shadow-color: light-dark(#5d5d5d, black);
@@ -52,6 +54,15 @@ body {
   pointer-events: none;
   opacity: 0.5;
 }
+.clickable {
+  cursor: pointer;
+}
+.focused {
+  border: var(--focus-color) solid 2px;
+}
+.selected {
+  background-color: var(--selected-color);
+}
 
 /* -- gestion des arbres -- */
 details > summary {
@@ -81,6 +92,11 @@ details[open] > summary::before {
 .tree__leaf:not(.tree__root) {
   display: block;
   padding-left: 50px;
+}
+.tree__item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 5px;
 }
 /* -- fin gestion des arbres -- */
 .toolbar {
@@ -116,51 +132,18 @@ details[open] > summary::before {
 }
 
 /* -- Affichage commun des items -- */
-/* 
-.item__content {
-  border: #f0949e solid 2px;
-}
-.item__article {
-  border: #1dec0a solid 1px;
-}
-.item__title {
-  border: #ec0ac6 solid 1px;
-}
-.item__text {
-  border: #1dec0a solid 1px;
-}
-*/
 .item--readonly {
   cursor: default;
   user-select: none;
   pointer-events: none;
   border: none;
 }
-.item__content.item--readonly .item__toolbar {
-  display: none;
-}
-.item__content:not(.item--readonly) .item__toolbar {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-}
-.item__content:not(.item--readonly) .item__title {
+.item__article:not(.item--readonly) .item__title {
   border: var(--border-color) solid 1px;
 }
 
-.item__done,
-.item__doAddChild,
-.item__doDelete,
-.item__doView {
-  cursor: pointer;
-}
-
 /* -- Affichage item en mode consultation arbre */
-.item--tree.item__content {
-  display: flex;
-  flex-direction: row;
-}
-.item--tree .item__article {
+.item--tree.item__article {
   flex: 1;
   display: flex;
   flex-direction: row;
@@ -181,17 +164,13 @@ details[open] > summary::before {
 }
 
 /* -- Affichage item comme un post-it -- */
-.item--post-it.item__content {
+.item--post-it.item__article {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: stretch;
   width: 200px;
   min-height: 150px;
-}
-.item--post-it .item__article {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
   color: var(--text-post-it-color);
   background: var(--item-post-it-color);
 }
@@ -203,11 +182,7 @@ details[open] > summary::before {
 }
 
 /* -- Affichage comme un todo -- */
-.item--todo.item__content {
-  display: flex;
-  flex-direction: row;
-}
-.item--todo .item__article {
+.item--todo.item__article {
   flex: 1;
   display: flex;
   flex-direction: row;

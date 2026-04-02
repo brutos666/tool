@@ -49,7 +49,6 @@ class Item extends Composite {
 
     const itemView = this.getView();
     itemView.setUpdateCallback(this.setPropertyValue.bind(this));
-    itemView.setDoAddChildCallback(this.doAddChild.bind(this));
     itemView.setDoDeleteCallback(this.doDelete.bind(this));
 
     if (this.#itemInfos.children) {
@@ -57,6 +56,12 @@ class Item extends Composite {
         this.addChild(new Item({ itemInfos: child, viewChoice: this.#viewChoice }));
       }
     }
+    this.setGetNewChildCallback(() => {
+      return new Item({
+        itemInfos: { parentId: this.getItemInfos().id },
+        viewChoice: this.#viewChoice
+      });
+    });
   }
   /**
    * @override
@@ -217,15 +222,6 @@ class Item extends Composite {
   doDelete() {
     return new DeleteItem(this)
       .execute();
-  }
-  /**
-   * Ajout d'un enfant
-   */
-  doAddChild() {
-    this.addChild(new Item({
-      itemInfos: { parentId: this.getItemInfos().id },
-      viewChoice: this.#viewChoice
-    }));
   }
 
   /**
