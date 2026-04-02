@@ -11,7 +11,6 @@ class Items extends TreeList {
     super();
 
     this.#itemLayout = itemLayout;
-    this.setIsLeafCallback(item => item.isLeaf());
   }
 
   getLayout() {

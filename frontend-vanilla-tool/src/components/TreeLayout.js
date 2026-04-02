@@ -16,7 +16,6 @@ class TreeLayout extends Component {
     const items = new Items(VIEW_CHOICE.Tree);
     const itemsWithCommands = new CommandItemsDecorator(items);
     this.setStaticChild('treeItems', itemsWithCommands);
-    // Application d'un décorateur pour gérer les commandes
 
     const addNewItemAction = new ActionButton({ id: 'addNewSpace', label: '< Ajouter un espace >' });
     addNewItemAction.setDoActionCallback(items.addNewItem.bind(this));

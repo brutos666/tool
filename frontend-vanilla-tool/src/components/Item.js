@@ -42,6 +42,7 @@ class Item extends Composite {
    * @param {VIEW_CHOICE} data.viewChoice - Affichage souhaité
    */
   constructor(data) {
+    // TODO : décorateur de commande
     super(new ItemView(data));
     this.#itemInfos = data.itemInfos;
     this.#viewChoice = data.viewChoice;
