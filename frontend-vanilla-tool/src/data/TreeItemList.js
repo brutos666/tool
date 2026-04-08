@@ -9,6 +9,9 @@ class TreeItemList {
   #treeList = [];
   #observers = [];
 
+  /** @type {TreeItem} */
+  #parent;
+
   /**
    * @constructor
    * @param {Array<ItemInfos>} itemInfosList
@@ -16,6 +19,12 @@ class TreeItemList {
    */
   constructor(itemInfosList) {
     this.setItems(itemInfosList);
+  }
+  setParent(parent) {
+    this.#parent = parent;
+  }
+  getParent() {
+    return this.#parent;
   }
   getItemInfos() {
     return this.#treeList.map(treeItem => treeItem.getItemInfos());
@@ -49,6 +58,7 @@ class TreeItemList {
     for (const observer of this.#observers) {
       observer.update('add', [treeItem]);
     }
+    this.alertParentObservers('addItem');
   }
   /**
    * Suppression d'un item
@@ -60,14 +70,17 @@ class TreeItemList {
       return;
     }
     this.#treeList.splice(index, 1);
-    if (index === this.#treeList.length) {
-      this.updateLast();
-    } else if (index > 0) {
-      this.updatePrevious(this.#treeList[index]);
+    if (index > 0) {
+      if (index === this.#treeList.length) {
+        this.updateLast();
+      } else {
+        this.updatePrevious(this.#treeList[index]);
+      }
     }
     for (const observer of this.#observers) {
       observer.update('remove', [treeItemToRemove]);
     }
+    this.alertParentObservers('removeItem');
   }
 
   updatePrevious(currentTreeItem) {
@@ -83,6 +96,12 @@ class TreeItemList {
     lastItem.setPropertyValue('nextId', null);
   }
 
+  alertParentObservers(action) {
+    if (this.getParent()) {
+      this.getParent()
+        .alertObservers(action);
+    }
+  }
   addObserver(observer) {
     this.#observers.push(observer);
   }

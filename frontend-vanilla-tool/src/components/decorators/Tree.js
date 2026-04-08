@@ -26,8 +26,9 @@ class Tree extends Decorator {
    * @param {VIEW_CHOICE} data.layout
    */
   constructor(decoratedElement, data) {
-    super(new TreeView(decoratedElement.getView(), { leaf: data.treeItem.isLeaf() }), decoratedElement);
+    super(new TreeView(decoratedElement.getView(), { treeItem: data.treeItem }), decoratedElement);
     this.#treeItem = data.treeItem;
+    this.#treeItem.addObserver(this);
 
     const toolbar = new Toolbar();
     this.#addAction = new ActionButton({ id: 'addNewChild', label: '+' });
@@ -40,6 +41,12 @@ class Tree extends Decorator {
 
     this.#treeList = new TreeList(data.treeItem.getTreeItemList(), data.layout);
     this.setStaticChild('treeList', this.#treeList);
+
+    this.setOpen(false);
+    this.setLeaf(this.#treeItem.isLeaf());
+    if (this.#treeItem.isRoot()) {
+      this.setRoot();
+    }
   }
 
   /**
@@ -59,14 +66,6 @@ class Tree extends Decorator {
   }
 
   addNewChild() {
-    const isLeaf = this.#treeItem.isLeaf();
-    if (isLeaf) {
-      this.updateData({ leaf: true });
-      if (this.#treeItem.isRoot()) {
-        this.setRoot();
-      }
-    }
-    this.setOpen();
     this.#treeItem.addItem({ title: 'Nouvel item', state: 'TODO', children: [] });
   }
 
@@ -74,14 +73,33 @@ class Tree extends Decorator {
     this.#treeItem.deleteItem();
   }
 
-  setOpen() {
+  setOpen(open) {
     this.getView()
-      .setOpen();
+      .setOpen(open);
+  }
+
+  setLeaf(leaf) {
+    this.getView()
+      .setLeaf(leaf);
   }
 
   setRoot() {
     this.getView()
       .setRoot();
+  }
+
+  /**
+   * Modification du modèle
+   * @param {'change'|'update'|'delete'|'addItem'|'removeItem'} action
+   * @param {TreeItem} treeItem
+   */
+  update(action, treeItem) {
+    if (action === 'addItem') {
+      this.setLeaf(treeItem.isLeaf());
+      this.setOpen(true);
+    } else if (action === 'removeItem') {
+      this.setLeaf(treeItem.isLeaf());
+    }
   }
 
 }

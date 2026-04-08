@@ -5,33 +5,60 @@ class TreeView extends DecoratorView {
 
   name = 'TreeView';
 
+  #toggle;
+
   /**
    * @constructor
    * @param {View} view
    * @param {Object} data
    * @param {boolean} data.leaf
+   * @param {boolean} data.root
    */
   constructor(view, data) {
     super(view, data);
+
+    this.#toggle = this.getNodeView()
+      .querySelector('#toggle');
+    this.#toggle.addEventListener('click', () => {
+      this.setOpen(!this.#toggle.classList.contains('tree--open'));
+    });
   }
 
-  getHtmlView(data) {
-    if (data.leaf) {
-      return String.raw`<div class="tree__leaf"><div class="tree__item"><template></template><menu id="toolbar"></menu>
-    <section id="treeList" class="tree__list"></section></div></div>`;
+  getHtmlView() {
+    return String.raw`<div class="tree">
+      <section class="tree__header"><button id="toggle" class="tree__toggle">▼</button><div class="tree__item"><template></template><menu id="toolbar"></menu></div></section>
+      <section id="treeList" class="tree__list"></section></div>`;
+  }
+
+  setOpen(open) {
+    if (open) {
+      this.#toggle.classList.add('tree--open');
+      this.#toggle.textContent = '▼';
+      this.getStaticView('treeList')
+        .getElementView().classList.remove('hidden');
+      return;
     }
-    return String.raw`<details class="tree__node">
-      <summary><div class="tree__item"><template></template><menu id="toolbar"></menu></div></summary>
-      <section id="treeList" class="tree__list"></section>
-    </details>`;
+    this.#toggle.classList.remove('tree--open');
+    this.#toggle.textContent = this.getNodeView().classList.contains('tree--leaf') ? '' : '►';
+    this.getStaticView('treeList')
+      .getElementView().classList.add('hidden');
   }
 
-  setOpen() {
-    this.getNodeView().open = true;
-  }
   setRoot() {
-    this.getNodeView().classList.remove('tree__node');
-    this.getNodeView().classList.add('tree__root');
+    this.getNodeView().classList.add('tree--root');
+  }
+  setLeaf(leaf) {
+    if (leaf) {
+      const classList = this.getNodeView().classList;
+      classList.remove('tree--node');
+      classList.add('tree--leaf');
+      this.#toggle.textContent = '';
+      return;
+    }
+    const classList = this.getNodeView().classList;
+    classList.remove('tree--leaf');
+    classList.add('tree--node');
+    this.#toggle.textContent = this.#toggle.classList.contains('tree--open') ? '▼' : '►';
   }
 
 }

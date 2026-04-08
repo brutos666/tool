@@ -97,21 +97,39 @@ details > summary::before {
 details[open] > summary::before {
   content: "▼";
 }
-.tree__root {
+
+.tree--root {
+  margin-bottom: 5px;
+  margin-right: 5px;
+  padding: 5px;
   box-shadow: 3px 3px 4px var(--box-shadow-color);
 }
-.tree__node {
+.tree--node:not(.tree--root) {
   padding-left: 20px;
 }
-.tree__leaf:not(.tree__root) {
+.tree--leaf:not(.tree--root) {
   display: block;
-  padding-left: 50px;
+  padding-left: 30px;
 }
+
+.tree__header {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 5px;
+}
+.tree__toggle {
+  cursor: pointer;
+  border: none;
+  background: none;
+  padding: 0;
+}
+
 .tree__item {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 5px;
 }
+
 /* -- fin gestion des arbres -- */
 .toolbar {
   flex: 1;

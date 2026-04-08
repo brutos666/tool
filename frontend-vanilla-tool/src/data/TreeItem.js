@@ -36,6 +36,7 @@ class TreeItem {
       nextId: itemInfos.nextId
     });
     this.#treeItemList = new TreeItemList(itemInfos.children);
+    this.#treeItemList.setParent(this);
   }
   setParent(parent) {
     this.#parent = parent;
@@ -59,10 +60,6 @@ class TreeItem {
     return this.#treeItemList;
   }
 
-  addItem(itemInfos) {
-    this.#treeItemList.addItem({ ...itemInfos, parentId: this.#item.id });
-  }
-
   /**
    * Met à jour la tâche en fonction de l'événement reçu
    * @param {string} property - Propriété de la tâche à mettre à jour
@@ -82,6 +79,10 @@ class TreeItem {
     }
   }
 
+  addItem(itemInfos) {
+    this.#treeItemList.addItem({ ...itemInfos, parentId: this.#item.id });
+  }
+
   updateItem(itemInfos) {
     const oldId = this.#item.id;
     Object.assign(this.#item, itemInfos);
@@ -92,16 +93,22 @@ class TreeItem {
           .updatePrevious(this);
       }
     }
-    for (const observer of this.#observers) {
-      observer.update('update', this);
-    }
+    this.alertObservers('update');
   }
   deleteItem() {
-    for (const observer of this.#observers) {
-      observer.update('delete', this);
-    }
+    this.alertObservers('delete');
     this.getParent()
       .removeItem(this);
+  }
+
+  /**
+   *
+   * @param {'update'|'delete'|'addItem'|'removeItem'} action
+   */
+  alertObservers(action) {
+    for (const observer of this.#observers) {
+      observer.update(action, this);
+    }
   }
 
   isLeaf() {

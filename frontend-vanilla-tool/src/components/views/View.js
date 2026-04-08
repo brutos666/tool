@@ -4,7 +4,9 @@ import { createNode } from '../../tools/NodeUtilities.js';
 
 class View {
 
+  /** @type {Element} */
   #nodeView;
+  /** @type {Element} */
   #elementView;
 
   /** @type {Object.<string, View>} */
@@ -49,6 +51,9 @@ class View {
     templateNode.classList.forEach(classItem => view.getElementView().classList.add(classItem));
     templateNode.parentNode.replaceChild(view.getNodeView(), templateNode);
     this.#staticViews[id] = view;
+  }
+  getStaticView(id) {
+    return this.#staticViews[id];
   }
 
   /**

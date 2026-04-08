@@ -62,9 +62,6 @@ class TreeList extends Composite {
       const item = new Item({ treeItem, layout: this.getLayout() });
       const commandItem = new CommandItemDecorator(item);
       const treeElement = new Tree(commandItem, { treeItem, layout: this.getLayout() });
-      if (treeItem.isRoot()) {
-        treeElement.setRoot();
-      }
       super.addChild(treeElement);
     });
   }

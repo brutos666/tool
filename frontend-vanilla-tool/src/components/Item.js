@@ -67,7 +67,7 @@ class Item extends Component {
 
   /**
    * Modification du modèle
-   * @param {'change'|'update'|'delete'} action
+   * @param {'change'|'update'|'delete'|'addChild'} action
    * @param {TreeItem} treeItem
    */
   update(action, treeItem) {
