@@ -2,7 +2,7 @@ import LoadItems from '../../commands/LoadItems.js';
 import CommandDecorator from './CommandDecorator.js';
 import CommandDecoratorView from './views/CommandDecoratorView.js';
 /** @import Items from '../Items.js'; */
-/** @typedef {import('../Item.js').ItemInfos} ItemInfos */
+/** @import {ItemInfos} from '../../data/TreeItem.js'; */
 
 class CommandItemsDecorator extends CommandDecorator {
 

@@ -1,9 +1,10 @@
 import TreeList from '../TreeList.js';
-import Decorator from './Decorator.js';
 import TreeView from './views/TreeView.js';
 import Toolbar from '../Toolbar.js';
 import ActionButton from '../ActionButton.js';
-/** @import Composite from '../Composite.js'; */
+import Decorator from './Decorator.js';
+/** @import Component from '../Component.js'; */
+/** @import TreeItem from '../../data/TreeItem.js'; */
 
 class Tree extends Decorator {
 
@@ -11,24 +12,34 @@ class Tree extends Decorator {
 
   #treeList;
 
+  #deleteAction;
+  #addAction;
+
+  /** @type {TreeItem} */
+  #treeItem;
+
   /**
    * @constructor
-   * @param {Composite} decoratedElement
+   * @param {Component} decoratedElement
+   * @param {Object} data
+   * @param {TreeItem} data.treeItem
+   * @param {VIEW_CHOICE} data.layout
    */
-  constructor(decoratedElement) {
-    super(new TreeView(decoratedElement.getView()), decoratedElement);
+  constructor(decoratedElement, data) {
+    super(new TreeView(decoratedElement.getView(), { leaf: data.treeItem.isLeaf() }), decoratedElement);
+    this.#treeItem = data.treeItem;
+
     const toolbar = new Toolbar();
-    const addNewChildAction = new ActionButton({ id: 'addNewChild', label: '+' });
-    // On ajoute l'élément au modèle
-    addNewChildAction.setDoActionCallback(decoratedElement.addNewChild.bind(this));
-    toolbar.addChild(addNewChildAction);
+    this.#addAction = new ActionButton({ id: 'addNewChild', label: '+' });
+    this.#addAction.setDoActionCallback(this.addNewChild.bind(this));
+    toolbar.addChild(this.#addAction);
+    this.#deleteAction = new ActionButton({ id: 'delete', label: 'X' });
+    this.#deleteAction.setDoActionCallback(this.doDelete.bind(this));
+    toolbar.addChild(this.#deleteAction);
     this.setStaticChild('toolbar', toolbar);
 
-    this.#treeList = new TreeList();
-    this.#treeList.setChildren(decoratedElement.getChildren());
+    this.#treeList = new TreeList(data.treeItem.getTreeItemList(), data.layout);
     this.setStaticChild('treeList', this.#treeList);
-
-    // TODO : transformation d'un noeud en feuille et inversement
   }
 
   /**
@@ -38,20 +49,29 @@ class Tree extends Decorator {
   getView() {
     return super.getView();
   }
-  /**
-   * @override
-   * @returns {Composite}
-   */
-  getDecoratedElement() {
-    return super.getDecoratedElement();
+
+  getTreeItem() {
+    return this.#treeItem;
   }
 
-  addChild(element) {
-    this.#treeList.addChild(element);
+  getTreeList() {
+    return this.#treeList;
   }
+
   addNewChild() {
-    super.addNewChild();
+    const isLeaf = this.#treeItem.isLeaf();
+    if (isLeaf) {
+      this.updateData({ leaf: true });
+      if (this.#treeItem.isRoot()) {
+        this.setRoot();
+      }
+    }
     this.setOpen();
+    this.#treeItem.addItem({ title: 'Nouvel item', state: 'TODO', children: [] });
+  }
+
+  doDelete() {
+    this.#treeItem.deleteItem();
   }
 
   setOpen() {

@@ -30,6 +30,15 @@ class NodeElement {
     return this.#view;
   }
 
+  changeView(data, view) {
+    const elementView = this.getElementView();
+    this.#view = view;
+    this.getView()
+      .setElementView(elementView);
+    this.getView()
+      .refreshView(data);
+  }
+
   /**
    * Retourne le noeud HTML contenant l'élément et des balises propres à tous les éléments
    * @returns {HTMLElement}
@@ -49,12 +58,36 @@ class NodeElement {
   }
 
   /**
-   * Met à jour les données d'un enfant
+   * Met à jour les données d'un enfant qui influent sur la vue
    * @param {Object} data - Données à mettre à jour
    */
   updateData(data) {
     this.getView()
       .refreshView(data);
+  }
+  setDisabled() {
+    this.getView()
+      .setDisabled();
+  }
+
+  setEnabled() {
+    this.getView()
+      .setEnabled();
+  }
+
+  isDisabled() {
+    return this.getView()
+      .isDisabled();
+  }
+
+  setHidden() {
+    this.getView()
+      .setHidden();
+  }
+
+  setVisible() {
+    this.getView()
+      .setVisible();
   }
 
 }

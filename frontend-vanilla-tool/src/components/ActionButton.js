@@ -4,6 +4,7 @@ import Component from './Component.js';
 import ActionButtonView from './views/ActionButtonView.js';
 class ActionButton extends Component {
 
+  name = 'ActionButton';
   /**
    * @constructor de la classe Button
    * @param {object} data - Informations pour afficher le bouton

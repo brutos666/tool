@@ -1,7 +1,7 @@
 'use strict';
 
 import CallRequest from './CallRequest.js';
-/** @import { ItemInfos } from '../components/Item.js' */
+/** @import {ItemInfos} from '../data/TreeItem.js'; */
 
 class ItemCallsRequests {
 

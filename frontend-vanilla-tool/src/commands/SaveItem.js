@@ -1,6 +1,7 @@
 import Command from './Command.js';
 import ItemCallsRequests from '../requests/ItemCallsRequests.js';
 /** @import Item from '../components/Item.js' */
+/** @import CommandItemDecorator from '../components/decorators/CommandItemDecorator.js' */
 
 class SaveItem extends Command {
 
@@ -8,11 +9,13 @@ class SaveItem extends Command {
 
   /**
    * @constructor de la classe CreateItem
-   * @param {Item} item - Item
+   * @param {CommandItemDecorator} commandItemDecorator - Item
    */
-  constructor(item) {
-    super(item);
-    if (item.isNew()) {
+  constructor(commandItemDecorator) {
+    super(commandItemDecorator);
+
+    const treeItem = commandItemDecorator.getTreeItem();
+    if (treeItem.isNew()) {
       this.setSuccessMessage('La tâche a bien été crée');
       this.setErrorMessage('Une erreur est survenue lors de la crée de la tâche');
     } else {
@@ -20,7 +23,7 @@ class SaveItem extends Command {
       this.setErrorMessage('Une erreur est survenue lors de la modification de la tâche');
     }
 
-    this.setExecuteCallback(new ItemCallsRequests().saveItem.bind(null, item.getItemInfos()));
+    this.setExecuteCallback(new ItemCallsRequests().saveItem.bind(null, treeItem.getItemInfos()));
   }
 
 }

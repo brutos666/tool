@@ -8,12 +8,18 @@ class TreeView extends DecoratorView {
   /**
    * @constructor
    * @param {View} view
+   * @param {Object} data
+   * @param {boolean} data.leaf
    */
-  constructor(view) {
-    super(view);
+  constructor(view, data) {
+    super(view, data);
   }
 
-  getHtmlView() {
+  getHtmlView(data) {
+    if (data.leaf) {
+      return String.raw`<div class="tree__leaf"><div class="tree__item"><template></template><menu id="toolbar"></menu>
+    <section id="treeList" class="tree__list"></section></div></div>`;
+    }
     return String.raw`<details class="tree__node">
       <summary><div class="tree__item"><template></template><menu id="toolbar"></menu></div></summary>
       <section id="treeList" class="tree__list"></section>

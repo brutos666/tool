@@ -1,6 +1,6 @@
-import CompositeView from './CompositeView.js';
+import View from './View.js';
 
-class NavTreeView extends CompositeView {
+class NavTreeView extends View {
 
   name = 'NavTreeView';
 

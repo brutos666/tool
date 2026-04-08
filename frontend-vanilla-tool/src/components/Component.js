@@ -16,6 +16,10 @@ class Component extends NodeElement {
     super(view);
   }
 
+  getOriginalElement() {
+    return this;
+  }
+
   /**
    * Appelé lorsque le composant est ajouté au parent
    * @param {Composite} parent - le parent du composant
@@ -30,32 +34,19 @@ class Component extends NodeElement {
     this.#parent = null;
   }
 
-  getParent() {
-    return this.#parent;
-  }
-  getPrevious() {
-    const index = this.#parent.getChildren()
-      .indexOf(this);
-    if (index === 0) {
-      return null;
-    }
-    return this.#parent.getChildren()[index - 1];
-  }
   /**
    * Retire le composant du parent
    */
-  doRemoveFromParent() {
-    this.#parent.removeChild(this);
+  removeFromParent() {
+    this.getParent()
+      .removeChild(this);
   }
-
-  setDisabled() {
-    this.getView()
-      .setDisabled();
-  }
-
-  setEnabled() {
-    this.getView()
-      .setEnabled();
+  /**
+   * Récupère le parent
+   * @returns {Composite}
+   */
+  getParent() {
+    return this.#parent;
   }
 
   isNode() {

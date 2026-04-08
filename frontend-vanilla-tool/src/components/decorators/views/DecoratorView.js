@@ -1,16 +1,16 @@
-import CompositeView from '../../views/CompositeView.js';
-/** @import View from '../../views/View.js'; */
+import View from '../../views/View.js';
 
-class DecoratorView extends CompositeView {
+class DecoratorView extends View {
 
   name = 'DecoratorView';
 
   /**
    * @constructor
    * @param {View} view
+   * @param {Object} data - Données à utiliser pour créer la vue
    */
-  constructor(view) {
-    super();
+  constructor(view, data) {
+    super(data);
     this.setDecoratedView(view);
   }
 
@@ -30,6 +30,16 @@ class DecoratorView extends CompositeView {
     oldView.parentNode.replaceChild(newView, oldView);
 
     super.setElementView(newView);
+  }
+
+  /** @override */
+  refreshView(data) {
+    const elementView = this.getElementView();
+    super.refreshView(data);
+    /** @type {Element} */
+    const oldView = this.getNodeView()
+      .querySelector('template');
+    oldView.parentNode.replaceChild(elementView, oldView);
   }
 
   getHtmlView(/* data */) {

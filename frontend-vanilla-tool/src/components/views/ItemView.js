@@ -1,6 +1,7 @@
 import { VIEW_CHOICE } from '../../tools/Constants.js';
 import View from './View.js';
-/** @typedef {import('../Item.js').ItemInfos} ItemInfos */
+/** @import TreeItem from '../../data/TreeItem.js' */
+/** @import {ItemInfos} from '../../data/TreeItem.js'; */
 
 class ItemView extends View {
 
@@ -10,91 +11,69 @@ class ItemView extends View {
   #title;
   #text;
   #done;
-  #doDelete;
 
-  #isNew;
-  #viewChoice;
-
-  #updateCallback = () => {};
-  #doneCallback = () => {};
-
-  #doDeleteCallback = () => {};
+  #onInputCallback = () => {};
+  #onDoneChangeCallback = () => {};
 
   /**
    * @param {Object} data - Données à utiliser pour créer la vue
-   * @param {ItemInfos} data.itemInfos - Informations sur la tache
-   * @param {VIEW_CHOICE} data.viewChoice - Affichage souhaité
+   * @param {TreeItem} data.treeItem - Informations sur la tache
+   * @param {VIEW_CHOICE} data.layout - Affichage souhaité
    */
   constructor(data) {
     super(data);
-    this.#viewChoice = data.viewChoice;
-    this.#isNew = data.itemInfos.id === undefined;
 
     this.majNodes();
-    this.setItemValues(data.itemInfos);
-    this.setContentEditable();
+    this.setItemValues(data.treeItem.getItemInfos());
   }
 
   /**
    * @override {@link View.getHtmlView}
    * @param {Object} data - Données à utiliser pour créer la vue
-   * @param {ItemInfos} data.itemInfos - Informations sur la tache
-   * @param {VIEW_CHOICE} data.viewChoice - Affichage souhaité
+   * @param {TreeItem} data.treeItem - Informations sur la tache
+   * @param {VIEW_CHOICE} data.layout - Affichage souhaité
    * @returns {string} - Code HTML du bouton
    */
   getHtmlView(data) {
-    return getHtmlArticle(data.itemInfos.id, data.viewChoice);
+    return getHtmlArticle(data.treeItem.getItemId(), data.layout);
   }
 
   /**
    * @override {@link View.refreshView}
    * @param {Object} data - Données à utiliser pour rafraîchir la vue
-   * @param {ItemInfos} data.itemInfos - Informations sur la tache
-   * @param {string} data.viewChoice - Affichage souhaité
+   * @param {TreeItem} data.treeItem - Informations sur la tache
+   * @param {VIEW_CHOICE} data.layout - Affichage souhaité
    */
   refreshView(data) {
     this.removeEventListeners();
     super.refreshView(data);
     this.majNodes();
-    this.setItemValues(data.itemInfos);
+    this.setItemValues(data.treeItem.getItemInfos());
     this.addEventListeners();
   }
 
   /**
-   * Positionne la fonction à appeler lorsqu'une action de suppression est effectuée
-   * @param {Function} doDeleteCallback - Fonction appelée lorsqu'une action de suppression est effectuée
-   */
-  setDoDeleteCallback(doDeleteCallback) {
-    if (!this.#doDelete) {
-      return;
-    }
-    this.#doDelete.removeEventListener('click', this.#doDeleteCallback);
-    this.#doDeleteCallback = doDeleteCallback;
-    this.#doDelete.addEventListener('click', this.#doDeleteCallback);
-  }
-
-  /**
    * Positionne la fonction à appeler lorsqu'une modification est effectuée (titre, texte, statut)
-   * @param {Function} updateCallback - Fonction appelée lorsqu'une modification est effectuée
+   * @param {Function} updateCallback - Fonction à appeler lorsqu'une modification est effectuée
    */
-  setUpdateCallback(updateCallback) {
-    this.#title.removeEventListener('input', this.#updateCallback);
-    this.#text.removeEventListener('input', this.#updateCallback);
-    this.#done.removeEventListener('change', this.#doneCallback);
+  setOnChangeCallback(updateCallback) {
+    this.#title.removeEventListener('input', this.#onInputCallback);
+    this.#text.removeEventListener('input', this.#onInputCallback);
+    this.#done.removeEventListener('change', this.#onDoneChangeCallback);
 
-    this.#updateCallback = event => {
+    this.#onInputCallback = event => {
       const property = event.target.getAttribute('id');
       const value = property === 'text' || property === 'title' ? event.target.innerHTML : event.target.value;
       updateCallback(property, value);
     };
-    this.#doneCallback = event => {
+    this.#onDoneChangeCallback = event => {
       const value = event.target.checked ? 'DONE' : 'TODO';
       updateCallback('state', value);
     };
 
-    this.#title.addEventListener('input', this.#updateCallback);
-    this.#text.addEventListener('input', this.#updateCallback);
-    this.#done.addEventListener('change', this.#doneCallback);
+    this.#title.addEventListener('input', this.#onInputCallback);
+    this.#text.addEventListener('input', this.#onInputCallback);
+    this.#done.addEventListener('change', this.#onDoneChangeCallback);
   }
 
   majNodes() {
@@ -103,12 +82,14 @@ class ItemView extends View {
     this.#title = mainNode.querySelector('#title');
     this.#text = mainNode.querySelector('#text');
     this.#done = mainNode.querySelector('#done');
-    this.#doDelete = mainNode.querySelector('#doDelete');
   }
 
+  /**
+   * Positionne les informations de la tâche sur les éléments
+   * @param {ItemInfos} itemInfos - Informations sur la tache
+   */
   setItemValues(itemInfos) {
-    this.setIdentify(itemInfos.id);
-
+    this.#identify.textContent = itemInfos.id === undefined ? '' : itemInfos.id;
     if (itemInfos.title) {
       this.#title.innerHTML = itemInfos.title;
     }
@@ -120,38 +101,30 @@ class ItemView extends View {
     }
   }
 
-  setIdentify(identify) {
-    this.#isNew = identify === undefined;
-    this.#identify.textContent = identify === undefined ? '' : identify;
-  }
-
-  setContentEditable() {
-    const contentEditable = this.#viewChoice === VIEW_CHOICE.Tree && !this.#isNew ? false : true;
-    if (contentEditable) {
-      this.getElementView().classList.remove('item--readonly');
-      this.#title.contenteditable = 'true';
-      this.#text.contenteditable = 'true';
-      this.#done.disabled = true;
-    } else {
+  setReadOnly(readOnly) {
+    if (readOnly) {
       this.getElementView().classList.add('item--readonly');
       this.#title.contenteditable = 'false';
       this.#text.contenteditable = 'false';
       this.#done.disabled = false;
+      return;
     }
+    this.getElementView().classList.remove('item--readonly');
+    this.#title.contenteditable = 'true';
+    this.#text.contenteditable = 'true';
+    this.#done.disabled = true;
   }
 
   addEventListeners() {
-    this.#title.addEventListener('input', this.#updateCallback);
-    this.#text.addEventListener('input', this.#updateCallback);
-    this.#done.addEventListener('change', this.#doneCallback);
-    this.#doDelete.addEventListener('click', this.#doDeleteCallback);
+    this.#title.addEventListener('input', this.#onInputCallback);
+    this.#text.addEventListener('input', this.#onInputCallback);
+    this.#done.addEventListener('change', this.#onDoneChangeCallback);
   }
 
   removeEventListeners() {
-    this.#title.removeEventListener('input', this.#updateCallback);
-    this.#text.removeEventListener('input', this.#updateCallback);
-    this.#done.removeEventListener('change', this.#doneCallback);
-    this.#doDelete.removeEventListener('click', this.#doDeleteCallback);
+    this.#title.removeEventListener('input', this.#onInputCallback);
+    this.#text.removeEventListener('input', this.#onInputCallback);
+    this.#done.removeEventListener('change', this.#onDoneChangeCallback);
   }
 
 }
@@ -159,11 +132,11 @@ class ItemView extends View {
 /**
  * Partie HTML décrivant l'item
  * @param {string} identify - Identifiant de la tâche
- * @param {VIEW_CHOICE} viewChoice - Affichage souhaité
+ * @param {VIEW_CHOICE} layout - Affichage souhaité
  * @returns {string} - Vue HTML de l'item
  */
-function getHtmlArticle(identify, viewChoice) {
-  const viewChoiceClass = getClassForViewChoice(viewChoice);
+function getHtmlArticle(identify, layout) {
+  const viewChoiceClass = getClassForViewChoice(layout);
   return String.raw`<article class="item__article ${ viewChoiceClass }">
         <span id="identify" class="item__identify">${ identify }</span>
         <input type="checkbox" id="done" class="item__done"/>
@@ -173,12 +146,12 @@ function getHtmlArticle(identify, viewChoice) {
 }
 /**
  * Retourne la classe CSS correspondant à la vue demandée
- * @param {VIEW_CHOICE} viewChoice - Vue demandée
+ * @param {VIEW_CHOICE} layout - Vue demandée
  * @returns {string} - Classe CSS correspondante
  * @example
  */
-function getClassForViewChoice(viewChoice) {
-  switch (viewChoice) {
+function getClassForViewChoice(layout) {
+  switch (layout) {
     case VIEW_CHOICE.Detail:
       return 'item--post-it';
     case VIEW_CHOICE.SampleMapping:

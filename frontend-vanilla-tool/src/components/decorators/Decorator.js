@@ -1,13 +1,13 @@
 import Component from '../Component.js';
-/** @import Composite from '../Composite.js'; */
 /** @import DecoratorView from './views/DecoratorView.js'; */
 
+/**
+ * NOTE : Il faut que le parent des décorateurs successifs soit le parent de l'élément décoré
+ */
 class Decorator extends Component {
 
   #decoratedElement;
-  #oldAddChild;
-  #oldAddNewChild;
-  #oldSetChildren;
+
   /**
    * @constructor
    * @param {DecoratorView} decoratorView
@@ -15,26 +15,11 @@ class Decorator extends Component {
    */
   constructor(decoratorView, decoratedElement) {
     super(decoratorView);
-
     this.#decoratedElement = decoratedElement;
-    // Remplacer éventuellement le comportement au composant d'origine en permettant de réécrire les méthode de gestion des enfants
-    if (decoratedElement.isNode()) {
-      this.#oldAddChild = decoratedElement.addChild.bind(decoratedElement);
-      decoratedElement.addChild = element => {
-        this.addChild(element);
-        // decoratedElement.addChild(element);
-      };
-      this.#oldAddNewChild = decoratedElement.addNewChild.bind(decoratedElement);
-      decoratedElement.addNewChild = () => {
-        this.addNewChild();
-        // decoratedElement.addNewChild();
-      };
-      this.#oldSetChildren = decoratedElement.setChildren.bind(decoratedElement);
-      decoratedElement.setChildren = children => {
-        this.setChildren(children);
-        // decoratedElement.setChildren(children);
-      };
-    }
+
+    this.#decoratedElement.removeFromParent = () => {
+      this.removeFromParent();
+    };
   }
 
   /**
@@ -45,18 +30,14 @@ class Decorator extends Component {
     return this.#decoratedElement;
   }
 
-  addChild(element) {
-    this.#oldAddChild(element);
-  }
-
-  addNewChild() {
-    this.#oldAddNewChild();
-  }
-
-  setChildren(children) {
-    this.#oldSetChildren(children);
+  /** @override */
+  getOriginalElement() {
+    let originalElement = this.getDecoratedElement();
+    while (originalElement instanceof Decorator) {
+      originalElement = originalElement.getDecoratedElement();
+    }
+    return originalElement;
   }
 
 }
-
 export default Decorator;

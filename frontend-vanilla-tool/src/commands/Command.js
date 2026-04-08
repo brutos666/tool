@@ -1,8 +1,9 @@
 /** @import NodeElement from './NodeElement.js' */
-/** @import CommandDecorator from './CommandDecorator.js' */
+/** @import CommandDecorator from '../components/decorators/CommandDecorator.js' */
 
 /**
  * Cette classe permet d'isoler les actions des composants. Cela permet qu'une touche de raccourci puisse faire la même chose qu'un bouton. Ici on va gérer les erreurs et on gérera le spinner
+ * Le décorateur doit contenir l'élément sur lequel agit la commande. Il va gérer le spinner, le message d'erreur, etc...
  */
 class Command {
 
@@ -20,6 +21,14 @@ class Command {
   constructor(commandDecoratorElement) {
     this.#commandDecoratorElement = commandDecoratorElement;
     this.#executeCallback = () => { return Promise.resolve(); };
+  }
+
+  /**
+   * Retourne le décorateur qui s'occupe du comportement d'une commande effectuée sur un item (spinner, erreur, etc...)
+   * @returns {CommandDecorator}
+   */
+  getCommandDecoratorElement() {
+    return this.#commandDecoratorElement;
   }
 
   /**
@@ -49,15 +58,20 @@ class Command {
    * @returns {Promise}
    */
   async execute() {
-    this.#commandDecoratorElement.commandInProgress(this.name);
+    const commandDecorator = this.getCommandDecoratorElement();
+    if (commandDecorator.isCommandInProgress()) {
+      alert('Attendre que la commande soit terminée !!');
+      return;
+    }
+    commandDecorator.commandInProgress(this.name);
     return this.#executeCallback()
       .then(response => {
-        this.#commandDecoratorElement.commandDone(this.name, response);
-        this.#commandDecoratorElement.setSuccess(this.#successMessage);
+        commandDecorator.commandDone(this.name, response);
+        commandDecorator.setSuccess(this.#successMessage);
         return Promise.resolve(response);
       }, errorResponse => {
-        this.#commandDecoratorElement.commandFailed(this.name);
-        this.#commandDecoratorElement.setError(`${ this.#errorMessage } : ${ errorResponse }`);
+        commandDecorator.commandFailed(this.name);
+        commandDecorator.setError(`${ this.#errorMessage } : ${ errorResponse }`);
         return Promise.reject(errorResponse);
       });
   }

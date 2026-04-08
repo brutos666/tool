@@ -1,6 +1,6 @@
-import CompositeView from './CompositeView.js';
+import View from './View.js';
 
-class WorkingSpaceView extends CompositeView {
+class WorkingSpaceView extends View {
 
   constructor() {
     super();
@@ -10,6 +10,7 @@ class WorkingSpaceView extends CompositeView {
 
   getHtmlView() {
     return String.raw`<div id="workingSpace" class="working-space">
+    <header class="working-space__header"><template id="toolbar"></template></header>
     <nav id="navSpace" class="working-space__nav"><template id="nav"></template></nav>
     <div id="splitter" class="working-space__splitter">&nbsp;</div>
     <main id="mainSpace"class="working-space__main"><template id="main"></template></main>

@@ -1,9 +1,10 @@
+import StoreData from '../data/StoreData.js';
 import { VIEW_CHOICE } from '../tools/Constants.js';
 import ActionButton from './ActionButton.js';
 import Component from './Component.js';
-import CommandItemsDecorator from './decorators/CommandItemsDecorator.js';
-import Items from './Items.js';
+import CommandLoadDecorator from './decorators/CommandLoadDecorator.js';
 import Toolbar from './Toolbar.js';
+import TreeList from './TreeList.js';
 import NavTreeView from './views/NavTreeView.js';
 /** @import Item from './Item.js' */
 
@@ -11,19 +12,19 @@ class NavTree extends Component {
 
   name = 'NavTree';
 
-  /** @type {Items} */
-  #items;
-
   constructor() {
     super(new NavTreeView());
 
-    this.#items = new Items(VIEW_CHOICE.Tree);
-    const itemsWithCommands = new CommandItemsDecorator(this.#items);
+    const items = new TreeList(StoreData.getTreeItems(), VIEW_CHOICE.Tree);
+    const itemsWithCommands = new CommandLoadDecorator(items);
     this.setStaticChild('treeItems', itemsWithCommands);
 
+    const reloadAction = new ActionButton({ id: 'reload', label: 'Rafraîchir' });
+    reloadAction.setDoActionCallback(itemsWithCommands.loadItems.bind(itemsWithCommands));
     const addNewItemAction = new ActionButton({ id: 'addNewSpace', label: '< Ajouter un espace >' });
     addNewItemAction.setDoActionCallback(this.addNewSpace.bind(this));
     const toolbar = new Toolbar();
+    toolbar.addChild(reloadAction);
     toolbar.addChild(addNewItemAction);
     this.setStaticChild('toolbar', toolbar);
 
@@ -39,7 +40,7 @@ class NavTree extends Component {
   }
 
   addNewSpace() {
-    this.#items.addNewItem();
+    StoreData.addRootItem({ id: undefined, title: 'Nouvel espace', text: '', state: 'TODO', parentId: -1, nextId: undefined, children: [] });
   }
 
 }

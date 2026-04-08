@@ -5,6 +5,8 @@ class CommandDecorator extends Decorator {
 
   name = 'CommandDecorator';
 
+  #commandInProgress = false;
+
   /**
    * @constructor
    * @param {CommandDecoratorView} view
@@ -22,14 +24,8 @@ class CommandDecorator extends Decorator {
     return super.getView();
   }
 
-  setError(value) {
-    this.getView()
-      .setError(value);
-  }
-
-  setSuccess(value) {
-    this.getView()
-      .setSuccess(value);
+  isCommandInProgress() {
+    return this.#commandInProgress;
   }
 
   /**
@@ -38,6 +34,9 @@ class CommandDecorator extends Decorator {
    */
   // eslint-disable-next-line no-unused-vars
   commandInProgress(name) {
+    this.#commandInProgress = true;
+    this.getDecoratedElement()
+      .setDisabled();
     this.getView()
       .showSpinner();
   }
@@ -49,6 +48,9 @@ class CommandDecorator extends Decorator {
    */
   // eslint-disable-next-line no-unused-vars
   commandDone(name, response) {
+    this.#commandInProgress = false;
+    this.getDecoratedElement()
+      .setEnabled();
     this.getView()
       .hideSpinner();
   }
@@ -60,8 +62,19 @@ class CommandDecorator extends Decorator {
    */
   // eslint-disable-next-line no-unused-vars
   commandFailed(name, error) {
+    this.#commandInProgress = false;
     this.getView()
-      .showSpinner();
+      .hideSpinner();
+  }
+
+  setError(value) {
+    this.getView()
+      .setError(value);
+  }
+
+  setSuccess(value) {
+    this.getView()
+      .setSuccess(value);
   }
 
 }

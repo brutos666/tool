@@ -4,7 +4,7 @@ import DecoratorView from './DecoratorView.js';
 
 class CommandDecoratorView extends DecoratorView {
 
-  name = 'CommandDecorator';
+  name = 'CommandDecoratorView';
 
   #messageView;
   /**
@@ -19,21 +19,23 @@ class CommandDecoratorView extends DecoratorView {
 
   getHtmlView() {
     return String.raw`<div class="command--decorator"><template></template>
-      <div class="message"></div></div>`;
+      <div class="message hidden"></div></div>`;
   }
 
   setError(value) {
     this.#messageView.textContent = value;
     this.#messageView.classList.add('error-mess');
-    this.#messageView.classList.remove('success-mess');
+    this.#messageView.classList.remove('error-mess');
+    this.#messageView.classList.remove('hidden');
   }
 
   setSuccess(value) {
     this.#messageView.textContent = value;
     this.#messageView.classList.remove('error-mess');
     this.#messageView.classList.add('success-mess');
+    this.#messageView.classList.remove('hidden');
     // Effacer le message au bout d'un peu de temps
-    setTimeout(() => this.#messageView.textContent = '', NOTIFICATION_TIMEOUT);
+    setTimeout(() => this.#messageView.classList.add('hidden'), NOTIFICATION_TIMEOUT);
   }
 
   showSpinner() {

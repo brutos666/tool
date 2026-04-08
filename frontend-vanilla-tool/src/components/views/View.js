@@ -70,8 +70,13 @@ class View {
   refreshView(data) {
     const htmlView = this.getHtmlView(data);
     const nodeElement = createNode(htmlView);
-    this.#elementView.parentNode.replaceChild(nodeElement, this.#elementView);
-    this.#elementView = nodeElement;
+    this.#nodeView.parentNode.replaceChild(nodeElement, this.#nodeView);
+    this.#nodeView = nodeElement;
+    for (const id in this.#staticViews) {
+      const view = this.#staticViews[id];
+      delete this.#staticViews[id];
+      this.setStaticView(id, view);
+    }
   }
 
   /**
@@ -96,6 +101,21 @@ class View {
 
   setEnabled() {
     this.getElementView().classList.remove('disabled');
+  }
+
+  isDisabled() {
+    return this.getElementView().classList.contains('disabled');
+  }
+
+  setHidden() {
+    this.getElementView().classList.add('hidden');
+  }
+  setVisible() {
+    this.getElementView().classList.remove('hidden');
+  }
+
+  isNode() {
+    return false;
   }
 
 }

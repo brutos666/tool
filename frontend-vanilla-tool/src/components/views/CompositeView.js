@@ -6,6 +6,10 @@ class CompositeView extends View {
   /** @type {Element} */
   #spaceChildren;
 
+  /**
+   * @constructor. Crée la vue à partir des données passées en paramètre
+   * @param {Object} data - Données à utiliser pour créer la vue
+   */
   constructor(data) {
     super(data);
     this.#spaceChildren = this.determinateSpaceChildren(this.getNodeView());
@@ -25,6 +29,10 @@ class CompositeView extends View {
     window.alert(`Erreur de conception : on tente d'accéder à un élément qui n'a pas été défini [spaceChildren]`);
     return document.createElement('div');
   }
+  /**
+   * Positionne l'espace d'ajout des enfants
+   * @param {Element} spaceChildren - Noeud HTML contenant les enfants
+   */
   setSpaceChildren(spaceChildren) {
     this.#spaceChildren = spaceChildren;
   }
@@ -109,6 +117,10 @@ class CompositeView extends View {
       return spaceChildren;
     }
     return null;
+  }
+
+  isNode() {
+    return true;
   }
 
 }
