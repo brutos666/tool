@@ -15,7 +15,8 @@ class NavTree extends Component {
   constructor() {
     super(new NavTreeView());
 
-    const items = new TreeList(StoreData.getTreeItems(), VIEW_CHOICE.Tree);
+    const items = new TreeList(StoreData.getTreeItem()
+      .getTreeItemList(), VIEW_CHOICE.Tree);
     const itemsWithCommands = new CommandLoadDecorator(items);
     this.setStaticChild('treeItems', itemsWithCommands);
 

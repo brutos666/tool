@@ -92,7 +92,6 @@ body {
   display: block;
   padding-left: 35px;
 }
-
 .tree--node .tree__header {
   display: grid;
   grid-template-columns: auto 1fr;
@@ -101,6 +100,9 @@ body {
 .tree--leaf .tree__header {
   display: grid;
   grid-template-columns: 1fr;
+}
+.tree--readonly .toolbar > button {
+  display: none;
 }
 .tree__toggle {
   cursor: pointer;

@@ -86,6 +86,10 @@ class TreeView extends DecoratorView {
     }
   }
 
+  setReadOnly() {
+    this.getNodeView().classList.add('tree--readonly');
+  }
+
 }
 
 export default TreeView;

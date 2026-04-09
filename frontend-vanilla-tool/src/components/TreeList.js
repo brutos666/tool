@@ -3,9 +3,9 @@ import CommandItemDecorator from './decorators/CommandItemDecorator.js';
 import Tree from './decorators/Tree.js';
 import Item from './Item.js';
 import TreeListView from './views/TreeListView.js';
+import { VIEW_CHOICE } from '../tools/Constants.js';
 /** @import TreeItem from '../data/TreeItem.js'; */
 /** @import TreeItemList from '../data/TreeItemList.js'; */
-/** @import { VIEW_CHOICE } from '../tools/Constants.js'; */
 
 class TreeList extends Composite {
 
@@ -73,6 +73,10 @@ class TreeList extends Composite {
       const item = new Item({ treeItem, layout: this.getLayout() });
       const commandItem = new CommandItemDecorator(item);
       const treeElement = new Tree(commandItem, { treeItem, layout: this.getLayout() });
+      if (this.getLayout() === VIEW_CHOICE.Tree && !treeItem.isRoot()) {
+        item.setReadOnly();
+        treeElement.setReadOnly();
+      }
       super.addChild(treeElement);
     });
   }

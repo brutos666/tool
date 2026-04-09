@@ -22,7 +22,7 @@ class CheckList extends Component {
     this.#text = new Text({ text: 'Check List' });
     this.setStaticChild('name', this.#text);
 
-    this.#treeList = new TreeList(new TreeItemList([]), VIEW_CHOICE.TodoList);
+    this.#treeList = new TreeList(new TreeItemList(), VIEW_CHOICE.TodoList);
     const itemsWithCommands = new CommandItemsDecorator(this.#treeList);
     this.setStaticChild('todoItems', itemsWithCommands);
 

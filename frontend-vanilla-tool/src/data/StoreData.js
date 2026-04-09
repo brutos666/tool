@@ -1,28 +1,29 @@
-import TreeItemList from './TreeItemList.js';
+import TreeItem from './TreeItem.js';
 /** @import {ItemInfos} from './TreeItem.js'; */
 
 class StoreData {
 
   static init() {
-    window._treeItems = new TreeItemList([]);
+    window._treeItem = new TreeItem({ id: -1, title: 'Racine', state: 'TODO', children: [] });
   }
-
-  /** @returns {TreeItemList} */
-  static getTreeItems() {
-    return window._treeItems;
+  /** @returns {TreeItem} */
+  static getTreeItem() {
+    return window._treeItem;
   }
 
   /**
    * @param {Array<ItemInfos>} itemInfosList
    */
   static storeItems(itemInfosList) {
-    StoreData.getTreeItems()
-      .setItems(itemInfosList);
+    const treeItem = StoreData.getTreeItem();
+    treeItem.getTreeItemList()
+      .setItems(treeItem, itemInfosList);
   }
 
   static addRootItem(itemInfos) {
-    StoreData.getTreeItems()
-      .addItem(itemInfos);
+    const treeItem = StoreData.getTreeItem();
+    treeItem.getTreeItemList()
+      .addItem(treeItem, itemInfos);
   }
 
 }

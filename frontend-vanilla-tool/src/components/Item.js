@@ -81,10 +81,16 @@ class Item extends Component {
    */
   update(action, treeItem) {
     if (action === 'update') {
-      this.updateData({ treeItem, layout: this.#layout });
+      this.getView()
+        .setItemValues(treeItem.getItemInfos());
     } else if (action === 'delete') {
       this.removeFromParent();
     }
+  }
+
+  setReadOnly(readonly) {
+    this.getView()
+      .setReadOnly(readonly);
   }
 
 }

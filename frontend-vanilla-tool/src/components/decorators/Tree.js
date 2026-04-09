@@ -88,6 +88,11 @@ class Tree extends Decorator {
       .setRoot();
   }
 
+  setReadOnly() {
+    this.getView()
+      .setReadOnly();
+  }
+
   /**
    * Modification du modèle
    * @param {'change'|'update'|'delete'|'addItem'|'removeItem'} action

@@ -12,6 +12,8 @@ class ItemView extends View {
   #text;
   #done;
 
+  #readOnly = false;
+
   #onInputCallback = () => {};
   #onDoneChangeCallback = () => {};
 
@@ -22,6 +24,8 @@ class ItemView extends View {
    */
   constructor(data) {
     super(data);
+    const viewChoiceClass = getClassForViewChoice(data.layout);
+    this.getElementView().classList.add(viewChoiceClass);
 
     this.majNodes();
     this.setItemValues(data.treeItem.getItemInfos());
@@ -29,13 +33,15 @@ class ItemView extends View {
 
   /**
    * @override {@link View.getHtmlView}
-   * @param {Object} data - Données à utiliser pour créer la vue
-   * @param {TreeItem} data.treeItem - Informations sur la tache
-   * @param {VIEW_CHOICE} data.layout - Affichage souhaité
-   * @returns {string} - Code HTML du bouton
+   * @returns {string} - Code HTML de l'item
    */
-  getHtmlView(data) {
-    return getHtmlArticle(data.treeItem.getItemId(), data.layout);
+  getHtmlView() {
+    return String.raw`<article class="item__article">
+          <span id="identify" class="item__identify"></span>
+          <input type="checkbox" id="done" class="item__done"/>
+          <div contenteditable="true" class="item__title" id="title"></div>
+          <div contenteditable="true" class="item__text" id="text"></div>
+      </article>`;
   }
 
   /**
@@ -50,6 +56,9 @@ class ItemView extends View {
     this.majNodes();
     this.setItemValues(data.treeItem.getItemInfos());
     this.addEventListeners();
+    if (this.#readOnly) {
+      this.setReadOnly();
+    }
   }
 
   /**
@@ -101,18 +110,12 @@ class ItemView extends View {
     }
   }
 
-  setReadOnly(readOnly) {
-    if (readOnly) {
-      this.getElementView().classList.add('item--readonly');
-      this.#title.contenteditable = 'false';
-      this.#text.contenteditable = 'false';
-      this.#done.disabled = false;
-      return;
-    }
-    this.getElementView().classList.remove('item--readonly');
-    this.#title.contenteditable = 'true';
-    this.#text.contenteditable = 'true';
-    this.#done.disabled = true;
+  setReadOnly() {
+    this.#readOnly = true;
+    this.getElementView().classList.add('item--readonly');
+    this.#title.contenteditable = 'false';
+    this.#text.contenteditable = 'false';
+    this.#done.disabled = false;
   }
 
   addEventListeners() {
@@ -129,21 +132,6 @@ class ItemView extends View {
 
 }
 
-/**
- * Partie HTML décrivant l'item
- * @param {string} identify - Identifiant de la tâche
- * @param {VIEW_CHOICE} layout - Affichage souhaité
- * @returns {string} - Vue HTML de l'item
- */
-function getHtmlArticle(identify, layout) {
-  const viewChoiceClass = getClassForViewChoice(layout);
-  return String.raw`<article class="item__article ${ viewChoiceClass }">
-        <span id="identify" class="item__identify">${ identify }</span>
-        <input type="checkbox" id="done" class="item__done"/>
-        <div contenteditable="true" class="item__title" id="title"></div>
-        <div contenteditable="true" class="item__text" id="text"></div>
-    </article>`;
-}
 /**
  * Retourne la classe CSS correspondant à la vue demandée
  * @param {VIEW_CHOICE} layout - Vue demandée

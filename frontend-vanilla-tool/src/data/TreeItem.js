@@ -20,8 +20,8 @@ class TreeItem {
   #item;
   /** @type {TreeItemList} */
   #treeItemList;
-  /** @type {TreeItemList} */
-  #parent;
+  /** @type {TreeItem} */
+  #parentItem;
 
   #observers = [];
   #updates = {};
@@ -35,15 +35,16 @@ class TreeItem {
       parentId: itemInfos.parentId,
       nextId: itemInfos.nextId
     });
-    this.#treeItemList = new TreeItemList(itemInfos.children);
-    this.#treeItemList.setParent(this);
+    this.#treeItemList = new TreeItemList();
+    this.#treeItemList.setItems(this, itemInfos.children);
   }
-  setParent(parent) {
-    this.#parent = parent;
+  setParentItem(parentItem) {
+    this.#parentItem = parentItem;
   }
-  getParent() {
-    return this.#parent;
+  getParentItem() {
+    return this.#parentItem;
   }
+
   getItemId() {
     return this.#item.id;
   }
@@ -80,7 +81,21 @@ class TreeItem {
   }
 
   addItem(itemInfos) {
-    this.#treeItemList.addItem({ ...itemInfos, parentId: this.#item.id });
+    this.#treeItemList.addItem(this, { ...itemInfos, parentId: this.#item.id });
+    this.alertObservers('addItem');
+  }
+
+  /**
+   * Suppression d'un item
+   * @param {TreeItem} treeItemToRemove - Item à supprimer
+   */
+  removeItem(treeItemToRemove) {
+    this.#treeItemList.removeItem(treeItemToRemove);
+    this.alertObservers('removeItem');
+  }
+
+  updatePrevious(treeItem) {
+    this.#treeItemList.updatePrevious(treeItem);
   }
 
   updateItem(itemInfos) {
@@ -89,7 +104,7 @@ class TreeItem {
     for (const key in itemInfos) {
       delete this.#updates[key];
       if (key === 'id' && itemInfos[key] !== oldId) {
-        this.getParent()
+        this.getParentItem()
           .updatePrevious(this);
       }
     }
@@ -97,7 +112,7 @@ class TreeItem {
   }
   deleteItem() {
     this.alertObservers('delete');
-    this.getParent()
+    this.getParentItem()
       .removeItem(this);
   }
 
