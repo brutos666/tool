@@ -123,6 +123,16 @@ class View {
     return false;
   }
 
+  dispatchEvent(event) {
+    this.getElementView()
+      .dispatchEvent(event);
+  }
+
+  addEventListener(event, callback) {
+    this.getElementView()
+      .addEventListener(event, callback);
+  }
+
 }
 
 export default View;

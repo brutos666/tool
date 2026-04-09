@@ -9,6 +9,7 @@ import Decorator from './Decorator.js';
 class Tree extends Decorator {
 
   name = 'Tree';
+  static EVENTS = { focus: 'treeItemFocus' };
 
   #treeList;
 
@@ -26,9 +27,15 @@ class Tree extends Decorator {
    * @param {VIEW_CHOICE} data.layout
    */
   constructor(decoratedElement, data) {
-    super(new TreeView(decoratedElement.getView(), { treeItem: data.treeItem }), decoratedElement);
+    super(new TreeView(decoratedElement.getView()), decoratedElement);
     this.#treeItem = data.treeItem;
     this.#treeItem.addObserver(this);
+
+    this.getView()
+      .setOnFocusCallback(() => {
+        this.getView()
+          .dispatchEvent(new CustomEvent(Tree.EVENTS.focus, { bubbles: true, detail: this.#treeItem }));
+      });
 
     const toolbar = new Toolbar();
     this.#addAction = new ActionButton({ id: 'addNewChild', label: '+' });

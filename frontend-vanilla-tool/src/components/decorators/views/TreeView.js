@@ -6,43 +6,46 @@ class TreeView extends DecoratorView {
   name = 'TreeView';
 
   #toggle;
+  #treeItem;
+
+  #onFocusCallback = () => {};
 
   /**
    * @constructor
    * @param {View} view
-   * @param {Object} data
-   * @param {boolean} data.leaf
-   * @param {boolean} data.root
    */
-  constructor(view, data) {
-    super(view, data);
+  constructor(view) {
+    super(view);
 
     const nodeView = this.getNodeView();
-
     this.#toggle = nodeView.querySelector('#toggle');
     this.#toggle.addEventListener('click', () => {
       this.setOpen(!this.#toggle.classList.contains('tree--open'));
     });
-    nodeView.addEventListener('focus', this.onFocus.bind(this), true);
-    nodeView.addEventListener('blur', this.onBlur.bind(this), true);
+    this.#treeItem = nodeView.querySelector('#treeItem');
+    this.#treeItem.addEventListener('focus', this.onFocus.bind(this), true);
+    this.#treeItem.addEventListener('blur', this.onBlur.bind(this), true);
+  }
+
+  setOnFocusCallback(onFocusCallback) {
+    this.#onFocusCallback = onFocusCallback;
   }
 
   getHtmlView() {
     return String.raw`<div class="tree">
-      <section class="tree__header"><button id="toggle" class="tree__toggle">▼</button><div class="tree__item"><template></template><menu id="toolbar"></menu></div></section>
+      <section class="tree__header"><button id="toggle" class="tree__toggle">▼</button><div id="treeItem" class="tree__item"><template></template><menu id="toolbar"></menu></div></section>
       <section id="treeList" class="tree__list"></section></div>`;
   }
 
   onFocus(event) {
-    if (!this.getNodeView()
-      .contains(event.relatedTarget)) {
+    if (!this.#treeItem.contains(event.relatedTarget)) {
       this.setFocused(true);
+      this.#onFocusCallback();
     }
   }
 
   onBlur(event) {
-    if (!this.getNodeView()
-      .contains(event.relatedTarget)) {
+    if (!this.#treeItem.contains(event.relatedTarget)) {
       this.setFocused(false);
     }
   }
@@ -88,6 +91,7 @@ class TreeView extends DecoratorView {
 
   setReadOnly() {
     this.getNodeView().classList.add('tree--readonly');
+    this.#treeItem.setAttribute('tabindex', 0);
   }
 
 }
