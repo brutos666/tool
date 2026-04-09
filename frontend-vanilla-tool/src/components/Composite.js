@@ -35,6 +35,10 @@ class Composite extends Component {
     return this.#children;
   }
 
+  getLastChild() {
+    return this.#children[this.#children.length - 1];
+  }
+
   /**
    * Ajoute un enfant. La vue du composant est ajouté au DOM dans l'espace dédié (#spaceChildren)
    * @param {Component} element : noeud

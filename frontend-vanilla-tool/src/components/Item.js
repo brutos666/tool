@@ -8,6 +8,7 @@ import Component from './Component.js';
 class Item extends Component {
 
   name = 'Item';
+  static EVENTS = { focus: 'itemFocus' };
 
   /** @type {TreeItem} */
   #treeItem = null;
@@ -27,6 +28,14 @@ class Item extends Component {
 
     this.getView()
       .setOnChangeCallback(this.setPropertyValue.bind(this));
+
+    const nodeView = this.getNodeView();
+    nodeView.addEventListener('focus', event => {
+      if (!this.getNodeView()
+        .contains(event.relatedTarget)) {
+        nodeView.dispatchEvent(new CustomEvent(Item.EVENTS.focus, { bubbles: true, detail: this.getTreeItem() }));
+      }
+    }, true);
   }
 
   /**

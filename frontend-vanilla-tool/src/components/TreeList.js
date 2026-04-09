@@ -32,6 +32,17 @@ class TreeList extends Composite {
   getTreeItemList() {
     return this.#treeItemList;
   }
+  setTreeItemList(treeItemList) {
+    this.#treeItemList.removeObserver(this);
+    treeItemList.addObserver(this);
+    this.#treeItemList = treeItemList;
+    this.removeAllChildren();
+    this.addItems(treeItemList.getTreeList());
+    for (const tree of this.getChildren()) {
+      tree.setRoot();
+      tree.setOpen(true);
+    }
+  }
 
   /**
    * Modification du modèle

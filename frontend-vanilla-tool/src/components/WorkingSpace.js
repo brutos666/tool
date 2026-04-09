@@ -3,6 +3,7 @@ import CheckList from './CheckList.js';
 import NavTree from './NavTree.js';
 import WorkingSpaceView from './views/WorkingSpaceView.js';
 import Toolbar from './Toolbar.js';
+import Item from './Item.js';
 
 class WorkingSpace extends Composite {
 
@@ -18,6 +19,12 @@ class WorkingSpace extends Composite {
     this.#checkList = new CheckList();
     this.setStaticChild('nav', this.#navTree);
     this.setStaticChild('main', this.#checkList);
+
+    this.#navTree.getView()
+      .getNodeView()
+      .addEventListener(Item.EVENTS.focus, event => {
+        this.#checkList.setTreeItem(event.detail);
+      });
   }
 
 }

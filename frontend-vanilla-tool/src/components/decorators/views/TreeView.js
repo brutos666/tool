@@ -17,17 +17,34 @@ class TreeView extends DecoratorView {
   constructor(view, data) {
     super(view, data);
 
-    this.#toggle = this.getNodeView()
-      .querySelector('#toggle');
+    const nodeView = this.getNodeView();
+
+    this.#toggle = nodeView.querySelector('#toggle');
     this.#toggle.addEventListener('click', () => {
       this.setOpen(!this.#toggle.classList.contains('tree--open'));
     });
+    nodeView.addEventListener('focus', this.onFocus.bind(this), true);
+    nodeView.addEventListener('blur', this.onBlur.bind(this), true);
   }
 
   getHtmlView() {
     return String.raw`<div class="tree">
       <section class="tree__header"><button id="toggle" class="tree__toggle">▼</button><div class="tree__item"><template></template><menu id="toolbar"></menu></div></section>
       <section id="treeList" class="tree__list"></section></div>`;
+  }
+
+  onFocus(event) {
+    if (!this.getNodeView()
+      .contains(event.relatedTarget)) {
+      this.setFocused(true);
+    }
+  }
+
+  onBlur(event) {
+    if (!this.getNodeView()
+      .contains(event.relatedTarget)) {
+      this.setFocused(false);
+    }
   }
 
   setOpen(open) {
@@ -52,13 +69,21 @@ class TreeView extends DecoratorView {
       const classList = this.getNodeView().classList;
       classList.remove('tree--node');
       classList.add('tree--leaf');
-      this.#toggle.textContent = '';
+      this.#toggle.classList.add('hidden');
       return;
     }
     const classList = this.getNodeView().classList;
     classList.remove('tree--leaf');
     classList.add('tree--node');
-    this.#toggle.textContent = this.#toggle.classList.contains('tree--open') ? '▼' : '►';
+    this.#toggle.classList.remove('hidden');
+  }
+
+  setFocused(focused) {
+    if (focused) {
+      this.getNodeView().classList.add('focused');
+    } else {
+      this.getNodeView().classList.remove('focused');
+    }
   }
 
 }

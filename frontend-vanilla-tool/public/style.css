@@ -3,7 +3,7 @@
   --color: light-dark(#202222, #e0e0e0);
   --background-color: light-dark(#959595, #202222);
   --border-color: light-dark(#5d5d5d, #5d5d5d);
-  --focus-color: light-dark(blue, blue);
+  --focus-color: light-dark(blue, rgb(0, 238, 255));
   --selected-color: light-dark(orange, orange);
   --error-color: light-dark(red, red);
   --success-color: light-dark(green, green);
@@ -79,25 +79,6 @@ body {
 }
 
 /* -- gestion des arbres -- */
-details > summary {
-  /* permet de supprimer l'icône d'ouverture fermeture par défaut pour éviter des soucis de positionnement*/
-  display: grid;
-  grid-template-columns: 30px auto;
-  align-items: center;
-}
-details > summary::before {
-  content: "►";
-  float: left;
-  font-size: 1em;
-  font-weight: bold;
-  text-align: center;
-  width: 30px;
-  cursor: pointer;
-}
-details[open] > summary::before {
-  content: "▼";
-}
-
 .tree--root {
   margin-bottom: 5px;
   margin-right: 5px;
@@ -109,13 +90,17 @@ details[open] > summary::before {
 }
 .tree--leaf:not(.tree--root) {
   display: block;
-  padding-left: 30px;
+  padding-left: 35px;
 }
 
-.tree__header {
+.tree--node .tree__header {
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 5px;
+}
+.tree--leaf .tree__header {
+  display: grid;
+  grid-template-columns: 1fr;
 }
 .tree__toggle {
   cursor: pointer;
@@ -123,14 +108,20 @@ details[open] > summary::before {
   background: none;
   padding: 0;
 }
-
 .tree__item {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 5px;
 }
-
+.tree-list__space {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 5px;
+  margin-top: 5px;
+}
 /* -- fin gestion des arbres -- */
+
 .toolbar {
   flex: 1;
 }
@@ -164,6 +155,9 @@ details[open] > summary::before {
 }
 
 /* -- Affichage commun des items -- */
+[contenteditable]:not(.item--readonly):focus {
+  outline: var(--focus-color) solid 1px;
+}
 .item--readonly {
   cursor: default;
   user-select: none;
@@ -172,6 +166,7 @@ details[open] > summary::before {
 }
 .item__article:not(.item--readonly) .item__title {
   border: var(--border-color) solid 1px;
+  margin: 1px;
 }
 
 /* -- Affichage item en mode consultation arbre */
@@ -181,6 +176,7 @@ details[open] > summary::before {
   flex-direction: row;
   flex-wrap: wrap;
   overflow: auto;
+  gap: 25px;
 }
 .item--tree .item__title {
   flex: 1;
@@ -215,11 +211,11 @@ details[open] > summary::before {
 
 /* -- Affichage comme un todo -- */
 .item--todo.item__article {
-  flex: 1;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
   overflow: auto;
+  gap: 5px;
 }
 .item--todo .item__identify {
   display: none;
