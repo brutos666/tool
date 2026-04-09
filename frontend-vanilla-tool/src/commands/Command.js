@@ -63,11 +63,18 @@ class Command {
       alert('Attendre que la commande soit terminée !!');
       return;
     }
+    if (commandDecorator.getRelaunchCallback() === null) {
+      commandDecorator.setRelaunchCallback(() => {
+        this.execute();
+      });
+    }
     commandDecorator.commandInProgress(this.name);
+    commandDecorator.setInProgress();
     return this.#executeCallback()
       .then(response => {
         commandDecorator.commandDone(this.name, response);
         commandDecorator.setSuccess(this.#successMessage);
+        commandDecorator.setRelaunchCallback(null);
         return Promise.resolve(response);
       }, errorResponse => {
         commandDecorator.commandFailed(this.name);

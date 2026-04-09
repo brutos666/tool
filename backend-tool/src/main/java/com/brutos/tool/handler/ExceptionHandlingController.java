@@ -24,9 +24,11 @@ public class ExceptionHandlingController {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorWebResult handleError(HttpServletRequest req, Exception ex) {
         logger.error(new ParameterizedMessage(REQUEST, req.getRequestURI()), ex);
-        return new ErrorWebResult(HttpStatus.INTERNAL_SERVER_ERROR,
-                "Erreur interne :" + ex.getMessage() + "\n Cause :" + ex.getCause().getMessage(),
-                req.getRequestURI());
+        String errorMessage = "Erreur interne :" + ex.getMessage();
+        if (ex.getCause() != null) {
+            errorMessage += "\n Cause :" + ex.getCause().getMessage();
+        }
+        return new ErrorWebResult(HttpStatus.INTERNAL_SERVER_ERROR, errorMessage, req.getRequestURI());
     }
 
     @ExceptionHandler(DateTimeParseException.class)

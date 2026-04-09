@@ -7,6 +7,8 @@ class CommandDecoratorView extends DecoratorView {
   name = 'CommandDecoratorView';
 
   #messageView;
+  #timeoutID;
+
   /**
    * @constructor
    * @param {View} view
@@ -19,14 +21,22 @@ class CommandDecoratorView extends DecoratorView {
 
   getHtmlView() {
     return String.raw`<div class="command--decorator"><template></template>
-      <div class="message hidden"></div></div>`;
+      <div class="message hidden"></div><template id="relaunch"></template>
+      </div>`;
   }
 
+  clearMessage() {
+    this.#messageView.textContent = '';
+    this.#messageView.classList.remove('success-mess');
+    this.#messageView.classList.remove('error-mess');
+    this.#messageView.classList.add('hidden');
+  }
   setError(value) {
     this.#messageView.textContent = value;
     this.#messageView.classList.add('error-mess');
-    this.#messageView.classList.remove('error-mess');
+    this.#messageView.classList.remove('success-mess');
     this.#messageView.classList.remove('hidden');
+    clearTimeout(this.#timeoutID);
   }
 
   setSuccess(value) {
@@ -35,7 +45,7 @@ class CommandDecoratorView extends DecoratorView {
     this.#messageView.classList.add('success-mess');
     this.#messageView.classList.remove('hidden');
     // Effacer le message au bout d'un peu de temps
-    setTimeout(() => this.#messageView.classList.add('hidden'), NOTIFICATION_TIMEOUT);
+    this.#timeoutID = setTimeout(() => this.#messageView.classList.add('hidden'), NOTIFICATION_TIMEOUT);
   }
 
   showSpinner() {

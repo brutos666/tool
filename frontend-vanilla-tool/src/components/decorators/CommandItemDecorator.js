@@ -1,4 +1,3 @@
-import ActionButton from '../ActionButton.js';
 import CommandDecorator from './CommandDecorator.js';
 import CommandItemDecoratorView from './views/CommandItemDecoratorView.js';
 import SaveItem from '../../commands/SaveItem.js';
@@ -50,6 +49,19 @@ class CommandItemDecorator extends CommandDecorator {
   /**
    * @override
    * @param {string} name - Nom de la commande
+   */
+  commandInProgress(name) {
+    super.commandInProgress(name);
+
+    if (name === 'SaveItem') {
+      // Ne plus lancer la sauvegarde lors de la perte de focus tant que la commande est en cours
+      this.getView()
+        .setOnBlurCallback(() => {});
+    }
+  }
+  /**
+   * @override
+   * @param {string} name - Nom de la commande
    * @param {ItemInfos} itemInfos - Informations sur la tache
    */
   commandDone(name, itemInfos) {
@@ -57,20 +69,8 @@ class CommandItemDecorator extends CommandDecorator {
 
     if (name === 'SaveItem') {
       this.#treeItem.updateItem(itemInfos);
-    }
-  }
-
-  /**
-   * @override
-   */
-  commandFailed(name) {
-    super.commandFailed(name);
-
-    if (name === 'SaveItem') {
-      // Ne plus lancer la sauvegarde lors de la perte de focus sur l'item tant que l'erreur n'a pas été résolue
       this.getView()
-        .setOnBlurCallback(() => {});
-      this.addChild(getRelaunchSaveButton());
+        .setOnBlurCallback(this.doSave.bind(this));
     }
   }
 
@@ -79,14 +79,23 @@ class CommandItemDecorator extends CommandDecorator {
    */
   doSave() {
     if (this.#treeItem.isNew() || this.#treeItem.isModified()) {
+      this.setRelaunchCallback(() => {
+        this.doSave();
+      });
       return new SaveItem(this)
         .execute();
     }
   }
 
-  doDelete() {
-    return new DeleteItem(this)
-      .execute();
+  doDelete(action, treeItem) {
+    this.setRelaunchCallback(() => {
+      this.doDelete(action, treeItem);
+    });
+    new DeleteItem(this)
+      .execute()
+      .then(() => {
+        this.#item.update(action, treeItem);
+      });
   }
 
   /**
@@ -103,34 +112,10 @@ class CommandItemDecorator extends CommandDecorator {
         this.doSave();
       }
     } else if (action === 'delete') {
-      this.doDelete()
-        .then(() => {
-          this.#item.update(action, treeItem);
-        });
+      this.doDelete(action, treeItem);
     }
   }
 
 }
-/**
- * Ajout d'un bouton pour lancer la sauvegarde manuellement
- * @this {CommandItemDecorator}
- */
-function getRelaunchSaveButton() {
-  /*
-   * Si la sauvegarde a échouée, c'est qu'il y a un problème à résoudre. On ne peut pas relancer la sauvegarde automatique tant que le problème est pas résolu. Ajout d'un bouton pour relancer la sauvegarde
-   */
-  const saveButton = new ActionButton({
-    id: 'saveButton',
-    label: 'Relancer la sauvegarde'
-  });
-  saveButton.setDoActionCallback(() => {
-    this.doSave()
-      .then(() => {
-        saveButton.removeFromParent();
-        this.getView()
-          .setOnBlurCallback(this.doSave.bind(this));
-      });
-  });
-  return saveButton;
-}
+
 export default CommandItemDecorator;
