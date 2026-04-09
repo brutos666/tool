@@ -18,12 +18,17 @@ class Item extends Component {
    * @param {Object} data - Données à utiliser pour créer la vue
    * @param {TreeItem} data.treeItem - Informations sur la tache
    * @param {VIEW_CHOICE} data.layout - Affichage souhaité
+   * @param {boolean} data.readOnly - Interdit la modification de la tâche
    */
   constructor(data) {
     super(new ItemView(data));
     this.#treeItem = data.treeItem;
     this.#layout = data.layout;
     this.#treeItem.addObserver(this);
+
+    if (data.readOnly) {
+      this.setReadOnly();
+    }
 
     this.getView()
       .setOnChangeCallback(this.setPropertyValue.bind(this));

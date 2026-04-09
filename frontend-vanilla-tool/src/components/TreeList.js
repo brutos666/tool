@@ -3,7 +3,7 @@ import CommandItemDecorator from './decorators/CommandItemDecorator.js';
 import Tree from './decorators/Tree.js';
 import Item from './Item.js';
 import TreeListView from './views/TreeListView.js';
-import { VIEW_CHOICE } from '../tools/Constants.js';
+import { RIGHT, VIEW_CHOICE } from '../tools/Constants.js';
 /** @import TreeItem from '../data/TreeItem.js'; */
 /** @import TreeItemList from '../data/TreeItemList.js'; */
 
@@ -69,14 +69,12 @@ class TreeList extends Composite {
    * @param {Array<TreeItem>} treeList
    */
   addItems(treeList) {
+    const itemRights = this.getLayout() === VIEW_CHOICE.Tree ? [] : [ RIGHT.create, RIGHT.update, RIGHT.delete ];
     treeList.forEach(treeItem => {
-      const item = new Item({ treeItem, layout: this.getLayout() });
+      const rights = treeItem.isRoot() ? [ RIGHT.update, RIGHT.delete ] : itemRights;
+      const item = new Item({ treeItem, layout: this.getLayout(), readOnly: !rights.includes(RIGHT.update) });
       const commandItem = new CommandItemDecorator(item);
-      const treeElement = new Tree(commandItem, { treeItem, layout: this.getLayout() });
-      if (this.getLayout() === VIEW_CHOICE.Tree && !treeItem.isRoot()) {
-        item.setReadOnly();
-        treeElement.setReadOnly();
-      }
+      const treeElement = new Tree(commandItem, { treeItem, layout: this.getLayout(), rights });
       super.addChild(treeElement);
     });
   }

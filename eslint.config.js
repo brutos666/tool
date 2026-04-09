@@ -55,7 +55,7 @@ export default [
       'no-with': 'error',
       'one-var': [
         'error',
-        { var: 'always', let: 'consecutive', const: 'never' },
+        { var: 'always', let: 'never', const: 'never' },
       ],
       '@stylistic/array-bracket-newline': [ 'error', { multiline: true } ],
       '@stylistic/array-bracket-spacing': [

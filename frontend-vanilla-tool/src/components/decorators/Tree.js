@@ -3,6 +3,7 @@ import TreeView from './views/TreeView.js';
 import Toolbar from '../Toolbar.js';
 import ActionButton from '../ActionButton.js';
 import Decorator from './Decorator.js';
+import { RIGHT } from '../../tools/Constants.js';
 /** @import Component from '../Component.js'; */
 /** @import TreeItem from '../../data/TreeItem.js'; */
 
@@ -25,6 +26,7 @@ class Tree extends Decorator {
    * @param {Object} data
    * @param {TreeItem} data.treeItem
    * @param {VIEW_CHOICE} data.layout
+   * @param {Array<RIGHT>} data.rights - Droits en création, modification et suppression
    */
   constructor(decoratedElement, data) {
     super(new TreeView(decoratedElement.getView()), decoratedElement);
@@ -37,13 +39,21 @@ class Tree extends Decorator {
           .dispatchEvent(new CustomEvent(Tree.EVENTS.focus, { bubbles: true, detail: this.#treeItem }));
       });
 
+    const rights = data.rights || [ RIGHT.create, RIGHT.delete, RIGHT.update ];
+    if (!rights.includes(RIGHT.update)) {
+      this.setReadOnly();
+    }
     const toolbar = new Toolbar();
-    this.#addAction = new ActionButton({ id: 'addNewChild', label: '+' });
-    this.#addAction.setDoActionCallback(this.addNewChild.bind(this));
-    toolbar.addChild(this.#addAction);
-    this.#deleteAction = new ActionButton({ id: 'delete', label: 'X' });
-    this.#deleteAction.setDoActionCallback(this.doDelete.bind(this));
-    toolbar.addChild(this.#deleteAction);
+    if (rights.includes(RIGHT.create)) {
+      this.#addAction = new ActionButton({ id: 'addNewChild', label: '+' });
+      this.#addAction.setDoActionCallback(this.addNewChild.bind(this));
+      toolbar.addChild(this.#addAction);
+    }
+    if (rights.includes(RIGHT.delete)) {
+      this.#deleteAction = new ActionButton({ id: 'delete', label: 'X' });
+      this.#deleteAction.setDoActionCallback(this.doDelete.bind(this));
+      toolbar.addChild(this.#deleteAction);
+    }
     this.setStaticChild('toolbar', toolbar);
 
     this.#treeList = new TreeList(data.treeItem.getTreeItemList(), data.layout);

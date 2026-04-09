@@ -43,5 +43,10 @@ const STATE = {
   IN_PROGRESS: 'IN_PROGRESS',
   DONE: 'DONE'
 };
+const RIGHT = {
+  create: 'create',
+  update: 'update',
+  delete: 'delete'
+};
 
-export { URL_ROOT_API, ACTION, STATE, VIEW_CHOICE, NOTIFICATION_TIMEOUT, SAVE_TIMEOUT };
+export { URL_ROOT_API, ACTION, STATE, RIGHT, VIEW_CHOICE, NOTIFICATION_TIMEOUT, SAVE_TIMEOUT };
