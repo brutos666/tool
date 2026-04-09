@@ -7,7 +7,6 @@ import com.brutos.tool.service.ItemService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/item")
@@ -25,8 +24,7 @@ public class ItemListController {
     @GetMapping("/findAllItems")
     public List<ItemWebResult> findAllItems() {
         List<Item> items = this.itemService.findAllItems();
-        Map<Long, List<Item>> sortedItems = this.itemService.sortItems(items);
-        return this.itemMapper.toWebResult(-1L, sortedItems);
+        return this.itemMapper.toWebResult(items);
     }
 
     @PostMapping("/save")
@@ -39,7 +37,7 @@ public class ItemListController {
     public ItemWebResult deleteItem(@RequestBody ItemWebResult itemWebRequest) {
         Item item = this.itemMapper.toEntity(itemWebRequest);
         this.itemService.controlItem(item);
-        this.itemService.deleteItem(item.getId());
+        this.itemService.deleteItem(item);
         return itemWebRequest;
     }
 

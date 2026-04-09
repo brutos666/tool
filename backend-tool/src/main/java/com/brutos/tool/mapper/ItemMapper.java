@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Component
@@ -23,6 +22,9 @@ public class ItemMapper implements Mapper<Item, ItemModel, ItemWebResult> {
         itemWebResult.setState(item.getState());
         itemWebResult.setParentId(item.getParentId());
         itemWebResult.setNextId(item.getNextId());
+        if (item.getChildren() != null) {
+            itemWebResult.setChildren(item.getChildren().stream().map(this::toWebResult).toList());
+        }
         return itemWebResult;
     }
 
@@ -35,6 +37,9 @@ public class ItemMapper implements Mapper<Item, ItemModel, ItemWebResult> {
         item.setState(webResult.getState());
         item.setParentId(webResult.getParentId());
         item.setNextId(webResult.getNextId());
+        if (webResult.getChildren() != null) {
+            item.setChildren(webResult.getChildren().stream().map(this::toEntity).toList());
+        }
         return item;
     }
 
@@ -42,20 +47,6 @@ public class ItemMapper implements Mapper<Item, ItemModel, ItemWebResult> {
     public List<ItemWebResult> toWebResult(List<Item> items) {
         // Pas de prise en compte des enfants
         return items.stream().map(this::toWebResult).toList();
-    }
-
-    public List<ItemWebResult> toWebResult(Long itemId, Map<Long, List<Item>> sortedItems) {
-        List<Item> childrenItems = sortedItems.get(itemId);
-        if (childrenItems == null) {
-            return new ArrayList<>();
-        }
-        List<ItemWebResult> webResultItems = new ArrayList<>();
-        for (Item childItem : childrenItems) {
-            ItemWebResult rootWebResult = this.toWebResult(childItem);
-            rootWebResult.setChildren(this.toWebResult(childItem.getId(), sortedItems));
-            webResultItems.add(rootWebResult);
-        }
-        return webResultItems;
     }
 
     @Override

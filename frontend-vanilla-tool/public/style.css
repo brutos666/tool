@@ -72,7 +72,7 @@ body {
   cursor: pointer;
 }
 .focused {
-  border: var(--focus-color) solid 2px;
+  outline: var(--focus-color) solid 2px;
 }
 .selected {
   background-color: var(--selected-color);

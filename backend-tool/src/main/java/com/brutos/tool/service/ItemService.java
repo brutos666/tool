@@ -26,7 +26,8 @@ public class ItemService {
     }
 
     public List<Item> findAllItems() {
-        return itemMapper.toEntity(itemRepository.findAll());
+        Map<Long, List<Item>> sortedItems = sortItems(itemMapper.toEntity(itemRepository.findAll()));
+        return getChildren(-1L, sortedItems);
     }
 
     public Map<Long, List<Item>> sortItems(List<Item> items) {
@@ -41,8 +42,24 @@ public class ItemService {
         return sortedItems;
     }
 
-    public void deleteItem(Long id) {
-        itemRepository.deleteById(id);
+    public List<Item> getChildren(Long itemId, Map<Long, List<Item>> sortedItems) {
+        List<Item> childrenItems = sortedItems.get(itemId);
+        if (childrenItems == null) {
+            return new ArrayList<>();
+        }
+        List<Item> resultItems = new ArrayList<>();
+        for (Item childItem : childrenItems) {
+            childItem.setChildren(getChildren(childItem.getId(), sortedItems));
+            resultItems.add(childItem);
+        }
+        return resultItems;
+    }
+
+    public void deleteItem(Item item) {
+        itemRepository.deleteById(item.getId());
+        for (Item child : item.getChildren()) {
+            deleteItem(child);
+        }
     }
 
     public void controlItem(Item item) {

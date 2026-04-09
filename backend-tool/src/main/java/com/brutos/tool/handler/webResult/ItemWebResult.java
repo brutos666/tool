@@ -2,6 +2,7 @@ package com.brutos.tool.handler.webResult;
 
 import com.brutos.tool.entity.State;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -11,7 +12,7 @@ public class ItemWebResult extends AbstractWebResultEntity {
     private State state = State.TODO;
     private Long parentId;
     private Long nextId;
-    private List<ItemWebResult> children;
+    private List<ItemWebResult> children = new ArrayList<>();
 
     public ItemWebResult() {
         super();

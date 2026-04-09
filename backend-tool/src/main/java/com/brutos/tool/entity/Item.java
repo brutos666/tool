@@ -1,5 +1,7 @@
 package com.brutos.tool.entity;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class Item extends AbstractEntity {
@@ -8,6 +10,7 @@ public class Item extends AbstractEntity {
     private State state = State.TODO;
     private Long parentId;
     private Long nextId;
+    private List<Item> children = new ArrayList<>();
 
     public Item() {
     }
@@ -57,12 +60,20 @@ public class Item extends AbstractEntity {
         this.nextId = nextId;
     }
 
+    public List<Item> getChildren() {
+        return children;
+    }
+
+    public void setChildren(List<Item> children) {
+        this.children = children;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
 
         Item item = (Item) o;
-        return Objects.equals(title, item.title) && Objects.equals(text, item.text) && state == item.state && Objects.equals(parentId, item.parentId) && Objects.equals(nextId, item.nextId);
+        return Objects.equals(title, item.title) && Objects.equals(text, item.text) && state == item.state && Objects.equals(parentId, item.parentId) && Objects.equals(nextId, item.nextId) && Objects.equals(children, item.children);
     }
 
     @Override
@@ -72,6 +83,7 @@ public class Item extends AbstractEntity {
         result = 31 * result + Objects.hashCode(state);
         result = 31 * result + Objects.hashCode(parentId);
         result = 31 * result + Objects.hashCode(nextId);
+        result = 31 * result + Objects.hashCode(children);
         return result;
     }
 
@@ -83,6 +95,7 @@ public class Item extends AbstractEntity {
                 ", state=" + state +
                 ", parentId=" + parentId +
                 ", nextId=" + nextId +
+                ", children=" + children +
                 "} " + super.toString();
     }
 }
