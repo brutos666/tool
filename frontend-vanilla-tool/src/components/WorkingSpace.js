@@ -2,7 +2,6 @@ import Composite from './Composite.js';
 import CheckList from './CheckList.js';
 import NavTree from './NavTree.js';
 import WorkingSpaceView from './views/WorkingSpaceView.js';
-import Toolbar from './Toolbar.js';
 import Tree from './decorators/Tree.js';
 
 class WorkingSpace extends Composite {

@@ -51,7 +51,7 @@ class Tree extends Decorator {
     }
     if (rights.includes(RIGHT.delete)) {
       this.#deleteAction = new ActionButton({ id: 'delete', label: 'X' });
-      this.#deleteAction.setDoActionCallback(this.doDelete.bind(this));
+      this.#deleteAction.setDoActionCallback(this.getOriginalElement().doDelete.bind(this.getOriginalElement()));
       toolbar.addChild(this.#deleteAction);
     }
     this.setStaticChild('toolbar', toolbar);
@@ -64,12 +64,6 @@ class Tree extends Decorator {
     if (this.#treeItem.isRoot()) {
       this.setRoot();
     }
-  }
-
-  removeFromParent() {
-    this.#treeItem.removeObserver(this);
-
-    super.removeFromParent();
   }
 
   /**
@@ -90,10 +84,6 @@ class Tree extends Decorator {
 
   addNewChild() {
     this.#treeItem.addItem({ title: 'Nouvel item', state: 'TODO', children: [] });
-  }
-
-  doDelete() {
-    this.#treeItem.deleteItem();
   }
 
   setOpen(open) {
@@ -118,7 +108,7 @@ class Tree extends Decorator {
 
   /**
    * Modification du modèle
-   * @param {'change'|'update'|'delete'|'addItem'|'removeItem'} action
+   * @param {'update'|'updated'|'deleted'|'addItem'|'removeItem'} action
    * @param {TreeItem} treeItem
    */
   update(action, treeItem) {
@@ -127,6 +117,8 @@ class Tree extends Decorator {
       this.setOpen(true);
     } else if (action === 'removeItem') {
       this.setLeaf(treeItem.isLeaf());
+    } else if (action === 'deleted') {
+      this.#treeItem.removeObserver(this);
     }
   }
 

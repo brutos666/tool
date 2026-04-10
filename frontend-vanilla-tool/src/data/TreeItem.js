@@ -35,6 +35,7 @@ class TreeItem {
 
   /** @type {Array<Object.<Component, Array<RIGHT>>>} */
   #observers = [];
+  /** Modification effectuées */
   #updates = {};
 
   constructor(itemInfos) {
@@ -86,12 +87,17 @@ class TreeItem {
     } else {
       this.#updates[property] = value;
     }
-    this.alertObservers('change');
+    this.alertObservers('update');
   }
 
   addItem(itemInfos) {
     this.#treeItemList.addItem(this, { ...itemInfos, parentId: this.#item.id });
     this.alertObservers('addItem');
+  }
+  getPrevious() {
+    return this.getParentItem()
+      .getTreeItemList()
+      .getPrevious(this);
   }
 
   /**
@@ -117,27 +123,23 @@ class TreeItem {
           .updatePrevious(this);
       }
     }
-    this.alertObservers('update');
+    this.alertObservers('updated');
   }
   deleteItem() {
-    this.alertObservers('delete');
     this.getParentItem()
       .removeItem(this);
+    this.alertObservers('deleted');
   }
 
   /**
    *
-   * @param {'change'|'update'|'delete'|'addItem'|'removeItem'} action
+   * @param {'update'|'updated'|'deleted'|'addItem'|'removeItem'} action
    */
   alertObservers(action) {
     for (const observerObject of this.#observers) {
       /** @type {Component} */
       const observer = observerObject.observer;
-      /** @type {Array<RIGHT>} */
-      const rights = observerObject.rights;
-      if (TreeItem.RIGHT_BY_ACTION[action].some(right => rights.includes(right))) {
-        observer.update(action, this);
-      }
+      observer.update(action, this);
     }
   }
 
@@ -159,6 +161,7 @@ class TreeItem {
   isModified() {
     return Object.keys(this.#updates).length > 0;
   }
+
   isNextIdModified() {
     return this.#updates.nextId !== undefined;
   }

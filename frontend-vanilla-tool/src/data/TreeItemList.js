@@ -42,9 +42,7 @@ class TreeItemList {
       treeItem.setParentItem(parentTreeItem);
       this.#treeList.push(treeItem);
     });
-    for (const observer of this.#observers) {
-      observer.update('replaceAll', this.getTreeList());
-    }
+    this.alertObservers('replaceAll', this.getTreeList());
   }
 
   addItem(parentTreeItem, itemInfos) {
@@ -52,9 +50,7 @@ class TreeItemList {
     treeItem.setParentItem(parentTreeItem);
     this.#treeList.push(treeItem);
     this.updatePrevious(treeItem);
-    for (const observer of this.#observers) {
-      observer.update('add', [treeItem]);
-    }
+    this.alertObservers('add', [treeItem]);
   }
   /**
    * Suppression d'un item
@@ -73,22 +69,37 @@ class TreeItemList {
         this.updatePrevious(this.#treeList[index]);
       }
     }
-    for (const observer of this.#observers) {
-      observer.update('remove', [treeItemToRemove]);
+    this.alertObservers('remove', [treeItemToRemove]);
+  }
+
+  getPrevious(treeItem) {
+    const index = this.#treeList.findIndex(item => item === treeItem);
+    if (index === 0) {
+      return null;
     }
+    return this.#treeList[index - 1];
   }
 
   updatePrevious(currentTreeItem) {
-    const index = this.#treeList.findIndex(treeItem => treeItem === currentTreeItem);
-    if (index > 0) {
-      const previousItem = this.#treeList[index - 1];
-      previousItem.setPropertyValue('nextId', this.#treeList[index].getItemId());
+    const previousItem = this.getPrevious(currentTreeItem);
+    if (previousItem) {
+      previousItem.setPropertyValue('nextId', currentTreeItem.getItemId());
     }
   }
 
   updateLast() {
     const lastItem = this.#treeList[this.#treeList.length - 1];
     lastItem.setPropertyValue('nextId', null);
+  }
+  /**
+   * Indiquer aux observateurs qu'une modification a eu lieu
+   * @param {'remove'|'add'|'replaceAll'} action
+   * @param {Array<TreeItem>} treeItemList
+   */
+  alertObservers(action, treeItemList) {
+    for (const observer of this.#observers) {
+      observer.update(action, treeItemList);
+    }
   }
 
   addObserver(observer) {

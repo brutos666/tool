@@ -6,7 +6,7 @@ class TreeView extends DecoratorView {
   name = 'TreeView';
 
   #toggle;
-  #treeItem;
+  #treeItemNode;
 
   #onFocusCallback = () => {};
 
@@ -22,9 +22,9 @@ class TreeView extends DecoratorView {
     this.#toggle.addEventListener('click', () => {
       this.setOpen(!this.#toggle.classList.contains('tree--open'));
     });
-    this.#treeItem = elementView.querySelector('#treeItem');
-    this.#treeItem.addEventListener('focus', this.onFocus.bind(this), true);
-    this.#treeItem.addEventListener('blur', this.onBlur.bind(this), true);
+    this.#treeItemNode = elementView.querySelector('#treeItem');
+    this.#treeItemNode.addEventListener('focus', this.onFocus.bind(this), true);
+    this.#treeItemNode.addEventListener('blur', this.onBlur.bind(this), true);
   }
 
   setOnFocusCallback(onFocusCallback) {
@@ -38,14 +38,14 @@ class TreeView extends DecoratorView {
   }
 
   onFocus(event) {
-    if (!this.#treeItem.contains(event.relatedTarget)) {
+    if (!this.#treeItemNode.contains(event.relatedTarget)) {
       this.setFocused(true);
       this.#onFocusCallback();
     }
   }
 
   onBlur(event) {
-    if (!this.#treeItem.contains(event.relatedTarget)) {
+    if (!this.#treeItemNode.contains(event.relatedTarget)) {
       this.setFocused(false);
     }
   }
@@ -91,7 +91,7 @@ class TreeView extends DecoratorView {
 
   setReadOnly() {
     this.getElementView().classList.add('tree--readonly');
-    this.#treeItem.setAttribute('tabindex', 0);
+    this.#treeItemNode.setAttribute('tabindex', 0);
   }
 
 }

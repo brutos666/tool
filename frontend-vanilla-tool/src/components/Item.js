@@ -41,6 +41,7 @@ class Item extends Component {
     this.#treeItem = data.treeItem;
     this.#layout = data.layout;
     this.#rights = data.rights;
+    this.#treeItem.removeObserver(this);
     this.#treeItem.addObserver(this, data.rights);
   }
 
@@ -68,6 +69,11 @@ class Item extends Component {
     super.updateData({ treeItem: this.getTreeItem(), layout: this.#layout, rights: this.#rights });
   }
 
+  doDelete() {
+    // Pour l'instant, on supprime immédiatement
+    this.#treeItem.deleteItem();
+  }
+
   /**
    * Met à jour la tâche en fonction de l'événement reçu
    * @param {string} property - Propriété de la tâche à mettre à jour
@@ -82,16 +88,15 @@ class Item extends Component {
 
   /**
    * Modification du modèle
-   * @param {'change'|'update'|'delete'|'addChild'} action
+   * @param {'update'|'updated'|'deleted'|'addItem'|'removeItem'} action
    * @param {TreeItem} treeItem
    */
   update(action, treeItem) {
-    if (action === 'update') {
+    if (action === 'updated') {
       this.getView()
         .setItemValues(treeItem.getItemInfos());
-    } else if (action === 'delete') {
+    } else if (action === 'deleted') {
       this.#treeItem.removeObserver(this);
-      this.removeFromParent();
     }
   }
 

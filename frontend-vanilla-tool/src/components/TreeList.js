@@ -1,13 +1,15 @@
 import Composite from './Composite.js';
-import CommandItemDecorator from './decorators/CommandItemDecorator.js';
 import Tree from './decorators/Tree.js';
 import Item from './Item.js';
 import TreeListView from './views/TreeListView.js';
 import { RIGHT, VIEW_CHOICE } from '../tools/Constants.js';
+import CommandItemDecorator from './decorators/CommandItemDecorator.js';
 /** @import TreeItem from '../data/TreeItem.js'; */
 /** @import TreeItemList from '../data/TreeItemList.js'; */
 
 class TreeList extends Composite {
+
+  name = 'TreeList';
 
   #itemLayout;
   /** @type {TreeItemList} */
@@ -43,13 +45,10 @@ class TreeList extends Composite {
       tree.setOpen(true);
     }
   }
-  removeFromParent() {
-    this.#treeItemList.removeObserver(this);
-    super.removeFromParent();
-  }
+
   /**
    * Modification du modèle
-   * @param {string} action - Type d'action
+   * @param {'remove'|'add'|'replaceAll'} action
    * @param {Array<TreeItem>} treeList
    */
   update(action, treeList) {
@@ -57,6 +56,8 @@ class TreeList extends Composite {
       this.replaceAllItems(treeList);
     } else if (action === 'add') {
       this.addItems(treeList);
+    } else if (action === 'remove') {
+      this.removeItems(treeList);
     }
   }
   /**
@@ -81,9 +82,18 @@ class TreeList extends Composite {
         super.addChild(new Tree(item, { treeItem, layout: this.getLayout(), rights }));
         return;
       }
-      const commandItem = new CommandItemDecorator(item, { rights });
+      // Mise en place du décorateur permettant la validation en base de données
+      const commandItem = new CommandItemDecorator(item, { treeItem, rights });
       const treeElement = new Tree(commandItem, { treeItem, layout: this.getLayout(), rights });
       super.addChild(treeElement);
+    });
+  }
+  removeItems(treeList) {
+    treeList.forEach(treeItem => {
+      const child = this.getChildren()
+        .find(child => child.getTreeItem() === treeItem);
+      // Trouver l'enfant qui correspond à l'item
+      this.removeChild(child);
     });
   }
 

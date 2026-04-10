@@ -15,6 +15,7 @@ class CheckList extends Component {
 
   #treeList;
   #treeItem;
+  #commandItem;
 
   #item;
 
@@ -28,7 +29,8 @@ class CheckList extends Component {
 
     this.#treeItem = new TreeItem({ title: 'Check List', children: [] });
     this.#item = new Item({ treeItem: this.#treeItem, layout: VIEW_CHOICE.TodoList, rights: [] });
-    this.setStaticChild('header', new CommandItemDecorator(this.#item, { rights: [RIGHT.update] }));
+    this.#commandItem = new CommandItemDecorator(this.#item, { treeItem: this.#treeItem, rights: [RIGHT.update] });
+    this.setStaticChild('header', this.#commandItem);
 
     this.#treeList = new TreeList(new TreeItemList(), VIEW_CHOICE.TodoList);
     this.setStaticChild('todoItems', this.#treeList);
@@ -41,6 +43,7 @@ class CheckList extends Component {
   setTreeItem(treeItem) {
     this.#treeItem = treeItem;
     this.#item.updateData({ treeItem, layout: VIEW_CHOICE.TodoList, rights: [RIGHT.update] });
+    this.#commandItem.setTreeItem(treeItem);
     this.#treeList.setTreeItemList(treeItem.getTreeItemList());
   }
 

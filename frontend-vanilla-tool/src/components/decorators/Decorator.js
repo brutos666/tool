@@ -16,10 +16,6 @@ class Decorator extends Component {
   constructor(decoratorView, decoratedElement) {
     super(decoratorView);
     this.#decoratedElement = decoratedElement;
-
-    this.#decoratedElement.removeFromParent = () => {
-      this.removeFromParent();
-    };
   }
 
   /**

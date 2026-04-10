@@ -54,12 +54,6 @@ class View {
     templateNode.parentNode.replaceChild(view.getElementView(), templateNode);
     this.#staticViews[id] = view;
   }
-  removeStaticView(id) {
-    const oldView = this.#staticViews[id];
-    const node = this.#templateNode[id];
-    oldView.getElementView().parentNode.replaceChild(node, oldView.getElementView());
-    delete this.#staticViews[id];
-  }
   getStaticView(id) {
     return this.#staticViews[id];
   }

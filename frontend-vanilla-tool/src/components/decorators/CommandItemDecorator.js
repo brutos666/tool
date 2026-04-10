@@ -1,63 +1,51 @@
 import CommandDecorator from './CommandDecorator.js';
-import CommandItemDecoratorView from './views/CommandItemDecoratorView.js';
-import SaveItem from '../../commands/SaveItem.js';
 import DeleteItem from '../../commands/DeleteItem.js';
+import CommandItemDecoratorView from './views/CommandItemDecoratorView.js';
 import { RIGHT } from '../../tools/Constants.js';
-/** @import Item from '../Item.js'; */
-/** @import TreeItem from '../../data/TreeItem.js'; */
-/** @import {ItemInfos} from '../data/TreeItem.js'; */
+import SaveItem from '../../commands/SaveItem.js';
+import ItemCallsRequests from '../../requests/ItemCallsRequests.js';
+/** @import Tree from './Tree.js' */
+/** @import TreeItem from '../../data/TreeItem.js' */
 
 /**
- * Le décorateur se charge de la sauvegarde d'un item. Il met à jour l'item.
- * En revanche, il ne doit pas interférer dans la hiérarchie parent/enfant des items
+ * Le décorateur se charge de la sauvegarde (création, modification, suppression) d'un item. Il sera positionner au niveau de l'élément qui agit sur l'item pour pouvoir gérer les erreurs et le spinner au bon endroit.
+ * L'action de sauvegarde et mise à jour se fait en revanche sur le modèle de données
  */
 class CommandItemDecorator extends CommandDecorator {
 
-  name = 'CommandItemDecorator';
-
   /** @type {TreeItem} */
   #treeItem;
-  /** @type {Item} */
-  #item;
 
   /** @type {Array<RIGHT>} */
   #rights;
 
   /**
    * @constructor
-   * @param {Item} decoratedElement
+   * @param {Tree} decoratedElement
    * @param {Object} data
+   * @param {TreeItem} data.treeItem
    * @param {Array<RIGHT>} data.rights - Droits en création, modification et suppression
    */
   constructor(decoratedElement, data) {
     super(new CommandItemDecoratorView(decoratedElement.getView()), decoratedElement);
-    this.#item = decoratedElement;
-    this.#treeItem = decoratedElement.getTreeItem();
-    this.#treeItem.addObserver(this, data.rights);
-    this.#treeItem.removeObserver(this.#item);
+    this.#treeItem = data.treeItem;
     this.#rights = data.rights;
 
     if (data.rights.includes(RIGHT.create) || data.rights.includes(RIGHT.update)) {
       this.getView()
         .setOnBlurCallback(this.doSave.bind(this));
     }
+    if (data.rights.includes(RIGHT.delete)) {
+      // L'élément décoré doit avoir la fonction qui supprime l'item
+      decoratedElement.getOriginalElement().doDelete = this.doDelete.bind(this);
+    }
   }
-  removeFromParent() {
-    this.#treeItem.removeObserver(this);
-    super.removeFromParent();
-  }
-  /**
-   * @override
-   * @returns {CommandItemDecoratorView}
-   */
-  getView() {
-    return super.getView();
-  }
-
   getTreeItem() {
     return this.#treeItem;
   }
-
+  setTreeItem(treeItem) {
+    this.#treeItem = treeItem;
+  }
   /**
    * @override
    * @param {string} name - Nom de la commande
@@ -80,7 +68,6 @@ class CommandItemDecorator extends CommandDecorator {
     super.commandDone(name, itemInfos);
 
     if (name === 'SaveItem') {
-      this.#treeItem.updateItem(itemInfos);
       this.getView()
         .setOnBlurCallback(this.doSave.bind(this));
     }
@@ -101,39 +88,50 @@ class CommandItemDecorator extends CommandDecorator {
       this.doSave();
     });
     return new SaveItem(this)
-      .execute();
-  }
-
-  doDelete(action, treeItem) {
-    if (!this.#rights.includes(RIGHT.delete)) {
-      return;
-    }
-    this.setRelaunchCallback(() => {
-      this.doDelete(action, treeItem);
-    });
-    new DeleteItem(this)
       .execute()
-      .then(() => {
-        this.#item.update(action, treeItem);
+      .then(itemInfos => {
+        const previousTreeItem = this.#treeItem.getPrevious();
+        this.#treeItem.updateItem(itemInfos);
+        if (previousTreeItem?.isModified()) {
+          return new ItemCallsRequests()
+            .saveItem(previousTreeItem.getItemInfos())
+            .then(previousItemInfos => {
+              previousTreeItem.updateItem(previousItemInfos);
+              return Promise.resolve(itemInfos);
+            });
+        }
+        return Promise.resolve(itemInfos);
       });
   }
 
   /**
-   * Modification du modèle
-   * @param {'change'|'update'|'delete'|'addItem'|'removeItem'} action
-   * @param {TreeItem} treeItem
+   *
+   * @param {} action
+   * @param {*} treeItem
+   * @returns
    */
-  update(action, treeItem) {
-    if (action === 'update') {
-      this.#item.update(action, treeItem);
-    } else if (action === 'change') {
-      // Si la modification concerne le suivant, il faut immédiatement le sauvegarder
-      if (this.#treeItem.isNextIdModified()) {
-        this.doSave();
-      }
-    } else if (action === 'delete') {
-      this.doDelete(action, treeItem);
+  doDelete() {
+    if (!this.#rights.includes(RIGHT.delete)) {
+      return;
     }
+    this.setRelaunchCallback(() => {
+      this.doDelete();
+    });
+    return new DeleteItem(this)
+      .execute()
+      .then(itemInfos => {
+        const previousTreeItem = this.#treeItem.getPrevious();
+        this.#treeItem.deleteItem();
+        if (previousTreeItem) {
+          return new ItemCallsRequests()
+            .saveItem(previousTreeItem.getItemInfos())
+            .then(previousItemInfos => {
+              previousTreeItem.updateItem(previousItemInfos);
+              return Promise.resolve(itemInfos);
+            });
+        }
+        return Promise.resolve(itemInfos);
+      });
   }
 
 }
