@@ -25,10 +25,6 @@ class Item extends Component {
   constructor(data) {
     super(new ItemView(data));
     this.setData(data);
-    if (this.#rights.includes(RIGHT.update)) {
-      this.getView()
-        .setOnChangeCallback(this.setPropertyValue.bind(this));
-    }
   }
 
   /** @override  */
@@ -43,6 +39,10 @@ class Item extends Component {
     this.#rights = data.rights;
     this.#treeItem.removeObserver(this);
     this.#treeItem.addObserver(this, data.rights);
+    if (this.#rights.includes(RIGHT.update)) {
+      this.getView()
+        .setOnChangeCallback(this.setPropertyValue.bind(this));
+    }
   }
 
   /**

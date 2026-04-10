@@ -31,7 +31,7 @@ class CommandItemDecorator extends CommandDecorator {
     this.#treeItem = data.treeItem;
     this.#rights = data.rights;
 
-    if (data.rights.includes(RIGHT.create) || data.rights.includes(RIGHT.update)) {
+    if (data.rights.includes(RIGHT.update)) {
       this.getView()
         .setOnBlurCallback(this.doSave.bind(this));
     }
@@ -80,8 +80,7 @@ class CommandItemDecorator extends CommandDecorator {
     if (!this.#treeItem.isNew() && !this.#treeItem.isModified()) {
       return;
     }
-    if ((this.#treeItem.isNew() && !this.#rights.includes(RIGHT.create))
-        || (this.#treeItem.isModified() && !this.#rights.includes(RIGHT.update))) {
+    if (!this.#rights.includes(RIGHT.update)) {
       return;
     }
     this.setRelaunchCallback(() => {
