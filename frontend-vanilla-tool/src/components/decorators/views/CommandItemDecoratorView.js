@@ -18,16 +18,16 @@ class CommandItemDecoratorView extends CommandDecoratorView {
    * @param {Function} onBlurCallback - Fonction à appeler lorsque l'item perd le focus
    */
   setOnBlurCallback(onBlurCallback) {
-    this.getNodeView()
+    this.getElementView()
       .removeEventListener('blur', this.#onBlurCallback, true);
 
     this.#onBlurCallback = event => {
-      if (!this.getNodeView()
+      if (!this.getElementView()
         .contains(event.relatedTarget)) {
         onBlurCallback();
       }
     };
-    this.getNodeView()
+    this.getElementView()
       .addEventListener('blur', this.#onBlurCallback, true);
   }
 

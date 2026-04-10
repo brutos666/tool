@@ -31,7 +31,7 @@ class Tree extends Decorator {
   constructor(decoratedElement, data) {
     super(new TreeView(decoratedElement.getView()), decoratedElement);
     this.#treeItem = data.treeItem;
-    this.#treeItem.addObserver(this);
+    this.#treeItem.addObserver(this, data.rights);
 
     this.getView()
       .setOnFocusCallback(() => {
@@ -39,7 +39,7 @@ class Tree extends Decorator {
           .dispatchEvent(new CustomEvent(Tree.EVENTS.focus, { bubbles: true, detail: this.#treeItem }));
       });
 
-    const rights = data.rights || [ RIGHT.create, RIGHT.delete, RIGHT.update ];
+    const rights = data.rights;
     if (!rights.includes(RIGHT.update)) {
       this.setReadOnly();
     }
@@ -64,6 +64,12 @@ class Tree extends Decorator {
     if (this.#treeItem.isRoot()) {
       this.setRoot();
     }
+  }
+
+  removeFromParent() {
+    this.#treeItem.removeObserver(this);
+
+    super.removeFromParent();
   }
 
   /**

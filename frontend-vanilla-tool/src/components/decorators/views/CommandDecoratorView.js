@@ -15,7 +15,7 @@ class CommandDecoratorView extends DecoratorView {
    */
   constructor(view) {
     super(view);
-    this.#messageView = this.getNodeView()
+    this.#messageView = this.getElementView()
       .querySelector('.message');
   }
 

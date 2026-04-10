@@ -12,7 +12,7 @@ class CompositeView extends View {
    */
   constructor(data) {
     super(data);
-    this.#spaceChildren = this.determinateSpaceChildren(this.getNodeView());
+    this.#spaceChildren = this.determinateSpaceChildren(this.getElementView());
   }
 
   /**
@@ -75,7 +75,7 @@ class CompositeView extends View {
   addView(view) {
     // Ajout au DOM
     this.getSpaceChildren()
-      .appendChild(view.getNodeView());
+      .appendChild(view.getElementView());
   }
 
   /**
@@ -84,7 +84,7 @@ class CompositeView extends View {
    */
   removeView(view) {
     this.getSpaceChildren()
-      .removeChild(view.getNodeView());
+      .removeChild(view.getElementView());
   }
 
   /**
@@ -94,7 +94,7 @@ class CompositeView extends View {
    */
   replaceView(view, oldView) {
     this.getSpaceChildren()
-      .replaceChild(view.getNodeView(), oldView.getNodeView());
+      .replaceChild(view.getElementView(), oldView.getElementView());
   }
 
   removeAllViews() {
@@ -103,14 +103,14 @@ class CompositeView extends View {
 
   /**
    * Détermine et retourne l'espace contenant les enfants (id='spaceChildren')
-   * @param {Element} nodeView
+   * @param {Element} elementView
    * @returns {Element}
    */
-  determinateSpaceChildren(nodeView) {
-    if (nodeView.id === 'spaceChildren') {
-      return nodeView;
+  determinateSpaceChildren(elementView) {
+    if (elementView.id === 'spaceChildren') {
+      return elementView;
     }
-    const spaceChildren = nodeView
+    const spaceChildren = elementView
       .querySelector('[id=\'spaceChildren\']');
 
     if (spaceChildren) {

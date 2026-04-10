@@ -2,6 +2,7 @@ import CommandDecorator from './CommandDecorator.js';
 import CommandItemDecoratorView from './views/CommandItemDecoratorView.js';
 import SaveItem from '../../commands/SaveItem.js';
 import DeleteItem from '../../commands/DeleteItem.js';
+import { RIGHT } from '../../tools/Constants.js';
 /** @import Item from '../Item.js'; */
 /** @import TreeItem from '../../data/TreeItem.js'; */
 /** @import {ItemInfos} from '../data/TreeItem.js'; */
@@ -19,21 +20,32 @@ class CommandItemDecorator extends CommandDecorator {
   /** @type {Item} */
   #item;
 
+  /** @type {Array<RIGHT>} */
+  #rights;
+
   /**
    * @constructor
    * @param {Item} decoratedElement
+   * @param {Object} data
+   * @param {Array<RIGHT>} data.rights - Droits en création, modification et suppression
    */
-  constructor(decoratedElement) {
+  constructor(decoratedElement, data) {
     super(new CommandItemDecoratorView(decoratedElement.getView()), decoratedElement);
     this.#item = decoratedElement;
     this.#treeItem = decoratedElement.getTreeItem();
-    this.#treeItem.addObserver(this);
+    this.#treeItem.addObserver(this, data.rights);
     this.#treeItem.removeObserver(this.#item);
+    this.#rights = data.rights;
 
-    this.getView()
-      .setOnBlurCallback(this.doSave.bind(this));
+    if (data.rights.includes(RIGHT.create) || data.rights.includes(RIGHT.update)) {
+      this.getView()
+        .setOnBlurCallback(this.doSave.bind(this));
+    }
   }
-
+  removeFromParent() {
+    this.#treeItem.removeObserver(this);
+    super.removeFromParent();
+  }
   /**
    * @override
    * @returns {CommandItemDecoratorView}
@@ -78,16 +90,24 @@ class CommandItemDecorator extends CommandDecorator {
    * Sauvegarde d'un item
    */
   doSave() {
-    if (this.#treeItem.isNew() || this.#treeItem.isModified()) {
-      this.setRelaunchCallback(() => {
-        this.doSave();
-      });
-      return new SaveItem(this)
-        .execute();
+    if (!this.#treeItem.isNew() && !this.#treeItem.isModified()) {
+      return;
     }
+    if ((this.#treeItem.isNew() && !this.#rights.includes(RIGHT.create))
+        || (this.#treeItem.isModified() && !this.#rights.includes(RIGHT.update))) {
+      return;
+    }
+    this.setRelaunchCallback(() => {
+      this.doSave();
+    });
+    return new SaveItem(this)
+      .execute();
   }
 
   doDelete(action, treeItem) {
+    if (!this.#rights.includes(RIGHT.delete)) {
+      return;
+    }
     this.setRelaunchCallback(() => {
       this.doDelete(action, treeItem);
     });
@@ -100,7 +120,7 @@ class CommandItemDecorator extends CommandDecorator {
 
   /**
    * Modification du modèle
-   * @param {'change'|'update'|'delete'} action
+   * @param {'change'|'update'|'delete'|'addItem'|'removeItem'} action
    * @param {TreeItem} treeItem
    */
   update(action, treeItem) {

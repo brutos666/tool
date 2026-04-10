@@ -5,12 +5,12 @@ import { createNode } from '../../tools/NodeUtilities.js';
 class View {
 
   /** @type {Element} */
-  #nodeView;
-  /** @type {Element} */
   #elementView;
 
   /** @type {Object.<string, View>} */
   #staticViews = {};
+  /** @type {Object.<string, Element>} */
+  #templateNode = {};
 
   /**
    * @constructor. Crée la vue à partir des données passées en paramètre
@@ -37,20 +37,28 @@ class View {
   setStaticView(id, view) {
     const oldView = this.#staticViews[id];
     if (oldView) {
-      oldView.getNodeView().parentNode.replaceChild(view.getNodeView(), oldView.getNodeView());
+      this.#templateNode[id].classList.forEach(classItem => view.getElementView().classList.add(classItem));
+      oldView.getElementView().parentNode.replaceChild(view.getElementView(), oldView.getElementView());
       this.#staticViews[id] = view;
       return;
     }
     /** @type {Element} */
-    const templateNode = this.getNodeView()
+    const templateNode = this.#templateNode[id] || this.getElementView()
       .querySelector(`#${ id }`);
     if (!templateNode) {
       window.alert(`Erreur de conception : on tente d'accéder à un élément qui n'a pas été défini [${ id }]`);
       return;
     }
+    this.#templateNode[id] = templateNode;
     templateNode.classList.forEach(classItem => view.getElementView().classList.add(classItem));
-    templateNode.parentNode.replaceChild(view.getNodeView(), templateNode);
+    templateNode.parentNode.replaceChild(view.getElementView(), templateNode);
     this.#staticViews[id] = view;
+  }
+  removeStaticView(id) {
+    const oldView = this.#staticViews[id];
+    const node = this.#templateNode[id];
+    oldView.getElementView().parentNode.replaceChild(node, oldView.getElementView());
+    delete this.#staticViews[id];
   }
   getStaticView(id) {
     return this.#staticViews[id];
@@ -63,7 +71,6 @@ class View {
   createView(data) {
     const htmlView = this.getHtmlView(data);
     this.#elementView = createNode(htmlView);
-    this.#nodeView = this.#elementView;
   }
 
   /**
@@ -75,21 +82,13 @@ class View {
   refreshView(data) {
     const htmlView = this.getHtmlView(data);
     const nodeElement = createNode(htmlView);
-    this.#nodeView.parentNode.replaceChild(nodeElement, this.#nodeView);
-    this.#nodeView = nodeElement;
+    this.#elementView.parentNode.replaceChild(nodeElement, this.#elementView);
+    this.#elementView = nodeElement;
     for (const id in this.#staticViews) {
       const view = this.#staticViews[id];
       delete this.#staticViews[id];
       this.setStaticView(id, view);
     }
-  }
-
-  /**
-   *
-   * @returns {HTMLElement}
-   */
-  getNodeView() {
-    return this.#nodeView;
   }
 
   getElementView() {
@@ -128,9 +127,9 @@ class View {
       .dispatchEvent(event);
   }
 
-  addEventListener(event, callback) {
+  addEventListener(event, callback, bubble = false) {
     this.getElementView()
-      .addEventListener(event, callback);
+      .addEventListener(event, callback, bubble);
   }
 
 }

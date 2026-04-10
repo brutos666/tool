@@ -43,7 +43,10 @@ class TreeList extends Composite {
       tree.setOpen(true);
     }
   }
-
+  removeFromParent() {
+    this.#treeItemList.removeObserver(this);
+    super.removeFromParent();
+  }
   /**
    * Modification du modèle
    * @param {string} action - Type d'action
@@ -72,8 +75,13 @@ class TreeList extends Composite {
     const itemRights = this.getLayout() === VIEW_CHOICE.Tree ? [] : [ RIGHT.create, RIGHT.update, RIGHT.delete ];
     treeList.forEach(treeItem => {
       const rights = treeItem.isRoot() ? [ RIGHT.update, RIGHT.delete ] : itemRights;
-      const item = new Item({ treeItem, layout: this.getLayout(), readOnly: !rights.includes(RIGHT.update) });
-      const commandItem = new CommandItemDecorator(item);
+      const readOnly = !rights.includes(RIGHT.update);
+      const item = new Item({ treeItem, layout: this.getLayout(), rights });
+      if (readOnly) {
+        super.addChild(new Tree(item, { treeItem, layout: this.getLayout(), rights }));
+        return;
+      }
+      const commandItem = new CommandItemDecorator(item, { rights });
       const treeElement = new Tree(commandItem, { treeItem, layout: this.getLayout(), rights });
       super.addChild(treeElement);
     });

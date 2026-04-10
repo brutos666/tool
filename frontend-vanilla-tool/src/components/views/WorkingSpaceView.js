@@ -10,7 +10,6 @@ class WorkingSpaceView extends View {
 
   getHtmlView() {
     return String.raw`<div id="workingSpace" class="working-space">
-    <header class="working-space__header"><template id="toolbar"></template></header>
     <nav id="navSpace" class="working-space__nav"><template id="nav"></template></nav>
     <div id="splitter" class="working-space__splitter">&nbsp;</div>
     <main id="mainSpace"class="working-space__main"><template id="main"></template></main>
@@ -18,10 +17,10 @@ class WorkingSpaceView extends View {
   }
 
   activateSplitter() {
-    const workingSpace = this.getNodeView();
-    const navSpace = this.getNodeView()
+    const workingSpace = this.getElementView();
+    const navSpace = this.getElementView()
       .querySelector('#navSpace');
-    const splitter = this.getNodeView()
+    const splitter = this.getElementView()
       .querySelector('#splitter');
 
     const moveSplitter = event => {

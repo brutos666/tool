@@ -1,4 +1,4 @@
-import { VIEW_CHOICE } from '../../tools/Constants.js';
+import { RIGHT, VIEW_CHOICE } from '../../tools/Constants.js';
 import View from './View.js';
 /** @import TreeItem from '../../data/TreeItem.js' */
 /** @import {ItemInfos} from '../../data/TreeItem.js'; */
@@ -12,7 +12,7 @@ class ItemView extends View {
   #text;
   #done;
 
-  #readOnly = false;
+  #rights;
 
   #onInputCallback = () => {};
   #onDoneChangeCallback = () => {};
@@ -21,14 +21,30 @@ class ItemView extends View {
    * @param {Object} data - Données à utiliser pour créer la vue
    * @param {TreeItem} data.treeItem - Informations sur la tache
    * @param {VIEW_CHOICE} data.layout - Affichage souhaité
+   * @param {Array<RIGHT>} data.rights - Droits en création, modification et suppression
    */
   constructor(data) {
     super(data);
+    this.viewAdded(data);
+  }
+
+  /**
+   * @override {@link View.viewAdded}
+   * Méthode appelée une fois la vue ajoutée ou redessinée
+   * @param {Object} data - Données à utiliser pour mettre à jour la vue
+   * @param {TreeItem} data.treeItem - Informations sur la tache
+   * @param {VIEW_CHOICE} data.layout - Affichage souhaité
+   * @param {Array<RIGHT>} data.rights - Droits en création, modification et suppression
+   */
+  viewAdded(data) {
+    this.#rights = data.rights;
     const viewChoiceClass = getClassForViewChoice(data.layout);
     this.getElementView().classList.add(viewChoiceClass);
-
     this.majNodes();
     this.setItemValues(data.treeItem.getItemInfos());
+    if (!this.#rights.includes(RIGHT.update)) {
+      this.setReadOnly();
+    }
   }
 
   /**
@@ -49,16 +65,13 @@ class ItemView extends View {
    * @param {Object} data - Données à utiliser pour rafraîchir la vue
    * @param {TreeItem} data.treeItem - Informations sur la tache
    * @param {VIEW_CHOICE} data.layout - Affichage souhaité
+   * @param {boolean} data.readOnly - Interdit la modification de la tâche
    */
   refreshView(data) {
     this.removeEventListeners();
     super.refreshView(data);
-    this.majNodes();
-    this.setItemValues(data.treeItem.getItemInfos());
+    this.viewAdded(data);
     this.addEventListeners();
-    if (this.#readOnly) {
-      this.setReadOnly();
-    }
   }
 
   /**
@@ -66,6 +79,9 @@ class ItemView extends View {
    * @param {Function} updateCallback - Fonction à appeler lorsqu'une modification est effectuée
    */
   setOnChangeCallback(updateCallback) {
+    if (!this.#rights.includes(RIGHT.update)) {
+      return;
+    }
     this.#title.removeEventListener('input', this.#onInputCallback);
     this.#text.removeEventListener('input', this.#onInputCallback);
     this.#done.removeEventListener('change', this.#onDoneChangeCallback);
@@ -86,7 +102,7 @@ class ItemView extends View {
   }
 
   majNodes() {
-    const mainNode = this.getNodeView();
+    const mainNode = this.getElementView();
     this.#identify = mainNode.querySelector('#identify');
     this.#title = mainNode.querySelector('#title');
     this.#text = mainNode.querySelector('#text');
@@ -111,7 +127,6 @@ class ItemView extends View {
   }
 
   setReadOnly() {
-    this.#readOnly = true;
     this.getElementView().classList.add('item--readonly');
     this.#title.contentEditable = false;
     this.#text.contentEditable = false;
@@ -119,12 +134,18 @@ class ItemView extends View {
   }
 
   addEventListeners() {
+    if (!this.#rights.includes(RIGHT.update)) {
+      return;
+    }
     this.#title.addEventListener('input', this.#onInputCallback);
     this.#text.addEventListener('input', this.#onInputCallback);
     this.#done.addEventListener('change', this.#onDoneChangeCallback);
   }
 
   removeEventListeners() {
+    if (!this.#rights.includes(RIGHT.update)) {
+      return;
+    }
     this.#title.removeEventListener('input', this.#onInputCallback);
     this.#text.removeEventListener('input', this.#onInputCallback);
     this.#done.removeEventListener('change', this.#onDoneChangeCallback);
@@ -148,6 +169,8 @@ function getClassForViewChoice(layout) {
       return 'item--todo';
     case VIEW_CHOICE.Tree:
       return 'item--tree';
+    case VIEW_CHOICE.Title:
+      return 'item--title';
     default:
       return 'item--block';
   }

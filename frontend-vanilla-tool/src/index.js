@@ -11,6 +11,6 @@ function loadApp() {
 
   StoreData.init();
   const homePage = new WorkingSpace();
-  appRoot.appendChild(homePage.getNodeView());
+  appRoot.appendChild(homePage.getElementView());
 }
 window.addEventListener('load', loadApp);

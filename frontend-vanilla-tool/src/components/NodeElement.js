@@ -40,15 +40,6 @@ class NodeElement {
   }
 
   /**
-   * Retourne le noeud HTML contenant l'élément et des balises propres à tous les éléments
-   * @returns {HTMLElement}
-   */
-  getNodeView() {
-    return this.getView()
-      .getNodeView();
-  }
-
-  /**
    * Retourne le noeud HTML contenant l'élément
    * @returns {HTMLElement}
    */

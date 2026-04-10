@@ -2,6 +2,7 @@ import StoreData from '../data/StoreData.js';
 import { VIEW_CHOICE } from '../tools/Constants.js';
 import ActionButton from './ActionButton.js';
 import Component from './Component.js';
+import AddTreeDecorator from './decorators/AddTreeDecorator.js';
 import CommandLoadDecorator from './decorators/CommandLoadDecorator.js';
 import Toolbar from './Toolbar.js';
 import TreeList from './TreeList.js';
@@ -17,16 +18,14 @@ class NavTree extends Component {
 
     const items = new TreeList(StoreData.getTreeItem()
       .getTreeItemList(), VIEW_CHOICE.Tree);
-    const itemsWithCommands = new CommandLoadDecorator(items);
+    const itemsWithAddButton = new AddTreeDecorator(items, { label: '< Ajouter un espace >', treeItem: StoreData.getTreeItem() });
+    const itemsWithCommands = new CommandLoadDecorator(itemsWithAddButton);
     this.setStaticChild('treeItems', itemsWithCommands);
 
     const reloadAction = new ActionButton({ id: 'reload', label: 'Rafraîchir' });
     reloadAction.setDoActionCallback(itemsWithCommands.loadItems.bind(itemsWithCommands));
-    const addNewItemAction = new ActionButton({ id: 'addNewSpace', label: '< Ajouter un espace >' });
-    addNewItemAction.setDoActionCallback(this.addNewSpace.bind(this));
     const toolbar = new Toolbar();
     toolbar.addChild(reloadAction);
-    toolbar.addChild(addNewItemAction);
     this.setStaticChild('toolbar', toolbar);
 
     itemsWithCommands.loadItems();

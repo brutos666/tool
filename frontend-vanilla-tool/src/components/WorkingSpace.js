@@ -13,8 +13,6 @@ class WorkingSpace extends Composite {
   constructor() {
     super(new WorkingSpaceView());
 
-    const toolbar = new Toolbar();
-    this.setStaticChild('toolbar', toolbar);
     this.#navTree = new NavTree();
     this.#checkList = new CheckList();
     this.setStaticChild('nav', this.#navTree);

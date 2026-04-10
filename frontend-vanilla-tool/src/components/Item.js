@@ -2,6 +2,7 @@
 
 import ItemView from './views/ItemView.js';
 import Component from './Component.js';
+import { RIGHT } from '../tools/Constants.js';
 /** @import TreeItem from '../data/TreeItem.js' */
 /** @import { VIEW_CHOICE } from '../tools/Constants.js' */
 
@@ -12,26 +13,35 @@ class Item extends Component {
   /** @type {TreeItem} */
   #treeItem = null;
   #layout = null;
+  #rights;
 
   /**
    * @constructor de la classe Item
    * @param {Object} data - Données à utiliser pour créer la vue
    * @param {TreeItem} data.treeItem - Informations sur la tache
    * @param {VIEW_CHOICE} data.layout - Affichage souhaité
-   * @param {boolean} data.readOnly - Interdit la modification de la tâche
+   * @param {Array<RIGHT>} data.rights - Droits en création, modification et suppression
    */
   constructor(data) {
     super(new ItemView(data));
+    this.setData(data);
+    if (this.#rights.includes(RIGHT.update)) {
+      this.getView()
+        .setOnChangeCallback(this.setPropertyValue.bind(this));
+    }
+  }
+
+  /** @override  */
+  updateData(data) {
+    this.setData(data);
+    super.updateData(data);
+  }
+
+  setData(data) {
     this.#treeItem = data.treeItem;
     this.#layout = data.layout;
-    this.#treeItem.addObserver(this);
-
-    if (data.readOnly) {
-      this.setReadOnly();
-    }
-
-    this.getView()
-      .setOnChangeCallback(this.setPropertyValue.bind(this));
+    this.#rights = data.rights;
+    this.#treeItem.addObserver(this, data.rights);
   }
 
   /**
@@ -55,7 +65,7 @@ class Item extends Component {
    */
   doChangeViewChoice(layout) {
     this.#layout = layout;
-    super.updateData({ treeItem: this.getTreeItem(), layout: this.#layout });
+    super.updateData({ treeItem: this.getTreeItem(), layout: this.#layout, rights: this.#rights });
   }
 
   /**
@@ -80,13 +90,9 @@ class Item extends Component {
       this.getView()
         .setItemValues(treeItem.getItemInfos());
     } else if (action === 'delete') {
+      this.#treeItem.removeObserver(this);
       this.removeFromParent();
     }
-  }
-
-  setReadOnly(readonly) {
-    this.getView()
-      .setReadOnly(readonly);
   }
 
 }

@@ -1,4 +1,6 @@
 import TreeItemList from './TreeItemList.js';
+import { RIGHT } from '../tools/Constants.js';
+/** @import Component from '../components/Component.js'; */
 
 /**
  * @typedef {Object} ItemInfos - Informations sur l'item
@@ -17,12 +19,21 @@ class TreeItem {
 
   name = 'TreeItem';
 
+  static RIGHT_BY_ACTION = {
+    change: [RIGHT.update],
+    update: [RIGHT.update],
+    delete: [RIGHT.delete],
+    addItem: [RIGHT.create],
+    removeItem: [RIGHT.create]
+  };
+
   #item;
   /** @type {TreeItemList} */
   #treeItemList;
   /** @type {TreeItem} */
   #parentItem;
 
+  /** @type {Array<Object.<Component, Array<RIGHT>>>} */
   #observers = [];
   #updates = {};
 
@@ -75,9 +86,7 @@ class TreeItem {
     } else {
       this.#updates[property] = value;
     }
-    for (const observer of this.#observers) {
-      observer.update('change', this);
-    }
+    this.alertObservers('change');
   }
 
   addItem(itemInfos) {
@@ -118,11 +127,17 @@ class TreeItem {
 
   /**
    *
-   * @param {'update'|'delete'|'addItem'|'removeItem'} action
+   * @param {'change'|'update'|'delete'|'addItem'|'removeItem'} action
    */
   alertObservers(action) {
-    for (const observer of this.#observers) {
-      observer.update(action, this);
+    for (const observerObject of this.#observers) {
+      /** @type {Component} */
+      const observer = observerObject.observer;
+      /** @type {Array<RIGHT>} */
+      const rights = observerObject.rights;
+      if (TreeItem.RIGHT_BY_ACTION[action].some(right => rights.includes(right))) {
+        observer.update(action, this);
+      }
     }
   }
 
@@ -148,21 +163,15 @@ class TreeItem {
     return this.#updates.nextId !== undefined;
   }
 
-  addObserver(observer) {
-    this.#observers.push(observer);
-  }
-  addObservers(observers) {
-    this.#observers = observers;
+  addObserver(observer, rights) {
+    this.#observers.push({ observer, rights });
   }
 
   removeObserver(observer) {
-    const index = this.#observers.indexOf(observer);
+    const index = this.#observers.findIndex(observerObject => observerObject.observer === observer);
     if (index !== -1) {
       this.#observers.splice(index, 1);
     }
-  }
-  removeObservers() {
-    this.#observers = null;
   }
 
 }

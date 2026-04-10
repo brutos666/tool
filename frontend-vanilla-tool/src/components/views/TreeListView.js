@@ -5,9 +5,7 @@ class TreeListView extends CompositeView {
   name = 'TreeListView';
 
   getHtmlView() {
-    return String.raw`<div class="tree-list">
-      <div id="spaceChildren" class="tree-list__space"></div>
-    </div>`;
+    return String.raw`<div class="tree-list"><div id="spaceChildren" class="tree-list__space"></div></div>`;
   }
 
 }

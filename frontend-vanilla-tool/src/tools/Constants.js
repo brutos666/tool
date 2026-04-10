@@ -21,6 +21,7 @@ const VIEW_CHOICE = {
   SampleMapping: 'SampleMapping',
   TodoList: 'TodoList',
   Tree: 'Tree',
+  Title: 'Title',
   getOptions() {
     const options = [{ label: '-- Sélectionner la vue --', value: '' }];
     for (const key in VIEW_CHOICE) {

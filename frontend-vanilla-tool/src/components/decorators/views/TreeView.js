@@ -17,12 +17,12 @@ class TreeView extends DecoratorView {
   constructor(view) {
     super(view);
 
-    const nodeView = this.getNodeView();
-    this.#toggle = nodeView.querySelector('#toggle');
+    const elementView = this.getElementView();
+    this.#toggle = elementView.querySelector('#toggle');
     this.#toggle.addEventListener('click', () => {
       this.setOpen(!this.#toggle.classList.contains('tree--open'));
     });
-    this.#treeItem = nodeView.querySelector('#treeItem');
+    this.#treeItem = elementView.querySelector('#treeItem');
     this.#treeItem.addEventListener('focus', this.onFocus.bind(this), true);
     this.#treeItem.addEventListener('blur', this.onBlur.bind(this), true);
   }
@@ -32,7 +32,7 @@ class TreeView extends DecoratorView {
   }
 
   getHtmlView() {
-    return String.raw`<div class="tree">
+    return String.raw`<div id="tree" class="tree">
       <section class="tree__header"><button id="toggle" class="tree__toggle">▼</button><div id="treeItem" class="tree__item"><template></template><menu id="toolbar"></menu></div></section>
       <section id="treeList" class="tree__list"></section></div>`;
   }
@@ -59,23 +59,23 @@ class TreeView extends DecoratorView {
       return;
     }
     this.#toggle.classList.remove('tree--open');
-    this.#toggle.textContent = this.getNodeView().classList.contains('tree--leaf') ? '' : '►';
+    this.#toggle.textContent = this.getElementView().classList.contains('tree--leaf') ? '' : '►';
     this.getStaticView('treeList')
       .getElementView().classList.add('hidden');
   }
 
   setRoot() {
-    this.getNodeView().classList.add('tree--root');
+    this.getElementView().classList.add('tree--root');
   }
   setLeaf(leaf) {
     if (leaf) {
-      const classList = this.getNodeView().classList;
+      const classList = this.getElementView().classList;
       classList.remove('tree--node');
       classList.add('tree--leaf');
       this.#toggle.classList.add('hidden');
       return;
     }
-    const classList = this.getNodeView().classList;
+    const classList = this.getElementView().classList;
     classList.remove('tree--leaf');
     classList.add('tree--node');
     this.#toggle.classList.remove('hidden');
@@ -83,14 +83,14 @@ class TreeView extends DecoratorView {
 
   setFocused(focused) {
     if (focused) {
-      this.getNodeView().classList.add('focused');
+      this.getElementView().classList.add('focused');
     } else {
-      this.getNodeView().classList.remove('focused');
+      this.getElementView().classList.remove('focused');
     }
   }
 
   setReadOnly() {
-    this.getNodeView().classList.add('tree--readonly');
+    this.getElementView().classList.add('tree--readonly');
     this.#treeItem.setAttribute('tabindex', 0);
   }
 

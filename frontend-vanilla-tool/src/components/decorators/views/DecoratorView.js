@@ -4,6 +4,8 @@ class DecoratorView extends View {
 
   name = 'DecoratorView';
 
+  #decoratedView;
+
   /**
    * @constructor
    * @param {View} view
@@ -19,17 +21,20 @@ class DecoratorView extends View {
    * @param {View} view - Vue statique
    */
   setDecoratedView(view) {
+    this.#decoratedView = view;
+
     /** @type {Element} */
-    const oldView = this.getNodeView()
+    const oldView = this.getElementView()
       .querySelector('template');
     if (!oldView) {
       window.alert(`Erreur de conception : il manque <template></template> dans le decorator [${ view.name }]`);
       return;
     }
-    const newView = view.getNodeView();
+    const newView = view.getElementView();
     oldView.parentNode.replaceChild(newView, oldView);
-
-    super.setElementView(newView);
+  }
+  getDecoratedView() {
+    return this.#decoratedView;
   }
 
   /** @override */
@@ -37,7 +42,7 @@ class DecoratorView extends View {
     const elementView = this.getElementView();
     super.refreshView(data);
     /** @type {Element} */
-    const oldView = this.getNodeView()
+    const oldView = this.getElementView()
       .querySelector('template');
     oldView.parentNode.replaceChild(elementView, oldView);
   }
