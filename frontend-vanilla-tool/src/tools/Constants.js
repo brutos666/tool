@@ -15,17 +15,13 @@ const ACTION_LABEL = {
   Save: 'Valider',
   Delete: 'Supprimer'
 };
-
-const VIEW_CHOICE = {
-  Detail: 'Detail',
+const LAYOUT = {
+  CheckList: 'CheckList',
   SampleMapping: 'SampleMapping',
-  TodoList: 'TodoList',
-  Tree: 'Tree',
-  Title: 'Title',
   getOptions() {
     const options = [{ label: '-- Sélectionner la vue --', value: '' }];
-    for (const key in VIEW_CHOICE) {
-      const label = VIEW_CHOICE_LABEL[key];
+    for (const key in LAYOUT) {
+      const label = LAYOUT_LABEL[key];
       if (label) {
         options.push({ label, value: key });
       }
@@ -33,12 +29,17 @@ const VIEW_CHOICE = {
     return options;
   }
 };
-const VIEW_CHOICE_LABEL = {
-  Detail: 'Vue détaillée',
-  SampleMapping: 'Sample Mapping',
-  TodoList: 'Todo List',
-  Tree: 'Arbre hiérarchique'
+const LAYOUT_LABEL = {
+  CheckList: 'CheckList',
+  SampleMapping: 'Sample Mapping'
 };
+
+const ITEM_LAYOUT = {
+  PostIt: 'PostIt',
+  Todo: 'Todo',
+  Title: 'Tree'
+};
+
 const STATE = {
   TODO: 'TODO',
   IN_PROGRESS: 'IN_PROGRESS',
@@ -50,4 +51,4 @@ const RIGHT = {
   delete: 'delete'
 };
 
-export { URL_ROOT_API, ACTION, STATE, RIGHT, VIEW_CHOICE, NOTIFICATION_TIMEOUT, SAVE_TIMEOUT };
+export { URL_ROOT_API, ACTION, LAYOUT, STATE, RIGHT, ITEM_LAYOUT, NOTIFICATION_TIMEOUT, SAVE_TIMEOUT };

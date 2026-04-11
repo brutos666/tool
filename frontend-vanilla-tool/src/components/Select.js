@@ -7,7 +7,6 @@ class Select extends Component {
    * @constructor
    * @param {Object} data - Données à utiliser pour créer la vue
    * @param {string} data.id - Identifiant du select
-   * @param {string} data.emptyLabel - Libellé quand rien n'est sélectionner
    * @param {Array<Option>} data.options - Liste des options du select
    */
   constructor(data) {

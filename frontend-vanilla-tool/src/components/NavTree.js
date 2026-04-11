@@ -1,5 +1,5 @@
 import StoreData from '../data/StoreData.js';
-import { VIEW_CHOICE } from '../tools/Constants.js';
+import { ITEM_LAYOUT } from '../tools/Constants.js';
 import ActionButton from './ActionButton.js';
 import Component from './Component.js';
 import AddTreeDecorator from './decorators/AddTreeDecorator.js';
@@ -17,7 +17,7 @@ class NavTree extends Component {
     super(new NavTreeView());
 
     const items = new TreeList(StoreData.getTreeItem()
-      .getTreeItemList(), VIEW_CHOICE.Tree);
+      .getTreeItemList(), ITEM_LAYOUT.Title);
     const itemsWithAddButton = new AddTreeDecorator(items, { label: '< Ajouter un espace >', treeItem: StoreData.getTreeItem() });
     const itemsWithCommands = new CommandLoadDecorator(itemsWithAddButton);
     this.setStaticChild('treeItems', itemsWithCommands);

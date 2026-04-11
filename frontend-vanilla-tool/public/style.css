@@ -24,25 +24,35 @@ body {
 
 /** espace de travail **/
 .working-space {
+  width: 100%;
+  height: 100%;
   display: grid;
   grid-template-columns: auto 5px 1fr;
   position: absolute;
-  width: 100%;
-  height: 100%;
 }
 
 .working-space__nav {
-  overflow: auto;
   width: 300px;
   height: 100%;
+  overflow: auto;
 }
 .working-space__splitter {
   background-color: var(--border-color);
   cursor: ew-resize;
 }
 .working-space__main {
-  overflow: auto;
   height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+.main-space {
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+.main-space__content {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
 }
 
 /** Message d'erreur **/
@@ -117,16 +127,11 @@ body {
   height: 100%;
 }
 .tree-list__space {
-  display: flex;
-  flex-direction: column;
   gap: 5px;
   height: 100%;
 }
 /* -- fin gestion des arbres -- */
 
-.toolbar {
-  flex: 1;
-}
 .toolbar__space {
   display: flex;
   flex-direction: row;
@@ -136,21 +141,15 @@ body {
   flex: 1;
 }
 /* -- Affichage des espaces de dispositions des items -- */
-/** -- Navigation arbre -- */
-.nav-tree__header {
-  display: flex;
-}
 
-/** -- Affichage Check list -- */
+/*** -- Affichage  -- ***/
+
+/** -- Affichage Check list -- **/
 .check-list {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
   display: grid;
-  grid-template-rows: auto auto 1fr;
+  grid-template-rows: min-content 1fr;
 }
 .check-list__header {
-  flex-shrink: 0;
   display: flex;
   justify-content: center;
 }
@@ -159,20 +158,24 @@ body {
   font-size: 1.5em;
   margin: 14px;
 }
-
 /* min-height: 0 empêche de déborder et force la contrainte de hauteur vers le bas. Utilisé pour l'affichage en colonne */
 .check-list__space {
-  flex: 1;
   min-height: 0; /* important */
+  overflow: auto; /* scroll sur le conteneur qui affiche les racines des arbres */
 }
 .check-list__space > .tree-list__space {
-  display: flex;
-  flex-direction: column;
-  flex-wrap: wrap;
-  height: 100%;
+  overflow: visible;
+  min-height: 0; /* important */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, max-content));
+  grid-gap: 12px;
+  margin: 0;
+  padding: 0;
+  align-items: start; /* aligne les arbres vers le haut plutôt que de les étendre à l'espace disponible */
+  align-content: start;
 }
 .check-list__space > .tree-list__space > .tree--root {
-  width: 30%;
+  display: block;
 }
 
 /* -- Affichage commun des items -- */
@@ -190,8 +193,8 @@ body {
   margin: 1px;
 }
 
-/* -- Affichage item en mode consultation arbre */
-.item--tree.item__article {
+/* -- Affichage item avec que le titre */
+.item--title.item__article {
   flex: 1;
   display: flex;
   flex-direction: row;
@@ -199,16 +202,16 @@ body {
   overflow: auto;
   gap: 25px;
 }
-.item--tree .item__title {
+.item--title .item__title {
   flex: 1;
 }
-.item--tree .item__identify {
+.item--title .item__identify {
   display: none;
 }
-.item--tree .item__done {
+.item--title .item__done {
   display: none;
 }
-.item--tree .item__text {
+.item--title .item__text {
   display: none;
 }
 

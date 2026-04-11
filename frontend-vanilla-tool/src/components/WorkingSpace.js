@@ -1,25 +1,24 @@
-import Composite from './Composite.js';
-import CheckList from './CheckList.js';
 import NavTree from './NavTree.js';
 import WorkingSpaceView from './views/WorkingSpaceView.js';
 import Tree from './decorators/Tree.js';
+import Component from './Component.js';
+import MainSpace from './MainSpace.js';
 
-class WorkingSpace extends Composite {
+class WorkingSpace extends Component {
 
   #navTree;
-  #checkList;
 
   constructor() {
     super(new WorkingSpaceView());
 
     this.#navTree = new NavTree();
-    this.#checkList = new CheckList();
+    const mainSpace = new MainSpace();
     this.setStaticChild('nav', this.#navTree);
-    this.setStaticChild('main', this.#checkList);
+    this.setStaticChild('main', mainSpace);
 
     this.#navTree.getView()
       .addEventListener(Tree.EVENTS.focus, event => {
-        this.#checkList.setTreeItem(event.detail);
+        mainSpace.setTreeItem(event.detail);
       });
   }
 

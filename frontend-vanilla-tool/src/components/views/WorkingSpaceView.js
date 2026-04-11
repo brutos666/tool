@@ -12,7 +12,7 @@ class WorkingSpaceView extends View {
     return String.raw`<div id="workingSpace" class="working-space">
     <nav id="navSpace" class="working-space__nav"><template id="nav"></template></nav>
     <div id="splitter" class="working-space__splitter">&nbsp;</div>
-    <main id="mainSpace"class="working-space__main"><template id="main"></template></main>
+    <main id="main" class="working-space__main"></main>
   </div>`;
   }
 

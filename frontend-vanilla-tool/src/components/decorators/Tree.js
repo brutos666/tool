@@ -25,7 +25,7 @@ class Tree extends Decorator {
    * @param {Component} decoratedElement
    * @param {Object} data
    * @param {TreeItem} data.treeItem
-   * @param {VIEW_CHOICE} data.layout
+   * @param {ITEM_LAYOUT} data.layout
    * @param {Array<RIGHT>} data.rights - Droits en création, modification et suppression
    */
   constructor(decoratedElement, data) {

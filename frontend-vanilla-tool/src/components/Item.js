@@ -4,7 +4,7 @@ import ItemView from './views/ItemView.js';
 import Component from './Component.js';
 import { RIGHT } from '../tools/Constants.js';
 /** @import TreeItem from '../data/TreeItem.js' */
-/** @import { VIEW_CHOICE } from '../tools/Constants.js' */
+/** @import { ITEM_LAYOUT } from '../tools/Constants.js' */
 
 class Item extends Component {
 
@@ -19,7 +19,7 @@ class Item extends Component {
    * @constructor de la classe Item
    * @param {Object} data - Données à utiliser pour créer la vue
    * @param {TreeItem} data.treeItem - Informations sur la tache
-   * @param {VIEW_CHOICE} data.layout - Affichage souhaité
+   * @param {ITEM_LAYOUT} data.layout - Affichage souhaité
    * @param {Array<RIGHT>} data.rights - Droits en création, modification et suppression
    */
   constructor(data) {
@@ -62,7 +62,7 @@ class Item extends Component {
 
   /**
    * Changement de l'affichage de l'item
-   * @param {VIEW_CHOICE} layout - Affichage souhaité
+   * @param {ITEM_LAYOUT} layout - Affichage souhaité
    */
   doChangeViewChoice(layout) {
     this.#layout = layout;

@@ -1,39 +1,33 @@
 import TreeItemList from '../data/TreeItemList.js';
 import TreeItem from '../data/TreeItem.js';
-import { RIGHT, VIEW_CHOICE } from '../tools/Constants.js';
-import ActionButton from './ActionButton.js';
-import Component from './Component.js';
+import { RIGHT, ITEM_LAYOUT } from '../tools/Constants.js';
 import CommandItemDecorator from './decorators/CommandItemDecorator.js';
 import Item from './Item.js';
 import TreeList from './TreeList.js';
 import CheckListView from './views/CheckListView.js';
-import Toolbar from './Toolbar.js';
+import DisplayItemsSpace from './DisplayItemsSpace.js';
 
-class CheckList extends Component {
+class CheckList extends DisplayItemsSpace {
 
   name = 'CheckList';
 
   #treeList;
-  #treeItem;
   #commandItem;
 
   #item;
 
   constructor() {
     super(new CheckListView());
-    const addItemAction = new ActionButton({ id: 'addItem', label: '< Ajouter un todo >' });
-    addItemAction.setDoActionCallback(this.addNewTodo.bind(this));
-    const toolbar = new Toolbar();
-    toolbar.addChild(addItemAction);
-    this.setStaticChild('toolbar', toolbar);
 
-    this.#treeItem = new TreeItem({ title: 'Check List', children: [] });
-    this.#item = new Item({ treeItem: this.#treeItem, layout: VIEW_CHOICE.TodoList, rights: [] });
-    this.#commandItem = new CommandItemDecorator(this.#item, { treeItem: this.#treeItem, rights: [RIGHT.update] });
+    const treeItem = new TreeItem({ title: 'Check List', children: [] });
+    this.#item = new Item({ treeItem, layout: ITEM_LAYOUT.Todo, rights: [] });
+    this.#commandItem = new CommandItemDecorator(this.#item, { treeItem, rights: [RIGHT.update] });
     this.setStaticChild('header', this.#commandItem);
 
-    this.#treeList = new TreeList(new TreeItemList(), VIEW_CHOICE.TodoList);
+    this.#treeList = new TreeList(new TreeItemList(), ITEM_LAYOUT.Todo);
     this.setStaticChild('todoItems', this.#treeList);
+
+    super.setTreeItem(treeItem);
   }
 
   /**
@@ -41,24 +35,16 @@ class CheckList extends Component {
    * @param {TreeItem} treeItem - Informations sur la tache
    */
   setTreeItem(treeItem) {
-    this.#treeItem = treeItem;
-    this.#item.updateData({ treeItem, layout: VIEW_CHOICE.TodoList, rights: [RIGHT.update] });
+    super.setTreeItem(treeItem);
+    this.#item.updateData({ treeItem, layout: ITEM_LAYOUT.Todo, rights: [RIGHT.update] });
     this.#commandItem.setTreeItem(treeItem);
     this.#treeList.setTreeItemList(treeItem.getTreeItemList());
   }
 
-  clearTreeItem() {
-    this.#treeItem = new TreeItem({ title: 'Check List', children: [] });
-    this.#item.updateData({ treeItem: this.#treeItem, layout: VIEW_CHOICE.TodoList, rights: [] });
-    this.#treeList.setTreeItemList(new TreeItemList());
-  }
-
-  addNewTodo() {
-    if (this.#treeItem) {
-      this.#treeItem.addItem({ title: 'Nouvelle tâche', state: 'TODO', children: [] });
-      this.#treeList.getLastChild()
-        .setRoot();
-    }
+  addNewItem() {
+    super.addNewItem();
+    this.#treeList.getLastChild()
+      .setRoot();
   }
 
 }
