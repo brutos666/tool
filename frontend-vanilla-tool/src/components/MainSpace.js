@@ -5,6 +5,7 @@ import MainSpaceView from './views/MainSpaceView.js';
 import { LAYOUT } from '../tools/Constants.js';
 import CheckList from './CheckList.js';
 import ActionButton from './ActionButton.js';
+import SampleMapping from './SampleMapping.js';
 /** @import DisplayItemsSpace from './DisplayItemsSpace.js'; */
 
 class MainSpace extends Component {
@@ -36,13 +37,16 @@ class MainSpace extends Component {
   changeDisplay(value) {
     switch (value) {
       case LAYOUT.SampleMapping:
+        this.#main = new SampleMapping();
         break;
       case LAYOUT.CheckList:
         this.#main = new CheckList();
         break;
     }
     this.setStaticChild('main', this.#main);
-    this.#main.setTreeItem(this.#treeItem);
+    if (this.#treeItem) {
+      this.#main.setTreeItem(this.#treeItem);
+    }
   }
 
   addNewItem() {

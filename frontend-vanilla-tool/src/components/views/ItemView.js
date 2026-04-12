@@ -38,8 +38,10 @@ class ItemView extends View {
    */
   viewAdded(data) {
     this.#rights = data.rights;
-    const viewChoiceClass = getClassForViewChoice(data.layout);
-    this.getElementView().classList.add(viewChoiceClass);
+    this.getElementView().classList.add(getClassForViewChoice(data.layout));
+    if (ITEM_LAYOUT.isPostIt(data.layout)) {
+      this.getElementView().classList.add(getClassColorForViewChoice(data.layout));
+    }
     this.majNodes();
     this.setItemValues(data.treeItem.getItemInfos());
     if (!this.#rights.includes(RIGHT.update)) {
@@ -54,7 +56,7 @@ class ItemView extends View {
   getHtmlView() {
     return String.raw`<article class="item__article">
           <span id="identify" class="item__identify"></span>
-          <input type="checkbox" id="done" class="item__done"/>
+          <input type="checkbox" id="done" class="item__checkbox clickable"/>
           <div contenteditable="true" class="item__title" id="title"></div>
           <div contenteditable="true" class="item__text" id="text"></div>
       </article>`;
@@ -157,18 +159,39 @@ class ItemView extends View {
  * Retourne la classe CSS correspondant à la vue demandée
  * @param {ITEM_LAYOUT} layout - Vue demandée
  * @returns {string} - Classe CSS correspondante
- * @example
  */
 function getClassForViewChoice(layout) {
+  if (ITEM_LAYOUT.isPostIt(layout)) {
+    return 'item--post-it';
+  }
   switch (layout) {
-    case ITEM_LAYOUT.PostIt:
-      return 'item--post-it';
     case ITEM_LAYOUT.Todo:
       return 'item--todo';
     case ITEM_LAYOUT.Title:
       return 'item--title';
     default:
       return 'item--block';
+  }
+}
+/**
+ * Retourne la classe CSS pour la couleur d'un post-it
+ * @param {ITEM_LAYOUT} layout - Vue demandée
+ * @returns {string} - Classe CSS correspondante
+ */
+function getClassColorForViewChoice(layout) {
+  switch (layout) {
+    case ITEM_LAYOUT.PostIt:
+      return 'item--color';
+    case ITEM_LAYOUT.Story:
+      return 'story--color';
+    case ITEM_LAYOUT.Rules:
+      return 'rules--color';
+    case ITEM_LAYOUT.Sample:
+      return 'sample--color';
+    case ITEM_LAYOUT.Question:
+      return 'question--color';
+    default:
+      return '';
   }
 }
 

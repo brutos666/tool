@@ -35,9 +35,16 @@ const LAYOUT_LABEL = {
 };
 
 const ITEM_LAYOUT = {
-  PostIt: 'PostIt',
   Todo: 'Todo',
-  Title: 'Tree'
+  Title: 'Tree',
+  PostIt: 'PostIt',
+  Story: 'Story',
+  Rules: 'Rules',
+  Sample: 'Sample',
+  Question: 'Question',
+  isPostIt(layout) {
+    return [ ITEM_LAYOUT.PostIt, ITEM_LAYOUT.Story, ITEM_LAYOUT.Rules, ITEM_LAYOUT.Sample, ITEM_LAYOUT.Question ].includes(layout);
+  }
 };
 
 const STATE = {

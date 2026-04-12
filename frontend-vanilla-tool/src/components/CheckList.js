@@ -20,9 +20,9 @@ class CheckList extends DisplayItemsSpace {
     super(new CheckListView());
 
     const treeItem = new TreeItem({ title: 'Check List', children: [] });
-    this.#item = new Item({ treeItem, layout: ITEM_LAYOUT.Todo, rights: [] });
+    this.#item = new Item({ treeItem, layout: ITEM_LAYOUT.Title, rights: [] });
     this.#commandItem = new CommandItemDecorator(this.#item, { treeItem, rights: [RIGHT.update] });
-    this.setStaticChild('header', this.#commandItem);
+    this.setStaticChild('title', this.#commandItem);
 
     this.#treeList = new TreeList(new TreeItemList(), ITEM_LAYOUT.Todo);
     this.setStaticChild('todoItems', this.#treeList);
