@@ -5,7 +5,6 @@ import MainSpaceView from './views/MainSpaceView.js';
 import { LAYOUT } from '../tools/Constants.js';
 import CheckList from './CheckList.js';
 import SampleMappingTables from './SampleMappingTables.js';
-import TreeItem from '../data/TreeItem.js';
 /** @import Items from './Items.js'; */
 
 class MainSpace extends Component {
@@ -13,6 +12,7 @@ class MainSpace extends Component {
   #treeItem;
   /** @type {Items} */
   #main;
+  #display = '';
 
   constructor() {
     super(new MainSpaceView());
@@ -27,19 +27,34 @@ class MainSpace extends Component {
     this.#treeItem = treeItem;
     if (this.#main) {
       this.#main.setTreeItem(this.#treeItem);
+    } else {
+      this.changeDisplay(this.#display);
     }
   }
 
   changeDisplay(value) {
+    this.#display = value;
+    if (!this.#treeItem) {
+      return;
+    }
+    if (this.#main) {
+      this.#main.destroy();
+    }
+
     switch (value) {
       case LAYOUT.SampleMapping:
-        this.#main = new SampleMappingTables(this.#treeItem || new TreeItem({ title: 'Sample Mapping', children: [] }));
+        this.#main = new SampleMappingTables(this.#treeItem);
         break;
       case LAYOUT.CheckList:
-        this.#main = new CheckList(this.#treeItem || new TreeItem({ title: 'Check List', children: [] }));
+        this.#main = new CheckList(this.#treeItem);
+        break;
+      default:
+        this.#main = null;
         break;
     }
-    this.setStaticChild('main', this.#main);
+    if (this.#main) {
+      this.setStaticChild('main', this.#main);
+    }
   }
 
 }

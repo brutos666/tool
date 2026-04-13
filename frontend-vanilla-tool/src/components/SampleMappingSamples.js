@@ -1,3 +1,4 @@
+import { ITEM_LAYOUT } from '../tools/Constants.js';
 import ActionButton from './ActionButton.js';
 import Items from './Items.js';
 import SampleMappingSamplesView from './views/SampleMappingSamplesView.js';
@@ -5,8 +6,8 @@ import SampleMappingSamplesView from './views/SampleMappingSamplesView.js';
 class SampleMappingSamples extends Items {
 
   name = 'SampleMappingSamples';
-  constructor(treeItem, itemLayout) {
-    super(new SampleMappingSamplesView(), treeItem, itemLayout);
+  constructor(treeItem) {
+    super(new SampleMappingSamplesView(), treeItem, ITEM_LAYOUT.Sample);
     const buttonAddSample = new ActionButton({ label: 'Add Sample' });
     buttonAddSample.setDoActionCallback(this.addNewItem.bind(this, 'Nouvelle exemple'));
     this.setStaticChild('addItemAction', buttonAddSample);

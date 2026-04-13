@@ -1,6 +1,6 @@
 import Tree from './decorators/Tree.js';
 import Item from './Item.js';
-import { RIGHT, ITEM_LAYOUT } from '../tools/Constants.js';
+import { ITEM_LAYOUT } from '../tools/Constants.js';
 import CommandItemDecorator from './decorators/CommandItemDecorator.js';
 import Items from './Items.js';
 import TreeListView from './views/TreeListView.js';
@@ -20,14 +20,6 @@ class TreeList extends Items {
     super(view === undefined ? new TreeListView() : view, treeItem, itemLayout);
   }
 
-  setTreeItem(treeItem) {
-    super.setTreeItem(treeItem);
-    for (const tree of super.getItemsComponent()) {
-      tree.setRoot();
-      tree.setOpen(true);
-    }
-  }
-
   getLastTree() {
     const trees = super.getItemsComponent();
     return trees[trees.length - 1];
@@ -39,15 +31,12 @@ class TreeList extends Items {
    * @returns {Component} composant
    */
   getItemComponent(treeItem) {
-    const itemRights = this.getLayout() === ITEM_LAYOUT.Title ? [] : [ RIGHT.create, RIGHT.update, RIGHT.delete ];
-    const rights = treeItem.isRoot() ? [ RIGHT.update, RIGHT.delete ] : itemRights;
-    const readOnly = !rights.includes(RIGHT.update);
-    let item = new Item({ treeItem, layout: this.getLayout(), rights });
-    if (!readOnly) {
-      // Mise en place du décorateur permettant la validation en base de données
-      item = new CommandItemDecorator(item, { treeItem, rights });
-    }
-    return new Tree(item, { treeItem, layout: this.getLayout(), rights });
+    const layout = this.getLayout();
+    const rights = ITEM_LAYOUT.getRights(layout);
+    let item = new Item({ treeItem, layout, rights });
+    // Mise en place du décorateur permettant la validation en base de données
+    item = new CommandItemDecorator(item, { treeItem, rights });
+    return new Tree(item, { treeItem, layout, rights });
   }
 
 }

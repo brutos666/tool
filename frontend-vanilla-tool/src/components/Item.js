@@ -3,6 +3,8 @@
 import ItemView from './views/ItemView.js';
 import Component from './Component.js';
 import { RIGHT } from '../tools/Constants.js';
+import ActionButton from './ActionButton.js';
+import Toolbar from './Toolbar.js';
 /** @import TreeItem from '../data/TreeItem.js' */
 /** @import { ITEM_LAYOUT } from '../tools/Constants.js' */
 
@@ -25,6 +27,20 @@ class Item extends Component {
   constructor(data) {
     super(new ItemView(data));
     this.setData(data);
+
+    const toolbar = new Toolbar();
+
+    if (data.rights.includes(RIGHT.create)) {
+      const addAction = new ActionButton({ id: 'addNewChild', label: '+' });
+      addAction.setDoActionCallback(this.doAdd.bind(this, 'Nouvel item'));
+      toolbar.addChild(addAction);
+    }
+    if (data.rights.includes(RIGHT.delete)) {
+      const deleteAction = new ActionButton({ id: 'deleteItem', label: 'X' });
+      deleteAction.setDoActionCallback(this.doDelete.bind(this));
+      toolbar.addChild(deleteAction);
+    }
+    this.setStaticChild('toolbar', toolbar);
   }
 
   /** @override  */
@@ -34,10 +50,12 @@ class Item extends Component {
   }
 
   setData(data) {
+    if (this.#treeItem) {
+      this.#treeItem.removeObserver(this);
+    }
     this.#treeItem = data.treeItem;
     this.#layout = data.layout;
     this.#rights = data.rights;
-    this.#treeItem.removeObserver(this);
     this.#treeItem.addObserver(this, data.rights);
     if (this.#rights.includes(RIGHT.update)) {
       this.getView()
@@ -69,6 +87,9 @@ class Item extends Component {
     super.updateData({ treeItem: this.getTreeItem(), layout: this.#layout, rights: this.#rights });
   }
 
+  doAdd(title) {
+    this.#treeItem.addItem({ title, state: 'TODO', children: [] });
+  }
   doDelete() {
     // Pour l'instant, on supprime immédiatement
     this.#treeItem.deleteItem();

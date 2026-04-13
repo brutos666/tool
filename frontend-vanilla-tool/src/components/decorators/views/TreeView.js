@@ -33,7 +33,7 @@ class TreeView extends DecoratorView {
 
   getHtmlView() {
     return String.raw`<div id="tree" class="tree">
-      <section class="tree__header"><button id="toggle" class="tree__toggle">▼</button><div id="treeItem" class="tree__item"><template></template><menu id="toolbar"></menu></div></section>
+      <section class="tree__header"><button id="toggle" class="tree__toggle">▼</button><div id="treeItem" class="tree__item"><template></template></div></section>
       <section id="treeList" class="tree__list"></section></div>`;
   }
 
@@ -90,7 +90,6 @@ class TreeView extends DecoratorView {
   }
 
   setReadOnly() {
-    this.getElementView().classList.add('tree--readonly');
     this.#treeItemNode.setAttribute('tabindex', 0);
   }
 

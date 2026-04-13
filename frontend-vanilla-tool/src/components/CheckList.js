@@ -15,11 +15,12 @@ class CheckList extends TreeList {
   constructor(treeItem) {
     super(new CheckListView(), treeItem, ITEM_LAYOUT.Todo);
 
-    this.#item = new Item({ treeItem, layout: ITEM_LAYOUT.Title, rights: [] });
-    this.#commandItem = new CommandItemDecorator(this.#item, { treeItem, rights: [RIGHT.update] });
+    const rights = [RIGHT.update];
+    this.#item = new Item({ treeItem, layout: ITEM_LAYOUT.Todo, rights });
+    this.#commandItem = new CommandItemDecorator(this.#item, { treeItem, rights });
     this.setStaticChild('title', this.#commandItem);
 
-    const addButton = new ActionButton({ id: 'addNewItem', label: '< Ajouter un élément >' });
+    const addButton = new ActionButton({ id: 'addNewItem', label: 'Ajouter un élément' });
     addButton.setDoActionCallback(this.addNewItem.bind(this, 'Nouveau todo'));
     this.setStaticChild('addItemAction', addButton);
   }
@@ -34,10 +35,10 @@ class CheckList extends TreeList {
     super.setTreeItem(treeItem);
   }
 
-  addNewItem(title) {
-    super.addNewItem(title);
-    this.getLastTree()
-      .setRoot();
+  addItemView(itemComponent) {
+    super.addItemView(itemComponent);
+    itemComponent.setRoot();
+    itemComponent.setOpen(true);
   }
 
 }

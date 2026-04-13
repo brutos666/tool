@@ -59,6 +59,7 @@ class ItemView extends View {
           <input type="checkbox" id="done" class="item__checkbox clickable"/>
           <div contenteditable="true" class="item__title" id="title"></div>
           <div contenteditable="true" class="item__text" id="text"></div>
+          <template id="toolbar"></template>
       </article>`;
   }
 

@@ -54,6 +54,18 @@ class View {
     templateNode.parentNode.replaceChild(view.getElementView(), templateNode);
     this.#staticViews[id] = view;
   }
+  removeStaticView(id) {
+    /** @type {Element} */
+    const templateNode = this.#templateNode[id] || this.getElementView()
+      .querySelector(`#${ id }`);
+    if (!templateNode) {
+      window.alert(`Erreur de conception : on tente d'accéder à un élément qui n'a pas été défini [${ id }]`);
+      return;
+    }
+    delete this.#staticViews[id];
+    delete this.#templateNode[id];
+    templateNode.parentNode.removeChild(templateNode);
+  }
   getStaticView(id) {
     return this.#staticViews[id];
   }
@@ -80,7 +92,6 @@ class View {
     this.#elementView = nodeElement;
     for (const id in this.#staticViews) {
       const view = this.#staticViews[id];
-      delete this.#staticViews[id];
       this.setStaticView(id, view);
     }
   }

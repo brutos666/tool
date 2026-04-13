@@ -1,7 +1,5 @@
 import TreeList from '../TreeList.js';
 import TreeView from './views/TreeView.js';
-import Toolbar from '../Toolbar.js';
-import ActionButton from '../ActionButton.js';
 import Decorator from './Decorator.js';
 import { RIGHT } from '../../tools/Constants.js';
 import TreeListView from '../views/TreeListView.js';
@@ -12,11 +10,6 @@ class Tree extends Decorator {
 
   name = 'Tree';
   static EVENTS = { focus: 'treeItemFocus' };
-
-  #treeList;
-
-  #deleteAction;
-  #addAction;
 
   /** @type {TreeItem} */
   #treeItem;
@@ -45,21 +38,9 @@ class Tree extends Decorator {
       this.setReadOnly();
     }
 
-    this.#treeList = new TreeList(new TreeListView(), data.treeItem, data.layout);
-    this.setStaticChild('treeList', this.#treeList);
-
-    const toolbar = new Toolbar();
-    if (rights.includes(RIGHT.create)) {
-      this.#addAction = new ActionButton({ id: 'addNewChild', label: '+' });
-      this.#addAction.setDoActionCallback(this.#treeList.addNewItem.bind(this.#treeList, 'Nouvel item'));
-      toolbar.addChild(this.#addAction);
-    }
-    if (rights.includes(RIGHT.delete)) {
-      this.#deleteAction = new ActionButton({ id: 'delete', label: 'X' });
-      this.#deleteAction.setDoActionCallback(this.getOriginalElement().doDelete.bind(this.getOriginalElement()));
-      toolbar.addChild(this.#deleteAction);
-    }
-    this.setStaticChild('toolbar', toolbar);
+    const treeList = new TreeList(new TreeListView(), data.treeItem, data.layout);
+    this.setStaticChild('treeList', treeList);
+    this.removeStaticView('addItemAction');
 
     this.setOpen(false);
     this.setLeaf(this.#treeItem.isLeaf());
@@ -68,40 +49,28 @@ class Tree extends Decorator {
     }
   }
 
-  /**
-   * @override
-   * @returns {TreeView}
-   */
-  getView() {
-    return super.getView();
-  }
-
-  getTreeItem() {
-    return this.#treeItem;
-  }
-
-  getTreeList() {
-    return this.#treeList;
-  }
-
   setOpen(open) {
-    this.getView()
-      .setOpen(open);
+    /** @type {TreeView} */
+    const view = this.getView();
+    view.setOpen(open);
   }
 
   setLeaf(leaf) {
-    this.getView()
-      .setLeaf(leaf);
+    /** @type {TreeView} */
+    const view = this.getView();
+    view.setLeaf(leaf);
   }
 
   setRoot() {
-    this.getView()
-      .setRoot();
+    /** @type {TreeView} */
+    const view = this.getView();
+    view.setRoot();
   }
 
   setReadOnly() {
-    this.getView()
-      .setReadOnly();
+    /** @type {TreeView} */
+    const view = this.getView();
+    view.setReadOnly();
   }
 
   /**

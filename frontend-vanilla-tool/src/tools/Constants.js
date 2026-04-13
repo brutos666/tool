@@ -36,7 +36,7 @@ const LAYOUT_LABEL = {
 
 const ITEM_LAYOUT = {
   Todo: 'Todo',
-  Title: 'Tree',
+  Title: 'Title',
   PostIt: 'PostIt',
   Story: 'Story',
   Rules: 'Rules',
@@ -44,6 +44,15 @@ const ITEM_LAYOUT = {
   Question: 'Question',
   isPostIt(layout) {
     return [ ITEM_LAYOUT.PostIt, ITEM_LAYOUT.Story, ITEM_LAYOUT.Rules, ITEM_LAYOUT.Sample, ITEM_LAYOUT.Question ].includes(layout);
+  },
+  getRights(layout) {
+    if (ITEM_LAYOUT.isPostIt(layout)) {
+      if (layout === ITEM_LAYOUT.Story) {
+        return [RIGHT.update];
+      }
+      return [ RIGHT.update, RIGHT.delete ];
+    }
+    return [ RIGHT.create, RIGHT.update, RIGHT.delete ];
   }
 };
 

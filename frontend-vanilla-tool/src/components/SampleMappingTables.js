@@ -1,4 +1,4 @@
-import { ITEM_LAYOUT, RIGHT } from '../tools/Constants.js';
+import { ITEM_LAYOUT } from '../tools/Constants.js';
 import CommandItemDecorator from './decorators/CommandItemDecorator.js';
 import Item from './Item.js';
 import Items from './Items.js';
@@ -17,16 +17,18 @@ class SampleMappingTables extends Items {
   constructor(treeItem) {
     super(new SampleMappingTablesView(), treeItem, ITEM_LAYOUT.Rules);
 
-    this.#item = new Item({ treeItem, layout: ITEM_LAYOUT.Story, rights: [] });
-    this.#commandItem = new CommandItemDecorator(this.#item, { treeItem, rights: [RIGHT.update] });
+    const rights = ITEM_LAYOUT.getRights(ITEM_LAYOUT.Story);
+    this.#item = new Item({ treeItem, layout: ITEM_LAYOUT.Story, rights });
+    this.#commandItem = new CommandItemDecorator(this.#item, { treeItem, rights });
     this.setStaticChild('storyItem', this.#commandItem);
 
-    const buttonAddRule = new ActionButton({ label: 'Add Rule' });
+    const buttonAddRule = new ActionButton({ id: 'addRule', label: 'Ajouter une règle' });
     buttonAddRule.setDoActionCallback(this.addNewItem.bind(this, 'Nouvelle règle'));
-    this.setStaticChild('addRule', buttonAddRule);
+    this.setStaticChild('addItemAction', buttonAddRule);
   }
   setTreeItem(treeItem) {
-    this.#item.updateData({ treeItem, layout: ITEM_LAYOUT.Story, rights: [RIGHT.update] });
+    const rights = ITEM_LAYOUT.getRights(ITEM_LAYOUT.Story);
+    this.#item.updateData({ treeItem, layout: ITEM_LAYOUT.Story, rights });
     this.#commandItem.setTreeItem(treeItem);
     super.setTreeItem(treeItem);
   }
@@ -37,9 +39,10 @@ class SampleMappingTables extends Items {
    * @returns {Component} composant
    */
   getItemComponent(treeItem) {
-    const item = new Item({ treeItem, layout: ITEM_LAYOUT.Rules, rights: [RIGHT.update] });
-    const commandItem = new CommandItemDecorator(item, { treeItem, rights: [RIGHT.update] });
-    const sampleItems = new SampleMappingSamples(treeItem, ITEM_LAYOUT.Sample);
+    const rights = ITEM_LAYOUT.getRights(ITEM_LAYOUT.Rules);
+    const item = new Item({ treeItem, layout: ITEM_LAYOUT.Rules, rights });
+    const commandItem = new CommandItemDecorator(item, { treeItem, rights });
+    const sampleItems = new SampleMappingSamples(treeItem);
     return { commandItem, sampleItems };
   }
 

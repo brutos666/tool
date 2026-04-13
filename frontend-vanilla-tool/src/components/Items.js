@@ -43,6 +43,11 @@ class Items extends Component {
     return this.#itemsComponent;
   }
 
+  destroy() {
+    this.#treeItem.getTreeItemList()
+      .removeObserver(this);
+  }
+
   setTreeItem(treeItem) {
     this.#treeItem.getTreeItemList()
       .removeObserver(this);
@@ -120,13 +125,9 @@ class Items extends Component {
    * @returns {Object} objet permettant l'ajout d'un item dans le vue
    */
   getItemComponent(treeItem) {
-    const itemRights = this.getLayout() === ITEM_LAYOUT.Title ? [] : [ RIGHT.create, RIGHT.update, RIGHT.delete ];
-    const rights = treeItem.isRoot() ? [ RIGHT.update, RIGHT.delete ] : itemRights;
-    const readOnly = !rights.includes(RIGHT.update);
-    const item = new Item({ treeItem, layout: this.getLayout(), rights });
-    if (readOnly) {
-      return item;
-    }
+    const layout = this.getLayout();
+    const rights = ITEM_LAYOUT.getRights(layout);
+    const item = new Item({ treeItem, layout, rights });
     // Mise en place du décorateur permettant la validation en base de données
     return new CommandItemDecorator(item, { treeItem, rights });
   }
@@ -149,6 +150,17 @@ class Items extends Component {
     /** @type {ItemsView} */
     const view = this.getView();
     view.removeItemView(index);
+  }
+
+  getLayoutRights() {
+    const layout = this.getLayout();
+    if (ITEM_LAYOUT.isPostIt(layout)) {
+      if (layout === ITEM_LAYOUT.Story) {
+        return [RIGHT.update];
+      }
+      return [ RIGHT.update, RIGHT.delete ];
+    }
+    return [ RIGHT.create, RIGHT.update, RIGHT.delete ];
   }
 
 }
