@@ -4,26 +4,22 @@ import Select from './Select.js';
 import MainSpaceView from './views/MainSpaceView.js';
 import { LAYOUT } from '../tools/Constants.js';
 import CheckList from './CheckList.js';
-import ActionButton from './ActionButton.js';
-import SampleMapping from './SampleMapping.js';
-/** @import DisplayItemsSpace from './DisplayItemsSpace.js'; */
+import SampleMappingTables from './SampleMappingTables.js';
+import TreeItem from '../data/TreeItem.js';
+/** @import Items from './Items.js'; */
 
 class MainSpace extends Component {
 
   #treeItem;
-
-  /** @type {DisplayItemsSpace} */
+  /** @type {Items} */
   #main;
 
   constructor() {
     super(new MainSpaceView());
     const select = new Select({ id: 'select', options: LAYOUT.getOptions() });
     select.setDoSelectCallback(this.changeDisplay.bind(this));
-    const addItemAction = new ActionButton({ id: 'addItem', label: '< Ajouter un élément >' });
-    addItemAction.setDoActionCallback(this.addNewItem.bind(this));
     const toolbar = new Toolbar();
     toolbar.addChild(select);
-    toolbar.addChild(addItemAction);
     this.setStaticChild('toolbar', toolbar);
   }
 
@@ -37,22 +33,13 @@ class MainSpace extends Component {
   changeDisplay(value) {
     switch (value) {
       case LAYOUT.SampleMapping:
-        this.#main = new SampleMapping();
+        this.#main = new SampleMappingTables(this.#treeItem || new TreeItem({ title: 'Sample Mapping', children: [] }));
         break;
       case LAYOUT.CheckList:
-        this.#main = new CheckList();
+        this.#main = new CheckList(this.#treeItem || new TreeItem({ title: 'Check List', children: [] }));
         break;
     }
     this.setStaticChild('main', this.#main);
-    if (this.#treeItem) {
-      this.#main.setTreeItem(this.#treeItem);
-    }
-  }
-
-  addNewItem() {
-    if (this.#treeItem && this.#main) {
-      this.#main.addNewItem();
-    }
   }
 
 }

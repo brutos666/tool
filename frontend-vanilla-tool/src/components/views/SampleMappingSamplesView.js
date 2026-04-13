@@ -1,10 +1,14 @@
-import CompositeView from './CompositeView.js';
+import ItemsView from './ItemsView.js';
 
-class SampleMappingSamplesView extends CompositeView {
+class SampleMappingSamplesView extends ItemsView {
 
   name = 'SampleMappingSamplesView';
-  getHtmlView() {
-    return String.raw`<div id="spaceChildren" class="sample-mapping__samples-items"></div>`;
+
+  constructor(data) {
+    super(data);
+    this.getElementView()
+      .querySelector('.items__space')
+      .classList.add('sample-mapping__samples-items');
   }
 
 }

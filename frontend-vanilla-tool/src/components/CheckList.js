@@ -1,33 +1,27 @@
-import TreeItemList from '../data/TreeItemList.js';
-import TreeItem from '../data/TreeItem.js';
 import { RIGHT, ITEM_LAYOUT } from '../tools/Constants.js';
 import CommandItemDecorator from './decorators/CommandItemDecorator.js';
 import Item from './Item.js';
 import TreeList from './TreeList.js';
 import CheckListView from './views/CheckListView.js';
-import DisplayItemsSpace from './DisplayItemsSpace.js';
+import ActionButton from './ActionButton.js';
 
-class CheckList extends DisplayItemsSpace {
+class CheckList extends TreeList {
 
   name = 'CheckList';
 
-  #treeList;
   #commandItem;
-
   #item;
 
-  constructor() {
-    super(new CheckListView());
+  constructor(treeItem) {
+    super(new CheckListView(), treeItem, ITEM_LAYOUT.Todo);
 
-    const treeItem = new TreeItem({ title: 'Check List', children: [] });
     this.#item = new Item({ treeItem, layout: ITEM_LAYOUT.Title, rights: [] });
     this.#commandItem = new CommandItemDecorator(this.#item, { treeItem, rights: [RIGHT.update] });
     this.setStaticChild('title', this.#commandItem);
 
-    this.#treeList = new TreeList(new TreeItemList(), ITEM_LAYOUT.Todo);
-    this.setStaticChild('todoItems', this.#treeList);
-
-    super.setTreeItem(treeItem);
+    const addButton = new ActionButton({ id: 'addNewItem', label: '< Ajouter un élément >' });
+    addButton.setDoActionCallback(this.addNewItem.bind(this, 'Nouveau todo'));
+    this.setStaticChild('addItemAction', addButton);
   }
 
   /**
@@ -35,15 +29,14 @@ class CheckList extends DisplayItemsSpace {
    * @param {TreeItem} treeItem - Informations sur la tache
    */
   setTreeItem(treeItem) {
-    super.setTreeItem(treeItem);
     this.#item.updateData({ treeItem, layout: ITEM_LAYOUT.Todo, rights: [RIGHT.update] });
     this.#commandItem.setTreeItem(treeItem);
-    this.#treeList.setTreeItemList(treeItem.getTreeItemList());
+    super.setTreeItem(treeItem);
   }
 
-  addNewItem() {
-    super.addNewItem();
-    this.#treeList.getLastChild()
+  addNewItem(title) {
+    super.addNewItem(title);
+    this.getLastTree()
       .setRoot();
   }
 

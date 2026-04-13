@@ -125,11 +125,21 @@ body {
   grid-template-columns: 1fr auto;
   gap: 5px;
 }
-.tree-list__space {
-  gap: 5px;
+
+/* -- fin gestion des arbres -- */
+/* -- liste des items -- */
+.items {
   height: 100%;
 }
-/* -- fin gestion des arbres -- */
+.items__space {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.items__add-item {
+  flex: 1;
+}
+/* -- fin gestion des items -- */
 
 .toolbar__space {
   display: flex;
@@ -141,10 +151,12 @@ body {
 .toolbar__space > * {
   flex: 1;
 }
+
 /* -- Affichage des espaces de dispositions des items -- */
 
 /*** -- Affichage  -- ***/
 /** -- Affichage Sample mapping -- **/
+
 .sample-mapping {
   margin: 10px;
   display: flex;
@@ -152,24 +164,21 @@ body {
   overflow: hidden;
   height: 100%;
 }
-.sample-mapping__content {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow: hidden;
-}
+
 .sample-mapping__table {
   display: block;
-  min-height: 0;
+  height: 100%;
   overflow: auto;
   margin-bottom: 20px;
 }
+
 .sample-mapping__story {
   grid-row: 1;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   gap: 20px;
 }
+
 .sample-mapping__story-item > * > * {
   margin: 0 auto;
   width: var(--post-it-width);
@@ -181,16 +190,26 @@ body {
   min-height: var(--post-it-height);
   padding: 10px;
 }
-
-/*
-.sample-mapping__rule {
-  position: sticky;
-  top: 0px;
-  background-color: var(--background-color);
+th:first-child,
+td:first-child {
+  width: auto;
+  white-space: nowrap; /* empêche le contenu de s'étirer */
 }
-  */
-.sample-mapping__samples,
+
+.spacer {
+  width: 100%;
+}
+.sample-mapping__story-type,
+.sample-mapping__rules-type,
 .sample-mapping__samples-type {
+  position: sticky;
+  right: 0;
+  background-color: var(--background-color);
+  z-index: 1;
+  padding: 10px;
+}
+
+.sample-mapping__samples {
   vertical-align: top;
 }
 .sample-mapping__samples-items {
@@ -203,7 +222,6 @@ body {
   text-align: center;
   font-weight: bold;
   font-size: 1.5em;
-  margin: 14px;
   cursor: default;
 }
 
@@ -248,7 +266,7 @@ body {
   min-height: 0; /* important */
   overflow: auto; /* scroll sur le conteneur qui affiche les racines des arbres */
 }
-.check-list__space > .tree-list__space {
+.check-list__space > .items__space {
   overflow: visible;
   min-height: 0; /* important */
   display: grid;
@@ -259,7 +277,7 @@ body {
   align-items: start; /* aligne les arbres vers le haut plutôt que de les étendre à l'espace disponible */
   align-content: start;
 }
-.check-list__space > .tree-list__space > .tree--root {
+.check-list__space > .items__space > .tree--root {
   display: block;
 }
 

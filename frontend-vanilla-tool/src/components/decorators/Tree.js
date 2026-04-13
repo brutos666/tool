@@ -4,6 +4,7 @@ import Toolbar from '../Toolbar.js';
 import ActionButton from '../ActionButton.js';
 import Decorator from './Decorator.js';
 import { RIGHT } from '../../tools/Constants.js';
+import TreeListView from '../views/TreeListView.js';
 /** @import Component from '../Component.js'; */
 /** @import TreeItem from '../../data/TreeItem.js'; */
 
@@ -43,10 +44,14 @@ class Tree extends Decorator {
     if (!rights.includes(RIGHT.update)) {
       this.setReadOnly();
     }
+
+    this.#treeList = new TreeList(new TreeListView(), data.treeItem, data.layout);
+    this.setStaticChild('treeList', this.#treeList);
+
     const toolbar = new Toolbar();
     if (rights.includes(RIGHT.create)) {
       this.#addAction = new ActionButton({ id: 'addNewChild', label: '+' });
-      this.#addAction.setDoActionCallback(this.addNewChild.bind(this));
+      this.#addAction.setDoActionCallback(this.#treeList.addNewItem.bind(this.#treeList, 'Nouvel item'));
       toolbar.addChild(this.#addAction);
     }
     if (rights.includes(RIGHT.delete)) {
@@ -55,9 +60,6 @@ class Tree extends Decorator {
       toolbar.addChild(this.#deleteAction);
     }
     this.setStaticChild('toolbar', toolbar);
-
-    this.#treeList = new TreeList(data.treeItem.getTreeItemList(), data.layout);
-    this.setStaticChild('treeList', this.#treeList);
 
     this.setOpen(false);
     this.setLeaf(this.#treeItem.isLeaf());
@@ -80,10 +82,6 @@ class Tree extends Decorator {
 
   getTreeList() {
     return this.#treeList;
-  }
-
-  addNewChild() {
-    this.#treeItem.addItem({ title: 'Nouvel item', state: 'TODO', children: [] });
   }
 
   setOpen(open) {

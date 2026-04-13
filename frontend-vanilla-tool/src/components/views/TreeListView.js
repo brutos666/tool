@@ -1,11 +1,14 @@
-import CompositeView from './CompositeView.js';
+import ItemsView from './ItemsView.js';
 
-class TreeListView extends CompositeView {
+class TreeListView extends ItemsView {
 
   name = 'TreeListView';
 
-  getHtmlView() {
-    return String.raw`<div class="tree-list"><div id="spaceChildren" class="tree-list__space"></div></div>`;
+  constructor(data) {
+    super(data);
+    this.getElementView()
+      .querySelector('.items__space')
+      .classList.add('tree-list__space');
   }
 
 }

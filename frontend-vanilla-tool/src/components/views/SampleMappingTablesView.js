@@ -28,12 +28,16 @@ class SampleMappingTablesView extends View {
 
     const rulesSpace = this.getElementView()
       .querySelector('#spaceRules');
-    rulesSpace.appendChild(ruleNode);
+    const ruleSpacer = rulesSpace.querySelector('.sample-mapping__add-rule');
+    rulesSpace.insertBefore(ruleNode, ruleSpacer);
+
     const samplesSpace = this.getElementView()
       .querySelector('#spaceSamples');
-    samplesSpace.appendChild(samplesNode);
+    const sampleSpacer = samplesSpace.querySelector('.sample-mapping__samples-empty');
+    samplesSpace.insertBefore(samplesNode, sampleSpacer);
 
-    document.querySelector('.sample-mapping__story-item').colSpan = this.#ruleHeaders.length;
+    this.getElementView()
+      .querySelector('.sample-mapping__story-item').colSpan = this.#ruleHeaders.length + 1;
   }
 
   removeAllColumns() {
@@ -41,7 +45,8 @@ class SampleMappingTablesView extends View {
     this.#sampleCells.forEach(samplesNode => samplesNode.parentNode.removeChild(samplesNode));
     this.#ruleHeaders = [];
     this.#sampleCells = [];
-    document.querySelector('.sample-mapping__story-item').colSpan = 1;
+    this.getElementView()
+      .querySelector('.sample-mapping__story-item').colSpan = 1;
   }
 
   removeColumn(index) {
@@ -54,21 +59,27 @@ class SampleMappingTablesView extends View {
     this.#ruleHeaders.splice(index, 1);
     this.#sampleCells.splice(index, 1);
 
-    document.querySelector('.sample-mapping__story-item').colSpan = this.#ruleHeaders.length;
+    this.getElementView()
+      .querySelector('.sample-mapping__story-item').colSpan = this.#ruleHeaders.length + 1;
   }
 
   getHtmlView() {
-    return String.raw`<table><thead>
+    return String.raw`<div class ="sample-mapping"><table class="sample-mapping__table"><thead>
       <tr>
+        <th class="sample-mapping__story-item" colspan="1" ><template id="storyItem"></template></th>
+        <th class="spacer"></th>
         <th class="sample-mapping__story-type"><span class="sample-mapping--type">Story</span></th>
-        <th class="sample-mapping__story-item" colspan="1" ><template id="storyItem" ></template></th>
       </tr>
       <tr id="spaceRules">
+        <th class="sample-mapping__add-rule sample-mapping__rule"><template id="addRule"></template></th>
+        <th class="spacer"></th>
         <th class="sample-mapping__rules-type"><span class="sample-mapping--type">Rules</span></th>
       </tr></thead>
       <tbody><tr id="spaceSamples">
-        <td class="sample-mapping__samples-type"><span class="sample-mapping--type">Samples</span></td>
-      </tr></tbody></table>`;
+        <td class="sample-mapping__samples-empty sample-mapping__samples"></td>
+        <td class="spacer"></td>
+        <td class="sample-mapping__samples-type"><span class="sample-mapping--type">Samples / Questions</span></td>
+      </tr></tbody></table></div>`;
   }
 
 }

@@ -1,42 +1,54 @@
 import { ITEM_LAYOUT, RIGHT } from '../tools/Constants.js';
-import Composite from './Composite.js';
+import Component from './Component.js';
 import CommandItemDecorator from './decorators/CommandItemDecorator.js';
 import Item from './Item.js';
+import ItemsView from './views/ItemsView.js';
 /** @import TreeItem from '../data/TreeItem.js'; */
-/** @import TreeItemList from '../data/TreeItemList.js'; */
-/** @import CompositeView from './CompositeView.js'; */
 
-class Items extends Composite {
+class Items extends Component {
 
   /** @type {ITEM_LAYOUT} */
   #itemLayout;
-  /** @type {TreeItemList} */
-  #treeItemList;
+  /** @type {TreeItem} */
+  #treeItem;
+  /** @type {Array<Component>} */
+  #itemsComponent = [];
+  /** @type {Array<TreeItem>} */
+  #treeItemArray = [];
 
   /**
    * @constructor
-   * @param {CompositeView} view
-   * @param {TreeItemList} treeItemList
+   * @param {ItemsView} view
+   * @param {TreeItem} treeItem
    * @param {ITEM_LAYOUT} itemLayout
    */
-  constructor(view, treeItemList, itemLayout) {
-    super(view);
+  constructor(view, treeItem, itemLayout) {
+    super(view === undefined ? new ItemsView() : view);
+    this.#treeItem = treeItem;
     this.#itemLayout = itemLayout;
-    this.#treeItemList = treeItemList;
+    const treeItemList = treeItem.getTreeItemList();
     this.addItems(treeItemList.getTreeList());
-
     treeItemList.addObserver(this);
   }
   getLayout() {
     return this.#itemLayout;
   }
   getTreeItemList() {
-    return this.#treeItemList;
+    return this.#treeItem.getTreeItemList();
   }
-  setTreeItemList(treeItemList) {
-    this.#treeItemList.removeObserver(this);
+  addNewItem(title) {
+    this.#treeItem.addItem({ title, state: 'TODO', children: [] });
+  }
+  getItemsComponent() {
+    return this.#itemsComponent;
+  }
+
+  setTreeItem(treeItem) {
+    this.#treeItem.getTreeItemList()
+      .removeObserver(this);
+    this.#treeItem = treeItem;
+    const treeItemList = treeItem.getTreeItemList();
     treeItemList.addObserver(this);
-    this.#treeItemList = treeItemList;
     this.removeAllItems();
     this.addItems(treeItemList.getTreeList());
   }
@@ -70,7 +82,10 @@ class Items extends Composite {
    */
   addItems(treeItemArray) {
     treeItemArray.forEach(treeItem => {
-      this.addItem(treeItem);
+      const itemComponent = this.getItemComponent(treeItem);
+      this.addItemView(itemComponent);
+      this.#treeItemArray.push(treeItem);
+      this.#itemsComponent.push(itemComponent);
     });
   }
 
@@ -80,8 +95,17 @@ class Items extends Composite {
    */
   removeItems(treeItemArray) {
     treeItemArray.forEach(treeItem => {
-      this.removeItem(treeItem);
+      const index = this.#treeItemArray.indexOf(treeItem);
+      this.removeItem(index);
+      this.#treeItemArray.splice(index, 1);
+      this.#itemsComponent.splice(index, 1);
     });
+  }
+
+  removeAllItems() {
+    this.removeAllItemsViews();
+    this.#itemsComponent = [];
+    this.#treeItemArray = [];
   }
 
   /**
@@ -89,30 +113,42 @@ class Items extends Composite {
    * Ces méthodes sont à réécrire dans la classe dérivée si nécessaire
    *******************************************************************
    */
+
   /**
-   * Ajout d'un item
-   * @param {TreeItem} treeItem - Item à ajouter
+   * Convertir un item en composant
+   * @param {TreeItem} treeItem - Informations sur la tache
+   * @returns {Object} objet permettant l'ajout d'un item dans le vue
    */
-  addItem(treeItem) {
+  getItemComponent(treeItem) {
     const itemRights = this.getLayout() === ITEM_LAYOUT.Title ? [] : [ RIGHT.create, RIGHT.update, RIGHT.delete ];
     const rights = treeItem.isRoot() ? [ RIGHT.update, RIGHT.delete ] : itemRights;
     const readOnly = !rights.includes(RIGHT.update);
     const item = new Item({ treeItem, layout: this.getLayout(), rights });
     if (readOnly) {
-      super.addChild(item);
-      return;
+      return item;
     }
     // Mise en place du décorateur permettant la validation en base de données
-    const commandItem = new CommandItemDecorator(item, { treeItem, rights });
-    super.addChild(commandItem);
+    return new CommandItemDecorator(item, { treeItem, rights });
   }
-  removeAllItems() {
-    this.removeAllChildren();
+
+  /**
+   * Ajout d'un item
+   * @param {Object} itemComponent - objet permettant l'ajout d'un item dans le vue
+   */
+  addItemView(itemComponent) {
+    /** @type {ItemsView} */
+    const view = this.getView();
+    view.addItemView(itemComponent.getView());
   }
-  removeItem(treeItem) {
-    const child = this.getChildren()
-      .find(child => child.getTreeItem() === treeItem);
-    this.removeChild(child);
+  removeAllItemsViews() {
+    /** @type {ItemsView} */
+    const view = this.getView();
+    view.removeAllItemsViews();
+  }
+  removeItem(index) {
+    /** @type {ItemsView} */
+    const view = this.getView();
+    view.removeItemView(index);
   }
 
 }
