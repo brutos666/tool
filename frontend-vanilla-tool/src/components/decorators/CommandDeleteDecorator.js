@@ -45,7 +45,9 @@ class CommandDeleteDecorator extends CommandSpaceDecorator {
       .execute()
       .then(itemInfos => {
         const previous = treeItemToRemove.getPrevious();
-        previous.updateItem({ nextId: treeItemToRemove.getNextId() });
+        if (previous) {
+          previous.updateItem({ nextId: treeItemToRemove.getItemInfos().nextId });
+        }
         this.#treeItem.removeItem(treeItemToRemove);
         return Promise.resolve(itemInfos);
       });
