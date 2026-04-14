@@ -7,6 +7,7 @@ import Toolbar from './Toolbar.js';
 import TreeList from './TreeList.js';
 import NavTreeView from './views/NavTreeView.js';
 import TreeListView from './views/TreeListView.js';
+import CommandDeleteDecorator from './decorators/CommandDeleteDecorator.js';
 
 class NavTree extends Component {
 
@@ -20,7 +21,8 @@ class NavTree extends Component {
     addButton.setDoActionCallback(items.addNewItem.bind(items, 'Nouvel espace'));
     items.setStaticChild('addItemAction', addButton);
 
-    const itemsWithCommands = new CommandLoadDecorator(items);
+    const itemsWithDelete = new CommandDeleteDecorator(items, { treeItem: StoreData.getTreeItem() });
+    const itemsWithCommands = new CommandLoadDecorator(itemsWithDelete);
     this.setStaticChild('treeItems', itemsWithCommands);
 
     const reloadAction = new ActionButton({ id: 'reload', label: 'Rafraîchir' });

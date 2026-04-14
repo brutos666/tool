@@ -70,6 +70,7 @@ class TreeItemList {
       }
     }
     this.alertObservers('remove', [treeItemToRemove]);
+    treeItemToRemove.alertObservers('deleted');
   }
 
   getPrevious(treeItem) {
@@ -86,9 +87,11 @@ class TreeItemList {
       previousItem.setPropertyValue('nextId', currentTreeItem.getItemId());
     }
   }
-
+  getLast() {
+    return this.#treeList[this.#treeList.length - 1];
+  }
   updateLast() {
-    const lastItem = this.#treeList[this.#treeList.length - 1];
+    const lastItem = this.getLast();
     lastItem.setPropertyValue('nextId', null);
   }
   /**

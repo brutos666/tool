@@ -39,6 +39,9 @@ class Items extends Component {
   addNewItem(title) {
     this.#treeItem.addItem({ title, state: 'TODO', children: [] });
   }
+  doDelete(treeItemToRemove) {
+    this.#treeItem.removeItem(treeItemToRemove);
+  }
   getItemsComponent() {
     return this.#itemsComponent;
   }
@@ -128,6 +131,7 @@ class Items extends Component {
     const layout = this.getLayout();
     const rights = ITEM_LAYOUT.getRights(layout);
     const item = new Item({ treeItem, layout, rights });
+    item.setParentContainer(this);
     // Mise en place du décorateur permettant la validation en base de données
     return new CommandItemDecorator(item, { treeItem, rights });
   }

@@ -1,9 +1,9 @@
-import CommandDecorator from './CommandDecorator.js';
 import DeleteItem from '../../commands/DeleteItem.js';
 import CommandItemDecoratorView from './views/CommandItemDecoratorView.js';
 import { RIGHT } from '../../tools/Constants.js';
 import SaveItem from '../../commands/SaveItem.js';
 import ItemCallsRequests from '../../requests/ItemCallsRequests.js';
+import CommandSpaceDecorator from './CommandSpaceDecorator.js';
 /** @import Tree from './Tree.js' */
 /** @import TreeItem from '../../data/TreeItem.js' */
 
@@ -11,7 +11,7 @@ import ItemCallsRequests from '../../requests/ItemCallsRequests.js';
  * Le décorateur se charge de la sauvegarde (création, modification, suppression) d'un item. Il sera positionner au niveau de l'élément qui agit sur l'item pour pouvoir gérer les erreurs et le spinner au bon endroit.
  * L'action de sauvegarde et mise à jour se fait en revanche sur le modèle de données
  */
-class CommandItemDecorator extends CommandDecorator {
+class CommandItemDecorator extends CommandSpaceDecorator {
 
   /** @type {TreeItem} */
   #treeItem;
@@ -86,7 +86,7 @@ class CommandItemDecorator extends CommandDecorator {
     this.setRelaunchCallback(() => {
       this.doSave();
     });
-    return new SaveItem(this)
+    return new SaveItem(this, this.#treeItem)
       .execute()
       .then(itemInfos => {
         const previousTreeItem = this.#treeItem.getPrevious();

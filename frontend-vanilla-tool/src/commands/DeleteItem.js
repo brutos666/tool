@@ -10,18 +10,18 @@ class DeleteItem extends Command {
   /**
    * @constructor de la classe DeleteItem
    * @param {CommandItemDecorator} commandItemDecorator - Item
+   * @param {TreeItem} treeItemToRemove
    */
-  constructor(commandItemDecorator) {
+  constructor(commandItemDecorator, treeItemToRemove) {
     super(commandItemDecorator);
-    const treeItem = commandItemDecorator.getTreeItem();
-    if (treeItem.isNew()) {
+    if (treeItemToRemove.isNew()) {
       this.setSuccessMessage('La tâche a bien été retirée');
       this.setErrorMessage('Une erreur est survenue lors de la suppression de la tâche');
       return;
     }
     this.setSuccessMessage('La tâche a bien été supprimée');
     this.setErrorMessage('Une erreur est survenue lors de la suppression de la tâche');
-    this.setExecuteCallback(new ItemCallsRequests().deleteItem.bind(null, treeItem.getItemInfos()));
+    this.setExecuteCallback(new ItemCallsRequests().deleteItem.bind(null, treeItemToRemove.getItemInfos()));
   }
 
 }

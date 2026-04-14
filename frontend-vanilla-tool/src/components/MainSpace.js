@@ -5,6 +5,7 @@ import MainSpaceView from './views/MainSpaceView.js';
 import { LAYOUT } from '../tools/Constants.js';
 import CheckList from './CheckList.js';
 import SampleMappingTables from './SampleMappingTables.js';
+import CommandDeleteDecorator from './decorators/CommandDeleteDecorator.js';
 /** @import Items from './Items.js'; */
 
 class MainSpace extends Component {
@@ -53,7 +54,8 @@ class MainSpace extends Component {
         break;
     }
     if (this.#main) {
-      this.setStaticChild('main', this.#main);
+      const mainWithDelete = new CommandDeleteDecorator(this.#main, { treeItem: this.#treeItem });
+      this.setStaticChild('main', mainWithDelete);
     }
   }
 

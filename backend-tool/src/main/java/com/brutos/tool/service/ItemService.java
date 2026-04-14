@@ -56,6 +56,13 @@ public class ItemService {
     }
 
     public void deleteItem(Item item) {
+        // Recherche de l'item précédent
+        Optional<ItemModel> previousItem = itemRepository.findFirstByParentIdAndNextId(item.getParentId(), item.getId());
+        if (previousItem.isPresent()) {
+            // Recherche de l'item suivant
+            previousItem.get().setNextId(item.getNextId());
+            itemRepository.save(previousItem.get());
+        }
         itemRepository.deleteById(item.getId());
         for (Item child : item.getChildren()) {
             deleteItem(child);

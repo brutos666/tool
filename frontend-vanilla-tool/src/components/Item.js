@@ -7,10 +7,14 @@ import ActionButton from './ActionButton.js';
 import Toolbar from './Toolbar.js';
 /** @import TreeItem from '../data/TreeItem.js' */
 /** @import { ITEM_LAYOUT } from '../tools/Constants.js' */
+/** @import {Items} from './Items.js' */
 
 class Item extends Component {
 
   name = 'Item';
+
+  /** @type {Items} */
+  #parentContainer = null;
 
   /** @type {TreeItem} */
   #treeItem = null;
@@ -41,6 +45,10 @@ class Item extends Component {
       toolbar.addChild(deleteAction);
     }
     this.setStaticChild('toolbar', toolbar);
+  }
+
+  setParentContainer(parentContainer) {
+    this.#parentContainer = parentContainer;
   }
 
   /** @override  */
@@ -91,8 +99,10 @@ class Item extends Component {
     this.#treeItem.addItem({ title, state: 'TODO', children: [] });
   }
   doDelete() {
-    // Pour l'instant, on supprime immédiatement
-    this.#treeItem.deleteItem();
+    if (this.#parentContainer === null) {
+      return;
+    }
+    this.#parentContainer.doDelete(this.#treeItem);
   }
 
   /**
