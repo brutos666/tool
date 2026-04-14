@@ -20,7 +20,7 @@ class CommandDecoratorView extends DecoratorView {
   }
 
   getHtmlView() {
-    return String.raw`<div class="command--decorator"><template></template>
+    return String.raw`<div class="command--decorator"> ${ super.getTemplateDecoratorHTML() }
       <div class="message hidden"></div><template id="relaunch"></template>
       </div>`;
   }

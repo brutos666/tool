@@ -4,6 +4,8 @@ import { createNode } from '../../tools/NodeUtilities.js';
 
 class View {
 
+  name = 'View';
+
   /** @type {Element} */
   #elementView;
 
@@ -12,12 +14,24 @@ class View {
   /** @type {Object.<string, Element>} */
   #templateNode = {};
 
+  #name;
+
   /**
    * @constructor. Crée la vue à partir des données passées en paramètre
    * @param {Object} data - Données à utiliser pour créer la vue
    */
   constructor(data) {
+    this.#name = this.constructor.name;
     this.createView(data);
+    const templateNodes = this.getElementView()
+      .querySelectorAll('template');
+    for (const templateNode of templateNodes) {
+      this.#templateNode[templateNode.id] = templateNode;
+    }
+  }
+
+  getName() {
+    return this.#name;
   }
 
   /**
@@ -43,29 +57,17 @@ class View {
       return;
     }
     /** @type {Element} */
-    const templateNode = this.#templateNode[id] || this.getElementView()
-      .querySelector(`#${ id }`);
+    const templateNode = this.#templateNode[id];
     if (!templateNode) {
-      window.alert(`Erreur de conception : on tente d'accéder à un élément qui n'a pas été défini [${ id }]`);
-      return;
+      const error = new Error(`Erreur de conception : on tente d'accéder à un élément qui n'a pas été défini [${ id }] dans la vue [${ this.getName() }]`);
+      window.alert(error);
+      throw new Error(error);
     }
-    this.#templateNode[id] = templateNode;
     templateNode.classList.forEach(classItem => view.getElementView().classList.add(classItem));
     templateNode.parentNode.replaceChild(view.getElementView(), templateNode);
     this.#staticViews[id] = view;
   }
-  removeStaticView(id) {
-    /** @type {Element} */
-    const templateNode = this.#templateNode[id] || this.getElementView()
-      .querySelector(`#${ id }`);
-    if (!templateNode) {
-      window.alert(`Erreur de conception : on tente d'accéder à un élément qui n'a pas été défini [${ id }]`);
-      return;
-    }
-    delete this.#staticViews[id];
-    delete this.#templateNode[id];
-    templateNode.parentNode.removeChild(templateNode);
-  }
+
   getStaticView(id) {
     return this.#staticViews[id];
   }

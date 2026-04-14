@@ -16,6 +16,13 @@ class DecoratorView extends View {
     this.setDecoratedView(view);
   }
 
+  getHtmlView(/* data */) {
+    return String.raw`<div class="decorator">${ this.getTemplateDecoratorHTML() }</div>`;
+  }
+  getTemplateDecoratorHTML() {
+    return String.raw`<template id="decoratedSpace"></template>`;
+  }
+
   /**
    * Positionne la vue statique
    * @param {View} view - Vue statique
@@ -25,10 +32,11 @@ class DecoratorView extends View {
 
     /** @type {Element} */
     const oldView = this.getElementView()
-      .querySelector('template');
+      .querySelector('#decoratedSpace');
     if (!oldView) {
-      window.alert(`Erreur de conception : il manque <template></template> dans le decorator [${ view.name }]`);
-      return;
+      const error = `Erreur de conception : il manque ${ this.getTemplateDecoratorHTML() } dans le decorator [${ this.getName() }]`;
+      window.alert(error);
+      throw new Error(error);
     }
     const newView = view.getElementView();
     oldView.parentNode.replaceChild(newView, oldView);
@@ -45,10 +53,6 @@ class DecoratorView extends View {
     const oldView = this.getElementView()
       .querySelector('template');
     oldView.parentNode.replaceChild(elementView, oldView);
-  }
-
-  getHtmlView(/* data */) {
-    return String.raw`<div class="decorator"><template></template></div>`;
   }
 
 }

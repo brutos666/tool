@@ -22,10 +22,6 @@ class NodeElement {
     this.getView()
       .setStaticView(id, child.getView());
   }
-  removeStaticView(id) {
-    this.getView()
-      .removeStaticView(id);
-  }
   /**
    * Donne la vue pour permettre de modifier l'affichage si besoin
    * @returns {View}

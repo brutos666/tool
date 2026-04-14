@@ -40,7 +40,6 @@ class Tree extends Decorator {
 
     const treeList = new TreeList(new TreeListView(), data.treeItem, data.layout);
     this.setStaticChild('treeList', treeList);
-    this.removeStaticView('addItemAction');
 
     this.setOpen(false);
     this.setLeaf(this.#treeItem.isLeaf());

@@ -33,8 +33,8 @@ class TreeView extends DecoratorView {
 
   getHtmlView() {
     return String.raw`<div id="tree" class="tree">
-      <section class="tree__header"><button id="toggle" class="tree__toggle">▼</button><div id="treeItem" class="tree__item"><template></template></div></section>
-      <section id="treeList" class="tree__list"></section></div>`;
+      <section class="tree__header"><button id="toggle" class="tree__toggle">▼</button><div id="treeItem" class="tree__item">${ super.getTemplateDecoratorHTML() }</div></section>
+      <template id="treeList" class="tree__list"></template></div>`;
   }
 
   onFocus(event) {
