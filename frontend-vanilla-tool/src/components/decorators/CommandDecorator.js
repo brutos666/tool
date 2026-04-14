@@ -1,4 +1,3 @@
-import ActionButton from '../ActionButton.js';
 import Decorator from './Decorator.js';
 /** @import CommandDecoratorView from './views/CommandDecoratorView.js'; */
 
@@ -7,9 +6,6 @@ class CommandDecorator extends Decorator {
   name = 'CommandDecorator';
 
   #commandInProgress = false;
-  #relaunchButton;
-
-  #relaunchCallback = null;
 
   /**
    * @constructor
@@ -18,16 +14,6 @@ class CommandDecorator extends Decorator {
    */
   constructor(view, decoratedElement) {
     super(view, decoratedElement);
-
-    this.#relaunchButton = new ActionButton({
-      id: 'relaunchButton',
-      label: 'Relancer'
-    });
-    this.#relaunchButton.setDoActionCallback(() => {
-      this.#relaunchCallback();
-    });
-    this.#relaunchButton.setHidden();
-    this.setStaticChild('relaunch', this.#relaunchButton);
   }
 
   /**
@@ -38,13 +24,6 @@ class CommandDecorator extends Decorator {
     return super.getView();
   }
 
-  setRelaunchCallback(callback) {
-    this.#relaunchCallback = callback;
-  }
-  getRelaunchCallback() {
-    return this.#relaunchCallback;
-  }
-
   isCommandInProgress() {
     return this.#commandInProgress;
   }
@@ -52,11 +31,11 @@ class CommandDecorator extends Decorator {
   /**
    * Cette méthode est appelée lorsque la commande est en cours
    * @param {string} name - Nom de la commande
+   * @param {Command} command - commande en cours
    */
   // eslint-disable-next-line no-unused-vars
-  commandInProgress(name) {
+  commandInProgress(name/* , command*/) {
     this.#commandInProgress = true;
-    this.#relaunchButton.setHidden();
 
     this.getDecoratedElement()
       .setDisabled();
@@ -76,7 +55,6 @@ class CommandDecorator extends Decorator {
       .setEnabled();
     this.getView()
       .hideSpinner();
-    this.#relaunchButton.setHidden();
   }
 
   /**
@@ -91,7 +69,6 @@ class CommandDecorator extends Decorator {
       .setEnabled();
     this.getView()
       .hideSpinner();
-    this.#relaunchButton.setVisible();
   }
 
   setInProgress() {

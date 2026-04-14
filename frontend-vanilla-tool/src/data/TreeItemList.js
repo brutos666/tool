@@ -45,6 +45,15 @@ class TreeItemList {
     this.alertObservers('replaceAll', this.getTreeList());
   }
 
+  addItems(parentTreeItem, itemInfosList) {
+    itemInfosList.forEach(itemInfos => {
+      const treeItem = new TreeItem(itemInfos);
+      treeItem.setParentItem(parentTreeItem);
+      this.#treeList.push(treeItem);
+      this.alertObservers('add', [treeItem]);
+    });
+  }
+
   addItem(parentTreeItem, itemInfos) {
     const treeItem = new TreeItem(itemInfos);
     treeItem.setParentItem(parentTreeItem);

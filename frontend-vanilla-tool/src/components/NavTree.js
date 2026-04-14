@@ -2,7 +2,9 @@ import StoreData from '../data/StoreData.js';
 import { ITEM_LAYOUT } from '../tools/Constants.js';
 import ActionButton from './ActionButton.js';
 import Component from './Component.js';
+import CommandActionDecorator from './decorators/CommandActionDecorator.js';
 import CommandLoadDecorator from './decorators/CommandLoadDecorator.js';
+import FileUpload from './FileUpload.js';
 import Toolbar from './Toolbar.js';
 import TreeList from './TreeList.js';
 import NavTreeView from './views/NavTreeView.js';
@@ -29,6 +31,17 @@ class NavTree extends Component {
     reloadAction.setDoActionCallback(itemsWithCommands.loadItems.bind(itemsWithCommands));
     const toolbar = new Toolbar();
     toolbar.addChild(reloadAction);
+
+    const exportAction = new ActionButton({ id: 'export', label: 'Exporter' });
+    const exportActionWithCommands = new CommandActionDecorator(exportAction);
+    exportAction.setDoActionCallback(exportActionWithCommands.exportItems.bind(exportActionWithCommands));
+    toolbar.addChild(exportAction);
+
+    const importAction = new FileUpload({ id: 'import', label: 'Importer' });
+    const importActionWithCommands = new CommandActionDecorator(importAction);
+    importAction.setDoActionCallback(importActionWithCommands.importItems.bind(importActionWithCommands));
+    toolbar.addChild(importAction);
+
     this.setStaticChild('toolbar', toolbar);
 
     itemsWithCommands.loadItems();

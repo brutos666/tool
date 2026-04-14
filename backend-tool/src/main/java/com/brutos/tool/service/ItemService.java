@@ -25,8 +25,57 @@ public class ItemService {
         return itemMapper.toEntity(itemModel);
     }
 
+    public List<Item> saveTreeItems(List<Item> items) {
+        List<Item> savedItems = new ArrayList<>();
+        Long nextId = null;
+        List<Item> reverseItemsToSave = items.reversed();
+        for (Item itemToSave : reverseItemsToSave) {
+            Item savedItem = saveTreeItem(-1L, nextId, itemToSave);
+            savedItems.addFirst(savedItem);
+            nextId = savedItem.getId();
+        }
+        // Récupérer le dernier item ayant -1 comme parentId et modifier son nextId avant
+        // l'identifiant du premier des items ajoutés
+        Optional<ItemModel> lastItem = this.itemRepository.findFirstByParentIdAndNextIdIsNull(-1L);
+        if (lastItem.isPresent()) {
+            lastItem.get().setNextId(savedItems.getFirst().getId());
+            ItemModel itemModel = this.itemRepository.save(lastItem.get());
+            savedItems.addFirst(this.itemMapper.toEntity(itemModel));
+        }
+        // Retourne l'item modifié et tous les autres items ajoutés
+        return savedItems;
+    }
+
+    private Item saveTreeItem(Long parentId, Long nextId, Item item) {
+        Item itemToSave = new Item();
+        itemToSave.setId(null);
+        itemToSave.setNextId(nextId);
+        itemToSave.setParentId(parentId);
+        itemToSave.setText(item.getText());
+        itemToSave.setTitle(item.getTitle());
+        itemToSave.setState(item.getState());
+
+        Item savedItem = save(itemToSave);
+
+        Long childNextId = null;
+        List<Item> savedChildren = new ArrayList<>();
+        List<Item> reverseChildrenToSave = item.getChildren().reversed();
+        for (Item childItemToSave : reverseChildrenToSave) {
+            Item savedChildItem = saveTreeItem(savedItem.getId(), childNextId, childItemToSave);
+            savedChildren.addFirst(savedChildItem);
+            childNextId = savedChildItem.getId();
+        }
+        savedItem.setChildren(savedChildren);
+        return savedItem;
+    }
+
     public List<Item> findAllItems() {
-        Map<Long, List<Item>> sortedItems = sortItems(itemMapper.toEntity(itemRepository.findAll()));
+        List<Item> flatList = itemMapper.toEntity(itemRepository.findAll());
+        return transformToTree(flatList);
+    }
+
+    public List<Item> transformToTree(List<Item> flatList) {
+        Map<Long, List<Item>> sortedItems = sortItems(flatList);
         return getChildren(-1L, sortedItems);
     }
 
@@ -95,4 +144,5 @@ public class ItemService {
                 .findFirst();
         return optionalItem.orElse(null);
     }
+
 }

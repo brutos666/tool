@@ -20,6 +20,15 @@ public class Item extends AbstractEntity {
         this.text = text;
     }
 
+    public Item(Long id, String title, String text, State state, Long parentId, Long nextId) {
+        this.setId(id);
+        this.title = title;
+        this.text = text;
+        this.state = state;
+        this.parentId = parentId;
+        this.nextId = nextId;
+    }
+
     public String getTitle() {
         return title;
     }
@@ -66,6 +75,10 @@ public class Item extends AbstractEntity {
 
     public void setChildren(List<Item> children) {
         this.children = children;
+    }
+
+    public Item getChild(int index) {
+        return children.get(index);
     }
 
     @Override

@@ -1,8 +1,8 @@
 'use strict';
 
-import Component from './Component.js';
+import Action from './Action.js';
 import ActionButtonView from './views/ActionButtonView.js';
-class ActionButton extends Component {
+class ActionButton extends Action {
 
   name = 'ActionButton';
   /**
@@ -13,19 +13,6 @@ class ActionButton extends Component {
    */
   constructor(data) {
     super(new ActionButtonView(data));
-  }
-
-  /**
-   * @override
-   * @returns {ActionButtonView}
-   */
-  getView() {
-    return super.getView();
-  }
-
-  setDoActionCallback(callback) {
-    this.getView()
-      .setDoActionCallback(callback);
   }
 
 }
