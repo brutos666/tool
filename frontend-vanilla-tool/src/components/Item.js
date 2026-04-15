@@ -70,6 +70,10 @@ class Item extends Component {
         .setOnChangeCallback(this.setPropertyValue.bind(this));
     }
   }
+  destroy() {
+    this.#treeItem.removeObserver(this);
+    super.destroy();
+  }
 
   /**
    * @returns {TreeItem}

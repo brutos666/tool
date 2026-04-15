@@ -1,4 +1,3 @@
-import DeleteItem from '../../commands/DeleteItem.js';
 import CommandItemDecoratorView from './views/CommandItemDecoratorView.js';
 import { RIGHT } from '../../tools/Constants.js';
 import SaveItem from '../../commands/SaveItem.js';
@@ -35,10 +34,6 @@ class CommandItemDecorator extends CommandSpaceDecorator {
     if (data.rights.includes(RIGHT.update)) {
       this.getView()
         .setOnBlurCallback(this.doSave.bind(this));
-    }
-    if (data.rights.includes(RIGHT.delete)) {
-      // L'élément décoré doit avoir la fonction qui supprime l'item
-      decoratedElement.getOriginalElement().doDelete = this.doDelete.bind(this);
     }
   }
   getTreeItem() {
@@ -93,36 +88,6 @@ class CommandItemDecorator extends CommandSpaceDecorator {
         const previousTreeItem = this.#treeItem.getPrevious();
         this.#treeItem.updateItem(itemInfos);
         if (previousTreeItem?.isModified()) {
-          return new ItemCallsRequests()
-            .saveItem(previousTreeItem.getItemInfos())
-            .then(previousItemInfos => {
-              previousTreeItem.updateItem(previousItemInfos);
-              return Promise.resolve(itemInfos);
-            });
-        }
-        return Promise.resolve(itemInfos);
-      });
-  }
-
-  /**
-   *
-   * @param {} action
-   * @param {*} treeItem
-   * @returns
-   */
-  doDelete() {
-    if (!this.#rights.includes(RIGHT.delete)) {
-      return;
-    }
-    this.setRelaunchCallback(() => {
-      this.doDelete();
-    });
-    return new DeleteItem(this)
-      .execute()
-      .then(itemInfos => {
-        const previousTreeItem = this.#treeItem.getPrevious();
-        this.#treeItem.deleteItem();
-        if (previousTreeItem) {
           return new ItemCallsRequests()
             .saveItem(previousTreeItem.getItemInfos())
             .then(previousItemInfos => {

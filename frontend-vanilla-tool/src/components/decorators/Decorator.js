@@ -35,5 +35,10 @@ class Decorator extends Component {
     return originalElement;
   }
 
+  destroy() {
+    super.destroy();
+    this.#decoratedElement.destroy();
+  }
+
 }
 export default Decorator;

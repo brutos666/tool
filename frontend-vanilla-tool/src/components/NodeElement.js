@@ -5,6 +5,7 @@ import View from './views/View.js';
 class NodeElement {
 
   #view;
+  #staticChildren = {};
 
   /**
    * @constructor
@@ -19,8 +20,17 @@ class NodeElement {
    * @param {Component} child
    */
   setStaticChild(id, child) {
+    if (this.#staticChildren[id]) {
+      this.#staticChildren[id].destroy();
+    }
     this.getView()
       .setStaticView(id, child.getView());
+    this.#staticChildren[id] = child;
+  }
+  destroy() {
+    // destroy de tous les staticChild
+    Object.values(this.#staticChildren)
+      .forEach(child => child.destroy());
   }
   /**
    * Donne la vue pour permettre de modifier l'affichage si besoin

@@ -1,8 +1,8 @@
 import DeleteItem from '../../commands/DeleteItem.js';
 import CommandSpaceDecorator from './CommandSpaceDecorator.js';
 import CommandDecoratorView from './views/CommandDecoratorView.js';
-/** @import Tree from './Tree.js' */
 /** @import TreeItem from '../../data/TreeItem.js' */
+/** @import Items from '../../components/Items.js' */
 
 /**
  * Le décorateur se charge de la suppression d'un item. Il sera positionner au niveau de l'élément qui agit sur l'item pour pouvoir gérer les erreurs et le spinner au bon endroit.

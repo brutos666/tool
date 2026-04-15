@@ -45,8 +45,11 @@ class SampleMappingTables extends Items {
     item.setParentContainer(this);
     const commandItem = new CommandItemDecorator(item, { treeItem, rights });
     const sampleItems = new SampleMappingSamples(treeItem);
-    const sampleItemsWithDelete = new CommandDeleteDecorator(sampleItems, { treeItem });
-    return { commandItem, sampleItemsWithDelete };
+    return { commandItem, sampleItems: new CommandDeleteDecorator(sampleItems, { treeItem }) };
+  }
+  removeItemComponent(component) {
+    component.commandItem.destroy();
+    component.sampleItems.destroy();
   }
 
   addItemView(data) {
@@ -54,13 +57,13 @@ class SampleMappingTables extends Items {
     const tableView = this.getView();
     tableView.addColumn(data.commandItem.getView(), data.sampleItems.getView());
   }
-  removeAllItems() {
+  removeAllItemsViews() {
     /** @type {SampleMappingTablesView} */
     const tableView = this.getView();
     tableView.removeAllColumns();
   }
 
-  removeItem(index) {
+  removeItemView(index) {
     /** @type {SampleMappingTablesView} */
     const tableView = this.getView();
     tableView.removeColumn(index);

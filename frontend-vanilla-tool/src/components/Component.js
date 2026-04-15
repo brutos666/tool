@@ -33,6 +33,7 @@ class Component extends NodeElement {
    */
   removed() {
     this.#parent = null;
+    this.destroy();
   }
 
   /**

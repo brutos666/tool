@@ -3,6 +3,7 @@ import TreeView from './views/TreeView.js';
 import Decorator from './Decorator.js';
 import { RIGHT } from '../../tools/Constants.js';
 import TreeListView from '../views/TreeListView.js';
+import CommandDeleteDecorator from './CommandDeleteDecorator.js';
 /** @import Component from '../Component.js'; */
 /** @import TreeItem from '../../data/TreeItem.js'; */
 
@@ -39,7 +40,8 @@ class Tree extends Decorator {
     }
 
     const treeList = new TreeList(new TreeListView(), data.treeItem, data.layout);
-    this.setStaticChild('treeList', treeList);
+    const treeListWithDelete = new CommandDeleteDecorator(treeList, { treeItem: data.treeItem });
+    this.setStaticChild('treeList', treeListWithDelete);
 
     this.setOpen(false);
     this.setLeaf(this.#treeItem.isLeaf());
@@ -86,6 +88,11 @@ class Tree extends Decorator {
     } else if (action === 'deleted') {
       this.#treeItem.removeObserver(this);
     }
+  }
+
+  destroy() {
+    this.#treeItem.removeObserver(this);
+    super.destroy();
   }
 
 }

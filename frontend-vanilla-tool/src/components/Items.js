@@ -7,6 +7,8 @@ import ItemsView from './views/ItemsView.js';
 
 class Items extends Component {
 
+  name = 'Items';
+
   /** @type {ITEM_LAYOUT} */
   #itemLayout;
   /** @type {TreeItem} */
@@ -49,6 +51,9 @@ class Items extends Component {
   destroy() {
     this.#treeItem.getTreeItemList()
       .removeObserver(this);
+    // Supprimer tous les observateurs
+    this.#itemsComponent.forEach(item => this.removeItemComponent(item));
+    super.destroy();
   }
 
   setTreeItem(treeItem) {
@@ -105,6 +110,7 @@ class Items extends Component {
     treeItemArray.forEach(treeItem => {
       const index = this.#treeItemArray.indexOf(treeItem);
       this.removeItem(index);
+      this.removeItemComponent(this.#itemsComponent[index]);
       this.#treeItemArray.splice(index, 1);
       this.#itemsComponent.splice(index, 1);
     });
@@ -112,6 +118,8 @@ class Items extends Component {
 
   removeAllItems() {
     this.removeAllItemsViews();
+    // Supprimer tous les observateurs
+    this.#itemsComponent.forEach(item => this.removeItemComponent(item));
     this.#itemsComponent = [];
     this.#treeItemArray = [];
   }
@@ -135,6 +143,9 @@ class Items extends Component {
     // Mise en place du décorateur permettant la validation en base de données
     return new CommandItemDecorator(item, { treeItem, rights });
   }
+  removeItemComponent(component) {
+    component.destroy();
+  }
 
   /**
    * Ajout d'un item
@@ -150,7 +161,7 @@ class Items extends Component {
     const view = this.getView();
     view.removeAllItemsViews();
   }
-  removeItem(index) {
+  removeItemView(index) {
     /** @type {ItemsView} */
     const view = this.getView();
     view.removeItemView(index);
