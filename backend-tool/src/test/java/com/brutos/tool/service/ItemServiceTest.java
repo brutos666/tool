@@ -71,6 +71,29 @@ public class ItemServiceTest {
         });
     }
 
+    private void mockSaveAll() {
+        when(itemRepository.saveAll(anyList())).thenAnswer(invocation -> {
+            List<ItemModel> inputs = invocation.getArgument(0);
+            return inputs.stream().map(this::convertToSavedItem).toList();
+        });
+    }
+
+    private ItemModel convertToSavedItem(ItemModel input) {
+        ItemModel copy = new ItemModel();
+        // Ne générer un nouvel ID que si l'objet en entrée a un ID null
+        if (input.getId() == null) {
+            copy.setId(nextId++);
+        } else {
+            copy.setId(input.getId());
+        }
+        copy.setTitle(input.getTitle());
+        copy.setText(input.getText());
+        copy.setState(input.getState());
+        copy.setParentId(input.getParentId());
+        copy.setNextId(input.getNextId());
+        return copy;
+    }
+
     @Test
     void shouldSaveItem() {
         // Given
@@ -305,14 +328,14 @@ public class ItemServiceTest {
         when(this.itemRepository.findFirstByParentIdAndNextIdIsNull(-1L)).thenReturn(Optional.of(lastItem));
         List<Item> itemsToSave = List.of(new Item(1L, TITLE1, TEXT1, State.TODO, -1L, null));
         nextId = 3L;
-        mockSave();
+        mockSaveAll();
 
         // When
         List<Item> actual = itemService.saveTreeItems(itemsToSave);
 
         // Then
         // Appel à sauvegarder une fois pour le précédent et 1 fois pour le nouveau
-        verify(itemRepository, times(2)).save(any());
+        verify(itemRepository, times(2)).saveAll(any());
         // Vérifier les valeurs
         assertEquals(toStringValues(lastItem), toStringValues(actual.getFirst()));
         assertEquals(toStringValues(itemsToSave.getFirst()), toStringValues(actual.get(1)));
@@ -336,7 +359,7 @@ public class ItemServiceTest {
                 .withFirstChild(2L, TITLE2, TEXT2, State.TODO)
                 .build();
         nextId = 3L;
-        mockSave();
+        mockSaveAll();
 
         // When
         List<Item> actual = itemService.saveTreeItems(itemsToSave);
@@ -345,8 +368,7 @@ public class ItemServiceTest {
         Item actualChildItem = actualItem.getChildren().getFirst();
 
         // Then
-        // Appel à sauvegarder une fois pour le précédent et 2 fois pour les nouveaux
-        verify(itemRepository, times(3)).save(any());
+        verify(itemRepository, times(2)).saveAll(any());
         // Vérifier les valeurs
         Item itemToSave = itemsToSave.getFirst();
         Item childItemToSave = itemToSave.getChild(0);
@@ -379,7 +401,7 @@ public class ItemServiceTest {
                 .withNextChild(24L, TITLE5, TEXT5, State.IN_PROGRESS)
                 .build();
         nextId = 3L;
-        mockSave();
+        mockSaveAll();
         Item itemToSave1 = itemsToSave.getFirst();
         Item itemToSave1Child1 = itemToSave1.getChild(0);
         Item itemToSave2 = itemsToSave.get(1);
@@ -389,42 +411,42 @@ public class ItemServiceTest {
         // When
         List<Item> actual = itemService.saveTreeItems(itemsToSave);
         Item actualPrevious = actual.get(0);
-        Item actualParent1 = actual.get(1);
-        Item actualParent2 = actual.get(2);
-        Item actual1Child1 = actualParent1.getChild(0);
-        Item actual2Child1 = actualParent2.getChild(0);
-        Item actual2Child2 = actualParent2.getChild(1);
+        Item actual1 = actual.get(1);
+        Item actual2 = actual.get(2);
+        Item actual1Child1 = actual1.getChild(0);
+        Item actual2Child1 = actual2.getChild(0);
+        Item actual2Child2 = actual2.getChild(1);
 
         // Then
-        verify(itemRepository, times(6)).save(any());
+        verify(itemRepository, times(2)).saveAll(any());
         // Vérifier les valeurs
         assertEquals(toStringValues(lastItem), toStringValues(actualPrevious));
-        assertEquals(toStringValues(itemToSave1), toStringValues(actualParent1));
-        assertEquals(toStringValues(itemToSave2), toStringValues(actualParent2));
+        assertEquals(toStringValues(itemToSave1), toStringValues(actual1));
+        assertEquals(toStringValues(itemToSave2), toStringValues(actual2));
         assertEquals(toStringValues(itemToSave1Child1), toStringValues(actual1Child1));
         assertEquals(toStringValues(itemToSave2Child1), toStringValues(actual2Child1));
         assertEquals(toStringValues(itemToSave2Child2), toStringValues(actual2Child2));
         // Vérifier que les ids sont corrects
         assertEquals(lastItem.getId(), actualPrevious.getId());
-        assertTrue(actualParent1.getId() > lastItem.getId());
-        assertTrue(actualParent2.getId() > lastItem.getId());
+        assertTrue(actual1.getId() > lastItem.getId());
+        assertTrue(actual2.getId() > lastItem.getId());
         assertTrue(actual1Child1.getId() > lastItem.getId());
         assertTrue(actual2Child1.getId() > lastItem.getId());
         assertTrue(actual2Child2.getId() > lastItem.getId());
         // Vérifier les suivants
-        assertEquals(actualParent1.getId(), actualPrevious.getNextId());
-        assertEquals(actualParent2.getId(), actualParent1.getNextId());
-        assertNull(actualParent2.getNextId());
+        assertEquals(actual1.getId(), actualPrevious.getNextId());
+        assertEquals(actual2.getId(), actual1.getNextId());
+        assertNull(actual2.getNextId());
         assertNull(actual1Child1.getNextId());
         assertEquals(actual2Child2.getId(), actual2Child1.getNextId());
         assertNull(actual2Child2.getNextId());
         // Vérifier les parents
         assertEquals(-1L, actualPrevious.getParentId());
-        assertEquals(-1L, actualParent1.getParentId());
-        assertEquals(-1L, actualParent2.getParentId());
-        assertEquals(actualParent1.getId(), actual1Child1.getParentId());
-        assertEquals(actualParent2.getId(), actual2Child1.getParentId());
-        assertEquals(actualParent2.getId(), actual2Child2.getParentId());
+        assertEquals(-1L, actual1.getParentId());
+        assertEquals(-1L, actual2.getParentId());
+        assertEquals(actual1.getId(), actual1Child1.getParentId());
+        assertEquals(actual2.getId(), actual2Child1.getParentId());
+        assertEquals(actual2.getId(), actual2Child2.getParentId());
     }
 
     @Test
@@ -439,7 +461,7 @@ public class ItemServiceTest {
                 .withFirstChild(24L, TITLE5, TEXT5, State.IN_PROGRESS)
                 .build();
         nextId = 3L;
-        mockSave();
+        mockSaveAll();
         Item itemToSave1 = itemsToSave.getFirst();
         Item itemToSave1Child1 = itemToSave1.getChild(0);
         Item itemToSave1Child1_1 = itemToSave1Child1.getChild(0);
@@ -456,7 +478,7 @@ public class ItemServiceTest {
         Item actual1Child1_2_1 = actual1Child1_2.getChild(0);
 
         // Then
-        verify(itemRepository, times(6)).save(any());
+        verify(itemRepository, times(2)).saveAll(any());
         // Vérifier les valeurs
         assertEquals(toStringValues(lastItem), toStringValues(actualPrevious));
         assertEquals(toStringValues(itemToSave1), toStringValues(actual1));

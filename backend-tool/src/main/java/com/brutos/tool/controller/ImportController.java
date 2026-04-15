@@ -29,7 +29,7 @@ public class ImportController {
     }
 
     @PostMapping("/items")
-    public List<ItemWebResult> importUsers(@RequestParam("file") MultipartFile file) throws IOException {
+    public List<ItemWebResult> importItems(@RequestParam("file") MultipartFile file) throws IOException {
 
         if (file.isEmpty()) {
             throw new IllegalArgumentException("Le fichier est vide");
