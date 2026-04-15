@@ -22,6 +22,7 @@ public class ItemMapper implements Mapper<Item, ItemModel, ItemWebResult> {
         itemWebResult.setState(item.getState());
         itemWebResult.setParentId(item.getParentId());
         itemWebResult.setNextId(item.getNextId());
+        itemWebResult.setStatus(item.getStatus());
         if (item.getChildren() != null) {
             itemWebResult.setChildren(item.getChildren().stream().map(this::toWebResult).toList());
         }
@@ -37,6 +38,7 @@ public class ItemMapper implements Mapper<Item, ItemModel, ItemWebResult> {
         item.setState(webResult.getState());
         item.setParentId(webResult.getParentId());
         item.setNextId(webResult.getNextId());
+        item.setStatus(webResult.getStatus());
         if (webResult.getChildren() != null) {
             item.setChildren(webResult.getChildren().stream().map(this::toEntity).toList());
         }

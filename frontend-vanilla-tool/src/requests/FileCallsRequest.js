@@ -1,4 +1,5 @@
 import CallRequest from './CallRequest.js';
+/** @import {ItemInfos} from '../data/TreeItem.js'; */
 
 class FileCallRequests {
 

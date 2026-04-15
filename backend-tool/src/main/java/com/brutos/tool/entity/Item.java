@@ -11,6 +11,7 @@ public class Item extends AbstractEntity {
     private Long parentId;
     private Long nextId;
     private List<Item> children = new ArrayList<>();
+    private Status status = Status.OK;
 
     public Item() {
     }
@@ -69,6 +70,10 @@ public class Item extends AbstractEntity {
         this.nextId = nextId;
     }
 
+    public Long getZeroOrNextId() {
+        return nextId == null ? 0L : nextId;
+    }
+
     public List<Item> getChildren() {
         return children;
     }
@@ -79,6 +84,27 @@ public class Item extends AbstractEntity {
 
     public Item getChild(int index) {
         return children.get(index);
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    @Override
+    public String toString() {
+        return "Item{" +
+                "title='" + title + '\'' +
+                ", text='" + text + '\'' +
+                ", state=" + state +
+                ", parentId=" + parentId +
+                ", nextId=" + nextId +
+                ", children=" + children +
+                ", status=" + status +
+                "} " + super.toString();
     }
 
     @Override
@@ -100,15 +126,4 @@ public class Item extends AbstractEntity {
         return result;
     }
 
-    @Override
-    public String toString() {
-        return "Item{" +
-                "title='" + title + '\'' +
-                ", text='" + text + '\'' +
-                ", state=" + state +
-                ", parentId=" + parentId +
-                ", nextId=" + nextId +
-                ", children=" + children +
-                "} " + super.toString();
-    }
 }

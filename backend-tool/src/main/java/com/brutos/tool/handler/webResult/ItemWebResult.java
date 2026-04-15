@@ -1,6 +1,7 @@
 package com.brutos.tool.handler.webResult;
 
 import com.brutos.tool.entity.State;
+import com.brutos.tool.entity.Status;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +14,7 @@ public class ItemWebResult extends AbstractWebResultEntity {
     private Long parentId;
     private Long nextId;
     private List<ItemWebResult> children = new ArrayList<>();
+    private Status status = Status.OK;
 
     public ItemWebResult() {
         super();
@@ -66,12 +68,33 @@ public class ItemWebResult extends AbstractWebResultEntity {
         this.children = children;
     }
 
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
 
         ItemWebResult that = (ItemWebResult) o;
         return Objects.equals(title, that.title) && Objects.equals(text, that.text) && state == that.state && Objects.equals(parentId, that.parentId) && Objects.equals(nextId, that.nextId) && Objects.equals(children, that.children);
+    }
+
+    @Override
+    public String toString() {
+        return "ItemWebResult{" +
+                "title='" + title + '\'' +
+                ", text='" + text + '\'' +
+                ", state=" + state +
+                ", parentId=" + parentId +
+                ", nextId=" + nextId +
+                ", children=" + children +
+                ", status=" + status +
+                "} " + super.toString();
     }
 
     @Override
@@ -85,15 +108,4 @@ public class ItemWebResult extends AbstractWebResultEntity {
         return result;
     }
 
-    @Override
-    public String toString() {
-        return "ItemWebResult{" +
-                "title='" + title + '\'' +
-                ", text='" + text + '\'' +
-                ", state=" + state +
-                ", parentId=" + parentId +
-                ", nextId=" + nextId +
-                ", children=" + children +
-                "} " + super.toString();
-    }
 }

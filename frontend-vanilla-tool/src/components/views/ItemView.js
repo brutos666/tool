@@ -1,4 +1,4 @@
-import { RIGHT, ITEM_LAYOUT } from '../../tools/Constants.js';
+import { RIGHT, ITEM_LAYOUT, STATUS } from '../../tools/Constants.js';
 import View from './View.js';
 /** @import TreeItem from '../../data/TreeItem.js' */
 /** @import {ItemInfos} from '../../data/TreeItem.js'; */
@@ -13,6 +13,7 @@ class ItemView extends View {
   #done;
 
   #rights;
+  #currentStatusClass;
 
   #onInputCallback = () => {};
   #onDoneChangeCallback = () => {};
@@ -127,6 +128,13 @@ class ItemView extends View {
     if (itemInfos.state) {
       this.#done.checked = itemInfos.state === 'DONE';
     }
+    if (itemInfos.status) {
+      if (this.#currentStatusClass) {
+        this.getElementView().classList.remove(this.#currentStatusClass);
+      }
+      this.#currentStatusClass = getClassForStatus(itemInfos.status);
+      this.getElementView().classList.add(this.#currentStatusClass);
+    }
   }
 
   setReadOnly() {
@@ -193,6 +201,25 @@ function getClassColorForViewChoice(layout) {
       return 'question--color';
     default:
       return '';
+  }
+}
+/**
+ * Retourne la classe CSS correspondant au statut
+ * @param {STATUS} status - Statut
+ * @returns {string} - classe CSS à appliquée pour faire ressortir le statut
+ */
+function getClassForStatus(status) {
+  switch (status) {
+    case STATUS.ORPHAN:
+      return 'item--status-orphan';
+    case STATUS.NEXT_NOT_FOUND:
+      return 'item--status-next-not-found';
+    case STATUS.TOTAL_ORPHAN:
+      return 'item--status-total-orphan';
+    case STATUS.LOOP:
+      return 'item--status-loop';
+    default:
+      return 'item--status-ok';
   }
 }
 

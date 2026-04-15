@@ -7,7 +7,7 @@ import ActionButton from './ActionButton.js';
 import Toolbar from './Toolbar.js';
 /** @import TreeItem from '../data/TreeItem.js' */
 /** @import { ITEM_LAYOUT } from '../tools/Constants.js' */
-/** @import {Items} from './Items.js' */
+/** @import Items from './Items.js' */
 
 class Item extends Component {
 

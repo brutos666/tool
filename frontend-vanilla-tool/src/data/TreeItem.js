@@ -1,31 +1,24 @@
 import TreeItemList from './TreeItemList.js';
-import { RIGHT } from '../tools/Constants.js';
 /** @import Component from '../components/Component.js'; */
+/** @import { STATE, STATUS } from '../tools/Constants.js'; */
 
 /**
  * @typedef {Object} ItemInfos - Informations sur l'item
  * @property {number} id - Identifiant
  * @property {string} title - Titre
  * @property {string} text - Description de ce qu'il faut faire
- * @property {STATE} state - État
+ * @property {STATE} state - État {@link STATE}
  *                          - TODO : A faire
  *                          - IN_PROGRESS : En cours
  *                          - DONE : Fait
  * @property {number} parentId - Identifiant de l'item parent
  * @property {number} nextId - Identifiant de l'item suivant
  * @property {Array<ItemInfos>} children - Enfants (arbre)
+ * @property {STATUS} status - Statut {@link STATUS}
  */
 class TreeItem {
 
   name = 'TreeItem';
-
-  static RIGHT_BY_ACTION = {
-    change: [RIGHT.update],
-    update: [RIGHT.update],
-    delete: [RIGHT.delete],
-    addItem: [RIGHT.create],
-    removeItem: [RIGHT.create]
-  };
 
   #item;
   /** @type {TreeItemList} */
@@ -45,7 +38,8 @@ class TreeItem {
       text: itemInfos.text,
       state: itemInfos.state,
       parentId: itemInfos.parentId,
-      nextId: itemInfos.nextId
+      nextId: itemInfos.nextId,
+      status: itemInfos.status
     });
     this.#treeItemList = new TreeItemList();
     this.#treeItemList.setItems(this, itemInfos.children);

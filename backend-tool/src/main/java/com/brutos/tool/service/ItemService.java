@@ -1,6 +1,7 @@
 package com.brutos.tool.service;
 
 import com.brutos.tool.entity.Item;
+import com.brutos.tool.entity.Status;
 import com.brutos.tool.mapper.ItemMapper;
 import com.brutos.tool.model.ItemModel;
 import com.brutos.tool.repository.ItemRepository;
@@ -79,7 +80,7 @@ public class ItemService {
         return getChildren(-1L, sortedItems);
     }
 
-    public Map<Long, List<Item>> sortItems(List<Item> items) {
+    private Map<Long, List<Item>> sortItems(List<Item> items) {
         // Regrouper par parent
         Map<Long, List<Item>> groupedByParent = items.stream()
                 .collect(Collectors.groupingBy(Item::getParentId));
@@ -125,11 +126,55 @@ public class ItemService {
     }
 
     private List<Item> sortSameParentItems(List<Item> items) {
+        if (items.size() == 1) {
+            return items;
+        }
+        Map<Long, Item> itemLeftToProccessById = items.stream().collect(Collectors.toMap(Item::getId, item -> item));
+        List<Long> nextIds = items.stream().map(Item::getZeroOrNextId).toList();
+        // Recherche des items qui n'existe pas en tant que nextId
+        List<Item> firstItems = itemLeftToProccessById.values().stream()
+                .filter(item -> !nextIds.contains(item.getId()))
+                .toList();
+        // S'il y en a plusieurs, on les déclare comme orphelins
+        if (firstItems.size() > 1) {
+            firstItems.forEach(item -> item.setStatus(Status.ORPHAN));
+        }
         List<Item> sortedItems = new ArrayList<>();
-        Item item = getLast(items);
-        while (item != null) {
-            sortedItems.addFirst(item);
-            item = getPrev(item, items);
+        // Pour éviter les boucles, on va retirer les éléments traités de itemLeftToProccessById
+        for (Item firstItem : firstItems) {
+            List<Item> itemsProcess = process(itemLeftToProccessById, firstItem.getId());
+            sortedItems.addAll(itemsProcess);
+        }
+        while (!itemLeftToProccessById.isEmpty()) {
+            // Ici il y a probablement une ou plusieurs boucles
+            Long id = itemLeftToProccessById.keySet().iterator().next();
+            List<Item> itemsProcess = process(itemLeftToProccessById, id);
+            sortedItems.addAll(itemsProcess);
+        }
+        return sortedItems;
+    }
+
+    private List<Item> process(Map<Long, Item> itemById, Long firstId) {
+        List<Item> sortedItems = new ArrayList<>();
+        List<Long> idsProcessed = new ArrayList<>();
+        Long nextId = firstId;
+        while (nextId != null && itemById.containsKey(nextId)) {
+            Item currentItem = itemById.get(nextId);
+            sortedItems.add(currentItem);
+            idsProcessed.add(nextId);
+            itemById.remove(nextId);
+            nextId = currentItem.getNextId();
+        }
+        if (nextId != null) {
+            Item lastItem = sortedItems.getLast();
+            // S'il existe dans la liste, alors il s'agit d'une boucle
+            if (idsProcessed.contains(nextId)) {
+                lastItem.setStatus(Status.LOOP);
+            } else if (lastItem.getStatus().equals(Status.ORPHAN)) {
+                lastItem.setStatus(Status.TOTAL_ORPHAN);
+            } else {
+                lastItem.setStatus(Status.NEXT_NOT_FOUND);
+            }
         }
         return sortedItems;
     }

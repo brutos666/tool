@@ -303,6 +303,12 @@ td:first-child {
   text-align: left;
   margin: 4px;
 }
+.item--status-orphan,
+.item--status-next-not-found,
+.item--status-total-orphan,
+.item--status-loop {
+  border: var(--error-color) solid 1px;
+}
 
 /* -- Affichage item avec que le titre */
 .item--title.item__article {

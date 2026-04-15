@@ -4,6 +4,7 @@ import StoreData from '../../data/StoreData.js';
 import CommandDecorator from './CommandDecorator.js';
 import CommandDecoratorView from './views/CommandDecoratorView.js';
 /** @import ActionButton from '../ActionButton.js'; */
+/** @import {ItemInfos} from '../../data/TreeItem.js' */
 
 class CommandActionDecorator extends CommandDecorator {
 

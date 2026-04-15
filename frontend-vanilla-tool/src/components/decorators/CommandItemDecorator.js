@@ -6,6 +6,7 @@ import ItemCallsRequests from '../../requests/ItemCallsRequests.js';
 import CommandSpaceDecorator from './CommandSpaceDecorator.js';
 /** @import Tree from './Tree.js' */
 /** @import TreeItem from '../../data/TreeItem.js' */
+/** @import {ItemInfos} from '../../data/TreeItem.js' */
 
 /**
  * Le décorateur se charge de la sauvegarde (création, modification, suppression) d'un item. Il sera positionner au niveau de l'élément qui agit sur l'item pour pouvoir gérer les erreurs et le spinner au bon endroit.
