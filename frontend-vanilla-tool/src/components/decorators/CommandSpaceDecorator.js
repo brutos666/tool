@@ -1,5 +1,6 @@
 import ActionButton from '../ActionButton.js';
 import CommandDecorator from './CommandDecorator.js';
+import CommandDecoratorView from './views/CommandDecoratorView.js';
 
 /**
  * Cette classe permet de décorer un espace pour lequel on aura besoin d'un bouton relancer en cas d'échec de la commande
@@ -10,7 +11,7 @@ class CommandSpaceDecorator extends CommandDecorator {
   #relaunchCallback = null;
 
   constructor(view, decoratedElement) {
-    super(view, decoratedElement);
+    super(new CommandDecoratorView(view), decoratedElement);
     this.#relaunchButton = new ActionButton({
       id: 'relaunchButton',
       label: 'Relancer'

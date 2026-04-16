@@ -3,8 +3,6 @@ package com.brutos.tool.service;
 import com.brutos.tool.entity.Item;
 import com.brutos.tool.entity.State;
 import com.brutos.tool.mapper.ItemMapper;
-import com.brutos.tool.model.ItemModel;
-import com.brutos.tool.repository.ItemRepository;
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,47 +17,42 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CsvServiceTest {
     @Mock
-    private ItemRepository itemRepository;
     private ItemMapper itemMapper;
     private CsvService csvService;
 
     @BeforeEach
     public void setUp() {
         itemMapper = new ItemMapper();
-        csvService = new CsvService(itemRepository, itemMapper);
+        csvService = new CsvService(itemMapper);
     }
 
     @Test
     public void convertAllItemsToCsv_shouldReturnCsvString() throws CsvRequiredFieldEmptyException, CsvDataTypeMismatchException {
         // Given
-        ItemModel itemModel = new ItemModel();
-        itemModel.setId(88L);
-        itemModel.setTitle("Liste de vacances");
-        itemModel.setText("Check list");
-        itemModel.setState(State.TODO.name());
-        itemModel.setParentId(-1L);
-        itemModel.setNextId(102L);
-        ItemModel itemModel2 = new ItemModel();
-        itemModel2.setId(102L);
-        itemModel2.setTitle("Todo liste");
-        itemModel2.setText("");
-        itemModel2.setState(State.DONE.name());
-        itemModel2.setParentId(-1L);
-        itemModel2.setNextId(null);
-        List<ItemModel> itemModels = new ArrayList<>();
-        itemModels.add(itemModel);
-        itemModels.add(itemModel2);
-        // Convertir en iterable
-
-        when(itemRepository.findAll()).thenReturn(itemModels);
+        Item item = new Item();
+        item.setId(88L);
+        item.setTitle("Liste de vacances");
+        item.setText("Check list");
+        item.setState(State.TODO);
+        item.setParentId(-1L);
+        item.setNextId(102L);
+        Item item2 = new Item();
+        item2.setId(102L);
+        item2.setTitle("Todo liste");
+        item2.setText("");
+        item2.setState(State.DONE);
+        item2.setParentId(-1L);
+        item2.setNextId(null);
+        List<Item> itemModels = new ArrayList<>();
+        itemModels.add(item);
+        itemModels.add(item2);
 
         // When
-        String result = csvService.convertAllItemsToCsv();
+        String result = csvService.convertAllItemsToCsv(itemModels);
 
         // Then
         // On ne sait pas dans quelle

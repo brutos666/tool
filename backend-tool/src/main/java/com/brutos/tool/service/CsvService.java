@@ -3,7 +3,6 @@ package com.brutos.tool.service;
 import com.brutos.tool.entity.Item;
 import com.brutos.tool.mapper.ItemMapper;
 import com.brutos.tool.model.ItemModel;
-import com.brutos.tool.repository.ItemRepository;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 import com.opencsv.bean.StatefulBeanToCsv;
@@ -20,21 +19,19 @@ import java.util.List;
 
 @Service
 public class CsvService {
-    private final ItemRepository itemRepository;
     private final ItemMapper itemMapper;
 
-    public CsvService(ItemRepository itemRepository, ItemMapper itemMapper) {
-        this.itemRepository = itemRepository;
+    public CsvService(ItemMapper itemMapper) {
         this.itemMapper = itemMapper;
     }
 
-    public String convertAllItemsToCsv() throws CsvRequiredFieldEmptyException, CsvDataTypeMismatchException {
-        Iterable<ItemModel> itemsModel = this.itemRepository.findAll();
+    public String convertAllItemsToCsv(List<Item> items) throws CsvRequiredFieldEmptyException, CsvDataTypeMismatchException {
+        List<ItemModel> itemsModel = itemMapper.toModel(items);
         StringWriter writer = new StringWriter();
         StatefulBeanToCsv<ItemModel> beanToCsv = new StatefulBeanToCsvBuilder<ItemModel>(writer)
                 .withSeparator(';') // utile en France
                 .build();
-        beanToCsv.write(itemsModel.iterator());
+        beanToCsv.write(itemsModel);
         return writer.toString();
     }
 
@@ -46,6 +43,6 @@ public class CsvService {
                 .withSeparator(';') // important en France
                 .withIgnoreLeadingWhiteSpace(true)
                 .build();
-        return this.itemMapper.toEntity(csvToBean.parse());
+        return itemMapper.toEntity(csvToBean.parse());
     }
 }

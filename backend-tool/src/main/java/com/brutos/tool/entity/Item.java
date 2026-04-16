@@ -16,6 +16,10 @@ public class Item extends AbstractEntity {
     public Item() {
     }
 
+    public Item(Long id) {
+        this.setId(id);
+    }
+
     public Item(String title, String text) {
         this.title = title;
         this.text = text;

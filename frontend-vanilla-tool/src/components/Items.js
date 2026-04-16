@@ -109,7 +109,7 @@ class Items extends Component {
   removeItems(treeItemArray) {
     treeItemArray.forEach(treeItem => {
       const index = this.#treeItemArray.indexOf(treeItem);
-      this.removeItem(index);
+      this.removeItemView(index);
       this.removeItemComponent(this.#itemsComponent[index]);
       this.#treeItemArray.splice(index, 1);
       this.#itemsComponent.splice(index, 1);

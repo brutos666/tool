@@ -1,15 +1,16 @@
 package com.brutos.tool.service;
 
 import com.brutos.tool.entity.Item;
-import com.brutos.tool.entity.Status;
+import com.brutos.tool.entity.Tree;
 import com.brutos.tool.mapper.ItemMapper;
 import com.brutos.tool.model.ItemModel;
 import com.brutos.tool.repository.ItemRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ItemService {
@@ -22,36 +23,54 @@ public class ItemService {
         this.itemMapper = itemMapper;
     }
 
+    public Item setNullIds(Item item) {
+        item.setId(null);
+        item.setNextId(null);
+        item.setParentId(null);
+        return item;
+    }
+
     public Item save(Item item) {
         ItemModel itemModel = itemRepository.save(itemMapper.toModel(item));
         return itemMapper.toEntity(itemModel);
     }
 
-    @Transactional
-    public List<Item> saveTreeItems(List<Item> items) {
-        List<ItemModel> itemsModel = convertTreeToItemModelList(items);
-        Iterable<ItemModel> savedItemsModel = this.itemRepository.saveAll(itemsModel);
+    public Optional<Item> getLastRootItem() {
+        Optional<ItemModel> optionalPrevious = itemRepository.findFirstByParentIdAndNextIdIsNull(-1L);
+        return optionalPrevious.map(itemMapper::toEntity);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public List<Item> saveTreeItemsTest(Optional<Item> lastItem, List<Tree<Item>> treeItemsList) {
+        ItemModel itemModel = new ItemModel(9999L, "A SUPPRIMER", "", "TODO", -1L, null);
+        List<ItemModel> items = new ArrayList<>();
+        items.add(itemModel);
+        Iterable<ItemModel> savedItemsModel = itemRepository.saveAll(items);
         List<ItemModel> savedItems = new ArrayList<>();
         savedItemsModel.forEach(savedItems::add);
 
-        updateIds(items, savedItems);
-        updatePreviousNext(savedItems);
-
-        Iterable<ItemModel> modifiedItems = this.itemRepository.saveAll(savedItems);
-
-        // On renvoie le retour de la sauvegarde sous forme d'arbre
-        List<Item> flatList = itemMapper.toEntity(modifiedItems);
-        return transformToTree(flatList);
+        savedItems.add(itemModel);
+        savedItemsModel = itemRepository.saveAll(savedItems);
+        return itemMapper.toEntity(savedItemsModel);
     }
 
-    public List<Item> findAllItems() {
-        List<Item> flatList = itemMapper.toEntity(itemRepository.findAll());
-        return transformToTree(flatList);
+    @Transactional(rollbackFor = Exception.class)
+    public List<Item> saveTreeItems(Optional<Item> lastItem, List<Tree<Item>> treeItemsList) {
+        List<ItemModel> itemsModel = itemMapper.treeToModel(treeItemsList);
+        Iterable<ItemModel> savedItemsModel = itemRepository.saveAll(itemsModel);
+        List<ItemModel> savedItems = new ArrayList<>();
+        savedItemsModel.forEach(savedItems::add);
+
+        updateIds(treeItemsList, savedItems);
+        updatePreviousNext(lastItem, savedItems);
+
+        Iterable<ItemModel> modifiedItems = itemRepository.saveAll(savedItems);
+
+        return itemMapper.toEntity(modifiedItems);
     }
 
-    public List<Item> transformToTree(List<Item> flatList) {
-        Map<Long, List<Item>> sortedItems = sortItems(flatList);
-        return getChildren(-1L, sortedItems);
+    public List<Item> getAllItems() {
+        return itemMapper.toEntity(itemRepository.findAll());
     }
 
     public void deleteItem(Item item) {
@@ -74,13 +93,14 @@ public class ItemService {
         }
     }
 
-    private void updateIds(List<Item> items, List<ItemModel> savedItems) {
-        Item lastChild = items.getLast();
+    private void updateIds(List<Tree<Item>> treeItemsList, List<ItemModel> savedItems) {
+        Item lastChild = treeItemsList.getLast().getData();
         int modeleIndex = 0;
         ItemModel currentModel = null;
-        for (Item item : items) {
+        for (Tree<Item> tree : treeItemsList) {
+            Item item = tree.getData();
             currentModel = savedItems.get(modeleIndex);
-            modeleIndex = updateIds(modeleIndex, savedItems, item, -1L);
+            modeleIndex = updateIds(modeleIndex, savedItems, tree, -1L);
             currentModel.setNextId(item == lastChild ? null : savedItems.get(modeleIndex).getId());
         }
     }
@@ -95,7 +115,7 @@ public class ItemService {
      * @param parentId    : identifiant du parent à affecter au modèle à la position index
      * @return : index de parcours des modèles
      */
-    private int updateIds(int modeleIndex, List<ItemModel> itemsModel, Item treeItem, Long parentId) {
+    private int updateIds(int modeleIndex, List<ItemModel> itemsModel, Tree<Item> treeItem, Long parentId) {
         ItemModel itemModel = itemsModel.get(modeleIndex);
         itemModel.setParentId(parentId);
         modeleIndex++;
@@ -103,126 +123,25 @@ public class ItemService {
             return modeleIndex;
         }
         ItemModel childModel = null;
-        Item lastChild = treeItem.getChildren().getLast();
-        for (Item item : treeItem.getChildren()) {
+        Item lastChild = treeItem.getChildren().getLast().getData();
+        for (Tree<Item> childTreeItem : treeItem.getChildren()) {
+            Item childItem = childTreeItem.getData();
             childModel = itemsModel.get(modeleIndex);
-            modeleIndex = updateIds(modeleIndex, itemsModel, item, itemModel.getId());
-            childModel.setNextId(item == lastChild ? null : itemsModel.get(modeleIndex).getId());
+            modeleIndex = updateIds(modeleIndex, itemsModel, childTreeItem, itemModel.getId());
+            childModel.setNextId(childItem == lastChild ? null : itemsModel.get(modeleIndex).getId());
         }
         return modeleIndex;
     }
 
-    private List<ItemModel> updatePreviousNext(List<ItemModel> savedItems) {
+    private void updatePreviousNext(Optional<Item> optionalPrevious, List<ItemModel> savedItems) {
+        if (optionalPrevious.isEmpty()) {
+            return;
+        }
         // Récupérer le dernier item ayant -1 comme parentId et modifier son nextId avant
         // l'identifiant du premier des items ajoutés
-        Optional<ItemModel> optionalLastItem = this.itemRepository.findFirstByParentIdAndNextIdIsNull(-1L);
-        if (optionalLastItem.isPresent()) {
-            ItemModel lastItem = optionalLastItem.get();
-            lastItem.setNextId(savedItems.getFirst().getId());
-            savedItems.addFirst(lastItem);
-        }
-        return savedItems;
-    }
-
-    private List<ItemModel> convertTreeToItemModelList(List<Item> treeItems) {
-        return treeItems.stream().flatMap(item -> flatten(item).stream())
-                .map(this::convertToNewItemModel).toList();
-    }
-
-    private ItemModel convertToNewItemModel(Item item) {
-        ItemModel model = this.itemMapper.toModel(item);
-        model.setId(null);
-        model.setParentId(null);
-        model.setNextId(null);
-        return model;
-    }
-
-    private List<Item> flatten(Item item) {
-        List<Item> flattenItems = new ArrayList<>();
-        flattenItems.add(item);
-        for (Item child : item.getChildren()) {
-            flattenItems.addAll(flatten(child));
-        }
-        return flattenItems;
-    }
-
-    private Map<Long, List<Item>> sortItems(List<Item> items) {
-        // Regrouper par parent
-        Map<Long, List<Item>> groupedByParent = items.stream()
-                .collect(Collectors.groupingBy(Item::getParentId));
-        // Trier les enfants directs entre eux
-        Map<Long, List<Item>> sortedItems = new HashMap<>();
-        for (Map.Entry<Long, List<Item>> entry : groupedByParent.entrySet()) {
-            sortedItems.put(entry.getKey(), sortSameParentItems(entry.getValue()));
-        }
-        return sortedItems;
-    }
-
-    private List<Item> getChildren(Long itemId, Map<Long, List<Item>> sortedItems) {
-        List<Item> childrenItems = sortedItems.get(itemId);
-        if (childrenItems == null) {
-            return new ArrayList<>();
-        }
-        List<Item> resultItems = new ArrayList<>();
-        for (Item childItem : childrenItems) {
-            childItem.setChildren(getChildren(childItem.getId(), sortedItems));
-            resultItems.add(childItem);
-        }
-        return resultItems;
-    }
-
-    private List<Item> sortSameParentItems(List<Item> items) {
-        if (items.size() == 1) {
-            return items;
-        }
-        Map<Long, Item> itemLeftToProccessById = items.stream().collect(Collectors.toMap(Item::getId, item -> item));
-        List<Long> nextIds = items.stream().map(Item::getZeroOrNextId).toList();
-        // Recherche des items qui n'existe pas en tant que nextId
-        List<Item> firstItems = itemLeftToProccessById.values().stream()
-                .filter(item -> !nextIds.contains(item.getId()))
-                .toList();
-        // S'il y en a plusieurs, on les déclare comme orphelins
-        if (firstItems.size() > 1) {
-            firstItems.forEach(item -> item.setStatus(Status.ORPHAN));
-        }
-        List<Item> sortedItems = new ArrayList<>();
-        // Pour éviter les boucles, on va retirer les éléments traités de itemLeftToProccessById
-        for (Item firstItem : firstItems) {
-            List<Item> itemsProcess = process(itemLeftToProccessById, firstItem.getId());
-            sortedItems.addAll(itemsProcess);
-        }
-        while (!itemLeftToProccessById.isEmpty()) {
-            // Ici il y a probablement une ou plusieurs boucles
-            Long id = itemLeftToProccessById.keySet().iterator().next();
-            List<Item> itemsProcess = process(itemLeftToProccessById, id);
-            sortedItems.addAll(itemsProcess);
-        }
-        return sortedItems;
-    }
-
-    private List<Item> process(Map<Long, Item> itemById, Long firstId) {
-        List<Item> sortedItems = new ArrayList<>();
-        List<Long> idsProcessed = new ArrayList<>();
-        Long nextId = firstId;
-        while (nextId != null && itemById.containsKey(nextId)) {
-            Item currentItem = itemById.get(nextId);
-            sortedItems.add(currentItem);
-            idsProcessed.add(nextId);
-            itemById.remove(nextId);
-            nextId = currentItem.getNextId();
-        }
-        if (nextId != null) {
-            Item lastItem = sortedItems.getLast();
-            // S'il existe dans la liste, alors il s'agit d'une boucle
-            if (idsProcessed.contains(nextId)) {
-                lastItem.setStatus(Status.LOOP);
-            } else if (lastItem.getStatus().equals(Status.ORPHAN)) {
-                lastItem.setStatus(Status.TOTAL_ORPHAN);
-            } else {
-                lastItem.setStatus(Status.NEXT_NOT_FOUND);
-            }
-        }
-        return sortedItems;
+        ItemModel previous = itemMapper.toModel(optionalPrevious.get());
+        previous.setNextId(savedItems.getFirst().getId());
+        savedItems.addFirst(previous);
     }
 
 }

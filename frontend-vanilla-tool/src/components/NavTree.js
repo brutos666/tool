@@ -40,7 +40,7 @@ class NavTree extends Component {
     const importAction = new FileUpload({ id: 'import', label: 'Importer' });
     const importActionWithCommands = new CommandActionDecorator(importAction);
     importAction.setDoActionCallback(importActionWithCommands.importItems.bind(importActionWithCommands));
-    toolbar.addChild(importAction);
+    toolbar.addChild(importActionWithCommands);
 
     this.setStaticChild('toolbar', toolbar);
 

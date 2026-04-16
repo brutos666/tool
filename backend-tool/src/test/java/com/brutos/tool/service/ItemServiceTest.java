@@ -2,7 +2,7 @@ package com.brutos.tool.service;
 
 import com.brutos.tool.entity.Item;
 import com.brutos.tool.entity.State;
-import com.brutos.tool.entity.Status;
+import com.brutos.tool.entity.Tree;
 import com.brutos.tool.mapper.ItemMapper;
 import com.brutos.tool.model.ItemModel;
 import com.brutos.tool.repository.ItemRepository;
@@ -114,231 +114,24 @@ public class ItemServiceTest {
     }
 
     @Test
-    void sortItems_shouldReturnList_shouldAllStatusOk_whenNoChildrenWithNextIdsCorrect() {
-        List<Item> flatItems = List.of(
-                new Item(1L, TITLE1, TEXT1, State.TODO, -1L, 2L),
-                new Item(2L, TITLE2, TEXT2, State.TODO, -1L, null));
-
-        List<Item> actual = itemService.transformToTree(flatItems);
-
-        assertEquals(2, actual.size());
-        assertEquals(TITLE1, actual.get(0).getTitle());
-        assertEquals(TITLE2, actual.get(1).getTitle());
-        assertEquals(Status.OK, actual.get(0).getStatus());
-        assertEquals(Status.OK, actual.get(1).getStatus());
-    }
-
-    @Test
-    void sortItems_shouldReturnTree_shouldAllStatusOk_whenOneChildrenWithNextIdsCorrect() {
-        List<Item> flatItems = List.of(
-                new Item(1L, TITLE1, TEXT1, State.TODO, -1L, null),
-                new Item(2L, TITLE2, TEXT2, State.TODO, 1L, null));
-
-        List<Item> actual = itemService.transformToTree(flatItems);
-        Item actualParent = actual.getFirst();
-        Item actualChild = actualParent.getChild(0);
-
-        assertEquals(1, actual.size());
-        assertEquals(TITLE1, actualParent.getTitle());
-        assertEquals(TITLE2, actualChild.getTitle());
-        assertEquals(1, actualParent.getChildren().size());
-        assertEquals(Status.OK, actualParent.getStatus());
-        assertEquals(Status.OK, actualChild.getStatus());
-    }
-
-    @Test
-    void sortItems_shouldReturnTree_shouldAllStatusOk_whenTreeWithNextIdsCorrect() {
-        Item parent1 = new Item(1L, TITLE1, TEXT1, State.TODO, -1L, 4L);
-        Item parent2 = new Item(4L, TITLE4, TEXT4, State.TODO, -1L, null);
-        Item child1parent1 = new Item(2L, TITLE2, TEXT2, State.TODO, 1L, 3L);
-        Item child2parent1 = new Item(3L, TITLE3, TEXT3, State.TODO, 1L, null);
-        List<Item> flatItems = List.of(parent1, child2parent1, child1parent1, parent2);
-
-        List<Item> actual = itemService.transformToTree(flatItems);
-        Item actualParent1 = actual.getFirst();
-        Item actualParent2 = actual.get(1);
-        Item actualChild1Parent1 = actualParent1.getChild(0);
-        Item actualChild2Parent1 = actualParent1.getChild(1);
-
-        assertEquals(2, actual.size());
-        assertEquals(toStringValues(parent1), toStringValues(actualParent1));
-        assertEquals(toStringValues(parent2), toStringValues(actualParent2));
-        assertEquals(toStringValues(actualChild1Parent1), toStringValues(actualChild1Parent1));
-        assertEquals(toStringValues(actualChild2Parent1), toStringValues(actualChild2Parent1));
-        assertEquals(2, actualParent1.getChildren().size());
-        assertEquals(0, actualParent2.getChildren().size());
-        assertEquals(Status.OK, actualParent1.getStatus());
-        assertEquals(Status.OK, actualParent2.getStatus());
-        assertEquals(Status.OK, actualChild1Parent1.getStatus());
-        assertEquals(Status.OK, actualChild2Parent1.getStatus());
-    }
-
-    @Test
-    void sortItems_shouldReturnTree_shouldHaveOrphanStatus_whenTreeWithNextIdsNull() {
-        Item parent1 = new Item(1L, TITLE1, TEXT1, State.TODO, -1L, null);
-        Item parent2 = new Item(4L, TITLE4, TEXT4, State.TODO, -1L, null);
-        Item child1parent1 = new Item(2L, TITLE2, TEXT2, State.TODO, 1L, null);
-        Item child2parent1 = new Item(3L, TITLE3, TEXT3, State.TODO, 1L, null);
-        List<Item> flatItems = List.of(parent1, child2parent1, child1parent1, parent2);
-
-        List<Item> actual = itemService.transformToTree(flatItems);
-        Item actualParent1 = actual.getFirst();
-        Item actualParent2 = actual.get(1);
-        Item actualChild1Parent1 = actualParent1.getChild(0);
-        Item actualChild2Parent1 = actualParent1.getChild(1);
-
-        assertEquals(2, actual.size());
-        assertEquals(toStringValues(parent1), toStringValues(actualParent1));
-        assertEquals(toStringValues(parent2), toStringValues(actualParent2));
-        assertEquals(toStringValues(actualChild1Parent1), toStringValues(actualChild1Parent1));
-        assertEquals(toStringValues(actualChild2Parent1), toStringValues(actualChild2Parent1));
-        assertEquals(2, actualParent1.getChildren().size());
-        assertEquals(0, actualParent2.getChildren().size());
-        assertEquals(Status.ORPHAN, actualParent1.getStatus());
-        assertEquals(Status.ORPHAN, actualParent2.getStatus());
-        assertEquals(Status.ORPHAN, actualChild1Parent1.getStatus());
-        assertEquals(Status.ORPHAN, actualChild2Parent1.getStatus());
-    }
-
-    @Test
-    void sortItems_shouldReturnTree_shouldHaveNextNotFoundStatus_whenTreeWithNextIdsNotFound() {
-        Item parent1 = new Item(1L, TITLE1, TEXT1, State.TODO, -1L, 4L);
-        Item parent2 = new Item(4L, TITLE4, TEXT4, State.TODO, -1L, 5L);
-        Item child1parent1 = new Item(2L, TITLE2, TEXT2, State.TODO, 1L, 3L);
-        Item child2parent1 = new Item(3L, TITLE3, TEXT3, State.TODO, 1L, 10L);
-        List<Item> flatItems = List.of(parent1, child2parent1, child1parent1, parent2);
-
-        List<Item> actual = itemService.transformToTree(flatItems);
-        Item actualParent1 = actual.getFirst();
-        Item actualParent2 = actual.get(1);
-        Item actualChild1Parent1 = actualParent1.getChild(0);
-        Item actualChild2Parent1 = actualParent1.getChild(1);
-
-        assertEquals(2, actual.size());
-        assertEquals(toStringValues(parent1), toStringValues(actualParent1));
-        assertEquals(toStringValues(parent2), toStringValues(actualParent2));
-        assertEquals(toStringValues(actualChild1Parent1), toStringValues(actualChild1Parent1));
-        assertEquals(toStringValues(actualChild2Parent1), toStringValues(actualChild2Parent1));
-        assertEquals(2, actualParent1.getChildren().size());
-        assertEquals(0, actualParent2.getChildren().size());
-        assertEquals(Status.OK, actualParent1.getStatus());
-        assertEquals(Status.NEXT_NOT_FOUND, actualParent2.getStatus());
-        assertEquals(Status.OK, actualChild1Parent1.getStatus());
-        assertEquals(Status.NEXT_NOT_FOUND, actualChild2Parent1.getStatus());
-    }
-
-    @Test
-    void sortItems_shouldReturnTree_shouldHaveLoopStatus_whenChildrenLoop() {
-        Item parent1 = new Item(1L, TITLE1, TEXT1, State.TODO, -1L, null);
-        Item child1parent1 = new Item(2L, TITLE2, TEXT2, State.TODO, 1L, 3L);
-        Item child2parent1 = new Item(3L, TITLE3, TEXT3, State.TODO, 1L, 4L);
-        Item child3Parent1 = new Item(4L, TITLE4, TEXT4, State.TODO, 1L, 2L);
-        List<Item> flatItems = List.of(parent1, child2parent1, child1parent1, child3Parent1);
-
-        List<Item> actual = itemService.transformToTree(flatItems);
-        Item actualParent1 = actual.getFirst();
-        Item actualChild1Parent1 = actualParent1.getChild(0);
-        Item actualChild2Parent1 = actualParent1.getChild(1);
-        Item actualChild3Parent1 = actualParent1.getChild(2);
-
-        assertEquals(1, actual.size());
-        assertEquals(3, actualParent1.getChildren().size());
-        assertEquals(toStringValues(parent1), toStringValues(actualParent1));
-        assertEquals(toStringValues(actualChild1Parent1), toStringValues(actualChild1Parent1));
-        assertEquals(toStringValues(actualChild2Parent1), toStringValues(actualChild2Parent1));
-        assertEquals(toStringValues(actualChild3Parent1), toStringValues(actualChild3Parent1));
-        assertEquals(3, actualParent1.getChildren().size());
-        assertEquals(Status.OK, actualParent1.getStatus());
-        assertEquals(Status.OK, actualChild1Parent1.getStatus());
-        assertEquals(Status.OK, actualChild2Parent1.getStatus());
-        assertEquals(Status.LOOP, actualChild3Parent1.getStatus());
-    }
-
-    @Test
-    void sortItems_shouldReturnTree_shouldHaveLoopStatus_whenTwoChildrenLoop() {
-        Item parent1 = new Item(1L, TITLE1, TEXT1, State.TODO, -1L, null);
-        Item child1parent1 = new Item(2L, TITLE2, TEXT2, State.TODO, 1L, 2L);
-        Item child2parent1 = new Item(3L, TITLE3, TEXT3, State.TODO, 1L, 4L);
-        Item child3Parent1 = new Item(4L, TITLE4, TEXT4, State.TODO, 1L, 3L);
-        List<Item> flatItems = List.of(parent1, child2parent1, child1parent1, child3Parent1);
-
-        List<Item> actual = itemService.transformToTree(flatItems);
-        Item actualParent1 = actual.getFirst();
-        Item actualChild1Parent1 = actualParent1.getChild(0);
-        Item actualChild2Parent1 = actualParent1.getChild(1);
-        Item actualChild3Parent1 = actualParent1.getChild(2);
-
-        assertEquals(1, actual.size());
-        assertEquals(3, actualParent1.getChildren().size());
-        assertEquals(toStringValues(parent1), toStringValues(actualParent1));
-        assertEquals(toStringValues(actualChild1Parent1), toStringValues(actualChild1Parent1));
-        assertEquals(toStringValues(actualChild2Parent1), toStringValues(actualChild2Parent1));
-        assertEquals(toStringValues(actualChild3Parent1), toStringValues(actualChild3Parent1));
-        assertEquals(3, actualParent1.getChildren().size());
-        assertEquals(Status.OK, actualParent1.getStatus());
-        assertEquals(Status.LOOP, actualChild1Parent1.getStatus());
-        assertEquals(Status.OK, actualChild2Parent1.getStatus());
-        assertEquals(Status.LOOP, actualChild3Parent1.getStatus());
-    }
-
-    @Test
-    void sortItems_shouldReturnTree_shouldHaveOrphanNextNotFoundStatus_whenTreeWithTotalOrphan() {
-        Item parent1 = new Item(1L, TITLE1, TEXT1, State.TODO, -1L, null);
-        Item parent2 = new Item(4L, TITLE4, TEXT4, State.TODO, -1L, 5L);
-        Item child1parent2 = new Item(2L, TITLE2, TEXT2, State.TODO, 4L, 3L);
-        Item child2parent2 = new Item(3L, TITLE3, TEXT3, State.TODO, 4L, 10L);
-        List<Item> flatItems = List.of(parent1, child2parent2, child1parent2, parent2);
-
-        List<Item> actual = itemService.transformToTree(flatItems);
-        Item actualParent1 = actual.getFirst();
-        Item actualParent2 = actual.get(1);
-        Item actualChild1Parent2 = actualParent2.getChild(0);
-        Item actualChild2Parent2 = actualParent2.getChild(1);
-
-        assertEquals(2, actual.size());
-        assertEquals(toStringValues(parent1), toStringValues(actualParent1));
-        assertEquals(toStringValues(parent2), toStringValues(actualParent2));
-        assertEquals(toStringValues(actualChild1Parent2), toStringValues(actualChild1Parent2));
-        assertEquals(toStringValues(actualChild2Parent2), toStringValues(actualChild2Parent2));
-        assertEquals(0, actualParent1.getChildren().size());
-        assertEquals(2, actualParent2.getChildren().size());
-        assertEquals(Status.ORPHAN, actualParent1.getStatus());
-        assertEquals(Status.TOTAL_ORPHAN, actualParent2.getStatus());
-        assertEquals(Status.OK, actualChild1Parent2.getStatus());
-        assertEquals(Status.NEXT_NOT_FOUND, actualChild2Parent2.getStatus());
-    }
-
-    @Test
-    void sortItems_shouldReturnTree_shouldAllStatusOk_whenNextIdsCorrect() {
-        List<Item> flatItems = List.of(
-                new Item(1L, TITLE1, TEXT1, State.TODO, -1L, 2L),
-                new Item(2L, TITLE2, TEXT2, State.TODO, -1L, null));
-
-        List<Item> actual = itemService.transformToTree(flatItems);
-
-        assertEquals(2, actual.size());
-        assertEquals(TITLE1, actual.get(0).getTitle());
-        assertEquals(TITLE2, actual.get(1).getTitle());
-    }
-
-    @Test
     void saveTreeItems_shouldUpdatePreviousNextId_whenExistPrevious() {
         // Given
-        ItemModel lastItem = new ItemModel(2L, TITLE, TEXT, State.TODO.name(), -1L, null);
-        when(this.itemRepository.findFirstByParentIdAndNextIdIsNull(-1L)).thenReturn(Optional.of(lastItem));
-        List<Item> itemsToSave = List.of(new Item(1L, TITLE1, TEXT1, State.TODO, -1L, null));
+        Item lastItem = new Item(2L, TITLE, TEXT, State.TODO, -1L, null);
+        Optional<Item> optionalLastItem = Optional.of(lastItem);
+        Item itemToSave = new Item(null, TITLE1, TEXT1, State.TODO, null, null);
+        List<Tree<Item>> itemsToSave = List.of(new Tree<>(itemToSave));
         nextId = 3L;
         mockSaveAll();
 
         // When
-        List<Item> actual = itemService.saveTreeItems(itemsToSave);
+        List<Item> actual = itemService.saveTreeItems(optionalLastItem, itemsToSave);
 
         // Then
         // Appel à sauvegarder une fois pour le précédent et 1 fois pour le nouveau
         verify(itemRepository, times(2)).saveAll(any());
         // Vérifier les valeurs
         assertEquals(toStringValues(lastItem), toStringValues(actual.getFirst()));
-        assertEquals(toStringValues(itemsToSave.getFirst()), toStringValues(actual.get(1)));
+        assertEquals(toStringValues(itemToSave), toStringValues(actual.get(1)));
         // Vérifier que les ids sont corrects
         assertEquals(lastItem.getId(), actual.getFirst().getId());
         assertTrue(actual.get(1).getId() > lastItem.getId());
@@ -353,25 +146,25 @@ public class ItemServiceTest {
     @Test
     void saveTreeItems_shouldKeepTree_whenExistChildren() {
         // Given
-        ItemModel lastItem = new ItemModel(2L, TITLE, TEXT, State.TODO.name(), -1L, null);
-        when(this.itemRepository.findFirstByParentIdAndNextIdIsNull(-1L)).thenReturn(Optional.of(lastItem));
-        List<Item> itemsToSave = new TreeItemBuilder().withRootItem(1L, TITLE1, TEXT1, State.TODO)
-                .withFirstChild(2L, TITLE2, TEXT2, State.TODO)
+        Item lastItem = new Item(2L, TITLE, TEXT, State.TODO, -1L, null);
+        Optional<Item> optionalLastItem = Optional.of(lastItem);
+        List<Tree<Item>> itemsToSave = new TreeItemBuilder().withRootItem(null, TITLE1, TEXT1, State.TODO)
+                .withFirstChild(null, TITLE2, TEXT2, State.TODO)
                 .build();
         nextId = 3L;
         mockSaveAll();
 
         // When
-        List<Item> actual = itemService.saveTreeItems(itemsToSave);
+        List<Item> actual = itemService.saveTreeItems(optionalLastItem, itemsToSave);
         Item actualPrevious = actual.get(0);
         Item actualItem = actual.get(1);
-        Item actualChildItem = actualItem.getChildren().getFirst();
+        Item actualChildItem = actual.get(2);
 
         // Then
         verify(itemRepository, times(2)).saveAll(any());
         // Vérifier les valeurs
-        Item itemToSave = itemsToSave.getFirst();
-        Item childItemToSave = itemToSave.getChild(0);
+        Item itemToSave = itemsToSave.getFirst().getData();
+        Item childItemToSave = itemsToSave.getFirst().getChildData(0);
         assertEquals(toStringValues(lastItem), toStringValues(actualPrevious));
         assertEquals(toStringValues(itemToSave), toStringValues(actualItem));
         assertEquals(toStringValues(childItemToSave), toStringValues(actualChildItem));
@@ -392,30 +185,30 @@ public class ItemServiceTest {
     @Test
     void saveTreeItems_shouldKeepTree_shouldUpdateNextId_when2LevelTree() {
         // Given
-        ItemModel lastItem = new ItemModel(2L, TITLE, TEXT, State.TODO.name(), -1L, null);
-        when(this.itemRepository.findFirstByParentIdAndNextIdIsNull(-1L)).thenReturn(Optional.of(lastItem));
-        List<Item> itemsToSave = new TreeItemBuilder().withRootItem(1L, TITLE1, TEXT1, State.TODO)
-                .withFirstChild(2L, TITLE2, TEXT2, State.TODO)
-                .withNextRootItem(12L, TITLE3, TEXT3, State.DONE)
-                .withFirstChild(14L, TITLE4, TEXT4, State.TODO)
-                .withNextChild(24L, TITLE5, TEXT5, State.IN_PROGRESS)
+        Item lastItem = new Item(2L, TITLE, TEXT, State.TODO, -1L, null);
+        Optional<Item> optionalLastItem = Optional.of(lastItem);
+        List<Tree<Item>> itemsToSave = new TreeItemBuilder().withRootItem(null, TITLE1, TEXT1, State.TODO)
+                .withFirstChild(null, TITLE2, TEXT2, State.TODO)
+                .withNextRootItem(null, TITLE3, TEXT3, State.DONE)
+                .withFirstChild(null, TITLE4, TEXT4, State.TODO)
+                .withNextChild(null, TITLE5, TEXT5, State.IN_PROGRESS)
                 .build();
         nextId = 3L;
         mockSaveAll();
-        Item itemToSave1 = itemsToSave.getFirst();
-        Item itemToSave1Child1 = itemToSave1.getChild(0);
-        Item itemToSave2 = itemsToSave.get(1);
-        Item itemToSave2Child1 = itemToSave2.getChild(0);
-        Item itemToSave2Child2 = itemToSave2.getChild(1);
+        Item itemToSave1 = itemsToSave.getFirst().getData();
+        Item itemToSave1Child1 = itemsToSave.getFirst().getChildData(0);
+        Item itemToSave2 = itemsToSave.get(1).getData();
+        Item itemToSave2Child1 = itemsToSave.get(1).getChildData(0);
+        Item itemToSave2Child2 = itemsToSave.get(1).getChildData(1);
 
         // When
-        List<Item> actual = itemService.saveTreeItems(itemsToSave);
+        List<Item> actual = itemService.saveTreeItems(optionalLastItem, itemsToSave);
         Item actualPrevious = actual.get(0);
         Item actual1 = actual.get(1);
-        Item actual2 = actual.get(2);
-        Item actual1Child1 = actual1.getChild(0);
-        Item actual2Child1 = actual2.getChild(0);
-        Item actual2Child2 = actual2.getChild(1);
+        Item actual1Child1 = actual.get(2);
+        Item actual2 = actual.get(3);
+        Item actual2Child1 = actual.get(4);
+        Item actual2Child2 = actual.get(5);
 
         // Then
         verify(itemRepository, times(2)).saveAll(any());
@@ -452,30 +245,35 @@ public class ItemServiceTest {
     @Test
     void saveTreeItems_shouldKeepTree_shouldUpdateNextId_when3LevelTree() {
         // Given
-        ItemModel lastItem = new ItemModel(2L, TITLE, TEXT, State.TODO.name(), -1L, null);
-        when(this.itemRepository.findFirstByParentIdAndNextIdIsNull(-1L)).thenReturn(Optional.of(lastItem));
-        List<Item> itemsToSave = new TreeItemBuilder().withRootItem(1L, TITLE1, TEXT1, State.TODO)
-                .withFirstChild(2L, TITLE2, TEXT2, State.TODO)
-                .withFirstChild(12L, TITLE3, TEXT3, State.DONE)
-                .withNextChild(14L, TITLE4, TEXT4, State.TODO)
-                .withFirstChild(24L, TITLE5, TEXT5, State.IN_PROGRESS)
+        Item lastItem = new Item(2L, TITLE, TEXT, State.TODO, -1L, null);
+        Optional<Item> optionalLastItem = Optional.of(lastItem);
+        List<Tree<Item>> itemsToSave = new TreeItemBuilder().withRootItem(null, TITLE1, TEXT1, State.TODO)
+                .withFirstChild(null, TITLE2, TEXT2, State.TODO)
+                .withFirstChild(null, TITLE3, TEXT3, State.DONE)
+                .withNextChild(null, TITLE4, TEXT4, State.TODO)
+                .withFirstChild(null, TITLE5, TEXT5, State.IN_PROGRESS)
                 .build();
         nextId = 3L;
         mockSaveAll();
-        Item itemToSave1 = itemsToSave.getFirst();
-        Item itemToSave1Child1 = itemToSave1.getChild(0);
-        Item itemToSave1Child1_1 = itemToSave1Child1.getChild(0);
-        Item itemToSave1Child1_2 = itemToSave1Child1.getChild(1);
-        Item itemToSave1Child1_2_1 = itemToSave1Child1_2.getChild(0);
+        Tree<Item> treeToSave1 = itemsToSave.getFirst();
+        Tree<Item> treeToSave1Child1 = treeToSave1.getChild(0);
+        Tree<Item> treeToSave1Child1_1 = treeToSave1Child1.getChild(0);
+        Tree<Item> treeToSave1Child1_2 = treeToSave1Child1.getChild(1);
+        Tree<Item> treeToSave1Child1_2_1 = treeToSave1Child1_2.getChild(0);
+        Item itemToSave1 = treeToSave1.getData();
+        Item itemToSave1Child1 = treeToSave1Child1.getData();
+        Item itemToSave1Child1_1 = treeToSave1Child1_1.getData();
+        Item itemToSave1Child1_2 = treeToSave1Child1_2.getData();
+        Item itemToSave1Child1_2_1 = treeToSave1Child1_2_1.getData();
 
         // When
-        List<Item> actual = itemService.saveTreeItems(itemsToSave);
+        List<Item> actual = itemService.saveTreeItems(optionalLastItem, itemsToSave);
         Item actualPrevious = actual.get(0);
         Item actual1 = actual.get(1);
-        Item actual1Child1 = actual1.getChild(0);
-        Item actual1Child1_1 = actual1Child1.getChild(0);
-        Item actual1Child1_2 = actual1Child1.getChild(1);
-        Item actual1Child1_2_1 = actual1Child1_2.getChild(0);
+        Item actual1Child1 = actual.get(2);
+        Item actual1Child1_1 = actual.get(3);
+        Item actual1Child1_2 = actual.get(4);
+        Item actual1Child1_2_1 = actual.get(5);
 
         // Then
         verify(itemRepository, times(2)).saveAll(any());
