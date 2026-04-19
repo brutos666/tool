@@ -1,7 +1,7 @@
 import Command from './Command.js';
 import ItemCallsRequests from '../requests/ItemCallsRequests.js';
-/** @import Item from '../components/Item.js' */
-/** @import CommandItemDecorator from '../components/decorators/CommandItemDecorator.js' */
+/** @import CommandSaveDecorator from '../components/decorators/CommandSaveDecorator.js'; */
+/** @import ItemToSave from '../components/decorators/CommandSaveDecorator.js' */
 
 class SaveItem extends Command {
 
@@ -9,21 +9,16 @@ class SaveItem extends Command {
 
   /**
    * @constructor de la classe CreateItem
-   * @param {CommandItemDecorator} commandItemDecorator - Item
-   * @param {TreeItem} treeItemToSave
+   * @param {CommandSaveDecorator} commandItemDecorator - Item
+   * @param {ItemToSave} itemToSave
    */
-  constructor(commandItemDecorator, treeItemToSave) {
+  constructor(commandItemDecorator, itemToSave) {
     super(commandItemDecorator);
 
-    if (treeItemToSave.isNew()) {
-      this.setSuccessMessage('La tâche a bien été crée');
-      this.setErrorMessage('Une erreur est survenue lors de la crée de la tâche');
-    } else {
-      this.setSuccessMessage('La tâche a bien été modifiée');
-      this.setErrorMessage('Une erreur est survenue lors de la modification de la tâche');
-    }
+    this.setSuccessMessage('Les modifications ont bien été enregistrées');
+    this.setErrorMessage('Une erreur est survenue lors de la sauvegarde des modifications');
 
-    this.setExecuteCallback(new ItemCallsRequests().saveItem.bind(null, treeItemToSave.getItemInfos()));
+    this.setExecuteCallback(new ItemCallsRequests().saveItem.bind(null, itemToSave));
   }
 
 }

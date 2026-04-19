@@ -6,6 +6,7 @@ import { LAYOUT } from '../tools/Constants.js';
 import CheckList from './CheckList.js';
 import SampleMappingTables from './SampleMappingTables.js';
 import CommandDeleteDecorator from './decorators/CommandDeleteDecorator.js';
+import CommandSaveDecorator from './decorators/CommandSaveDecorator.js';
 /** @import Items from './Items.js'; */
 
 class MainSpace extends Component {
@@ -14,6 +15,8 @@ class MainSpace extends Component {
   /** @type {Items} */
   #main;
   #display = '';
+  /** @type {CommandSaveDecorator} */
+  #saveDecorator;
 
   constructor() {
     super(new MainSpaceView());
@@ -24,7 +27,11 @@ class MainSpace extends Component {
     this.setStaticChild('toolbar', toolbar);
   }
 
-  setTreeItem(treeItem) {
+  async setTreeItem(treeItem) {
+    if (this.#saveDecorator) {
+      await this.#saveDecorator.doSave();
+      this.#saveDecorator.setTreeItem(treeItem);
+    }
     this.#treeItem = treeItem;
     if (this.#main) {
       this.#main.setTreeItem(this.#treeItem);
@@ -55,7 +62,8 @@ class MainSpace extends Component {
     }
     if (this.#main) {
       const mainWithDelete = new CommandDeleteDecorator(this.#main, { treeItem: this.#treeItem });
-      this.setStaticChild('main', mainWithDelete);
+      this.#saveDecorator = new CommandSaveDecorator(mainWithDelete, { treeItem: this.#treeItem });
+      this.setStaticChild('main', this.#saveDecorator);
     }
   }
 

@@ -30,11 +30,12 @@ class CommandItemDecorator extends CommandSpaceDecorator {
     super(new CommandItemDecoratorView(decoratedElement.getView()), decoratedElement);
     this.#treeItem = data.treeItem;
     this.#rights = data.rights;
-
-    if (data.rights.includes(RIGHT.update)) {
-      this.getView()
-        .setOnBlurCallback(this.doSave.bind(this));
-    }
+    /*
+     *if (data.rights.includes(RIGHT.update)) {
+     *  this.getView()
+     *    .setOnBlurCallback(this.doSave.bind(this));
+     *}
+     */
   }
   getTreeItem() {
     return this.#treeItem;

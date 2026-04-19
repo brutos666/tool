@@ -55,14 +55,29 @@ public class ItemService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public List<Item> saveTreeItems(Optional<Item> lastItem, List<Tree<Item>> treeItemsList) {
+    public List<Item> saveTreeItem(Optional<Item> previousItem, Long nextItemId, Tree<Item> treeItem) {
+        List<ItemModel> itemsModel = itemMapper.toModel(treeItem);
+        Iterable<ItemModel> savedItemsModel = itemRepository.saveAll(itemsModel);
+        List<ItemModel> savedItems = new ArrayList<>();
+        savedItemsModel.forEach(savedItems::add);
+
+        updateIds(treeItem, nextItemId, savedItems);
+        updatePreviousNext(previousItem, savedItems);
+
+        Iterable<ItemModel> modifiedItems = itemRepository.saveAll(savedItems);
+
+        return itemMapper.toEntity(modifiedItems);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public List<Item> saveTreeItems(Optional<Item> previousItem, List<Tree<Item>> treeItemsList) {
         List<ItemModel> itemsModel = itemMapper.treeToModel(treeItemsList);
         Iterable<ItemModel> savedItemsModel = itemRepository.saveAll(itemsModel);
         List<ItemModel> savedItems = new ArrayList<>();
         savedItemsModel.forEach(savedItems::add);
 
         updateIds(treeItemsList, savedItems);
-        updatePreviousNext(lastItem, savedItems);
+        updatePreviousNext(previousItem, savedItems);
 
         Iterable<ItemModel> modifiedItems = itemRepository.saveAll(savedItems);
 
@@ -102,6 +117,14 @@ public class ItemService {
             currentModel = savedItems.get(modeleIndex);
             modeleIndex = updateIds(modeleIndex, savedItems, tree, -1L);
             currentModel.setNextId(item == lastChild ? null : savedItems.get(modeleIndex).getId());
+        }
+    }
+
+    private void updateIds(Tree<Item> treeItem, Long nextItemId, List<ItemModel> savedItems) {
+        Item item = treeItem.getData();
+        updateIds(0, savedItems, treeItem, item.getParentId());
+        if (nextItemId != null) {
+            savedItems.getFirst().setNextId(nextItemId);
         }
     }
 

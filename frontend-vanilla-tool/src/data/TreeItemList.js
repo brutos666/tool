@@ -90,12 +90,24 @@ class TreeItemList {
     return this.#treeList[index - 1];
   }
 
+  getNext(treeItem) {
+    const index = this.#treeList.findIndex(item => item === treeItem);
+    if (index === this.#treeList.length - 1) {
+      return null;
+    }
+    return this.#treeList[index + 1];
+  }
+
   updatePrevious(currentTreeItem) {
     const previousItem = this.getPrevious(currentTreeItem);
     if (previousItem) {
       previousItem.setPropertyValue('nextId', currentTreeItem.getItemId());
     }
   }
+  getById(id) {
+    return this.#treeList.find(treeItem => treeItem.getItemId() === id);
+  }
+
   getLast() {
     return this.#treeList[this.#treeList.length - 1];
   }

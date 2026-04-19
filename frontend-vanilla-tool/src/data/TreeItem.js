@@ -94,6 +94,12 @@ class TreeItem {
       .getPrevious(this);
   }
 
+  getNext() {
+    return this.getParentItem()
+      .getTreeItemList()
+      .getNext(this);
+  }
+
   /**
    * Suppression d'un item
    * @param {TreeItem} treeItemToRemove - Item à supprimer

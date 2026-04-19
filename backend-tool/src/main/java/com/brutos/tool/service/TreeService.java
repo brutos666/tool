@@ -15,9 +15,21 @@ import java.util.stream.Collectors;
 @Service
 public class TreeService<T> {
 
-    public List<Tree<Item>> transformToTree(List<Item> flatList) {
+    public List<Tree<Item>> transformToTrees(List<Item> flatList) {
         Map<Long, List<Item>> sortedItems = sortItems(flatList);
         return getChildren(-1L, sortedItems);
+    }
+
+    public Tree<Item> transformToTree(List<Item> flatList) {
+        Map<Long, List<Item>> sortedItems = sortItems(flatList);
+        Item item = flatList.getFirst();
+        List<Item> childrenItems = sortedItems.get(item.getId());
+        if (childrenItems == null) {
+            return new Tree<>(item);
+        }
+        Tree<Item> resultItem = new Tree<>(item);
+        resultItem.setChildren(getChildren(item.getId(), sortedItems));
+        return resultItem;
     }
 
     public void applyFunctionOnEach(List<Tree<T>> trees, Function<T, T> updateItem) {

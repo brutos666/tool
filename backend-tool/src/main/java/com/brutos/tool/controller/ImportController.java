@@ -40,11 +40,11 @@ public class ImportController {
             throw new IllegalArgumentException("Le fichier est vide");
         }
         List<Item> flatItems = csvService.convertCsvToItems(file);
-        List<Tree<Item>> items = treeService.transformToTree(flatItems);
+        List<Tree<Item>> items = treeService.transformToTrees(flatItems);
         treeService.applyFunctionOnEach(items, itemService::setNullIds);
         Optional<Item> lastItem = itemService.getLastRootItem();
         List<Item> savedItems = itemService.saveTreeItems(lastItem, items);
-        List<Tree<Item>> savedItemsTree = treeService.transformToTree(savedItems);
+        List<Tree<Item>> savedItemsTree = treeService.transformToTrees(savedItems);
         return itemMapper.treeToWebResult(savedItemsTree);
     }
 

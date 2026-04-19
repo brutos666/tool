@@ -29,12 +29,12 @@ public class TreeServiceTest {
     private final TreeService<Item> treeService = new TreeService<>();
 
     @Test
-    void transformToTree_shouldReturnList_shouldAllStatusOk_whenNoChildrenWithNextIdsCorrect() {
+    void transformToTrees_shouldReturnList_shouldAllStatusOk_whenNoChildrenWithNextIdsCorrect() {
         List<Item> flatItems = List.of(
                 new Item(1L, TITLE1, TEXT1, State.TODO, -1L, 2L),
                 new Item(2L, TITLE2, TEXT2, State.TODO, -1L, null));
 
-        List<Tree<Item>> actual = treeService.transformToTree(flatItems);
+        List<Tree<Item>> actual = treeService.transformToTrees(flatItems);
         Item actualItem1 = actual.get(0).getData();
         Item actualItem2 = actual.get(1).getData();
 
@@ -46,12 +46,12 @@ public class TreeServiceTest {
     }
 
     @Test
-    void transformToTree_shouldReturnTree_shouldAllStatusOk_whenOneChildrenWithNextIdsCorrect() {
+    void transformToTree_shouldReturnTrees_shouldAllStatusOk_whenOneChildrenWithNextIdsCorrect() {
         List<Item> flatItems = List.of(
                 new Item(1L, TITLE1, TEXT1, State.TODO, -1L, null),
                 new Item(2L, TITLE2, TEXT2, State.TODO, 1L, null));
 
-        List<Tree<Item>> actual = treeService.transformToTree(flatItems);
+        List<Tree<Item>> actual = treeService.transformToTrees(flatItems);
         Item actualParent = actual.getFirst().getData();
         Item actualChild = actual.getFirst().getChildData(0);
 
@@ -64,14 +64,14 @@ public class TreeServiceTest {
     }
 
     @Test
-    void transformToTree_shouldReturnTree_shouldAllStatusOk_whenTreeWithNextIdsCorrect() {
+    void transformToTree_shouldReturnTree_shouldAllStatusOk_whenTreesWithNextIdsCorrect() {
         Item parent1 = new Item(1L, TITLE1, TEXT1, State.TODO, -1L, 4L);
         Item parent2 = new Item(4L, TITLE4, TEXT4, State.TODO, -1L, null);
         Item child1parent1 = new Item(2L, TITLE2, TEXT2, State.TODO, 1L, 3L);
         Item child2parent1 = new Item(3L, TITLE3, TEXT3, State.TODO, 1L, null);
         List<Item> flatItems = List.of(parent1, child2parent1, child1parent1, parent2);
 
-        List<Tree<Item>> actual = treeService.transformToTree(flatItems);
+        List<Tree<Item>> actual = treeService.transformToTrees(flatItems);
         Item actualParent1 = actual.getFirst().getData();
         Item actualParent2 = actual.get(1).getData();
         Item actualChild1Parent1 = actual.getFirst().getChildData(0);
@@ -91,14 +91,14 @@ public class TreeServiceTest {
     }
 
     @Test
-    void transformToTree_shouldReturnTree_shouldHaveOrphanStatus_whenTreeWithNextIdsNull() {
+    void transformToTree_shouldReturnTree_shouldHaveOrphanStatus_whenTreesWithNextIdsNull() {
         Item parent1 = new Item(1L, TITLE1, TEXT1, State.TODO, -1L, null);
         Item parent2 = new Item(4L, TITLE4, TEXT4, State.TODO, -1L, null);
         Item child1parent1 = new Item(2L, TITLE2, TEXT2, State.TODO, 1L, null);
         Item child2parent1 = new Item(3L, TITLE3, TEXT3, State.TODO, 1L, null);
         List<Item> flatItems = List.of(parent1, child2parent1, child1parent1, parent2);
 
-        List<Tree<Item>> actual = treeService.transformToTree(flatItems);
+        List<Tree<Item>> actual = treeService.transformToTrees(flatItems);
         Item actualParent1 = actual.getFirst().getData();
         Item actualParent2 = actual.get(1).getData();
         Item actualChild1Parent1 = actual.getFirst().getChildData(0);
@@ -118,14 +118,14 @@ public class TreeServiceTest {
     }
 
     @Test
-    void transformToTree_shouldReturnTree_shouldHaveNextNotFoundStatus_whenTreeWithNextIdsNotFound() {
+    void transformToTree_shouldReturnTree_shouldHaveNextNotFoundStatus_whenTreesWithNextIdsNotFound() {
         Item parent1 = new Item(1L, TITLE1, TEXT1, State.TODO, -1L, 4L);
         Item parent2 = new Item(4L, TITLE4, TEXT4, State.TODO, -1L, 5L);
         Item child1parent1 = new Item(2L, TITLE2, TEXT2, State.TODO, 1L, 3L);
         Item child2parent1 = new Item(3L, TITLE3, TEXT3, State.TODO, 1L, 10L);
         List<Item> flatItems = List.of(parent1, child2parent1, child1parent1, parent2);
 
-        List<Tree<Item>> actual = treeService.transformToTree(flatItems);
+        List<Tree<Item>> actual = treeService.transformToTrees(flatItems);
         Item actualParent1 = actual.getFirst().getData();
         Item actualParent2 = actual.get(1).getData();
         Item actualChild1Parent1 = actual.getFirst().getChildData(0);
@@ -145,14 +145,14 @@ public class TreeServiceTest {
     }
 
     @Test
-    void transformToTree_shouldReturnTree_shouldHaveLoopStatus_whenChildrenLoop() {
+    void transformToTree_shouldReturnTrees_shouldHaveLoopStatus_whenChildrenLoop() {
         Item parent1 = new Item(1L, TITLE1, TEXT1, State.TODO, -1L, null);
         Item child1parent1 = new Item(2L, TITLE2, TEXT2, State.TODO, 1L, 3L);
         Item child2parent1 = new Item(3L, TITLE3, TEXT3, State.TODO, 1L, 4L);
         Item child3Parent1 = new Item(4L, TITLE4, TEXT4, State.TODO, 1L, 2L);
         List<Item> flatItems = List.of(parent1, child2parent1, child1parent1, child3Parent1);
 
-        List<Tree<Item>> actual = treeService.transformToTree(flatItems);
+        List<Tree<Item>> actual = treeService.transformToTrees(flatItems);
         Item actualParent1 = actual.getFirst().getData();
         Item actualChild1Parent1 = actual.getFirst().getChildData(0);
         Item actualChild2Parent1 = actual.getFirst().getChildData(1);
@@ -172,14 +172,14 @@ public class TreeServiceTest {
     }
 
     @Test
-    void transformToTree_shouldReturnTree_shouldHaveLoopStatus_whenTwoChildrenLoop() {
+    void transformToTree_shouldReturnTrees_shouldHaveLoopStatus_whenTwoChildrenLoop() {
         Item parent1 = new Item(1L, TITLE1, TEXT1, State.TODO, -1L, null);
         Item child1parent1 = new Item(2L, TITLE2, TEXT2, State.TODO, 1L, 2L);
         Item child2parent1 = new Item(3L, TITLE3, TEXT3, State.TODO, 1L, 4L);
         Item child3Parent1 = new Item(4L, TITLE4, TEXT4, State.TODO, 1L, 3L);
         List<Item> flatItems = List.of(parent1, child2parent1, child1parent1, child3Parent1);
 
-        List<Tree<Item>> actual = treeService.transformToTree(flatItems);
+        List<Tree<Item>> actual = treeService.transformToTrees(flatItems);
         Item actualParent1 = actual.getFirst().getData();
         Item actualChild1Parent1 = actual.getFirst().getChildData(0);
         Item actualChild2Parent1 = actual.getFirst().getChildData(1);
@@ -199,14 +199,14 @@ public class TreeServiceTest {
     }
 
     @Test
-    void transformToTree_shouldReturnTree_shouldHaveOrphanNextNotFoundStatus_whenTreeWithTotalOrphan() {
+    void transformToTree_shouldReturnTree_shouldHaveOrphanNextNotFoundStatus_whenTreesWithTotalOrphan() {
         Item parent1 = new Item(1L, TITLE1, TEXT1, State.TODO, -1L, null);
         Item parent2 = new Item(4L, TITLE4, TEXT4, State.TODO, -1L, 5L);
         Item child1parent2 = new Item(2L, TITLE2, TEXT2, State.TODO, 4L, 3L);
         Item child2parent2 = new Item(3L, TITLE3, TEXT3, State.TODO, 4L, 10L);
         List<Item> flatItems = List.of(parent1, child2parent2, child1parent2, parent2);
 
-        List<Tree<Item>> actual = treeService.transformToTree(flatItems);
+        List<Tree<Item>> actual = treeService.transformToTrees(flatItems);
         Item actualParent1 = actual.getFirst().getData();
         Item actualParent2 = actual.get(1).getData();
         Item actualChild1Parent2 = actual.get(1).getChildData(0);
@@ -226,12 +226,12 @@ public class TreeServiceTest {
     }
 
     @Test
-    void transformToTree_shouldReturnTree_shouldAllStatusOk_whenNextIdsCorrect() {
+    void transformToTree_shouldReturnTrees_shouldAllStatusOk_whenNextIdsCorrect() {
         List<Item> flatItems = List.of(
                 new Item(1L, TITLE1, TEXT1, State.TODO, -1L, 2L),
                 new Item(2L, TITLE2, TEXT2, State.TODO, -1L, null));
 
-        List<Tree<Item>> actual = treeService.transformToTree(flatItems);
+        List<Tree<Item>> actual = treeService.transformToTrees(flatItems);
 
         assertEquals(2, actual.size());
         assertEquals(TITLE1, actual.get(0).getData().getTitle());

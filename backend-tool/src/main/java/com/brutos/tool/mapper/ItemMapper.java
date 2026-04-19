@@ -38,10 +38,16 @@ public class ItemMapper implements Mapper<Item, ItemModel, ItemWebResult> {
         item.setParentId(webResult.getParentId());
         item.setNextId(webResult.getNextId());
         item.setStatus(webResult.getStatus());
-        if (webResult.getChildren() != null) {
-            item.setChildren(webResult.getChildren().stream().map(this::toEntity).toList());
-        }
         return item;
+    }
+
+    public Tree<Item> toTreeEntity(ItemWebResult webResult) {
+        Item item = toEntity(webResult);
+        Tree<Item> treeItem = new Tree<>(item);
+        if (webResult.getChildren() != null) {
+            treeItem.setChildren(webResult.getChildren().stream().map(this::toTreeEntity).toList());
+        }
+        return treeItem;
     }
 
     @Override

@@ -35,7 +35,7 @@ public class ExportController {
     public ResponseEntity<String> findAllItems() throws CsvRequiredFieldEmptyException, CsvDataTypeMismatchException {
         List<Item> items = itemService.getAllItems();
         // Permet de trier les items pour rendre le fichier exporté plus lisible
-        List<Tree<Item>> trees = treeService.transformToTree(items);
+        List<Tree<Item>> trees = treeService.transformToTrees(items);
         List<Item> orderedItems = treeService.transformToListLevelOrder(trees);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=users.csv")
