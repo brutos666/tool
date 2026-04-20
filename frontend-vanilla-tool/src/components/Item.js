@@ -13,9 +13,6 @@ class Item extends Component {
 
   name = 'Item';
 
-  /** @type {Items} */
-  #parentContainer = null;
-
   /** @type {TreeItem} */
   #treeItem = null;
   #layout = null;
@@ -45,10 +42,6 @@ class Item extends Component {
       toolbar.addChild(deleteAction);
     }
     this.setStaticChild('toolbar', toolbar);
-  }
-
-  setParentContainer(parentContainer) {
-    this.#parentContainer = parentContainer;
   }
 
   /** @override  */
@@ -103,10 +96,7 @@ class Item extends Component {
     this.#treeItem.addItem({ title, state: 'TODO', children: [] });
   }
   doDelete() {
-    if (this.#parentContainer === null) {
-      return;
-    }
-    this.#parentContainer.doDelete(this.#treeItem);
+    this.#treeItem.deleteItem();
   }
 
   /**
@@ -127,11 +117,22 @@ class Item extends Component {
    * @param {TreeItem} treeItem
    */
   update(action, treeItem) {
-    if (action === 'updated') {
+    if (action === 'update') {
+      // MAJ éventuelle du status
+      this.getView()
+        .setCRUDMode(treeItem.getItemInfos().CRUDMode);
+    } else if (action === 'updated') {
       this.getView()
         .setItemValues(treeItem.getItemInfos());
     } else if (action === 'deleted') {
       this.#treeItem.removeObserver(this);
+      if (this.#treeItem.isNew()) {
+        this.#treeItem.getParentItem()
+          .removeItem(this.#treeItem);
+      } else {
+        this.getView()
+          .setDeleted();
+      }
     }
   }
 

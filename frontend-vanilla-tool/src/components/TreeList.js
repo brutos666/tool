@@ -34,7 +34,6 @@ class TreeList extends Items {
     const layout = this.getLayout();
     const rights = ITEM_LAYOUT.getRights(layout);
     let item = new Item({ treeItem, layout, rights });
-    item.setParentContainer(this);
     // Mise en place du décorateur permettant la validation en base de données
     item = new CommandItemDecorator(item, { treeItem, rights });
     return new Tree(item, { treeItem, layout, rights });

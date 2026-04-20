@@ -1,4 +1,5 @@
 import TreeItemList from './TreeItemList.js';
+import { CRUD_MODE } from '../tools/Constants.js';
 /** @import Component from '../components/Component.js'; */
 /** @import { STATE, STATUS } from '../tools/Constants.js'; */
 
@@ -15,6 +16,7 @@ import TreeItemList from './TreeItemList.js';
  * @property {number} nextId - Identifiant de l'item suivant
  * @property {Array<ItemInfos>} children - Enfants (arbre)
  * @property {STATUS} status - Statut {@link STATUS}
+ * @property {CRUD_MODE} CRUDMode - Création, modification, suppression ou lecture {@link CRUD_MODE}
  */
 class TreeItem {
 
@@ -30,6 +32,7 @@ class TreeItem {
   #observers = [];
   /** Modification effectuées */
   #updates = {};
+  #deleted = false;
 
   constructor(itemInfos) {
     this.#item = Object.assign({}, {
@@ -60,11 +63,24 @@ class TreeItem {
    */
   getItemInfos() {
     // Prise en compte des modifications en cours
-    return { ...this.#item, ...this.#updates, children: this.#treeItemList.getItemInfos() };
+    return { ...this.#item, ...this.#updates, children: this.#treeItemList.getItemInfos(), CRUDMode: this.getCRUDMode() };
   }
 
   getTreeItemList() {
     return this.#treeItemList;
+  }
+
+  getCRUDMode() {
+    if (this.isNew()) {
+      return CRUD_MODE.CREATE;
+    }
+    if (this.isDeleted()) {
+      return CRUD_MODE.DELETE;
+    }
+    if (this.isModified()) {
+      return CRUD_MODE.UPDATE;
+    }
+    return CRUD_MODE.READ;
   }
 
   /**
@@ -101,7 +117,7 @@ class TreeItem {
   }
 
   /**
-   * Suppression d'un item
+   * Suppression d'un item fils
    * @param {TreeItem} treeItemToRemove - Item à supprimer
    */
   removeItem(treeItemToRemove) {
@@ -126,8 +142,7 @@ class TreeItem {
     this.alertObservers('updated');
   }
   deleteItem() {
-    this.getParentItem()
-      .removeItem(this);
+    this.#deleted = true;
     this.alertObservers('deleted');
   }
 
@@ -153,7 +168,7 @@ class TreeItem {
    * @returns {boolean} - Indique si la tâche est nouvelle
    */
   isNew() {
-    return !this.getItemInfos().id;
+    return !this.#item.id && !this.#updates.id;
   }
   /**
    * @returns {boolean} - Indique si la tâche a des modifications
@@ -162,8 +177,8 @@ class TreeItem {
     return Object.keys(this.#updates).length > 0;
   }
 
-  isNextIdModified() {
-    return this.#updates.nextId !== undefined;
+  isDeleted() {
+    return this.#deleted;
   }
 
   addObserver(observer, rights) {

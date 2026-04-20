@@ -12,6 +12,7 @@ public class Item extends AbstractEntity {
     private Long nextId;
     private List<Item> children = new ArrayList<>();
     private Status status = Status.OK;
+    private CRUDMode CRUDMode;
 
     public Item() {
     }
@@ -98,6 +99,14 @@ public class Item extends AbstractEntity {
         this.status = status;
     }
 
+    public CRUDMode getCRUDMode() {
+        return CRUDMode;
+    }
+
+    public void setCRUDMode(CRUDMode CRUDMode) {
+        this.CRUDMode = CRUDMode;
+    }
+
     @Override
     public String toString() {
         return "Item{" +
@@ -108,6 +117,7 @@ public class Item extends AbstractEntity {
                 ", nextId=" + nextId +
                 ", children=" + children +
                 ", status=" + status +
+                ", CRUDMode=" + CRUDMode +
                 "} " + super.toString();
     }
 
@@ -116,7 +126,7 @@ public class Item extends AbstractEntity {
         if (o == null || getClass() != o.getClass()) return false;
 
         Item item = (Item) o;
-        return Objects.equals(title, item.title) && Objects.equals(text, item.text) && state == item.state && Objects.equals(parentId, item.parentId) && Objects.equals(nextId, item.nextId) && Objects.equals(children, item.children);
+        return Objects.equals(title, item.title) && Objects.equals(text, item.text) && state == item.state && Objects.equals(parentId, item.parentId) && Objects.equals(nextId, item.nextId) && Objects.equals(children, item.children) && status == item.status && CRUDMode == item.CRUDMode;
     }
 
     @Override
@@ -127,7 +137,8 @@ public class Item extends AbstractEntity {
         result = 31 * result + Objects.hashCode(parentId);
         result = 31 * result + Objects.hashCode(nextId);
         result = 31 * result + Objects.hashCode(children);
+        result = 31 * result + Objects.hashCode(status);
+        result = 31 * result + Objects.hashCode(CRUDMode);
         return result;
     }
-
 }

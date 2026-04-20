@@ -37,20 +37,18 @@ class CommandDeleteDecorator extends CommandSpaceDecorator {
    *
    * @param {TreeItem} treeItemToRemove
    */
-  doDelete(treeItemToRemove) {
+  async doDelete(treeItemToRemove) {
     this.setRelaunchCallback(() => {
       this.doDelete();
     });
-    return new DeleteItem(this, treeItemToRemove)
-      .execute()
-      .then(itemInfos => {
-        const previous = treeItemToRemove.getPrevious();
-        if (previous) {
-          previous.updateItem({ nextId: treeItemToRemove.getItemInfos().nextId });
-        }
-        this.#treeItem.removeItem(treeItemToRemove);
-        return Promise.resolve(itemInfos);
-      });
+    const itemInfos = await new DeleteItem(this, treeItemToRemove)
+      .execute();
+    const previous = treeItemToRemove.getPrevious();
+    if (previous) {
+      previous.updateItem({ nextId: treeItemToRemove.getItemInfos().nextId });
+    }
+    this.#treeItem.removeItem(treeItemToRemove);
+    return await Promise.resolve(itemInfos);
   }
 
 }

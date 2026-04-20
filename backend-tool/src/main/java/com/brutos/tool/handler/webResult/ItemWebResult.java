@@ -1,5 +1,6 @@
 package com.brutos.tool.handler.webResult;
 
+import com.brutos.tool.entity.CRUDMode;
 import com.brutos.tool.entity.State;
 import com.brutos.tool.entity.Status;
 
@@ -15,6 +16,7 @@ public class ItemWebResult extends AbstractWebResultEntity {
     private Long nextId;
     private List<ItemWebResult> children = new ArrayList<>();
     private Status status = Status.OK;
+    private CRUDMode CRUDMode;
 
     public ItemWebResult() {
         super();
@@ -76,12 +78,33 @@ public class ItemWebResult extends AbstractWebResultEntity {
         this.status = status;
     }
 
+    public CRUDMode getCRUDMode() {
+        return CRUDMode;
+    }
+
+    public void setCRUDMode(CRUDMode CRUDMode) {
+        this.CRUDMode = CRUDMode;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
 
         ItemWebResult that = (ItemWebResult) o;
-        return Objects.equals(title, that.title) && Objects.equals(text, that.text) && state == that.state && Objects.equals(parentId, that.parentId) && Objects.equals(nextId, that.nextId) && Objects.equals(children, that.children);
+        return Objects.equals(title, that.title) && Objects.equals(text, that.text) && state == that.state && Objects.equals(parentId, that.parentId) && Objects.equals(nextId, that.nextId) && Objects.equals(children, that.children) && status == that.status && CRUDMode == that.CRUDMode;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hashCode(title);
+        result = 31 * result + Objects.hashCode(text);
+        result = 31 * result + Objects.hashCode(state);
+        result = 31 * result + Objects.hashCode(parentId);
+        result = 31 * result + Objects.hashCode(nextId);
+        result = 31 * result + Objects.hashCode(children);
+        result = 31 * result + Objects.hashCode(status);
+        result = 31 * result + Objects.hashCode(CRUDMode);
+        return result;
     }
 
     @Override
@@ -94,18 +117,8 @@ public class ItemWebResult extends AbstractWebResultEntity {
                 ", nextId=" + nextId +
                 ", children=" + children +
                 ", status=" + status +
+                ", CRUDMode=" + CRUDMode +
                 "} " + super.toString();
-    }
-
-    @Override
-    public int hashCode() {
-        int result = Objects.hashCode(title);
-        result = 31 * result + Objects.hashCode(text);
-        result = 31 * result + Objects.hashCode(state);
-        result = 31 * result + Objects.hashCode(parentId);
-        result = 31 * result + Objects.hashCode(nextId);
-        result = 31 * result + Objects.hashCode(children);
-        return result;
     }
 
 }

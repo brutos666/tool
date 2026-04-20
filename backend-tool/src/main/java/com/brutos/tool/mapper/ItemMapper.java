@@ -1,5 +1,6 @@
 package com.brutos.tool.mapper;
 
+import com.brutos.tool.entity.CRUDMode;
 import com.brutos.tool.entity.Item;
 import com.brutos.tool.entity.State;
 import com.brutos.tool.entity.Tree;
@@ -25,6 +26,7 @@ public class ItemMapper implements Mapper<Item, ItemModel, ItemWebResult> {
         itemWebResult.setParentId(item.getParentId());
         itemWebResult.setNextId(item.getNextId());
         itemWebResult.setStatus(item.getStatus());
+        itemWebResult.setCRUDMode(item.getCRUDMode());
         return itemWebResult;
     }
 
@@ -38,6 +40,7 @@ public class ItemMapper implements Mapper<Item, ItemModel, ItemWebResult> {
         item.setParentId(webResult.getParentId());
         item.setNextId(webResult.getNextId());
         item.setStatus(webResult.getStatus());
+        item.setCRUDMode(webResult.getCRUDMode());
         return item;
     }
 
@@ -110,11 +113,12 @@ public class ItemMapper implements Mapper<Item, ItemModel, ItemWebResult> {
         if (itemModel.getState() != null) {
             Optional<State> optionalState = State.convertStringToEnum(itemModel.getState());
             optionalState.ifPresentOrElse(item::setState, () -> {
-                throw new InvalidModelValueException("state (État de l'item)", itemModel.getState(), "TODO, IN_PROGESS, DONE");
+                throw new InvalidModelValueException("state (État de l'item)", itemModel.getState(), "TODO, IN_PROGRESS, DONE");
             });
         }
         item.setParentId(itemModel.getParentId());
         item.setNextId(itemModel.getNextId());
+        item.setCRUDMode(CRUDMode.READ);
         return item;
     }
 

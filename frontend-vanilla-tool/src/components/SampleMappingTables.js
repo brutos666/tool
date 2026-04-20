@@ -5,7 +5,6 @@ import Items from './Items.js';
 import SampleMappingTablesView from './views/SampleMappingTablesView.js';
 import SampleMappingSamples from './SampleMappingSamples.js';
 import ActionButton from './ActionButton.js';
-import CommandDeleteDecorator from './decorators/CommandDeleteDecorator.js';
 /** @import TreeItem from '../data/TreeItem.js'; */
 
 class SampleMappingTables extends Items {
@@ -42,10 +41,9 @@ class SampleMappingTables extends Items {
   getItemComponent(treeItem) {
     const rights = ITEM_LAYOUT.getRights(ITEM_LAYOUT.Rules);
     const item = new Item({ treeItem, layout: ITEM_LAYOUT.Rules, rights });
-    item.setParentContainer(this);
     const commandItem = new CommandItemDecorator(item, { treeItem, rights });
     const sampleItems = new SampleMappingSamples(treeItem);
-    return { commandItem, sampleItems: new CommandDeleteDecorator(sampleItems, { treeItem }) };
+    return { commandItem, sampleItems };
   }
   removeItemComponent(component) {
     component.commandItem.destroy();

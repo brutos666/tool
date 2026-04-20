@@ -7,6 +7,8 @@
   --selected-color: light-dark(orange, orange);
   --error-color: light-dark(red, red);
   --success-color: light-dark(green, green);
+  --created-color: light-dark(green, green);
+  --updated-color: light-dark(blue, blue);
   --box-shadow-color: light-dark(#5d5d5d, black);
   --sample-color: light-dark(#cadf58, #cadf58);
   --story-color: light-dark(#fff9b2, #fff9b2);
@@ -308,6 +310,23 @@ td:first-child {
 .item--status-total-orphan,
 .item--status-loop {
   border: var(--error-color) solid 1px;
+}
+.item--crud-created::before {
+  content: "•";
+  font-size: 1em;
+  color: var(--created-color);
+}
+.item--crud-updated::before {
+  content: "•";
+  font-size: 1em;
+  color: var(--updated-color);
+}
+.item--crud-deleted {
+  cursor: default;
+  user-select: none;
+  pointer-events: none;
+  border: none;
+  opacity: 0.5;
 }
 
 /* -- Affichage item avec que le titre */

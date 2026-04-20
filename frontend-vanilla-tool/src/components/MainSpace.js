@@ -5,8 +5,8 @@ import MainSpaceView from './views/MainSpaceView.js';
 import { LAYOUT } from '../tools/Constants.js';
 import CheckList from './CheckList.js';
 import SampleMappingTables from './SampleMappingTables.js';
-import CommandDeleteDecorator from './decorators/CommandDeleteDecorator.js';
 import CommandSaveDecorator from './decorators/CommandSaveDecorator.js';
+import ActionButton from './ActionButton.js';
 /** @import Items from './Items.js'; */
 
 class MainSpace extends Component {
@@ -22,14 +22,17 @@ class MainSpace extends Component {
     super(new MainSpaceView());
     const select = new Select({ id: 'select', options: LAYOUT.getOptions() });
     select.setDoSelectCallback(this.changeDisplay.bind(this));
+    const saveAction = new ActionButton({ id: 'save', label: 'Sauvegarder les modifications' });
+    saveAction.setDoActionCallback(this.doSave.bind(this));
+
     const toolbar = new Toolbar();
     toolbar.addChild(select);
+    toolbar.addChild(saveAction);
     this.setStaticChild('toolbar', toolbar);
   }
 
   async setTreeItem(treeItem) {
     if (this.#saveDecorator) {
-      await this.#saveDecorator.doSave();
       this.#saveDecorator.setTreeItem(treeItem);
     }
     this.#treeItem = treeItem;
@@ -60,10 +63,16 @@ class MainSpace extends Component {
         this.#main = null;
         break;
     }
-    if (this.#main) {
-      const mainWithDelete = new CommandDeleteDecorator(this.#main, { treeItem: this.#treeItem });
-      this.#saveDecorator = new CommandSaveDecorator(mainWithDelete, { treeItem: this.#treeItem });
-      this.setStaticChild('main', this.#saveDecorator);
+    if (!this.#main) {
+      return;
+    }
+    this.#saveDecorator = new CommandSaveDecorator(this.#main, { treeItem: this.#treeItem });
+    this.setStaticChild('main', this.#saveDecorator);
+  }
+
+  doSave() {
+    if (this.#saveDecorator) {
+      return this.#saveDecorator.doSave();
     }
   }
 

@@ -1,4 +1,4 @@
-import { RIGHT, ITEM_LAYOUT, STATUS } from '../../tools/Constants.js';
+import { RIGHT, ITEM_LAYOUT, STATUS, CRUD_MODE } from '../../tools/Constants.js';
 import View from './View.js';
 /** @import TreeItem from '../../data/TreeItem.js' */
 /** @import {ItemInfos} from '../../data/TreeItem.js'; */
@@ -11,9 +11,11 @@ class ItemView extends View {
   #title;
   #text;
   #done;
+  #crudMode;
 
   #rights;
   #currentStatusClass;
+  #currentCRUDModeClass;
 
   #onInputCallback = () => {};
   #onDoneChangeCallback = () => {};
@@ -58,6 +60,7 @@ class ItemView extends View {
     return String.raw`<article class="item__article">
           <span id="identify" class="item__identify"></span>
           <input type="checkbox" id="done" class="item__checkbox clickable"/>
+          <span id="crudMode" class="item__crud-mode"></span>
           <div contenteditable="true" class="item__title" id="title"></div>
           <div contenteditable="true" class="item__text" id="text"></div>
           <template id="toolbar"></template>
@@ -111,6 +114,7 @@ class ItemView extends View {
     this.#title = mainNode.querySelector('#title');
     this.#text = mainNode.querySelector('#text');
     this.#done = mainNode.querySelector('#done');
+    this.#crudMode = mainNode.querySelector('#crudMode');
   }
 
   /**
@@ -119,9 +123,7 @@ class ItemView extends View {
    */
   setItemValues(itemInfos) {
     this.#identify.textContent = itemInfos.id === undefined ? '' : itemInfos.id;
-    if (itemInfos.title) {
-      this.#title.innerHTML = itemInfos.title;
-    }
+    this.#title.innerHTML = itemInfos.title;
     if (itemInfos.text) {
       this.#text.innerHTML = itemInfos.text;
     }
@@ -129,12 +131,34 @@ class ItemView extends View {
       this.#done.checked = itemInfos.state === 'DONE';
     }
     if (itemInfos.status) {
+      const newStatusClass = getClassForStatus(itemInfos.status);
       if (this.#currentStatusClass) {
-        this.getElementView().classList.remove(this.#currentStatusClass);
+        this.getElementView().classList.replace(this.#currentStatusClass, newStatusClass);
+      } else {
+        this.getElementView().classList.add(newStatusClass);
       }
-      this.#currentStatusClass = getClassForStatus(itemInfos.status);
-      this.getElementView().classList.add(this.#currentStatusClass);
+      this.#currentStatusClass = newStatusClass;
     }
+    if (itemInfos.CRUDMode) {
+      this.setCRUDMode(itemInfos.CRUDMode);
+    }
+  }
+
+  setCRUDMode(CRUDMode) {
+    const newCRUDModeClass = getClassForCRUDMode(CRUDMode);
+    if (this.#currentCRUDModeClass) {
+      this.#crudMode.classList.replace(this.#currentCRUDModeClass, newCRUDModeClass);
+    } else {
+      this.#crudMode.classList.add(newCRUDModeClass);
+    }
+    this.#currentCRUDModeClass = newCRUDModeClass;
+  }
+
+  setDeleted() {
+    this.getElementView().classList.add('item--crud-deleted');
+    this.#title.contentEditable = false;
+    this.#text.contentEditable = false;
+    this.#done.disabled = true;
   }
 
   setReadOnly() {
@@ -206,7 +230,7 @@ function getClassColorForViewChoice(layout) {
 /**
  * Retourne la classe CSS correspondant au statut
  * @param {STATUS} status - Statut
- * @returns {string} - classe CSS à appliquée pour faire ressortir le statut
+ * @returns {string} - classe CSS à appliquer pour faire ressortir le statut
  */
 function getClassForStatus(status) {
   switch (status) {
@@ -220,6 +244,25 @@ function getClassForStatus(status) {
       return 'item--status-loop';
     default:
       return 'item--status-ok';
+  }
+}
+/**
+ * Retourne la classe CSS correspondant au statut
+ * @param {CRUD_MODE} mode - Mode CRUD de l'item
+ * @returns {string} - classe CSS à appliquer
+ */
+function getClassForCRUDMode(mode) {
+  switch (mode) {
+    case CRUD_MODE.CREATE:
+      return 'item--crud-created';
+    case CRUD_MODE.UPDATE:
+      return 'item--crud-updated';
+    case CRUD_MODE.DELETE:
+      return 'item--crud-deleted';
+    case CRUD_MODE.READ:
+      return 'item--crud-read';
+    default:
+      return '';
   }
 }
 
