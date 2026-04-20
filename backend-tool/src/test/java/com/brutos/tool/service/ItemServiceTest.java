@@ -114,17 +114,17 @@ public class ItemServiceTest {
     }
 
     @Test
-    void saveTreeItems_shouldUpdatePreviousNextId_whenExistPrevious() {
+    void saveTreeItem_shouldUpdatePreviousNextId_whenExistPrevious() {
         // Given
         Item lastItem = new Item(2L, TITLE, TEXT, State.TODO, -1L, null);
         Optional<Item> optionalLastItem = Optional.of(lastItem);
         Item itemToSave = new Item(null, TITLE1, TEXT1, State.TODO, null, null);
-        List<Tree<Item>> itemsToSave = List.of(new Tree<>(itemToSave));
+        Tree<Item> itemTree = new Tree<>(itemToSave);
         nextId = 3L;
         mockSaveAll();
 
         // When
-        List<Item> actual = itemService.saveTreeItems(optionalLastItem, itemsToSave);
+        List<Item> actual = itemService.saveTreeItem(optionalLastItem, null, itemTree);
 
         // Then
         // Appel à sauvegarder une fois pour le précédent et 1 fois pour le nouveau
@@ -141,6 +141,147 @@ public class ItemServiceTest {
         // Vérifier les parents (tous -1L)
         assertEquals(-1L, actual.getFirst().getParentId());
         assertEquals(-1L, actual.get(1).getParentId());
+    }
+
+    @Test
+    void saveTreeItem_shouldKeepTree_whenExistChildren() {
+        // Given
+        Item lastItem = new Item(2L, TITLE, TEXT, State.TODO, -1L, null);
+        Optional<Item> optionalLastItem = Optional.of(lastItem);
+        Item itemToSave1 = new ItemBuilder().withTitle(TITLE1).withText(TEXT1).withState(State.TODO).build();
+        Item itemToSave1Child1 = new ItemBuilder().withTitle(TITLE2).withText(TEXT2).withState(State.TODO).build();
+        Tree<Item> treeItem = new Tree<>(itemToSave1);
+        treeItem.addChild(itemToSave1Child1);
+        nextId = 3L;
+        mockSaveAll();
+
+        // When
+        List<Item> actual = itemService.saveTreeItem(optionalLastItem, 4L, treeItem);
+        Item actualPrevious = actual.get(0);
+        Item actualItem = actual.get(1);
+        Item actualChildItem = actual.get(2);
+
+        // Then
+        verify(itemRepository, times(2)).saveAll(any());
+        // Vérifier les valeurs
+        assertEquals(toStringValues(lastItem), toStringValues(actualPrevious));
+        assertEquals(toStringValues(itemToSave1), toStringValues(actualItem));
+        assertEquals(toStringValues(itemToSave1Child1), toStringValues(actualChildItem));
+        // Vérifier que les ids sont corrects
+        assertEquals(lastItem.getId(), actualPrevious.getId());
+        assertTrue(actualItem.getId() > lastItem.getId());
+        assertTrue(actualChildItem.getId() > lastItem.getId());
+        // Vérifier les suivants
+        assertEquals(actualItem.getId(), actualPrevious.getNextId());
+        assertEquals(4L, actualItem.getNextId());
+        assertNull(actualChildItem.getNextId());
+        // Vérifier les parents
+        assertEquals(-1L, actualPrevious.getParentId());
+        assertEquals(-1L, actualItem.getParentId());
+        assertEquals(actualItem.getId(), actualChildItem.getParentId());
+    }
+
+    @Test
+    void saveTreeItem_shouldKeepTree_shouldUpdateNextId_when2LevelTree() {
+        // Given
+        Item lastItem = new Item(2L, TITLE, TEXT, State.TODO, -1L, null);
+        Optional<Item> optionalLastItem = Optional.of(lastItem);
+        Item itemToSave1 = new ItemBuilder().withTitle(TITLE1).withText(TEXT1).withState(State.TODO).build();
+        Item itemToSave1Child1 = new ItemBuilder().withTitle(TITLE2).withText(TEXT2).withState(State.TODO).build();
+        Item itemToSave1Child2 = new ItemBuilder().withTitle(TITLE3).withText(TEXT3).withState(State.DONE).build();
+        Tree<Item> treeItem = new Tree<>(itemToSave1);
+        treeItem.addChild(itemToSave1Child1);
+        treeItem.addChild(itemToSave1Child2);
+        nextId = 3L;
+        mockSaveAll();
+
+        // When
+        List<Item> actual = itemService.saveTreeItem(optionalLastItem, 12L, treeItem);
+        Item actualPrevious = actual.get(0);
+        Item actual1 = actual.get(1);
+        Item actual1Child1 = actual.get(2);
+        Item actual1Child2 = actual.get(3);
+
+        // Then
+        verify(itemRepository, times(2)).saveAll(any());
+        // Vérifier les valeurs
+        assertEquals(toStringValues(lastItem), toStringValues(actualPrevious));
+        assertEquals(toStringValues(itemToSave1), toStringValues(actual1));
+        assertEquals(toStringValues(itemToSave1Child1), toStringValues(actual1Child1));
+        assertEquals(toStringValues(itemToSave1Child2), toStringValues(actual1Child2));
+        // Vérifier que les ids sont corrects
+        assertEquals(lastItem.getId(), actualPrevious.getId());
+        assertTrue(actual1.getId() > lastItem.getId());
+        assertTrue(actual1Child1.getId() > lastItem.getId());
+        assertTrue(actual1Child2.getId() > lastItem.getId());
+        // Vérifier les suivants
+        assertEquals(actual1.getId(), actualPrevious.getNextId());
+        assertEquals(actual1Child2.getId(), actual1Child1.getNextId());
+        assertNull(actual1Child2.getNextId());
+        // Vérifier les parents
+        assertEquals(-1L, actualPrevious.getParentId());
+        assertEquals(-1L, actual1.getParentId());
+        assertEquals(actual1.getId(), actual1Child1.getParentId());
+        assertEquals(actual1.getId(), actual1Child2.getParentId());
+    }
+
+    @Test
+    void saveTreeItem_shouldKeepTree_shouldUpdateNextId_when3LevelTree() {
+        // Given
+        Item lastItem = new Item(2L, TITLE, TEXT, State.TODO, -1L, null);
+        Optional<Item> optionalLastItem = Optional.of(lastItem);
+        Item itemToSave1 = new ItemBuilder().withTitle(TITLE1).withText(TEXT1).withState(State.TODO).build();
+        Item itemToSave1Child1 = new ItemBuilder().withTitle(TITLE2).withText(TEXT2).withState(State.TODO).build();
+        Item itemToSave1Child1_1 = new ItemBuilder().withTitle(TITLE3).withText(TEXT3).withState(State.DONE).build();
+        Item itemToSave1Child1_2 = new ItemBuilder().withTitle(TITLE4).withText(TEXT4).withState(State.TODO).build();
+        Item itemToSave1Child1_2_1 = new ItemBuilder().withTitle(TITLE5).withText(TEXT5).withState(State.TODO).build();
+        Tree<Item> treeToSave1 = new Tree<>(itemToSave1);
+        Tree<Item> treeToSave1Child1 = treeToSave1.addChild(itemToSave1Child1);
+        Tree<Item> treeToSave1Child1_1 = treeToSave1Child1.addChild(itemToSave1Child1_1);
+        Tree<Item> treeToSave1Child1_2 = treeToSave1Child1.addChild(itemToSave1Child1_2);
+        Tree<Item> treeToSave1Child1_2_1 = treeToSave1Child1_2.addChild(itemToSave1Child1_2_1);
+        nextId = 3L;
+        mockSaveAll();
+
+        // When
+        List<Item> actual = itemService.saveTreeItem(optionalLastItem, 15L, treeToSave1);
+        Item actualPrevious = actual.get(0);
+        Item actual1 = actual.get(1);
+        Item actual1Child1 = actual.get(2);
+        Item actual1Child1_1 = actual.get(3);
+        Item actual1Child1_2 = actual.get(4);
+        Item actual1Child1_2_1 = actual.get(5);
+
+        // Then
+        verify(itemRepository, times(2)).saveAll(any());
+        // Vérifier les valeurs
+        assertEquals(toStringValues(lastItem), toStringValues(actualPrevious));
+        assertEquals(toStringValues(itemToSave1), toStringValues(actual1));
+        assertEquals(toStringValues(itemToSave1Child1), toStringValues(actual1Child1));
+        assertEquals(toStringValues(itemToSave1Child1_1), toStringValues(actual1Child1_1));
+        assertEquals(toStringValues(itemToSave1Child1_2), toStringValues(actual1Child1_2));
+        assertEquals(toStringValues(itemToSave1Child1_2_1), toStringValues(actual1Child1_2_1));
+        // Vérifier que les ids sont corrects
+        assertEquals(lastItem.getId(), actualPrevious.getId());
+        assertTrue(actual1.getId() > lastItem.getId());
+        assertTrue(actual1Child1.getId() > lastItem.getId());
+        assertTrue(actual1Child1_1.getId() > lastItem.getId());
+        assertTrue(actual1Child1_2.getId() > lastItem.getId());
+        assertTrue(actual1Child1_2_1.getId() > lastItem.getId());
+        // Vérifier les suivants
+        assertEquals(actual1.getId(), actualPrevious.getNextId());
+        assertEquals(15L, actual1.getNextId());
+        assertNull(actual1Child1.getNextId());
+        assertEquals(actual1Child1_2.getId(), actual1Child1_1.getNextId());
+        assertNull(actual1Child1_2.getNextId());
+        assertNull(actual1Child1_2_1.getNextId());
+        // Vérifier les parents
+        assertEquals(-1L, actualPrevious.getParentId());
+        assertEquals(-1L, actual1.getParentId());
+        assertEquals(actual1.getId(), actual1Child1.getParentId());
+        assertEquals(actual1Child1.getId(), actual1Child1_1.getParentId());
+        assertEquals(actual1Child1.getId(), actual1Child1_2.getParentId());
+        assertEquals(actual1Child1_2.getId(), actual1Child1_2_1.getParentId());
     }
 
     @Test

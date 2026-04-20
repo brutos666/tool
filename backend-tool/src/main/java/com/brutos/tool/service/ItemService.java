@@ -41,20 +41,6 @@ public class ItemService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public List<Item> saveTreeItemsTest(Optional<Item> lastItem, List<Tree<Item>> treeItemsList) {
-        ItemModel itemModel = new ItemModel(9999L, "A SUPPRIMER", "", "TODO", -1L, null);
-        List<ItemModel> items = new ArrayList<>();
-        items.add(itemModel);
-        Iterable<ItemModel> savedItemsModel = itemRepository.saveAll(items);
-        List<ItemModel> savedItems = new ArrayList<>();
-        savedItemsModel.forEach(savedItems::add);
-
-        savedItems.add(itemModel);
-        savedItemsModel = itemRepository.saveAll(savedItems);
-        return itemMapper.toEntity(savedItemsModel);
-    }
-
-    @Transactional(rollbackFor = Exception.class)
     public List<Item> saveTreeItem(Optional<Item> previousItem, Long nextItemId, Tree<Item> treeItem) {
         List<ItemModel> itemsModel = itemMapper.toModel(treeItem);
         Iterable<ItemModel> savedItemsModel = itemRepository.saveAll(itemsModel);

@@ -34,4 +34,10 @@ public class Tree<I> {
     public I getChildData(int i) {
         return children.get(i).getData();
     }
+
+    public Tree<I> addChild(I childData) {
+        Tree<I> treeChild = new Tree<>(childData);
+        this.getChildren().add(treeChild);
+        return treeChild;
+    }
 }
