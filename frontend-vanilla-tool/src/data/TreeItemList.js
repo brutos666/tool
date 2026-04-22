@@ -58,7 +58,6 @@ class TreeItemList {
     const treeItem = new TreeItem(itemInfos);
     treeItem.setParentItem(parentTreeItem);
     this.#treeList.push(treeItem);
-    this.updatePrevious(treeItem);
     this.alertObservers('add', [treeItem]);
   }
   /**
@@ -71,13 +70,6 @@ class TreeItemList {
       return;
     }
     this.#treeList.splice(index, 1);
-    if (index > 0) {
-      if (index === this.#treeList.length) {
-        this.updateLast();
-      } else {
-        this.updatePrevious(this.#treeList[index]);
-      }
-    }
     this.alertObservers('remove', [treeItemToRemove]);
     treeItemToRemove.alertObservers('deleted');
   }
@@ -98,22 +90,12 @@ class TreeItemList {
     return this.#treeList[index + 1];
   }
 
-  updatePrevious(currentTreeItem) {
-    const previousItem = this.getPrevious(currentTreeItem);
-    if (previousItem) {
-      previousItem.setPropertyValue('nextId', currentTreeItem.getItemId());
-    }
-  }
   getById(id) {
     return this.#treeList.find(treeItem => treeItem.getItemId() === id);
   }
 
   getLast() {
     return this.#treeList[this.#treeList.length - 1];
-  }
-  updateLast() {
-    const lastItem = this.getLast();
-    lastItem.setPropertyValue('nextId', null);
   }
   /**
    * Indiquer aux observateurs qu'une modification a eu lieu

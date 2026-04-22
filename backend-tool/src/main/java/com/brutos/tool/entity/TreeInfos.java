@@ -1,5 +1,6 @@
 package com.brutos.tool.entity;
 
+import java.util.Objects;
 import java.util.Optional;
 
 public class TreeInfos {
@@ -56,5 +57,32 @@ public class TreeInfos {
 
     public void setNextItemId(Long nextItemId) {
         this.nextItemId = nextItemId;
+    }
+
+    @Override
+    public String toString() {
+        return "TreeInfos{" +
+                "treeItem=" + treeItem +
+                ", previousItem=" + previousItem +
+                ", parentId=" + parentId +
+                ", nextItemId=" + nextItemId +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+
+        TreeInfos treeInfos = (TreeInfos) o;
+        return Objects.equals(treeItem, treeInfos.treeItem) && Objects.equals(previousItem, treeInfos.previousItem) && Objects.equals(parentId, treeInfos.parentId) && Objects.equals(nextItemId, treeInfos.nextItemId);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hashCode(treeItem);
+        result = 31 * result + Objects.hashCode(previousItem);
+        result = 31 * result + Objects.hashCode(parentId);
+        result = 31 * result + Objects.hashCode(nextItemId);
+        return result;
     }
 }

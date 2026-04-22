@@ -1,21 +1,20 @@
 package com.brutos.tool.handler.webResult;
 
 import com.brutos.tool.entity.CRUDMode;
-import com.brutos.tool.entity.ChainEntity;
 import com.brutos.tool.entity.State;
 import com.brutos.tool.entity.Status;
+import com.brutos.tool.entity.TreeEntity;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class ItemWebResult implements ChainEntity {
+public class ItemWebResult implements TreeEntity {
     private Long id;
     private String title = "";
     private String text = "";
     private State state = State.TODO;
     private Long parentId;
-    private Long nextId;
     private List<ItemWebResult> children = new ArrayList<>();
     private Status status = Status.OK;
     private CRUDMode CRUDMode;
@@ -71,14 +70,6 @@ public class ItemWebResult implements ChainEntity {
         this.parentId = parentId;
     }
 
-    public Long getNextId() {
-        return nextId;
-    }
-
-    public void setNextId(Long nextId) {
-        this.nextId = nextId;
-    }
-
     public List<ItemWebResult> getChildren() {
         return children;
     }
@@ -108,11 +99,25 @@ public class ItemWebResult implements ChainEntity {
     }
 
     @Override
+    public String toString() {
+        return "ItemWebResult{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", text='" + text + '\'' +
+                ", state=" + state +
+                ", parentId=" + parentId +
+                ", children=" + children +
+                ", status=" + status +
+                ", CRUDMode=" + CRUDMode +
+                '}';
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
 
         ItemWebResult that = (ItemWebResult) o;
-        return Objects.equals(id, that.id) && Objects.equals(title, that.title) && Objects.equals(text, that.text) && state == that.state && Objects.equals(parentId, that.parentId) && Objects.equals(nextId, that.nextId) && Objects.equals(children, that.children) && status == that.status && CRUDMode == that.CRUDMode;
+        return Objects.equals(id, that.id) && Objects.equals(title, that.title) && Objects.equals(text, that.text) && state == that.state && Objects.equals(parentId, that.parentId) && Objects.equals(children, that.children) && status == that.status && CRUDMode == that.CRUDMode;
     }
 
     @Override
@@ -122,26 +127,10 @@ public class ItemWebResult implements ChainEntity {
         result = 31 * result + Objects.hashCode(text);
         result = 31 * result + Objects.hashCode(state);
         result = 31 * result + Objects.hashCode(parentId);
-        result = 31 * result + Objects.hashCode(nextId);
         result = 31 * result + Objects.hashCode(children);
         result = 31 * result + Objects.hashCode(status);
         result = 31 * result + Objects.hashCode(CRUDMode);
         return result;
-    }
-
-    @Override
-    public String toString() {
-        return "ItemWebResult{" +
-                "id=" + id +
-                ", title='" + title + '\'' +
-                ", text='" + text + '\'' +
-                ", state=" + state +
-                ", parentId=" + parentId +
-                ", nextId=" + nextId +
-                ", children=" + children +
-                ", status=" + status +
-                ", CRUDMode=" + CRUDMode +
-                '}';
     }
 
 }

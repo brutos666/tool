@@ -1,8 +1,10 @@
 package com.brutos.tool.service;
 
 import com.brutos.tool.entity.Item;
+import com.brutos.tool.entity.Tree;
 import com.brutos.tool.mapper.ItemMapper;
 import com.brutos.tool.model.ItemModel;
+import com.brutos.tool.utilities.TreeUtils;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 import com.opencsv.bean.StatefulBeanToCsv;
@@ -15,13 +17,20 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class CsvService {
 
-    public String convertAllItemsToCsv(List<Item> items) throws CsvRequiredFieldEmptyException, CsvDataTypeMismatchException {
-        List<ItemModel> itemsModel = ItemMapper.toModel(items);
+    public String convertAllItemsToCsv(List<Tree<Item>> trees) throws CsvRequiredFieldEmptyException, CsvDataTypeMismatchException {
+        List<ItemModel> itemsModel = new ArrayList<>();
+        Long parentId = -1L;
+        for (Tree<Item> treeItem : trees) {
+            Tree<Item> nextTree = TreeUtils.getNext(treeItem, trees);
+            Long nextId = nextTree == null ? null : nextTree.getData().getId();
+            itemsModel.addAll(TreeUtils.transformToChain(treeItem, parentId, nextId, ItemMapper::toModel));
+        }
         StringWriter writer = new StringWriter();
         StatefulBeanToCsv<ItemModel> beanToCsv = new StatefulBeanToCsvBuilder<ItemModel>(writer)
                 .withSeparator(';') // utile en France
@@ -30,7 +39,7 @@ public class CsvService {
         return writer.toString();
     }
 
-    public List<Item> convertCsvToItems(MultipartFile file) throws IOException {
+    public List<Tree<Item>> convertCsvToItems(MultipartFile file) throws IOException {
         InputStreamReader reader = new InputStreamReader(file.getInputStream());
 
         CsvToBean<ItemModel> csvToBean = new CsvToBeanBuilder<ItemModel>(reader)
@@ -38,6 +47,7 @@ public class CsvService {
                 .withSeparator(';') // important en France
                 .withIgnoreLeadingWhiteSpace(true)
                 .build();
-        return ItemMapper.toEntity(csvToBean.parse());
+        List<ItemModel> flatItems = csvToBean.parse();
+        return TreeUtils.transformToTrees(flatItems, ItemMapper::toEntity);
     }
 }

@@ -29,10 +29,6 @@ public class TreeItemBuilder {
         Item child = new ItemBuilder().withId(id).withTitle(title).withText(text).withState(state)
                 .withParentId(currentItem.getData().getParentId()).build();
         Tree<Item> treeChild = new Tree<>(child);
-        Tree<Item> lastChild = children.isEmpty() ? null : children.getLast();
-        if (lastChild != null) {
-            lastChild.getData().setNextId(child.getId());
-        }
         children.add(treeChild);
         if (this.currentChild != null) {
             this.currentItem = this.currentChild;
@@ -46,10 +42,6 @@ public class TreeItemBuilder {
         Item child = new ItemBuilder().withId(id).withTitle(title).withText(text).withState(state)
                 .withParentId(currentItem.getData().getParentId()).build();
         Tree<Item> treeChild = new Tree<>(child);
-        Tree<Item> lastChild = children.isEmpty() ? null : children.getLast();
-        if (lastChild != null) {
-            lastChild.getData().setNextId(child.getId());
-        }
         children.add(treeChild);
         this.currentChild = treeChild;
         return this;

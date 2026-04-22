@@ -12,8 +12,4 @@ public interface ChainEntity {
     Long getId();
 
     void setId(Long id);
-
-    Status getStatus();
-
-    void setStatus(Status status);
 }

@@ -27,15 +27,9 @@ public class ItemService {
 
     public Item setNullIds(Item item) {
         item.setId(null);
-        item.setNextId(null);
         item.setParentId(null);
         item.setCRUDMode(CRUDMode.CREATE);
         return item;
-    }
-
-    public Item save(Item item) {
-        ItemModel itemModel = itemRepository.save(ItemMapper.toModel(item));
-        return ItemMapper.toEntity(itemModel);
     }
 
     public Optional<Item> getLastRootItem() {
@@ -80,7 +74,7 @@ public class ItemService {
             Iterable<ItemModel> itemsCreated = itemRepository.saveAll(ItemMapper.toModel(itemsToCreate));
             updateTreeItemIds(itemsToCreate, itemsCreated);
         }
-        // Parcours de l'arbre afin de fournir la liste des items : tous les items sont pris en compte même
+        // Parcours de l'arbre afin de fournir la liste des itemModels : tous les itemModels sont pris en compte même
         // s'il n'y a pas eu de modification
         Optional<Item> previousItem = treeInfos.getPreviousItem();
         List<ItemModel> itemsToModify = getAllItemsToModify(previousItem, treeInfos.getParentId(), treeInfos.getNextItemId(), treeItem);
@@ -88,12 +82,12 @@ public class ItemService {
 
         Iterator<ItemModel> iterator = modifiedItems.iterator();
         Item savedPreviousItem = null;
-        List<Item> items = new ArrayList<>();
         if (previousItem.isPresent()) {
             savedPreviousItem = ItemMapper.toEntity(iterator.next());
         }
-        iterator.forEachRemaining(itemModel -> items.add(ItemMapper.toEntity(itemModel)));
-        Tree<Item> savedTreeItem = TreeUtils.transformToTree(items);
+        List<ItemModel> itemModels = new ArrayList<>();
+        iterator.forEachRemaining(itemModels::add);
+        Tree<Item> savedTreeItem = TreeUtils.transformToTree(itemModels, ItemMapper::toEntity);
         return new TreeInfos(savedTreeItem, savedPreviousItem, treeInfos.getParentId(), treeInfos.getNextItemId());
     }
 
@@ -142,7 +136,7 @@ public class ItemService {
      * @return liste des items créés
      */
     @Transactional(rollbackFor = Exception.class)
-    public List<Item> createTreeItems(Optional<Item> previousItem, Long parentId, List<Tree<Item>> treeItemsList) {
+    public List<Tree<Item>> createTreeItems(Optional<Item> previousItem, Long parentId, List<Tree<Item>> treeItemsList) {
         List<Item> itemsToCreate = TreeUtils.transformToListDepthFirst(treeItemsList);
         Iterable<ItemModel> itemsCreated = itemRepository.saveAll(ItemMapper.toModel(itemsToCreate));
         updateTreeItemIds(itemsToCreate, itemsCreated);
@@ -157,32 +151,12 @@ public class ItemService {
         }
 
         Iterable<ItemModel> modifiedItems = itemRepository.saveAll(itemsToModify);
-
-        return ItemMapper.toEntity(modifiedItems);
+        return TreeUtils.transformToTrees(modifiedItems, ItemMapper::toEntity);
     }
 
-    public List<Item> getAllItems() {
-        return ItemMapper.toEntity(itemRepository.findAll());
-    }
-
-    public void deleteItem(Item item) {
-        // Recherche de l'item précédent
-        Optional<ItemModel> previousItem = itemRepository.findFirstByParentIdAndNextId(item.getParentId(), item.getId());
-        if (previousItem.isPresent()) {
-            // Recherche de l'item suivant
-            previousItem.get().setNextId(item.getNextId());
-            itemRepository.save(previousItem.get());
-        }
-        itemRepository.deleteById(item.getId());
-        for (Item child : item.getChildren()) {
-            deleteItem(child);
-        }
-    }
-
-    public void controlItem(Item item) {
-        if (item.getId() == null) {
-            throw new IllegalArgumentException("id (ID de la tâche) est obligatoire");
-        }
+    public List<Tree<Item>> getAllItems() {
+        Iterable<ItemModel> itemsModel = itemRepository.findAll();
+        return TreeUtils.transformToTrees(itemsModel, ItemMapper::toEntity);
     }
 
     /**
@@ -234,7 +208,7 @@ public class ItemService {
         Item parentItem = treeItem.getData();
         CRUDMode crudMode = parentItem.getCRUDMode();
         if (crudMode.isCreate() || crudMode.isUpdate() || crudMode.isMove()) {
-            itemsToUpdate.add(ItemMapper.toModel(parentItem));
+            itemsToUpdate.add(ItemMapper.toModel(parentItem, null));
         }
         Item previousItem = null;
         for (Tree<Item> child : treeItem.getChildren()) {
@@ -265,7 +239,7 @@ public class ItemService {
         // S'il n'a pas été ajouté à la liste, il faut le faire
         CRUDMode previousCrudMode = previousItem.getCRUDMode();
         if (previousCrudMode.isRead()) {
-            itemsToUpdate.add(ItemMapper.toModel(previousItem));
+            itemsToUpdate.add(ItemMapper.toModel(previousItem, nextItemId));
         }
         // MAJ de l'identifiant du suivant pour l'item précédent
         ItemModel previousModel = itemsToUpdate.getLast();
@@ -295,32 +269,18 @@ public class ItemService {
 
     private List<ItemModel> getAllItemsToModify(Optional<Item> previousItem, Long parentId, Long nextItemId, Tree<Item> treeItem) {
         Item rootItem = treeItem.getData();
-        List<ItemModel> itemsToModify = getAllItemsToModify(parentId, nextItemId, treeItem);
+        List<ItemModel> itemsToModify = TreeUtils.transformToChain(treeItem, parentId, nextItemId, ItemMapper::toModel);
         previousItem.ifPresent(item -> itemsToModify.addFirst(getPreviousToSave(rootItem, item, nextItemId)));
         return itemsToModify;
     }
 
     private List<ItemModel> getAllItemsToModify(Long parentId, Long nextId, Tree<Item> treeItem) {
-        List<ItemModel> itemsToModify = new ArrayList<>();
-        Item item = treeItem.getData();
-        ItemModel itemModel = ItemMapper.toModel(item);
-        itemModel.setParentId(parentId);
-        itemModel.setNextId(nextId);
-        itemsToModify.add(itemModel);
-
-        List<Tree<Item>> children = treeItem.getChildren();
-        for (Tree<Item> child : children) {
-            Long nextChildId = getNext(child, children).map(Item::getId).orElse(null);
-            itemsToModify.addAll(getAllItemsToModify(item.getId(), nextChildId, child));
-        }
-        return itemsToModify;
+        return TreeUtils.transformToChain(treeItem, parentId, nextId, ItemMapper::toModel);
     }
 
     private ItemModel getPreviousToSave(Item item, Item previous, Long nextItemId) {
         Long previousNextId = item.getCRUDMode().isDelete() ? nextItemId : item.getId();
-        ItemModel previousModel = ItemMapper.toModel(previous);
-        previousModel.setNextId(previousNextId);
-        return previousModel;
+        return ItemMapper.toModel(previous, previousNextId);
     }
 
     private Optional<Item> getNext(Tree<Item> treeItem, List<Tree<Item>> treeItemList) {
@@ -394,11 +354,11 @@ public class ItemService {
                 }
             }
 
-            List<Item> items = new ArrayList<>();
-            while (items.size() < expectedSize) {
-                items.add(ItemMapper.toEntity(iterator.next()));
+            List<ItemModel> itemModels = new ArrayList<>();
+            while (itemModels.size() < expectedSize) {
+                itemModels.add(iterator.next());
             }
-            Tree<Item> savedTreeItem = TreeUtils.transformToTree(items);
+            Tree<Item> savedTreeItem = TreeUtils.transformToTree(itemModels, ItemMapper::toEntity);
             savedItemsList.add(new TreeInfos(savedTreeItem, savedPreviousItem, treeInfos.getParentId(), treeInfos.getNextItemId()));
             index++;
         }

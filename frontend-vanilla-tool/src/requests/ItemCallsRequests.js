@@ -28,15 +28,5 @@ class ItemCallsRequests {
       .execute('item/save', 'POST', itemToSave);
   }
 
-  /**
-   * Supprime une tâche
-   * @param {ItemInfos} itemInfos - Tâche à supprimer
-   * @returns {Promise<ItemInfos>} - Promesse contenant la tâche supprimée
-   */
-  async deleteItem(itemInfos) {
-    return new CallRequest()
-      .execute('item/delete', 'POST', itemInfos);
-  }
-
 }
 export default ItemCallsRequests;

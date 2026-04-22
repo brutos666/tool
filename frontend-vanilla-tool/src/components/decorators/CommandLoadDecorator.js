@@ -36,7 +36,7 @@ class CommandLoadDecorator extends CommandSpaceDecorator {
       return;
     }
     if (itemInfosList.length === 0) {
-      itemInfosList.push({ id: undefined, title: 'Nouvel espace', text: '', state: 'TODO', parentId: undefined, nextId: undefined, children: [] });
+      itemInfosList.push({ id: undefined, title: 'Nouvel espace', text: '', state: 'TODO', parentId: undefined, children: [] });
     }
     StoreData.storeItems(itemInfosList);
   }

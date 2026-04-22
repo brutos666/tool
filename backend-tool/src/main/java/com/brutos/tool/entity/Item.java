@@ -4,13 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class Item implements ChainEntity {
+public class Item implements TreeEntity {
     private Long id = null;
     private String title = "";
     private String text = "";
     private State state = State.TODO;
     private Long parentId = -1L;
-    private Long nextId;
     private List<Item> children = new ArrayList<>();
     private Status status = Status.OK;
     private CRUDMode mode = CRUDMode.READ;
@@ -27,13 +26,12 @@ public class Item implements ChainEntity {
         this.text = text;
     }
 
-    public Item(Long id, String title, String text, State state, Long parentId, Long nextId) {
+    public Item(Long id, String title, String text, State state, Long parentId) {
         this.id = id;
         this.title = title;
         this.text = text;
         this.state = state;
         this.parentId = parentId;
-        this.nextId = nextId;
     }
 
     public Long getId() {
@@ -76,18 +74,6 @@ public class Item implements ChainEntity {
         this.parentId = parentId;
     }
 
-    public Long getNextId() {
-        return nextId;
-    }
-
-    public void setNextId(Long nextId) {
-        this.nextId = nextId;
-    }
-
-    public Long getZeroOrNextId() {
-        return nextId == null ? 0L : nextId;
-    }
-
     public List<Item> getChildren() {
         return children;
     }
@@ -119,15 +105,15 @@ public class Item implements ChainEntity {
     @Override
     public String toString() {
         return "Item{" +
-                "title='" + title + '\'' +
+                "id=" + id +
+                ", title='" + title + '\'' +
                 ", text='" + text + '\'' +
                 ", state=" + state +
                 ", parentId=" + parentId +
-                ", nextId=" + nextId +
                 ", children=" + children +
                 ", status=" + status +
-                ", CRUDMode=" + mode +
-                "} " + super.toString();
+                ", mode=" + mode +
+                '}';
     }
 
     @Override
@@ -135,20 +121,19 @@ public class Item implements ChainEntity {
         if (o == null || getClass() != o.getClass()) return false;
 
         Item item = (Item) o;
-        return Objects.equals(title, item.title) && Objects.equals(text, item.text) && state == item.state && Objects.equals(parentId, item.parentId) && Objects.equals(nextId, item.nextId) && Objects.equals(children, item.children) && status == item.status && mode == item.mode;
+        return Objects.equals(id, item.id) && Objects.equals(title, item.title) && Objects.equals(text, item.text) && state == item.state && Objects.equals(parentId, item.parentId) && Objects.equals(children, item.children) && status == item.status && mode == item.mode;
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hashCode(title);
+        int result = Objects.hashCode(id);
+        result = 31 * result + Objects.hashCode(title);
         result = 31 * result + Objects.hashCode(text);
         result = 31 * result + Objects.hashCode(state);
         result = 31 * result + Objects.hashCode(parentId);
-        result = 31 * result + Objects.hashCode(nextId);
         result = 31 * result + Objects.hashCode(children);
         result = 31 * result + Objects.hashCode(status);
         result = 31 * result + Objects.hashCode(mode);
         return result;
     }
-
 }

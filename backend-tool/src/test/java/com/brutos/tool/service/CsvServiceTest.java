@@ -2,6 +2,7 @@ package com.brutos.tool.service;
 
 import com.brutos.tool.entity.Item;
 import com.brutos.tool.entity.State;
+import com.brutos.tool.entity.Tree;
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import org.junit.jupiter.api.Test;
@@ -22,26 +23,13 @@ class CsvServiceTest {
     @Test
     public void convertAllItemsToCsv_shouldReturnCsvString() throws CsvRequiredFieldEmptyException, CsvDataTypeMismatchException {
         // Given
-        Item item = new Item();
-        item.setId(88L);
-        item.setTitle("Liste de vacances");
-        item.setText("Check list");
-        item.setState(State.TODO);
-        item.setParentId(-1L);
-        item.setNextId(102L);
-        Item item2 = new Item();
-        item2.setId(102L);
-        item2.setTitle("Todo liste");
-        item2.setText("");
-        item2.setState(State.DONE);
-        item2.setParentId(-1L);
-        item2.setNextId(null);
-        List<Item> itemModels = new ArrayList<>();
-        itemModels.add(item);
-        itemModels.add(item2);
+        Item item = new Item(88L, "Liste de vacances", "Check list", State.TODO, -1L);
+        Item item2 = new Item(102L, "Todo liste", "", State.DONE, -1L);
+        Tree<Item> treeItem = new Tree<>(item);
+        Tree<Item> treeItem2 = new Tree<>(item2);
 
         // When
-        String result = csvService.convertAllItemsToCsv(itemModels);
+        String result = csvService.convertAllItemsToCsv(List.of(treeItem, treeItem2));
 
         // Then
         // On ne sait pas dans quelle
@@ -62,26 +50,14 @@ class CsvServiceTest {
                 """;
 
         // When
-        List<Item> result = csvService.convertCsvToItems(new MockMultipartFile("test.csv", csv.getBytes()));
+        List<Tree<Item>> result = csvService.convertCsvToItems(new MockMultipartFile("test.csv", csv.getBytes()));
 
         // Then
-        Item expectedItem1 = new Item();
-        expectedItem1.setId(88L);
-        expectedItem1.setTitle("Liste de vacances");
-        expectedItem1.setText("Check list");
-        expectedItem1.setState(State.TODO);
-        expectedItem1.setParentId(-1L);
-        expectedItem1.setNextId(102L);
-        Item expectedItem2 = new Item();
-        expectedItem2.setId(102L);
-        expectedItem2.setTitle("Todo liste");
-        expectedItem2.setText("");
-        expectedItem2.setState(State.DONE);
-        expectedItem2.setParentId(-1L);
-        expectedItem2.setNextId(null);
-        List<Item> expected = new ArrayList<>();
-        expected.add(expectedItem1);
-        expected.add(expectedItem2);
+        Item expectedItem1 = new Item(88L, "Liste de vacances", "Check list", State.TODO, -1L);
+        Item expectedItem2 = new Item(102L, "Todo liste", "", State.DONE, -1L);
+        List<Tree<Item>> expected = new ArrayList<>();
+        expected.add(new Tree<>(expectedItem1));
+        expected.add(new Tree<>(expectedItem2));
         assertEquals(expected, result);
     }
 

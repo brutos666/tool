@@ -29,10 +29,22 @@ public class ItemMapper {
         itemWebResult.setText(item.getText());
         itemWebResult.setState(item.getState());
         itemWebResult.setParentId(item.getParentId());
-        itemWebResult.setNextId(item.getNextId());
         itemWebResult.setStatus(item.getStatus());
         itemWebResult.setCRUDMode(item.getCRUDMode());
         return itemWebResult;
+    }
+
+    public static ItemWebResult toWebResult(Tree<Item> treeItem) {
+        ItemWebResult itemWebResult = toWebResult(treeItem.getData());
+        if (treeItem.getChildren() != null) {
+            itemWebResult.setChildren(treeItem.getChildren().stream().map(ItemMapper::toWebResult).toList());
+        }
+        return itemWebResult;
+    }
+
+    public static List<ItemWebResult> toWebResult(List<Tree<Item>> trees) {
+        // Pas de prise en compte des enfants
+        return trees.stream().map(ItemMapper::toWebResult).toList();
     }
 
     public static Item toEntity(ItemWebResult webResult) {
@@ -45,47 +57,9 @@ public class ItemMapper {
         item.setText(webResult.getText());
         item.setState(webResult.getState());
         item.setParentId(webResult.getParentId());
-        item.setNextId(webResult.getNextId());
         item.setStatus(webResult.getStatus());
         item.setCRUDMode(webResult.getCRUDMode());
         return item;
-    }
-
-    public static Tree<Item> toTreeEntity(ItemWebResult webResult) {
-        Item item = toEntity(webResult);
-        Tree<Item> treeItem = new Tree<>(item);
-        if (webResult.getChildren() != null) {
-            webResult.getChildren().forEach(child -> treeItem.addChild(toTreeEntity(child)));
-        }
-        return treeItem;
-    }
-
-    public static ItemWebResult toWebResult(Tree<Item> treeItem) {
-        ItemWebResult itemWebResult = toWebResult(treeItem.getData());
-        if (treeItem.getChildren() != null) {
-            itemWebResult.setChildren(treeItem.getChildren().stream().map(ItemMapper::toWebResult).toList());
-        }
-        return itemWebResult;
-    }
-
-    public static List<ItemWebResult> treeToWebResult(List<Tree<Item>> trees) {
-        // Pas de prise en compte des enfants
-        return trees.stream().map(ItemMapper::toWebResult).toList();
-    }
-
-    public static ItemModel toModel(Item item) {
-        ItemModel itemModel = new ItemModel();
-        itemModel.setId(item.getId());
-        itemModel.setTitle(item.getTitle());
-        itemModel.setText(item.getText());
-        itemModel.setState(item.getState().name());
-        itemModel.setParentId(item.getParentId());
-        itemModel.setNextId(item.getNextId());
-        return itemModel;
-    }
-
-    public static List<ItemModel> toModel(List<Item> items) {
-        return items.stream().map(ItemMapper::toModel).toList();
     }
 
     public static List<Item> toEntity(Iterable<ItemModel> itemModels) {
@@ -106,9 +80,42 @@ public class ItemMapper {
             });
         }
         item.setParentId(itemModel.getParentId());
-        item.setNextId(itemModel.getNextId());
         item.setCRUDMode(CRUDMode.READ);
         return item;
+    }
+
+    public static Tree<Item> toTreeEntity(ItemWebResult webResult) {
+        Item item = toEntity(webResult);
+        Tree<Item> treeItem = new Tree<>(item);
+        if (webResult.getChildren() != null) {
+            webResult.getChildren().forEach(child -> treeItem.addChild(toTreeEntity(child)));
+        }
+        return treeItem;
+    }
+
+    public static ItemModel toModel(Item item) {
+        return toModel(item, null);
+    }
+
+    public static ItemModel toModel(Item item, Long nextId) {
+        ItemModel itemModel = new ItemModel();
+        itemModel.setId(item.getId());
+        itemModel.setTitle(item.getTitle());
+        itemModel.setText(item.getText());
+        itemModel.setState(item.getState().name());
+        itemModel.setParentId(item.getParentId());
+        itemModel.setNextId(nextId);
+        return itemModel;
+    }
+
+    /**
+     * Convertit une liste d'item en itemModel sans la notion de nextId
+     *
+     * @param items : Liste des items à convertir
+     * @return Liste des itemModel
+     */
+    public static List<ItemModel> toModel(List<Item> items) {
+        return items.stream().map(item -> ItemMapper.toModel(item, null)).toList();
     }
 
 }

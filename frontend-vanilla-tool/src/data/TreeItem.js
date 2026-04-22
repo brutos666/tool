@@ -13,7 +13,6 @@ import { CRUD_MODE } from '../tools/Constants.js';
  *                          - IN_PROGRESS : En cours
  *                          - DONE : Fait
  * @property {number} parentId - Identifiant de l'item parent
- * @property {number} nextId - Identifiant de l'item suivant
  * @property {Array<ItemInfos>} children - Enfants (arbre)
  * @property {STATUS} status - Statut {@link STATUS}
  * @property {CRUD_MODE} CRUDMode - Création, modification, suppression ou lecture {@link CRUD_MODE}
@@ -41,7 +40,6 @@ class TreeItem {
       text: itemInfos.text,
       state: itemInfos.state,
       parentId: itemInfos.parentId,
-      nextId: itemInfos.nextId,
       status: itemInfos.status
     });
     this.#treeItemList = new TreeItemList();
@@ -131,19 +129,10 @@ class TreeItem {
     this.alertObservers('removeItem');
   }
 
-  updatePrevious(treeItem) {
-    this.#treeItemList.updatePrevious(treeItem);
-  }
-
   updateItem(itemInfos) {
-    const oldId = this.#item.id;
     Object.assign(this.#item, itemInfos);
     for (const key in itemInfos) {
       delete this.#updates[key];
-      if (key === 'id' && itemInfos[key] !== oldId && this.getParentItem()) {
-        this.getParentItem()
-          .updatePrevious(this);
-      }
     }
     this.alertObservers('updated');
   }

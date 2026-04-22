@@ -4,6 +4,9 @@ import com.brutos.tool.entity.Item;
 import com.brutos.tool.entity.State;
 import com.brutos.tool.entity.Status;
 import com.brutos.tool.entity.Tree;
+import com.brutos.tool.mapper.ItemMapper;
+import com.brutos.tool.model.ItemModel;
+import com.brutos.tool.service.TreeBuilder;
 import com.brutos.tool.service.TreeItemBuilder;
 import org.junit.jupiter.api.Test;
 
@@ -124,234 +127,188 @@ public class TreeUtilsTest {
 
     @Test
     void transformToTree_shouldReturnTree_shouldAllStatusOk_whenNoChildrenWithNextIdsCorrect() {
-        List<Item> flatItems = List.of(
-                new Item(-1L, RACINE, "", State.TODO, null, null),
-                new Item(1L, TITLE1, TEXT1, State.TODO, -1L, 2L),
-                new Item(2L, TITLE2, TEXT2, State.TODO, -1L, null));
+        ItemModel itemRacine = new ItemModel(-1L, RACINE, "", State.TODO.name(), null, null);
+        ItemModel itemModel1 = new ItemModel(1L, TITLE1, TEXT1, State.TODO.name(), -1L, 2L);
+        ItemModel itemModel2 = new ItemModel(2L, TITLE2, TEXT2, State.TODO.name(), -1L, null);
+        List<ItemModel> flatItems = List.of(itemRacine, itemModel1, itemModel2);
 
-        Tree<Item> actual = TreeUtils.transformToTree(flatItems);
-        Item actualRacine = actual.getData();
-        Item actualItem1 = actual.getChildData(0);
-        Item actualItem2 = actual.getChildData(1);
+        Tree<Item> actual = TreeUtils.transformToTree(flatItems, ItemMapper::toEntity);
 
-        assertEquals(RACINE, actualRacine.getTitle());
-        assertEquals(TITLE1, actualItem1.getTitle());
-        assertEquals(TITLE2, actualItem2.getTitle());
-        assertEquals(Status.OK, actualItem1.getStatus());
-        assertEquals(Status.OK, actualItem2.getStatus());
+        Tree<Item> expected = new TreeBuilder<Item>()
+                .withRootItem(new Item(-1L, RACINE, "", State.TODO, null))
+                .withFirstChild(new Item(1L, TITLE1, TEXT1, State.TODO, -1L))
+                .withNextChild(new Item(2L, TITLE2, TEXT2, State.TODO, -1L))
+                .build();
+        assertEquals(expected, actual);
     }
 
     @Test
     void transformToTrees_shouldReturnList_shouldAllStatusOk_whenNoChildrenWithNextIdsCorrect() {
-        List<Item> flatItems = List.of(
-                new Item(1L, TITLE1, TEXT1, State.TODO, -1L, 2L),
-                new Item(2L, TITLE2, TEXT2, State.TODO, -1L, null));
+        ItemModel itemModel1 = new ItemModel(1L, TITLE1, TEXT1, State.TODO.name(), -1L, 2L);
+        ItemModel itemModel2 = new ItemModel(2L, TITLE2, TEXT2, State.TODO.name(), -1L, null);
+        List<ItemModel> flatItems = List.of(itemModel1, itemModel2);
 
-        List<Tree<Item>> actual = TreeUtils.transformToTrees(flatItems);
-        Item actualItem1 = actual.get(0).getData();
-        Item actualItem2 = actual.get(1).getData();
+        List<Tree<Item>> actual = TreeUtils.transformToTrees(flatItems, ItemMapper::toEntity);
 
-        assertEquals(2, actual.size());
-        assertEquals(TITLE1, actualItem1.getTitle());
-        assertEquals(TITLE2, actualItem2.getTitle());
-        assertEquals(Status.OK, actualItem1.getStatus());
-        assertEquals(Status.OK, actualItem2.getStatus());
+        List<Tree<Item>> expected = List.of(
+                new Tree<>(new Item(1L, TITLE1, TEXT1, State.TODO, -1L)),
+                new Tree<>(new Item(2L, TITLE2, TEXT2, State.TODO, -1L)));
+        assertEquals(expected, actual);
     }
 
     @Test
-    void transformToTree_shouldReturnTrees_shouldAllStatusOk_whenOneChildrenWithNextIdsCorrect() {
-        List<Item> flatItems = List.of(
-                new Item(1L, TITLE1, TEXT1, State.TODO, -1L, null),
-                new Item(2L, TITLE2, TEXT2, State.TODO, 1L, null));
+    void transformToTrees_shouldReturnTrees_shouldAllStatusOk_whenOneChildrenWithNextIdsCorrect() {
+        ItemModel itemModel1 = new ItemModel(1L, TITLE1, TEXT1, State.TODO.name(), -1L, null);
+        ItemModel itemModel2 = new ItemModel(2L, TITLE2, TEXT2, State.TODO.name(), 1L, null);
+        List<ItemModel> flatItems = List.of(itemModel1, itemModel2);
 
-        List<Tree<Item>> actual = TreeUtils.transformToTrees(flatItems);
-        Item actualParent = actual.getFirst().getData();
-        Item actualChild = actual.getFirst().getChildData(0);
+        List<Tree<Item>> actual = TreeUtils.transformToTrees(flatItems, ItemMapper::toEntity);
 
-        assertEquals(1, actual.size());
-        assertEquals(TITLE1, actualParent.getTitle());
-        assertEquals(TITLE2, actualChild.getTitle());
-        assertEquals(1, actual.getFirst().getChildren().size());
-        assertEquals(Status.OK, actualParent.getStatus());
-        assertEquals(Status.OK, actualChild.getStatus());
+        Tree<Item> expected = new TreeBuilder<Item>()
+                .withRootItem(new Item(1L, TITLE1, TEXT1, State.TODO, -1L))
+                .withFirstChild(new Item(2L, TITLE2, TEXT2, State.TODO, 1L))
+                .build();
+        assertEquals(List.of(expected), actual);
     }
 
     @Test
-    void transformToTree_shouldReturnTree_shouldAllStatusOk_whenTreesWithNextIdsCorrect() {
-        Item parent1 = new Item(1L, TITLE1, TEXT1, State.TODO, -1L, 4L);
-        Item parent2 = new Item(4L, TITLE4, TEXT4, State.TODO, -1L, null);
-        Item child1parent1 = new Item(2L, TITLE2, TEXT2, State.TODO, 1L, 3L);
-        Item child2parent1 = new Item(3L, TITLE3, TEXT3, State.TODO, 1L, null);
-        List<Item> flatItems = List.of(parent1, child2parent1, child1parent1, parent2);
+    void transformToTrees_shouldReturnTree_shouldAllStatusOk_whenTreesWithNextIdsCorrect() {
+        ItemModel parent1 = new ItemModel(1L, TITLE1, TEXT1, State.TODO.name(), -1L, 4L);
+        ItemModel parent2 = new ItemModel(4L, TITLE4, TEXT4, State.TODO.name(), -1L, null);
+        ItemModel child1parent1 = new ItemModel(2L, TITLE2, TEXT2, State.TODO.name(), 1L, 3L);
+        ItemModel child2parent1 = new ItemModel(3L, TITLE3, TEXT3, State.TODO.name(), 1L, null);
+        List<ItemModel> flatItems = List.of(parent1, child2parent1, child1parent1, parent2);
 
-        List<Tree<Item>> actual = TreeUtils.transformToTrees(flatItems);
-        Item actualParent1 = actual.getFirst().getData();
-        Item actualParent2 = actual.get(1).getData();
-        Item actualChild1Parent1 = actual.getFirst().getChildData(0);
-        Item actualChild2Parent1 = actual.getFirst().getChildData(1);
+        List<Tree<Item>> actual = TreeUtils.transformToTrees(flatItems, ItemMapper::toEntity);
 
-        assertEquals(2, actual.size());
-        assertEquals(toStringValues(parent1), toStringValues(actualParent1));
-        assertEquals(toStringValues(parent2), toStringValues(actualParent2));
-        assertEquals(toStringValues(actualChild1Parent1), toStringValues(actualChild1Parent1));
-        assertEquals(toStringValues(actualChild2Parent1), toStringValues(actualChild2Parent1));
-        assertEquals(2, actual.getFirst().getChildren().size());
-        assertEquals(0, actual.get(1).getChildren().size());
-        assertEquals(Status.OK, actualParent1.getStatus());
-        assertEquals(Status.OK, actualParent2.getStatus());
-        assertEquals(Status.OK, actualChild1Parent1.getStatus());
-        assertEquals(Status.OK, actualChild2Parent1.getStatus());
+        Tree<Item> expectedTree1 = new TreeBuilder<Item>()
+                .withRootItem(new Item(1L, TITLE1, TEXT1, State.TODO, -1L))
+                .withFirstChild(new Item(2L, TITLE2, TEXT2, State.TODO, 1L))
+                .withNextChild(new Item(3L, TITLE3, TEXT3, State.TODO, 1L))
+                .build();
+        Tree<Item> expectedTree2 = new TreeBuilder<Item>()
+                .withRootItem(new Item(4L, TITLE4, TEXT4, State.TODO, -1L))
+                .build();
+        assertEquals(List.of(expectedTree1, expectedTree2), actual);
     }
 
     @Test
-    void transformToTree_shouldReturnTree_shouldHaveOrphanStatus_whenTreesWithNextIdsNull() {
-        Item parent1 = new Item(1L, TITLE1, TEXT1, State.TODO, -1L, null);
-        Item parent2 = new Item(4L, TITLE4, TEXT4, State.TODO, -1L, null);
-        Item child1parent1 = new Item(2L, TITLE2, TEXT2, State.TODO, 1L, null);
-        Item child2parent1 = new Item(3L, TITLE3, TEXT3, State.TODO, 1L, null);
-        List<Item> flatItems = List.of(parent1, child2parent1, child1parent1, parent2);
+    void transformToTrees_shouldReturnTree_shouldHaveOrphanStatus_whenTreesWithNextIdsNull() {
+        ItemModel parent1 = new ItemModel(1L, TITLE1, TEXT1, State.TODO.name(), -1L, null);
+        ItemModel parent2 = new ItemModel(4L, TITLE4, TEXT4, State.TODO.name(), -1L, null);
+        ItemModel child1parent1 = new ItemModel(2L, TITLE2, TEXT2, State.TODO.name(), 1L, null);
+        ItemModel child2parent1 = new ItemModel(3L, TITLE3, TEXT3, State.TODO.name(), 1L, null);
+        List<ItemModel> flatItems = List.of(parent1, child2parent1, child1parent1, parent2);
 
-        List<Tree<Item>> actual = TreeUtils.transformToTrees(flatItems);
-        Item actualParent1 = actual.getFirst().getData();
-        Item actualParent2 = actual.get(1).getData();
-        Item actualChild1Parent1 = actual.getFirst().getChildData(0);
-        Item actualChild2Parent1 = actual.getFirst().getChildData(1);
+        List<Tree<Item>> actual = TreeUtils.transformToTrees(flatItems, ItemMapper::toEntity);
 
-        assertEquals(2, actual.size());
-        assertEquals(toStringValues(parent1), toStringValues(actualParent1));
-        assertEquals(toStringValues(parent2), toStringValues(actualParent2));
-        assertEquals(toStringValues(actualChild1Parent1), toStringValues(actualChild1Parent1));
-        assertEquals(toStringValues(actualChild2Parent1), toStringValues(actualChild2Parent1));
-        assertEquals(2, actual.getFirst().getChildren().size());
-        assertEquals(0, actual.get(1).getChildren().size());
-        assertEquals(Status.ORPHAN, actualParent1.getStatus());
-        assertEquals(Status.ORPHAN, actualParent2.getStatus());
-        assertEquals(Status.ORPHAN, actualChild1Parent1.getStatus());
-        assertEquals(Status.ORPHAN, actualChild2Parent1.getStatus());
+        Tree<Item> expected1 = new TreeBuilder<Item>()
+                .withRootItem(new Item(1L, TITLE1, TEXT1, State.TODO, -1L)).withStatus(Status.ORPHAN)
+                .withFirstChild(new Item(2L, TITLE2, TEXT2, State.TODO, 1L)).withStatus(Status.ORPHAN)
+                .withNextChild(new Item(3L, TITLE3, TEXT3, State.TODO, 1L)).withStatus(Status.ORPHAN)
+                .build();
+        Tree<Item> expected2 = new TreeBuilder<Item>()
+                .withRootItem(new Item(4L, TITLE4, TEXT4, State.TODO, -1L)).withStatus(Status.ORPHAN)
+                .build();
+        assertEquals(List.of(expected1, expected2), actual);
     }
 
     @Test
-    void transformToTree_shouldReturnTree_shouldHaveNextNotFoundStatus_whenTreesWithNextIdsNotFound() {
-        Item parent1 = new Item(1L, TITLE1, TEXT1, State.TODO, -1L, 4L);
-        Item parent2 = new Item(4L, TITLE4, TEXT4, State.TODO, -1L, 5L);
-        Item child1parent1 = new Item(2L, TITLE2, TEXT2, State.TODO, 1L, 3L);
-        Item child2parent1 = new Item(3L, TITLE3, TEXT3, State.TODO, 1L, 10L);
-        List<Item> flatItems = List.of(parent1, child2parent1, child1parent1, parent2);
+    void transformToTrees_shouldReturnTree_shouldHaveNextNotFoundStatus_whenTreesWithNextIdsNotFound() {
+        ItemModel parent1 = new ItemModel(1L, TITLE1, TEXT1, State.TODO.name(), -1L, 4L);
+        ItemModel parent2 = new ItemModel(4L, TITLE4, TEXT4, State.TODO.name(), -1L, 5L);
+        ItemModel child1parent1 = new ItemModel(2L, TITLE2, TEXT2, State.TODO.name(), 1L, 3L);
+        ItemModel child2parent1 = new ItemModel(3L, TITLE3, TEXT3, State.TODO.name(), 1L, 10L);
+        List<ItemModel> flatItems = List.of(parent1, child2parent1, child1parent1, parent2);
 
-        List<Tree<Item>> actual = TreeUtils.transformToTrees(flatItems);
-        Item actualParent1 = actual.getFirst().getData();
-        Item actualParent2 = actual.get(1).getData();
-        Item actualChild1Parent1 = actual.getFirst().getChildData(0);
-        Item actualChild2Parent1 = actual.getFirst().getChildData(1);
+        List<Tree<Item>> actual = TreeUtils.transformToTrees(flatItems, ItemMapper::toEntity);
 
-        assertEquals(2, actual.size());
-        assertEquals(toStringValues(parent1), toStringValues(actualParent1));
-        assertEquals(toStringValues(parent2), toStringValues(actualParent2));
-        assertEquals(toStringValues(actualChild1Parent1), toStringValues(actualChild1Parent1));
-        assertEquals(toStringValues(actualChild2Parent1), toStringValues(actualChild2Parent1));
-        assertEquals(2, actual.getFirst().getChildren().size());
-        assertEquals(0, actual.get(1).getChildren().size());
-        assertEquals(Status.OK, actualParent1.getStatus());
-        assertEquals(Status.NEXT_NOT_FOUND, actualParent2.getStatus());
-        assertEquals(Status.OK, actualChild1Parent1.getStatus());
-        assertEquals(Status.NEXT_NOT_FOUND, actualChild2Parent1.getStatus());
+        Tree<Item> expected1 = new TreeBuilder<Item>()
+                .withRootItem(new Item(1L, TITLE1, TEXT1, State.TODO, -1L))
+                .withFirstChild(new Item(2L, TITLE2, TEXT2, State.TODO, 1L))
+                .withNextChild(new Item(3L, TITLE3, TEXT3, State.TODO, 1L)).withStatus(Status.NEXT_NOT_FOUND)
+                .build();
+        Tree<Item> expected2 = new TreeBuilder<Item>()
+                .withRootItem(new Item(4L, TITLE4, TEXT4, State.TODO, -1L)).withStatus(Status.NEXT_NOT_FOUND)
+                .build();
+        assertEquals(List.of(expected1, expected2), actual);
     }
 
     @Test
-    void transformToTree_shouldReturnTrees_shouldHaveLoopStatus_whenChildrenLoop() {
-        Item parent1 = new Item(1L, TITLE1, TEXT1, State.TODO, -1L, null);
-        Item child1parent1 = new Item(2L, TITLE2, TEXT2, State.TODO, 1L, 3L);
-        Item child2parent1 = new Item(3L, TITLE3, TEXT3, State.TODO, 1L, 4L);
-        Item child3Parent1 = new Item(4L, TITLE4, TEXT4, State.TODO, 1L, 2L);
-        List<Item> flatItems = List.of(parent1, child2parent1, child1parent1, child3Parent1);
+    void transformToTrees_shouldReturnTrees_shouldHaveLoopStatus_whenChildrenLoop() {
+        ItemModel parent1 = new ItemModel(1L, TITLE1, TEXT1, State.TODO.name(), -1L, null);
+        ItemModel child1parent1 = new ItemModel(2L, TITLE2, TEXT2, State.TODO.name(), 1L, 3L);
+        ItemModel child2parent1 = new ItemModel(3L, TITLE3, TEXT3, State.TODO.name(), 1L, 4L);
+        ItemModel child3Parent1 = new ItemModel(4L, TITLE4, TEXT4, State.TODO.name(), 1L, 2L);
+        List<ItemModel> flatItems = List.of(parent1, child2parent1, child1parent1, child3Parent1);
 
-        List<Tree<Item>> actual = TreeUtils.transformToTrees(flatItems);
-        Item actualParent1 = actual.getFirst().getData();
-        Item actualChild1Parent1 = actual.getFirst().getChildData(0);
-        Item actualChild2Parent1 = actual.getFirst().getChildData(1);
-        Item actualChild3Parent1 = actual.getFirst().getChildData(2);
+        List<Tree<Item>> actual = TreeUtils.transformToTrees(flatItems, ItemMapper::toEntity);
 
-        assertEquals(1, actual.size());
-        assertEquals(3, actual.getFirst().getChildren().size());
-        assertEquals(toStringValues(parent1), toStringValues(actualParent1));
-        assertEquals(toStringValues(actualChild1Parent1), toStringValues(actualChild1Parent1));
-        assertEquals(toStringValues(actualChild2Parent1), toStringValues(actualChild2Parent1));
-        assertEquals(toStringValues(actualChild3Parent1), toStringValues(actualChild3Parent1));
-        assertEquals(3, actual.getFirst().getChildren().size());
-        assertEquals(Status.OK, actualParent1.getStatus());
-        assertEquals(Status.OK, actualChild1Parent1.getStatus());
-        assertEquals(Status.OK, actualChild2Parent1.getStatus());
-        assertEquals(Status.LOOP, actualChild3Parent1.getStatus());
+        Tree<Item> expected = new TreeBuilder<Item>()
+                .withRootItem(new Item(1L, TITLE1, TEXT1, State.TODO, -1L))
+                .withFirstChild(new Item(2L, TITLE2, TEXT2, State.TODO, 1L))
+                .withNextChild(new Item(3L, TITLE3, TEXT3, State.TODO, 1L))
+                .withNextChild(new Item(4L, TITLE4, TEXT4, State.TODO, 1L)).withStatus(Status.LOOP)
+                .build();
+        assertEquals(List.of(expected), actual);
     }
 
     @Test
-    void transformToTree_shouldReturnTrees_shouldHaveLoopStatus_whenTwoChildrenLoop() {
-        Item parent1 = new Item(1L, TITLE1, TEXT1, State.TODO, -1L, null);
-        Item child1parent1 = new Item(2L, TITLE2, TEXT2, State.TODO, 1L, 2L);
-        Item child2parent1 = new Item(3L, TITLE3, TEXT3, State.TODO, 1L, 4L);
-        Item child3Parent1 = new Item(4L, TITLE4, TEXT4, State.TODO, 1L, 3L);
-        List<Item> flatItems = List.of(parent1, child2parent1, child1parent1, child3Parent1);
+    void transformToTrees_shouldReturnTrees_shouldHaveLoopStatus_whenTwoChildrenLoop() {
+        ItemModel parent1 = new ItemModel(1L, TITLE1, TEXT1, State.TODO.name(), -1L, null);
+        ItemModel child1parent1 = new ItemModel(2L, TITLE2, TEXT2, State.TODO.name(), 1L, 2L);
+        ItemModel child2parent1 = new ItemModel(3L, TITLE3, TEXT3, State.TODO.name(), 1L, 4L);
+        ItemModel child3Parent1 = new ItemModel(4L, TITLE4, TEXT4, State.TODO.name(), 1L, 3L);
+        List<ItemModel> flatItems = List.of(parent1, child2parent1, child1parent1, child3Parent1);
 
-        List<Tree<Item>> actual = TreeUtils.transformToTrees(flatItems);
-        Item actualParent1 = actual.getFirst().getData();
-        Item actualChild1Parent1 = actual.getFirst().getChildData(0);
-        Item actualChild2Parent1 = actual.getFirst().getChildData(1);
-        Item actualChild3Parent1 = actual.getFirst().getChildData(2);
+        List<Tree<Item>> actual = TreeUtils.transformToTrees(flatItems, ItemMapper::toEntity);
 
-        assertEquals(1, actual.size());
-        assertEquals(3, actual.getFirst().getChildren().size());
-        assertEquals(toStringValues(parent1), toStringValues(actualParent1));
-        assertEquals(toStringValues(actualChild1Parent1), toStringValues(actualChild1Parent1));
-        assertEquals(toStringValues(actualChild2Parent1), toStringValues(actualChild2Parent1));
-        assertEquals(toStringValues(actualChild3Parent1), toStringValues(actualChild3Parent1));
-        assertEquals(3, actual.getFirst().getChildren().size());
-        assertEquals(Status.OK, actualParent1.getStatus());
-        assertEquals(Status.LOOP, actualChild1Parent1.getStatus());
-        assertEquals(Status.OK, actualChild2Parent1.getStatus());
-        assertEquals(Status.LOOP, actualChild3Parent1.getStatus());
+        Tree<Item> expected = new TreeBuilder<Item>()
+                .withRootItem(new Item(1L, TITLE1, TEXT1, State.TODO, -1L))
+                .withFirstChild(new Item(2L, TITLE2, TEXT2, State.TODO, 1L)).withStatus(Status.LOOP)
+                .withNextChild(new Item(3L, TITLE3, TEXT3, State.TODO, 1L))
+                .withNextChild(new Item(4L, TITLE4, TEXT4, State.TODO, 1L)).withStatus(Status.LOOP)
+                .build();
+
+        assertEquals(List.of(expected), actual);
     }
 
     @Test
-    void transformToTree_shouldReturnTree_shouldHaveOrphanNextNotFoundStatus_whenTreesWithTotalOrphan() {
-        Item parent1 = new Item(1L, TITLE1, TEXT1, State.TODO, -1L, null);
-        Item parent2 = new Item(4L, TITLE4, TEXT4, State.TODO, -1L, 5L);
-        Item child1parent2 = new Item(2L, TITLE2, TEXT2, State.TODO, 4L, 3L);
-        Item child2parent2 = new Item(3L, TITLE3, TEXT3, State.TODO, 4L, 10L);
-        List<Item> flatItems = List.of(parent1, child2parent2, child1parent2, parent2);
+    void transformToTrees_shouldReturnTree_shouldHaveOrphanNextNotFoundStatus_whenTreesWithTotalOrphan() {
+        ItemModel parent1 = new ItemModel(1L, TITLE1, TEXT1, State.TODO.name(), -1L, null);
+        ItemModel parent2 = new ItemModel(4L, TITLE4, TEXT4, State.TODO.name(), -1L, 5L);
+        ItemModel child1parent2 = new ItemModel(2L, TITLE2, TEXT2, State.TODO.name(), 4L, 3L);
+        ItemModel child2parent2 = new ItemModel(3L, TITLE3, TEXT3, State.TODO.name(), 4L, 10L);
+        List<ItemModel> flatItems = List.of(parent1, child2parent2, child1parent2, parent2);
 
-        List<Tree<Item>> actual = TreeUtils.transformToTrees(flatItems);
-        Item actualParent1 = actual.getFirst().getData();
-        Item actualParent2 = actual.get(1).getData();
-        Item actualChild1Parent2 = actual.get(1).getChildData(0);
-        Item actualChild2Parent2 = actual.get(1).getChildData(1);
+        List<Tree<Item>> actual = TreeUtils.transformToTrees(flatItems, ItemMapper::toEntity);
 
-        assertEquals(2, actual.size());
-        assertEquals(toStringValues(parent1), toStringValues(actualParent1));
-        assertEquals(toStringValues(parent2), toStringValues(actualParent2));
-        assertEquals(toStringValues(actualChild1Parent2), toStringValues(actualChild1Parent2));
-        assertEquals(toStringValues(actualChild2Parent2), toStringValues(actualChild2Parent2));
-        assertEquals(0, actual.getFirst().getChildren().size());
-        assertEquals(2, actual.get(1).getChildren().size());
-        assertEquals(Status.ORPHAN, actualParent1.getStatus());
-        assertEquals(Status.TOTAL_ORPHAN, actualParent2.getStatus());
-        assertEquals(Status.OK, actualChild1Parent2.getStatus());
-        assertEquals(Status.NEXT_NOT_FOUND, actualChild2Parent2.getStatus());
+        Tree<Item> expected1 = new TreeBuilder<Item>()
+                .withRootItem(new Item(1L, TITLE1, TEXT1, State.TODO, -1L)).withStatus(Status.ORPHAN)
+                .build();
+        Tree<Item> expected2 = new TreeBuilder<Item>()
+                .withRootItem(new Item(4L, TITLE4, TEXT4, State.TODO, -1L)).withStatus(Status.TOTAL_ORPHAN)
+                .withFirstChild(new Item(2L, TITLE2, TEXT2, State.TODO, 4L))
+                .withNextChild(new Item(3L, TITLE3, TEXT3, State.TODO, 4L)).withStatus(Status.NEXT_NOT_FOUND)
+                .build();
+        assertEquals(List.of(expected1, expected2), actual);
     }
 
     @Test
     void transformToTree_shouldReturnTrees_shouldAllStatusOk_whenNextIdsCorrect() {
-        List<Item> flatItems = List.of(
-                new Item(1L, TITLE1, TEXT1, State.TODO, -1L, 2L),
-                new Item(2L, TITLE2, TEXT2, State.TODO, -1L, null));
+        List<ItemModel> flatItems = List.of(
+                new ItemModel(1L, TITLE1, TEXT1, State.TODO.name(), -1L, 2L),
+                new ItemModel(2L, TITLE2, TEXT2, State.TODO.name(), -1L, null));
 
-        List<Tree<Item>> actual = TreeUtils.transformToTrees(flatItems);
+        List<Tree<Item>> actual = TreeUtils.transformToTrees(flatItems, ItemMapper::toEntity);
+        Tree<Item> expected1 = new TreeBuilder<Item>()
+                .withRootItem(new Item(1L, TITLE1, TEXT1, State.TODO, -1L))
+                .build();
+        Tree<Item> expected2 = new TreeBuilder<Item>()
+                .withRootItem(new Item(2L, TITLE2, TEXT2, State.TODO, -1L))
+                .build();
 
-        assertEquals(2, actual.size());
-        assertEquals(TITLE1, actual.get(0).getData().getTitle());
-        assertEquals(TITLE2, actual.get(1).getData().getTitle());
+        assertEquals(List.of(expected1, expected2), actual);
     }
 
-    private String toStringValues(Item item) {
-        return "title=" + item.getTitle() + ", text=" + item.getText() + ", state=" + item.getState();
-    }
 }

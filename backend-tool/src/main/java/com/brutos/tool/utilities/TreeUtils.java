@@ -3,6 +3,7 @@ package com.brutos.tool.utilities;
 import com.brutos.tool.entity.ChainEntity;
 import com.brutos.tool.entity.Status;
 import com.brutos.tool.entity.Tree;
+import com.brutos.tool.entity.TreeEntity;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -70,42 +71,107 @@ public class TreeUtils {
         return items;
     }
 
-    public static <T extends ChainEntity> List<Tree<T>> transformToTrees(List<T> flatList) {
-        Map<Long, List<T>> sortedItems = sortItems(flatList);
+    public static <T extends ChainEntity, R extends TreeEntity> List<T> transformToChain(Tree<R> tree, Long parentId, Long nextId, Function<R, T> convertToChain) {
+        // Extraire éventuellement l'item racine
+        List<T> flatList = new ArrayList<>();
+        T item = convertToChain.apply(tree.getData());
+        item.setParentId(parentId);
+        item.setNextId(nextId);
+        flatList.add(item);
+        for (Tree<R> child : tree.getChildren()) {
+            Tree<R> next = getNext(child, tree.getChildren());
+            flatList.addAll(transformToChain(child, item.getId(), next == null ? null : next.getData().getId(), convertToChain));
+        }
+        return flatList;
+    }
+
+    public static <T> Tree<T> getNext(Tree<T> tree, List<Tree<T>> children) {
+        if (tree == children.getLast()) {
+            return null;
+        }
+        return children.get(children.indexOf(tree) + 1);
+    }
+
+    public static <T extends ChainEntity, R extends TreeEntity> List<Tree<R>> transformToTrees(Iterable<T> flatList, Function<T, R> convertToTree) {
+        List<T> itemsToSort = new ArrayList<>();
+        flatList.forEach(itemsToSort::add);
+        Map<Long, List<R>> sortedItems = sortItems(itemsToSort, convertToTree);
         return getChildren(-1L, sortedItems);
     }
 
-    public static <T extends ChainEntity> Tree<T> transformToTree(List<T> flatList) {
+    public static <T extends ChainEntity, R extends TreeEntity> Tree<R> transformToTree(List<T> flatList, Function<T, R> convertToTree) {
         // Extraire éventuellement l'item racine
-        T rootItem = flatList.getFirst();
-        Map<Long, List<T>> sortedItems = null;
+        R rootItem = convertToTree.apply(flatList.getFirst());
+        Map<Long, List<R>> sortedItems = null;
         if (rootItem.getParentId() == null) {
-            sortedItems = sortItems(flatList.subList(1, flatList.size()));
+            sortedItems = sortItems(flatList.subList(1, flatList.size()), convertToTree);
         } else {
-            sortedItems = sortItems(flatList);
+            sortedItems = sortItems(flatList, convertToTree);
         }
-        List<T> childrenItems = sortedItems.get(rootItem.getId());
+        List<R> childrenItems = sortedItems.get(rootItem.getId());
         if (childrenItems == null) {
             return new Tree<>(rootItem);
         }
-        Tree<T> resultItem = new Tree<>(rootItem);
+        Tree<R> resultItem = new Tree<>(rootItem);
         resultItem.setChildren(getChildren(rootItem.getId(), sortedItems));
         return resultItem;
     }
 
-    private static <T extends ChainEntity> Map<Long, List<T>> sortItems(List<T> items) {
+    private static <T extends ChainEntity, R extends TreeEntity> Map<Long, List<R>> sortItems(List<T> items, Function<T, R> convertToTree) {
         // Regrouper par parent
         Map<Long, List<T>> groupedByParent = items.stream()
                 .collect(Collectors.groupingBy(ChainEntity::getParentId));
         // Trier les enfants directs entre eux
-        Map<Long, List<T>> sortedItems = new HashMap<>();
+        Map<Long, List<R>> sortedItems = new HashMap<>();
         for (Map.Entry<Long, List<T>> entry : groupedByParent.entrySet()) {
-            sortedItems.put(entry.getKey(), sortSameParentItems(entry.getValue()));
+            sortedItems.put(entry.getKey(), sortSameParentItems(entry.getValue(), convertToTree));
         }
         return sortedItems;
     }
 
-    private static <T extends ChainEntity> List<Tree<T>> getChildren(Long itemId, Map<Long, List<T>> sortedItems) {
+    private static <T extends ChainEntity, R extends TreeEntity> List<R> sortSameParentItems(List<T> items, Function<T, R> convertToTree) {
+        if (items.size() == 1) {
+            return items.stream().map(convertToTree).toList();
+        }
+        Map<Long, T> itemLeftToProcessById = items.stream()
+                .collect(Collectors.toMap(T::getId, item -> item));
+        List<Long> nextIds = items
+                .stream()
+                .map(item -> item.getNextId() == null ? 0L : item.getNextId())
+                .toList();
+        // Recherche des items qui n'existe pas en tant que nextId
+        List<T> firstItems = itemLeftToProcessById.values().stream()
+                .filter(item -> !nextIds.contains(item.getId()))
+                .toList();
+        List<R> sortedItems = new ArrayList<>();
+        // Pour éviter les boucles, on va retirer les éléments traités de itemLeftToProccessById
+        for (T firstItem : firstItems) {
+            List<R> itemsProcess = process(itemLeftToProcessById, firstItem.getId(), convertToTree);
+            sortedItems.addAll(itemsProcess);
+        }
+        if (firstItems.size() > 1) {
+            List<Long> ids = firstItems.stream().map(T::getId).toList();
+            sortedItems.stream()
+                    .filter(sortItem -> ids.contains(sortItem.getId()))
+                    .forEach(sortItem -> {
+                        if (sortItem.getStatus().equals(Status.NEXT_NOT_FOUND)) {
+                            sortItem.setStatus(Status.TOTAL_ORPHAN);
+                        } else {
+                            sortItem.setStatus(Status.ORPHAN);
+                        }
+                    });
+        }
+
+        while (!itemLeftToProcessById.isEmpty()) {
+            // Ici il y a probablement une ou plusieurs boucles
+            Long id = itemLeftToProcessById.keySet().iterator().next();
+            List<R> itemsProcess = process(itemLeftToProcessById, id, convertToTree);
+            sortedItems.addAll(itemsProcess);
+        }
+        return sortedItems;
+    }
+
+    private static <T extends TreeEntity> List<Tree<T>> getChildren(Long itemId, Map<Long, List<T>> sortedItems) {
         List<T> childrenItems = sortedItems.get(itemId);
         if (childrenItems == null) {
             return new ArrayList<>();
@@ -118,12 +184,13 @@ public class TreeUtils {
         }
         return resultItems;
     }
-
+/*
     private static <T extends ChainEntity> List<T> sortSameParentItems(List<T> items) {
         if (items.size() == 1) {
             return items;
         }
-        Map<Long, T> itemLeftToProcessById = items.stream().collect(Collectors.toMap(T::getId, item -> item));
+        Map<Long, T> itemLeftToProcessById = items.stream()
+                .collect(Collectors.toMap(T::getId, item -> item));
         List<Long> nextIds = items
                 .stream()
                 .map(item -> item.getNextId() == null ? 0L : item.getNextId())
@@ -151,15 +218,8 @@ public class TreeUtils {
         return sortedItems;
     }
 
-    /**
-     * Contruit la liste des items ordonnés par nextId. Si une incohérence est trouvée, positionne un status sur les
-     * items incohérents
-     *
-     * @param itemById : item par identifiant
-     * @param firstId  : identifiant du 1er item
-     * @return la liste des items ordonnés par nextId
-     */
-    private static <T extends ChainEntity> List<T> process(Map<Long, T> itemById, Long firstId) {
+
+     private static <T extends ChainEntity> List<T> process(Map<Long, T> itemById, Long firstId) {
         List<T> sortedItems = new ArrayList<>();
         List<Long> idsProcessed = new ArrayList<>();
         Long nextId = firstId;
@@ -172,6 +232,40 @@ public class TreeUtils {
         }
         if (nextId != null) {
             T lastItem = sortedItems.getLast();
+            // S'il existe dans la liste, alors il s'agit d'une boucle
+            if (idsProcessed.contains(nextId)) {
+                lastItem.setStatus(Status.LOOP);
+            } else if (lastItem.getStatus().equals(Status.ORPHAN)) {
+                lastItem.setStatus(Status.TOTAL_ORPHAN);
+            } else {
+                lastItem.setStatus(Status.NEXT_NOT_FOUND);
+            }
+        }
+        return sortedItems;
+    }
+*/
+
+    /**
+     * Construit la liste des items ordonnés par nextId. Si une incohérence est trouvée, positionne un status sur les
+     * items incohérents
+     *
+     * @param itemById : item par identifiant
+     * @param firstId  : identifiant du 1er item
+     * @return la liste des items ordonnés par nextId
+     */
+    private static <T extends ChainEntity, R extends TreeEntity> List<R> process(Map<Long, T> itemById, Long firstId, Function<T, R> convertToTree) {
+        List<R> sortedItems = new ArrayList<>();
+        List<Long> idsProcessed = new ArrayList<>();
+        Long nextId = firstId;
+        while (nextId != null && itemById.containsKey(nextId)) {
+            T currentItem = itemById.get(nextId);
+            sortedItems.add(convertToTree.apply(currentItem));
+            idsProcessed.add(nextId);
+            itemById.remove(nextId);
+            nextId = currentItem.getNextId();
+        }
+        if (nextId != null) {
+            R lastItem = sortedItems.getLast();
             // S'il existe dans la liste, alors il s'agit d'une boucle
             if (idsProcessed.contains(nextId)) {
                 lastItem.setStatus(Status.LOOP);

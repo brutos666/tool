@@ -13,7 +13,6 @@ public class ItemBuilder {
     private String text = "";
     private State state = State.TODO;
     private Long parentId;
-    private Long nextId;
     private CRUDMode crudMode;
     private List<Item> children = new ArrayList<>();
 
@@ -53,11 +52,6 @@ public class ItemBuilder {
         return this;
     }
 
-    public ItemBuilder withNextId(Long nextId) {
-        this.nextId = nextId;
-        return this;
-    }
-
     public ItemBuilder withChildren(List<Item> children) {
         this.children = children != null ? new ArrayList<>(children) : new ArrayList<>();
         return this;
@@ -82,7 +76,6 @@ public class ItemBuilder {
         item.setText(text);
         item.setState(state);
         item.setParentId(parentId);
-        item.setNextId(nextId);
         item.setCRUDMode(crudMode);
         item.setChildren(children);
         return item;

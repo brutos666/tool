@@ -4,7 +4,6 @@ import com.brutos.tool.entity.Item;
 import com.brutos.tool.entity.Tree;
 import com.brutos.tool.service.CsvService;
 import com.brutos.tool.service.ItemService;
-import com.brutos.tool.utilities.TreeUtils;
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import org.springframework.http.HttpHeaders;
@@ -31,14 +30,11 @@ public class ExportController {
 
     @GetMapping("/allItems")
     public ResponseEntity<String> findAllItems() throws CsvRequiredFieldEmptyException, CsvDataTypeMismatchException {
-        List<Item> items = itemService.getAllItems();
-        // Permet de trier les items pour rendre le fichier exporté plus lisible
-        List<Tree<Item>> trees = TreeUtils.transformToTrees(items);
-        List<Item> orderedItems = TreeUtils.transformToListLevelOrder(trees);
+        List<Tree<Item>> trees = itemService.getAllItems();
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=users.csv")
                 .contentType(MediaType.TEXT_PLAIN)
-                .body(csvService.convertAllItemsToCsv(orderedItems));
+                .body(csvService.convertAllItemsToCsv(trees));
     }
 
 }

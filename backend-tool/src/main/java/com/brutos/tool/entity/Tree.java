@@ -2,6 +2,7 @@ package com.brutos.tool.entity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Tree<I> {
     private I data;
@@ -44,5 +45,28 @@ public class Tree<I> {
     public Tree<I> addChild(Tree<I> child) {
         this.getChildren().add(child);
         return child;
+    }
+
+    @Override
+    public String toString() {
+        return "Tree{" +
+                "data=" + data +
+                ", children=" + children +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Tree<?> tree = (Tree<?>) o;
+        return Objects.equals(data, tree.data) && Objects.deepEquals(children, tree.children);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hashCode(data);
+        result = 31 * result + Objects.hashCode(children);
+        return result;
     }
 }

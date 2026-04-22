@@ -8,7 +8,6 @@ import com.brutos.tool.handler.webResult.ItemWebResult;
 import com.brutos.tool.mapper.ItemMapper;
 import com.brutos.tool.mapper.ItemToSaveMapper;
 import com.brutos.tool.service.ItemService;
-import com.brutos.tool.utilities.TreeUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,9 +25,8 @@ public class ItemListController {
 
     @GetMapping("/findAllItems")
     public List<ItemWebResult> findAllItems() {
-        List<Item> items = itemService.getAllItems();
-        List<Tree<Item>> trees = TreeUtils.transformToTrees(items);
-        return ItemMapper.treeToWebResult(trees);
+        List<Tree<Item>> trees = itemService.getAllItems();
+        return ItemMapper.toWebResult(trees);
     }
 
     @PostMapping("/save")
@@ -39,13 +37,4 @@ public class ItemListController {
 
         return ItemToSaveMapper.toWebResult(savedItems);
     }
-
-    @PostMapping("/delete")
-    public ItemWebResult deleteItem(@RequestBody ItemWebResult itemWebRequest) {
-        Item item = ItemMapper.toEntity(itemWebRequest);
-        itemService.controlItem(item);
-        itemService.deleteItem(item);
-        return itemWebRequest;
-    }
-
 }

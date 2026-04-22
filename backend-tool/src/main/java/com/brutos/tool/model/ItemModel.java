@@ -1,10 +1,11 @@
 package com.brutos.tool.model;
 
 import com.brutos.tool.entity.ChainEntity;
-import com.brutos.tool.entity.Status;
 import com.opencsv.bean.CsvBindByName;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
+
+import java.util.Objects;
 
 @Table(name = "item")
 public class ItemModel implements ChainEntity {
@@ -82,12 +83,23 @@ public class ItemModel implements ChainEntity {
         this.nextId = nextId;
     }
 
-    public Status getStatus() {
-        return null;
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ItemModel itemModel = (ItemModel) o;
+        return Objects.equals(id, itemModel.id) && Objects.equals(title, itemModel.title) && Objects.equals(text, itemModel.text) && Objects.equals(state, itemModel.state) && Objects.equals(parentId, itemModel.parentId) && Objects.equals(nextId, itemModel.nextId);
     }
 
-    public void setStatus(Status status) {
-        //this.status = status;
+    @Override
+    public int hashCode() {
+        int result = Objects.hashCode(id);
+        result = 31 * result + Objects.hashCode(title);
+        result = 31 * result + Objects.hashCode(text);
+        result = 31 * result + Objects.hashCode(state);
+        result = 31 * result + Objects.hashCode(parentId);
+        result = 31 * result + Objects.hashCode(nextId);
+        return result;
     }
 
     @Override
