@@ -2,7 +2,7 @@
 
 import CallRequest from './CallRequest.js';
 /** @import {ItemInfos} from '../data/TreeItem.js'; */
-/** @import {ItemToSave} from '../components/decorators/CommandSaveDecorator.js'; */
+/** @import {TreeInfos} from '../components/decorators/CommandSaveDecorator.js'; */
 
 class ItemCallsRequests {
 
@@ -20,12 +20,12 @@ class ItemCallsRequests {
 
   /**
    * Sauvegarde une tâche
-   * @param {ItemToSave} itemToSave - Tâche à sauvegarder,ses enfants, l'item précédent et l'identifiant du suivant
-   * @returns {Promise<ItemToSave>} - Promesse contenant la tache sauvegardée
+   * @param {TreeInfos} treeInfos - Tâche à sauvegarder,ses enfants, l'identifiant du précédent et du suivant
+   * @returns {Promise<TreeInfos>} - Promesse contenant la tache sauvegardée
    */
-  async saveItem(itemToSave) {
+  async saveItem(treeInfos) {
     return new CallRequest()
-      .execute('item/save', 'POST', itemToSave);
+      .execute('item/save', 'POST', treeInfos);
   }
 
 }

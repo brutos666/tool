@@ -1,18 +1,17 @@
 package com.brutos.tool.entity;
 
 import java.util.Objects;
-import java.util.Optional;
 
 public class TreeInfos {
     private Tree<Item> treeItem;
-    private Item previousItem;
-    private Long parentId;
+    private Long previousItemId;
+    private Long parentItemId;
     private Long nextItemId;
 
-    public TreeInfos(Tree<Item> treeItem, Item previousItem, Long parentId, Long nextItemId) {
+    public TreeInfos(Tree<Item> treeItem, Long previousItemId, Long parentItemId, Long nextItemId) {
         this.treeItem = treeItem;
-        this.previousItem = previousItem;
-        this.parentId = parentId;
+        this.previousItemId = previousItemId;
+        this.parentItemId = parentItemId;
         this.nextItemId = nextItemId;
     }
 
@@ -24,31 +23,20 @@ public class TreeInfos {
         this.treeItem = treeItem;
     }
 
-    public Optional<Item> getPreviousItem() {
-        if (previousItem == null) {
-            return Optional.empty();
-        }
-        return Optional.of(previousItem);
+    public Long getPreviousItemId() {
+        return previousItemId;
     }
 
-    public void setPreviousItem(Item previousItem) {
-        this.previousItem = previousItem;
+    public void setPreviousItemId(Long previousItemId) {
+        this.previousItemId = previousItemId;
     }
 
-    public boolean previousIsNew() {
-        return previousItem != null && previousItem.getCRUDMode().isCreate();
+    public Long getParentItemId() {
+        return parentItemId;
     }
 
-    public boolean previousIsDelete() {
-        return previousItem != null && previousItem.getCRUDMode().isDelete();
-    }
-
-    public Long getParentId() {
-        return parentId;
-    }
-
-    public void setParentId(Long parentId) {
-        this.parentId = parentId;
+    public void setParentItemId(Long parentItemId) {
+        this.parentItemId = parentItemId;
     }
 
     public Long getNextItemId() {
@@ -63,8 +51,8 @@ public class TreeInfos {
     public String toString() {
         return "TreeInfos{" +
                 "treeItem=" + treeItem +
-                ", previousItem=" + previousItem +
-                ", parentId=" + parentId +
+                ", previousItemId=" + previousItemId +
+                ", parentId=" + parentItemId +
                 ", nextItemId=" + nextItemId +
                 '}';
     }
@@ -74,14 +62,14 @@ public class TreeInfos {
         if (o == null || getClass() != o.getClass()) return false;
 
         TreeInfos treeInfos = (TreeInfos) o;
-        return Objects.equals(treeItem, treeInfos.treeItem) && Objects.equals(previousItem, treeInfos.previousItem) && Objects.equals(parentId, treeInfos.parentId) && Objects.equals(nextItemId, treeInfos.nextItemId);
+        return Objects.equals(treeItem, treeInfos.treeItem) && Objects.equals(previousItemId, treeInfos.previousItemId) && Objects.equals(parentItemId, treeInfos.parentItemId) && Objects.equals(nextItemId, treeInfos.nextItemId);
     }
 
     @Override
     public int hashCode() {
         int result = Objects.hashCode(treeItem);
-        result = 31 * result + Objects.hashCode(previousItem);
-        result = 31 * result + Objects.hashCode(parentId);
+        result = 31 * result + Objects.hashCode(previousItemId);
+        result = 31 * result + Objects.hashCode(parentItemId);
         result = 31 * result + Objects.hashCode(nextItemId);
         return result;
     }

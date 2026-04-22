@@ -6,9 +6,10 @@ import CommandDecoratorView from './views/CommandDecoratorView.js';
 /** @import {ItemInfos} from '../../data/TreeItem.js' */
 
 /**
- * @typedef {Object} ItemToSave - Informations sur l'item
+ * @typedef {Object} TreeInfos - Informations sur l'item
  * @property {ItemInfos} item - Item à sauvegarder avec ses enfants
- * @property {ItemInfos} previousItem - Item précédent
+ * @property {number} previousItemId - Identifiant de l'item précédent
+ * @property {number} parentItemId - Identifiant de l'item suivant
  * @property {number} nextItemId - Identifiant de l'item suivant
  */
 
@@ -20,11 +21,6 @@ class CommandSaveDecorator extends CommandSpaceDecorator {
 
   /** @type {TreeItem} */
   #treeItem;
-
-  /** @type {TreeItem} */
-  #previousItem;
-  /** @type {ItemToSave} */
-  #itemToSave;
 
   /**
    * @constructor
@@ -46,17 +42,14 @@ class CommandSaveDecorator extends CommandSpaceDecorator {
   /**
    * @override
    * @param {string} name
-   * @param {ItemToSave} itemToSaveResult
+   * @param {TreeInfos} treeInfos
    */
-  commandDone(name, itemToSaveResult) {
-    super.commandDone(name, itemToSaveResult);
+  commandDone(name, treeInfos) {
+    super.commandDone(name, treeInfos);
 
-    if (this.#previousItem) {
-      this.#previousItem.updateItem(itemToSaveResult.previousItem);
-    }
-    this.#treeItem.updateItem(itemToSaveResult.item);
+    this.#treeItem.updateItem(treeInfos.item);
     const treeItemList = this.#treeItem.getTreeItemList();
-    treeItemList.setItems(this.#treeItem, itemToSaveResult.item.children);
+    treeItemList.setItems(this.#treeItem, treeInfos.item.children);
   }
 
   /**
@@ -66,16 +59,17 @@ class CommandSaveDecorator extends CommandSpaceDecorator {
     this.setRelaunchCallback(() => {
       this.doSave();
     });
-    this.#previousItem = this.#treeItem.getPrevious();
-    this.#itemToSave = {
+    /** @type {TreeInfos} */
+    const treeInfos = {
       item: this.#treeItem.getItemInfos(),
-      previousItem: this.#previousItem?.getItemInfos(),
-      parentId: this.#treeItem.getParentItem()
+      previousItemId: this.#treeItem.getPrevious()
+        ?.getItemId(),
+      parentItemId: this.#treeItem.getParentItem()
         ?.getItemId(),
       nextItemId: this.#treeItem.getNext()
         ?.getItemId()
     };
-    return new SaveItem(this, this.#itemToSave)
+    return new SaveItem(this, treeInfos)
       .execute();
   }
 

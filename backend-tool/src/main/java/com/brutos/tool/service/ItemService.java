@@ -76,19 +76,21 @@ public class ItemService {
         }
         // Parcours de l'arbre afin de fournir la liste des itemModels : tous les itemModels sont pris en compte même
         // s'il n'y a pas eu de modification
-        Optional<Item> previousItem = treeInfos.getPreviousItem();
-        List<ItemModel> itemsToModify = getAllItemsToModify(previousItem, treeInfos.getParentId(), treeInfos.getNextItemId(), treeItem);
-        Iterable<ItemModel> modifiedItems = itemRepository.saveAll(itemsToModify);
-
-        Iterator<ItemModel> iterator = modifiedItems.iterator();
-        Item savedPreviousItem = null;
-        if (previousItem.isPresent()) {
-            savedPreviousItem = ItemMapper.toEntity(iterator.next());
+        List<ItemModel> itemsToModify = getAllItemsToModify(treeInfos);
+        if (treeInfos.getPreviousItemId() != null) {
+            addFirstPrevious(treeInfos, itemsToModify);
         }
+        Iterable<ItemModel> modifiedItems = itemRepository.saveAll(itemsToModify);
+        Iterator<ItemModel> iterator = modifiedItems.iterator();
+        if (treeInfos.getPreviousItemId() != null) {
+            // Retirer le précédent de la liste
+            removeFirstPrevious(iterator);
+        }
+
         List<ItemModel> itemModels = new ArrayList<>();
         iterator.forEachRemaining(itemModels::add);
         Tree<Item> savedTreeItem = TreeUtils.transformToTree(itemModels, ItemMapper::toEntity);
-        return new TreeInfos(savedTreeItem, savedPreviousItem, treeInfos.getParentId(), treeInfos.getNextItemId());
+        return new TreeInfos(savedTreeItem, treeInfos.getPreviousItemId(), treeInfos.getParentItemId(), treeInfos.getNextItemId());
     }
 
     /**
@@ -111,12 +113,18 @@ public class ItemService {
             Iterable<ItemModel> itemsCreated = itemRepository.saveAll(ItemMapper.toModel(itemsToCreate));
             updateTreeItemIds(itemsToCreate, itemsCreated);
         }
+        updateNextIds(treeInfosList);
+
         // Constitution de la liste de tous les items à modifier
         List<Integer> numberOfItems = new ArrayList<>(treeInfosList.size());
         List<ItemModel> allItemsToModify = new ArrayList<>();
         // Traiter tous les éléments afin de prendre en compte les modifications et mettre à jour les identifiants
         for (TreeInfos treeInfos : treeInfosList) {
-            List<ItemModel> itemsToModify = getAllItemsToModify(treeInfos, treeInfosList);
+            //List<ItemModel> itemsToModify = getAllItemsToModify(treeInfos, treeInfosList);
+            List<ItemModel> itemsToModify = getAllItemsToModify(treeInfos);
+            if (treeInfos.getPreviousItemId() != null) {
+                addFirstPrevious(treeInfos, itemsToModify);
+            }
             numberOfItems.add(itemsToModify.size());
             allItemsToModify.addAll(itemsToModify);
         }
@@ -168,6 +176,57 @@ public class ItemService {
     private void updateTreeItemIds(List<Item> itemsToCreate, Iterable<ItemModel> createdItems) {
         Iterator<ItemModel> createdItemsIterator = createdItems.iterator();
         itemsToCreate.forEach(item -> item.setId(createdItemsIterator.next().getId()));
+    }
+
+    private void updateNextIds(List<TreeInfos> treeInfosList) {
+        // Pour un même parent, un précédent null est soit le 1er, soit un item venant d'être créé
+        // Pour un même parent un suivant null est soit le dernier, soit un item venant d'être créé
+        // Un précédent et un suivant connu peuvent avoir été supprimés
+        //
+        // Cette algo a pour but de passer les précédents déjà traités à null pour tout ce qui a été sauvegardé
+        // (pour ne pas les traiter plusieurs fois) et de mettre à jour les suivants pour les items sauvegardés
+
+        for (TreeInfos treeInfos : treeInfosList) {
+            Optional<TreeInfos> next = getNextSameParent(treeInfos, treeInfosList);
+            if (next.isEmpty()) {
+                continue;
+            }
+            Item item = treeInfos.getTreeItem().getData();
+            CRUDMode itemCRUDMode = item.getCRUDMode();
+            TreeInfos nextTreeInfos = next.get();
+            if (itemCRUDMode.isDelete()) {
+                // L'item est supprimé : report du précédent sur l'item suivant
+                nextTreeInfos.setPreviousItemId(treeInfos.getPreviousItemId());
+                continue;
+            }
+            Item nextItem = nextTreeInfos.getTreeItem().getData();
+            CRUDMode nextCRUDMode = nextItem.getCRUDMode();
+            if (nextCRUDMode.isDelete()) {
+                continue;
+            }
+
+            if (treeInfos.getNextItemId() == null && nextCRUDMode.isCreate()) {
+                // Le suivant est un item qui vient d'être créé
+                // => mis à jour de l'identifiant du suivant, suppression de l'identifiant du précédent
+                treeInfos.setNextItemId(nextItem.getId());
+                nextTreeInfos.setPreviousItemId(null);
+                continue;
+            }
+            Long nextPreviousId = nextTreeInfos.getPreviousItemId();
+            if (nextPreviousId == null && itemCRUDMode.isCreate()) {
+                // Le précédent est un item qui vient d'être créé
+                // => mis à jour du suivant
+                treeInfos.setNextItemId(nextItem.getId());
+                continue;
+            }
+            if (treeInfos.getNextItemId() != null && nextTreeInfos.getPreviousItemId() != null
+                    && treeInfos.getNextItemId().equals(nextTreeInfos.getPreviousItemId())) {
+                // Les identifiants correspondent, mais il ne faut pas traiter le précédent 2 fois
+                nextTreeInfos.setPreviousItemId(null);
+            }
+
+        }
+
     }
 
     private List<ItemModel> getItemsToModify(Optional<Item> previousItem, Long nextItemId, Tree<Item> treeItem) {
@@ -246,25 +305,26 @@ public class ItemService {
         previousModel.setNextId(nextItemId);
     }
 
-    private List<ItemModel> getAllItemsToModify(TreeInfos treeInfos, List<TreeInfos> treeInfosList) {
-        List<ItemModel> itemsToModify = null;
-        Long nextChildId = treeInfos.getNextItemId();
-        if (nextFollow(treeInfos, treeInfosList)) {
-            nextChildId = getNext(treeInfos, treeInfosList)
-                    .map(next -> next.getTreeItem().getData().getId())
-                    .orElse(null);
-        }
-        if (followPrevious(treeInfos, treeInfosList)) {
-            itemsToModify = getAllItemsToModify(treeInfos.getParentId(), nextChildId, treeInfos.getTreeItem());
-        } else {
-            // Parcours de l'arbre afin de fournir la liste des items : tous les items sont pris en compte même
-            // s'il n'y a pas eu de modification
-            itemsToModify = getAllItemsToModify(treeInfos.getPreviousItem(),
-                    treeInfos.getParentId(),
-                    nextChildId,
-                    treeInfos.getTreeItem());
-        }
-        return itemsToModify;
+    private List<ItemModel> getAllItemsToModify(TreeInfos treeInfos) {
+        Tree<Item> treeItem = treeInfos.getTreeItem();
+        Long nextItemId = treeInfos.getNextItemId();
+        return TreeUtils.transformToChain(treeItem, treeInfos.getParentItemId(), nextItemId, ItemMapper::toModel);
+    }
+
+    private void addFirstPrevious(TreeInfos treeInfos, List<ItemModel> itemsToModify) {
+        Tree<Item> treeItem = treeInfos.getTreeItem();
+        Item rootItem = treeItem.getData();
+        Long nextItemId = treeInfos.getNextItemId();
+        // Si l'identifiant du précédent est fourni, le mettre à jour avec les autres
+        itemRepository.findById(treeInfos.getPreviousItemId()).ifPresent(previousModel -> {
+            Long nextId = rootItem.getCRUDMode().isDelete() ? nextItemId : rootItem.getId();
+            previousModel.setNextId(nextId);
+            itemsToModify.addFirst(previousModel);
+        });
+    }
+
+    private void removeFirstPrevious(Iterator<ItemModel> iterator) {
+        iterator.next();
     }
 
     private List<ItemModel> getAllItemsToModify(Optional<Item> previousItem, Long parentId, Long nextItemId, Tree<Item> treeItem) {
@@ -291,44 +351,15 @@ public class ItemService {
         return Optional.of(treeItemList.get(index + 1).getData());
     }
 
-    private Optional<TreeInfos> getNext(TreeInfos treeItem, List<TreeInfos> treeItemList) {
-        if (treeItem == treeItemList.getLast()) {
+    private Optional<TreeInfos> getNextSameParent(TreeInfos treeInfos, List<TreeInfos> treeItemList) {
+        if (treeInfos == treeItemList.getLast()) {
             return Optional.empty();
         }
-        int index = treeItemList.indexOf(treeItem);
-        return Optional.of(treeItemList.get(index + 1));
-    }
-
-    private boolean nextFollow(TreeInfos treeInfos, List<TreeInfos> treeInfosList) {
-        Optional<TreeInfos> optionalNextItemToSave = getNext(treeInfos, treeInfosList);
-        if (optionalNextItemToSave.isEmpty()) {
-            return false;
-        }
-        Item item = treeInfos.getTreeItem().getData();
-        TreeInfos nextTreeInfos = optionalNextItemToSave.get();
-        return isFollow(nextTreeInfos, item);
-    }
-
-    private boolean followPrevious(TreeInfos treeInfos, List<TreeInfos> treeInfosList) {
-        if (treeInfosList.size() == 1) {
-            return false;
-        }
-        TreeInfos previous = treeInfosList.get(treeInfosList.size() - 2);
-        return isFollow(treeInfos, previous.getTreeItem().getData());
-    }
-
-    private boolean isFollow(TreeInfos treeInfos, Item item) {
-        if (treeInfos.previousIsNew() && item.getCRUDMode().isCreate() ||
-                treeInfos.previousIsDelete() && item.getCRUDMode().isDelete()) {
-            // Si le suivant est en création ou suppression, on peut considérer que les items se suivent
-            return true;
-        }
-        // Dans les autres cas, les identifiants sont connus, on peut les vérifier
-        if (treeInfos.getPreviousItem().isPresent()) {
-            Long previousId = item.getId();
-            return treeInfos.getPreviousItem().get().getId().equals(previousId);
-        }
-        return false;
+        int index = treeItemList.indexOf(treeInfos);
+        return treeItemList.subList(index + 1, treeItemList.size())
+                .stream()
+                .filter(infos -> infos.getParentItemId().equals(treeInfos.getParentItemId()))
+                .findFirst();
     }
 
     /**
@@ -346,12 +377,10 @@ public class ItemService {
         int index = 0;
         for (TreeInfos treeInfos : treeInfosList) {
             int expectedSize = numberOfItems.get(index);
-            Item savedPreviousItem = null;
-            if (!followPrevious(treeInfos, treeInfosList)) {
-                if (treeInfos.getPreviousItem().isPresent()) {
-                    savedPreviousItem = ItemMapper.toEntity(iterator.next());
-                    expectedSize--;
-                }
+            if (treeInfos.getPreviousItemId() != null) {
+                // Ne pas prendre en compte l'item précédent qui a été modifié
+                iterator.next();
+                expectedSize--;
             }
 
             List<ItemModel> itemModels = new ArrayList<>();
@@ -359,7 +388,7 @@ public class ItemService {
                 itemModels.add(iterator.next());
             }
             Tree<Item> savedTreeItem = TreeUtils.transformToTree(itemModels, ItemMapper::toEntity);
-            savedItemsList.add(new TreeInfos(savedTreeItem, savedPreviousItem, treeInfos.getParentId(), treeInfos.getNextItemId()));
+            savedItemsList.add(new TreeInfos(savedTreeItem, treeInfos.getPreviousItemId(), treeInfos.getParentItemId(), treeInfos.getNextItemId()));
             index++;
         }
         return savedItemsList;

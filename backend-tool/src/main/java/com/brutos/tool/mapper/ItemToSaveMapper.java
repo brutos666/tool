@@ -7,15 +7,15 @@ public class ItemToSaveMapper {
 
     public static TreeInfos toEntity(ItemToSaveWebResult webResult) {
         return new TreeInfos(ItemMapper.toTreeEntity(webResult.getItem()),
-                ItemMapper.toEntity(webResult.getPreviousItem()),
+                webResult.getPreviousItemId(),
                 webResult.getParentId(),
                 webResult.getNextItemId());
     }
 
     public static ItemToSaveWebResult toWebResult(TreeInfos entity) {
         return new ItemToSaveWebResult(ItemMapper.toWebResult(entity.getTreeItem()),
-                ItemMapper.toWebResult(entity.getPreviousItem()),
-                entity.getParentId(),
+                entity.getPreviousItemId(),
+                entity.getParentItemId(),
                 entity.getNextItemId());
     }
 }

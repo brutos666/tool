@@ -2,13 +2,13 @@ package com.brutos.tool.handler.webResult;
 
 public class ItemToSaveWebResult {
     private ItemWebResult item;
-    private ItemWebResult previousItem;
+    private Long previousItemId;
     private Long parentId;
     private Long nextItemId;
 
-    public ItemToSaveWebResult(ItemWebResult item, ItemWebResult previousItem, Long parentId, Long nextItemId) {
+    public ItemToSaveWebResult(ItemWebResult item, Long previousItemId, Long parentId, Long nextItemId) {
         this.item = item;
-        this.previousItem = previousItem;
+        this.previousItemId = previousItemId;
         this.parentId = parentId;
         this.nextItemId = nextItemId;
     }
@@ -21,12 +21,12 @@ public class ItemToSaveWebResult {
         this.item = item;
     }
 
-    public ItemWebResult getPreviousItem() {
-        return previousItem;
+    public Long getPreviousItemId() {
+        return previousItemId;
     }
 
-    public void setPreviousItem(ItemWebResult previousItem) {
-        this.previousItem = previousItem;
+    public void setPreviousItemId(Long previousItemId) {
+        this.previousItemId = previousItemId;
     }
 
     public Long getNextItemId() {
