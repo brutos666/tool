@@ -40,4 +40,9 @@ public class Tree<I> {
         this.getChildren().add(treeChild);
         return treeChild;
     }
+
+    public Tree<I> addChild(Tree<I> child) {
+        this.getChildren().add(child);
+        return child;
+    }
 }

@@ -1,6 +1,7 @@
 package com.brutos.tool.handler.webResult;
 
 import com.brutos.tool.entity.CRUDMode;
+import com.brutos.tool.entity.ChainEntity;
 import com.brutos.tool.entity.State;
 import com.brutos.tool.entity.Status;
 
@@ -8,7 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class ItemWebResult extends AbstractWebResultEntity {
+public class ItemWebResult implements ChainEntity {
+    private Long id;
     private String title = "";
     private String text = "";
     private State state = State.TODO;
@@ -20,6 +22,21 @@ public class ItemWebResult extends AbstractWebResultEntity {
 
     public ItemWebResult() {
         super();
+    }
+
+    public ItemWebResult(Long id, String title, String text, State state) {
+        this.id = id;
+        this.title = title;
+        this.text = text;
+        this.state = state;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getTitle() {
@@ -70,6 +87,10 @@ public class ItemWebResult extends AbstractWebResultEntity {
         this.children = children;
     }
 
+    public ItemWebResult getChild(int index) {
+        return children.get(index);
+    }
+
     public Status getStatus() {
         return status;
     }
@@ -91,12 +112,13 @@ public class ItemWebResult extends AbstractWebResultEntity {
         if (o == null || getClass() != o.getClass()) return false;
 
         ItemWebResult that = (ItemWebResult) o;
-        return Objects.equals(title, that.title) && Objects.equals(text, that.text) && state == that.state && Objects.equals(parentId, that.parentId) && Objects.equals(nextId, that.nextId) && Objects.equals(children, that.children) && status == that.status && CRUDMode == that.CRUDMode;
+        return Objects.equals(id, that.id) && Objects.equals(title, that.title) && Objects.equals(text, that.text) && state == that.state && Objects.equals(parentId, that.parentId) && Objects.equals(nextId, that.nextId) && Objects.equals(children, that.children) && status == that.status && CRUDMode == that.CRUDMode;
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hashCode(title);
+        int result = Objects.hashCode(id);
+        result = 31 * result + Objects.hashCode(title);
         result = 31 * result + Objects.hashCode(text);
         result = 31 * result + Objects.hashCode(state);
         result = 31 * result + Objects.hashCode(parentId);
@@ -110,7 +132,8 @@ public class ItemWebResult extends AbstractWebResultEntity {
     @Override
     public String toString() {
         return "ItemWebResult{" +
-                "title='" + title + '\'' +
+                "id=" + id +
+                ", title='" + title + '\'' +
                 ", text='" + text + '\'' +
                 ", state=" + state +
                 ", parentId=" + parentId +
@@ -118,7 +141,7 @@ public class ItemWebResult extends AbstractWebResultEntity {
                 ", children=" + children +
                 ", status=" + status +
                 ", CRUDMode=" + CRUDMode +
-                "} " + super.toString();
+                '}';
     }
 
 }

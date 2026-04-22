@@ -14,10 +14,15 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
-public class ItemMapper implements Mapper<Item, ItemModel, ItemWebResult> {
+public class ItemMapper {
+    public static ItemWebResult toWebResult(Optional<Item> item) {
+        return item.map(ItemMapper::toWebResult).orElse(null);
+    }
 
-    @Override
-    public ItemWebResult toWebResult(Item item) {
+    public static ItemWebResult toWebResult(Item item) {
+        if (item == null) {
+            return null;
+        }
         ItemWebResult itemWebResult = new ItemWebResult();
         itemWebResult.setId(item.getId());
         itemWebResult.setTitle(item.getTitle());
@@ -30,8 +35,10 @@ public class ItemMapper implements Mapper<Item, ItemModel, ItemWebResult> {
         return itemWebResult;
     }
 
-    @Override
-    public Item toEntity(ItemWebResult webResult) {
+    public static Item toEntity(ItemWebResult webResult) {
+        if (webResult == null) {
+            return null;
+        }
         Item item = new Item();
         item.setId(webResult.getId());
         item.setTitle(webResult.getTitle());
@@ -44,35 +51,29 @@ public class ItemMapper implements Mapper<Item, ItemModel, ItemWebResult> {
         return item;
     }
 
-    public Tree<Item> toTreeEntity(ItemWebResult webResult) {
+    public static Tree<Item> toTreeEntity(ItemWebResult webResult) {
         Item item = toEntity(webResult);
         Tree<Item> treeItem = new Tree<>(item);
         if (webResult.getChildren() != null) {
-            treeItem.setChildren(webResult.getChildren().stream().map(this::toTreeEntity).toList());
+            webResult.getChildren().forEach(child -> treeItem.addChild(toTreeEntity(child)));
         }
         return treeItem;
     }
 
-    @Override
-    public List<ItemWebResult> toWebResult(List<Item> items) {
-        return null;
-    }
-
-    public ItemWebResult toWebResult(Tree<Item> treeItem) {
+    public static ItemWebResult toWebResult(Tree<Item> treeItem) {
         ItemWebResult itemWebResult = toWebResult(treeItem.getData());
         if (treeItem.getChildren() != null) {
-            itemWebResult.setChildren(treeItem.getChildren().stream().map(this::toWebResult).toList());
+            itemWebResult.setChildren(treeItem.getChildren().stream().map(ItemMapper::toWebResult).toList());
         }
         return itemWebResult;
     }
 
-    public List<ItemWebResult> treeToWebResult(List<Tree<Item>> trees) {
+    public static List<ItemWebResult> treeToWebResult(List<Tree<Item>> trees) {
         // Pas de prise en compte des enfants
-        return trees.stream().map(this::toWebResult).toList();
+        return trees.stream().map(ItemMapper::toWebResult).toList();
     }
 
-    @Override
-    public ItemModel toModel(Item item) {
+    public static ItemModel toModel(Item item) {
         ItemModel itemModel = new ItemModel();
         itemModel.setId(item.getId());
         itemModel.setTitle(item.getTitle());
@@ -83,29 +84,17 @@ public class ItemMapper implements Mapper<Item, ItemModel, ItemWebResult> {
         return itemModel;
     }
 
-    @Override
-    public List<ItemModel> toModel(List<Item> items) {
-        return items.stream().map(this::toModel).toList();
+    public static List<ItemModel> toModel(List<Item> items) {
+        return items.stream().map(ItemMapper::toModel).toList();
     }
 
-    public List<ItemModel> toModel(Tree<Item> treeItem) {
-        List<ItemModel> itemModels = new ArrayList<>();
-        itemModels.add(toModel(treeItem.getData()));
-        if (treeItem.getChildren() != null) {
-            treeItem.getChildren()
-                    .forEach(tree -> itemModels.addAll(this.toModel(tree)));
-        }
-        return itemModels;
+    public static List<Item> toEntity(Iterable<ItemModel> itemModels) {
+        List<Item> items = new ArrayList<>();
+        itemModels.forEach(itemModel -> items.add(ItemMapper.toEntity(itemModel)));
+        return items;
     }
 
-    public List<ItemModel> treeToModel(List<Tree<Item>> treeItemsList) {
-        List<ItemModel> itemModels = new ArrayList<>();
-        treeItemsList.forEach(tree -> itemModels.addAll(this.toModel(tree)));
-        return itemModels;
-    }
-
-    @Override
-    public Item toEntity(ItemModel itemModel) {
+    public static Item toEntity(ItemModel itemModel) {
         Item item = new Item();
         item.setId(itemModel.getId());
         item.setTitle(itemModel.getTitle());
@@ -120,13 +109,6 @@ public class ItemMapper implements Mapper<Item, ItemModel, ItemWebResult> {
         item.setNextId(itemModel.getNextId());
         item.setCRUDMode(CRUDMode.READ);
         return item;
-    }
-
-    @Override
-    public List<Item> toEntity(Iterable<ItemModel> itemModels) {
-        List<Item> items = new ArrayList<>();
-        itemModels.forEach(itemModel -> items.add(this.toEntity(itemModel)));
-        return items;
     }
 
 }

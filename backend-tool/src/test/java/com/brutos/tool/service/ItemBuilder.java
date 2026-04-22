@@ -1,5 +1,6 @@
 package com.brutos.tool.service;
 
+import com.brutos.tool.entity.CRUDMode;
 import com.brutos.tool.entity.Item;
 import com.brutos.tool.entity.State;
 
@@ -13,17 +14,17 @@ public class ItemBuilder {
     private State state = State.TODO;
     private Long parentId;
     private Long nextId;
+    private CRUDMode crudMode;
     private List<Item> children = new ArrayList<>();
 
     public ItemBuilder() {
     }
 
-    public static ItemBuilder anItem() {
-        return new ItemBuilder();
-    }
-
     public ItemBuilder withId(Long id) {
         this.id = id;
+        if (id == null) {
+            this.crudMode = CRUDMode.CREATE;
+        }
         return this;
     }
 
@@ -39,6 +40,11 @@ public class ItemBuilder {
 
     public ItemBuilder withState(State state) {
         this.state = state;
+        return this;
+    }
+
+    public ItemBuilder withCrudMode(CRUDMode crudMode) {
+        this.crudMode = crudMode;
         return this;
     }
 
@@ -77,6 +83,7 @@ public class ItemBuilder {
         item.setState(state);
         item.setParentId(parentId);
         item.setNextId(nextId);
+        item.setCRUDMode(crudMode);
         item.setChildren(children);
         return item;
     }

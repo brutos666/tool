@@ -1,15 +1,11 @@
 package com.brutos.tool.service;
 
-import com.brutos.tool.entity.Item;
-import com.brutos.tool.entity.State;
-import com.brutos.tool.entity.Tree;
-import com.brutos.tool.mapper.ItemMapper;
+import com.brutos.tool.entity.*;
 import com.brutos.tool.model.ItemModel;
 import com.brutos.tool.repository.ItemRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -38,16 +34,13 @@ public class ItemServiceTest {
     @Mock
     private ItemRepository itemRepository;
 
-    @InjectMocks
-    private ItemMapper itemMapper;
-
     private ItemService itemService;
 
     private Long nextId = 1L;
 
     @BeforeEach
     public void setUp() {
-        itemService = new ItemService(itemRepository, itemMapper);
+        itemService = new ItemService(itemRepository);
 
     }
 
@@ -56,7 +49,7 @@ public class ItemServiceTest {
         when(itemRepository.save(any(ItemModel.class))).thenAnswer(invocation -> {
             ItemModel input = invocation.getArgument(0);
             ItemModel copy = new ItemModel();
-            // Ne générer un nouvel ID que si l'objet en entrée a un ID null
+            // Ne générer un nouvel ID que si l'objet a un ID null
             if (input.getId() == null) {
                 copy.setId(nextId++);
             } else {
@@ -80,7 +73,7 @@ public class ItemServiceTest {
 
     private ItemModel convertToSavedItem(ItemModel input) {
         ItemModel copy = new ItemModel();
-        // Ne générer un nouvel ID que si l'objet en entrée a un ID null
+        // Ne générer un nouvel ID que si l'objet a un ID null
         if (input.getId() == null) {
             copy.setId(nextId++);
         } else {
@@ -97,11 +90,6 @@ public class ItemServiceTest {
     @Test
     void shouldSaveItem() {
         // Given
-        ItemModel savedItem = new ItemModel();
-        savedItem.setId(1L);
-        savedItem.setTitle(TITLE);
-        savedItem.setText(TEXT);
-        savedItem.setState(State.TODO.name());
         mockSave();
 
         // When
@@ -117,53 +105,70 @@ public class ItemServiceTest {
     void saveTreeItem_shouldUpdatePreviousNextId_whenExistPrevious() {
         // Given
         Item lastItem = new Item(2L, TITLE, TEXT, State.TODO, -1L, null);
-        Optional<Item> optionalLastItem = Optional.of(lastItem);
-        Item itemToSave = new Item(null, TITLE1, TEXT1, State.TODO, null, null);
-        Tree<Item> itemTree = new Tree<>(itemToSave);
+        Item item = new ItemBuilder().withCrudMode(CRUDMode.CREATE)
+                .withTitle(TITLE1).withText(TEXT1).withState(State.TODO)
+                .withParentId(-1L).build();
+        Tree<Item> itemTree = new Tree<>(item);
+        TreeInfos treeInfos = new TreeInfos(itemTree, lastItem, -1L, null);
         nextId = 3L;
         mockSaveAll();
 
         // When
-        List<Item> actual = itemService.saveTreeItem(optionalLastItem, null, itemTree);
+        TreeInfos actual = itemService.saveTreeItem(treeInfos);
+        Item actualPrevious = actual.getPreviousItem().orElse(null);
+        Item actualItem = actual.getTreeItem().getData();
 
         // Then
         // Appel à sauvegarder une fois pour le précédent et 1 fois pour le nouveau
         verify(itemRepository, times(2)).saveAll(any());
         // Vérifier les valeurs
-        assertEquals(toStringValues(lastItem), toStringValues(actual.getFirst()));
-        assertEquals(toStringValues(itemToSave), toStringValues(actual.get(1)));
+        assertNotNull(actualPrevious);
+        assertEquals(toStringValues(lastItem), toStringValues(actualPrevious));
+        assertEquals(toStringValues(item), toStringValues(actual.getTreeItem().getData()));
         // Vérifier que les ids sont corrects
-        assertEquals(lastItem.getId(), actual.getFirst().getId());
-        assertTrue(actual.get(1).getId() > lastItem.getId());
+        assertEquals(lastItem.getId(), actualPrevious.getId());
+        assertTrue(actualItem.getId() > lastItem.getId());
         // Vérifier les suivants
-        assertEquals(actual.get(1).getId(), actual.getFirst().getNextId());
-        assertNull(actual.get(1).getNextId());
+        assertEquals(actualItem.getId(), actualPrevious.getNextId());
+        assertNull(actualItem.getNextId());
         // Vérifier les parents (tous -1L)
-        assertEquals(-1L, actual.getFirst().getParentId());
-        assertEquals(-1L, actual.get(1).getParentId());
+        assertEquals(-1L, actualPrevious.getParentId());
+        assertEquals(-1L, actualItem.getParentId());
     }
 
     @Test
     void saveTreeItem_shouldKeepTree_whenExistChildren() {
         // Given
         Item lastItem = new Item(2L, TITLE, TEXT, State.TODO, -1L, null);
-        Optional<Item> optionalLastItem = Optional.of(lastItem);
-        Item itemToSave1 = new ItemBuilder().withTitle(TITLE1).withText(TEXT1).withState(State.TODO).build();
-        Item itemToSave1Child1 = new ItemBuilder().withTitle(TITLE2).withText(TEXT2).withState(State.TODO).build();
+        Item itemToSave1 = new ItemBuilder()
+                .withCrudMode(CRUDMode.CREATE)
+                .withTitle(TITLE1)
+                .withText(TEXT1)
+                .withState(State.TODO)
+                .withParentId(-1L)
+                .build();
+        Item itemToSave1Child1 = new ItemBuilder()
+                .withCrudMode(CRUDMode.CREATE)
+                .withTitle(TITLE2)
+                .withText(TEXT2)
+                .withState(State.TODO)
+                .build();
         Tree<Item> treeItem = new Tree<>(itemToSave1);
         treeItem.addChild(itemToSave1Child1);
         nextId = 3L;
+        TreeInfos treeInfos = new TreeInfos(treeItem, lastItem, -1L, 4L);
         mockSaveAll();
 
         // When
-        List<Item> actual = itemService.saveTreeItem(optionalLastItem, 4L, treeItem);
-        Item actualPrevious = actual.get(0);
-        Item actualItem = actual.get(1);
-        Item actualChildItem = actual.get(2);
+        TreeInfos actual = itemService.saveTreeItem(treeInfos);
+        Item actualPrevious = actual.getPreviousItem().orElse(null);
+        Item actualItem = actual.getTreeItem().getData();
+        Item actualChildItem = actual.getTreeItem().getChildData(0);
 
         // Then
         verify(itemRepository, times(2)).saveAll(any());
         // Vérifier les valeurs
+        assertNotNull(actualPrevious);
         assertEquals(toStringValues(lastItem), toStringValues(actualPrevious));
         assertEquals(toStringValues(itemToSave1), toStringValues(actualItem));
         assertEquals(toStringValues(itemToSave1Child1), toStringValues(actualChildItem));
@@ -185,26 +190,43 @@ public class ItemServiceTest {
     void saveTreeItem_shouldKeepTree_shouldUpdateNextId_when2LevelTree() {
         // Given
         Item lastItem = new Item(2L, TITLE, TEXT, State.TODO, -1L, null);
-        Optional<Item> optionalLastItem = Optional.of(lastItem);
-        Item itemToSave1 = new ItemBuilder().withTitle(TITLE1).withText(TEXT1).withState(State.TODO).build();
-        Item itemToSave1Child1 = new ItemBuilder().withTitle(TITLE2).withText(TEXT2).withState(State.TODO).build();
-        Item itemToSave1Child2 = new ItemBuilder().withTitle(TITLE3).withText(TEXT3).withState(State.DONE).build();
+        Item itemToSave1 = new ItemBuilder()
+                .withCrudMode(CRUDMode.CREATE)
+                .withTitle(TITLE1)
+                .withText(TEXT1)
+                .withState(State.TODO)
+                .withParentId(-1L)
+                .build();
+        Item itemToSave1Child1 = new ItemBuilder()
+                .withCrudMode(CRUDMode.CREATE)
+                .withTitle(TITLE2)
+                .withText(TEXT2)
+                .withState(State.TODO)
+                .build();
+        Item itemToSave1Child2 = new ItemBuilder()
+                .withCrudMode(CRUDMode.CREATE)
+                .withTitle(TITLE3)
+                .withText(TEXT3)
+                .withState(State.DONE)
+                .build();
         Tree<Item> treeItem = new Tree<>(itemToSave1);
         treeItem.addChild(itemToSave1Child1);
         treeItem.addChild(itemToSave1Child2);
+        TreeInfos treeInfos = new TreeInfos(treeItem, lastItem, -1L, 12L);
         nextId = 3L;
         mockSaveAll();
 
         // When
-        List<Item> actual = itemService.saveTreeItem(optionalLastItem, 12L, treeItem);
-        Item actualPrevious = actual.get(0);
-        Item actual1 = actual.get(1);
-        Item actual1Child1 = actual.get(2);
-        Item actual1Child2 = actual.get(3);
+        TreeInfos actual = itemService.saveTreeItem(treeInfos);
+        Item actualPrevious = actual.getPreviousItem().orElse(null);
+        Item actual1 = actual.getTreeItem().getData();
+        Item actual1Child1 = actual.getTreeItem().getChildData(0);
+        Item actual1Child2 = actual.getTreeItem().getChildData(1);
 
         // Then
         verify(itemRepository, times(2)).saveAll(any());
         // Vérifier les valeurs
+        assertNotNull(actualPrevious);
         assertEquals(toStringValues(lastItem), toStringValues(actualPrevious));
         assertEquals(toStringValues(itemToSave1), toStringValues(actual1));
         assertEquals(toStringValues(itemToSave1Child1), toStringValues(actual1Child1));
@@ -229,12 +251,21 @@ public class ItemServiceTest {
     void saveTreeItem_shouldKeepTree_shouldUpdateNextId_when3LevelTree() {
         // Given
         Item lastItem = new Item(2L, TITLE, TEXT, State.TODO, -1L, null);
-        Optional<Item> optionalLastItem = Optional.of(lastItem);
-        Item itemToSave1 = new ItemBuilder().withTitle(TITLE1).withText(TEXT1).withState(State.TODO).build();
-        Item itemToSave1Child1 = new ItemBuilder().withTitle(TITLE2).withText(TEXT2).withState(State.TODO).build();
-        Item itemToSave1Child1_1 = new ItemBuilder().withTitle(TITLE3).withText(TEXT3).withState(State.DONE).build();
-        Item itemToSave1Child1_2 = new ItemBuilder().withTitle(TITLE4).withText(TEXT4).withState(State.TODO).build();
-        Item itemToSave1Child1_2_1 = new ItemBuilder().withTitle(TITLE5).withText(TEXT5).withState(State.TODO).build();
+        Item itemToSave1 = new ItemBuilder()
+                .withCrudMode(CRUDMode.CREATE).withParentId(-1L).withTitle(TITLE1)
+                .withText(TEXT1).withState(State.TODO).build();
+        Item itemToSave1Child1 = new ItemBuilder()
+                .withCrudMode(CRUDMode.CREATE).withTitle(TITLE2)
+                .withText(TEXT2).withState(State.TODO).build();
+        Item itemToSave1Child1_1 = new ItemBuilder()
+                .withCrudMode(CRUDMode.CREATE).withTitle(TITLE3)
+                .withText(TEXT3).withState(State.DONE).build();
+        Item itemToSave1Child1_2 = new ItemBuilder()
+                .withCrudMode(CRUDMode.CREATE).withTitle(TITLE4)
+                .withText(TEXT4).withState(State.TODO).build();
+        Item itemToSave1Child1_2_1 = new ItemBuilder()
+                .withCrudMode(CRUDMode.CREATE).withTitle(TITLE5)
+                .withText(TEXT5).withState(State.TODO).build();
         Tree<Item> treeToSave1 = new Tree<>(itemToSave1);
         Tree<Item> treeToSave1Child1 = treeToSave1.addChild(itemToSave1Child1);
         Tree<Item> treeToSave1Child1_1 = treeToSave1Child1.addChild(itemToSave1Child1_1);
@@ -242,19 +273,23 @@ public class ItemServiceTest {
         Tree<Item> treeToSave1Child1_2_1 = treeToSave1Child1_2.addChild(itemToSave1Child1_2_1);
         nextId = 3L;
         mockSaveAll();
+        TreeInfos treeInfos = new TreeInfos(treeToSave1, lastItem, -1L, 15L);
 
         // When
-        List<Item> actual = itemService.saveTreeItem(optionalLastItem, 15L, treeToSave1);
-        Item actualPrevious = actual.get(0);
-        Item actual1 = actual.get(1);
-        Item actual1Child1 = actual.get(2);
-        Item actual1Child1_1 = actual.get(3);
-        Item actual1Child1_2 = actual.get(4);
-        Item actual1Child1_2_1 = actual.get(5);
+        TreeInfos actual = itemService.saveTreeItem(treeInfos);
+        Item actualPrevious = actual.getPreviousItem().orElse(null);
+        Tree<Item> actualTree = actual.getTreeItem();
+        Item actual1 = actualTree.getData();
+        Tree<Item> actualTreeChild1 = actualTree.getChild(0);
+        Item actual1Child1 = actualTreeChild1.getData();
+        Item actual1Child1_1 = actualTreeChild1.getChildData(0);
+        Item actual1Child1_2 = actualTreeChild1.getChildData(1);
+        Item actual1Child1_2_1 = actualTreeChild1.getChild(1).getChildData(0);
 
         // Then
         verify(itemRepository, times(2)).saveAll(any());
         // Vérifier les valeurs
+        assertNotNull(actualPrevious);
         assertEquals(toStringValues(lastItem), toStringValues(actualPrevious));
         assertEquals(toStringValues(itemToSave1), toStringValues(actual1));
         assertEquals(toStringValues(itemToSave1Child1), toStringValues(actual1Child1));
@@ -285,18 +320,18 @@ public class ItemServiceTest {
     }
 
     @Test
-    void saveTreeItems_shouldKeepTree_whenExistChildren() {
+    void createTreeItems_shouldKeepTree_whenExistChildren() {
         // Given
         Item lastItem = new Item(2L, TITLE, TEXT, State.TODO, -1L, null);
         Optional<Item> optionalLastItem = Optional.of(lastItem);
         List<Tree<Item>> itemsToSave = new TreeItemBuilder().withRootItem(null, TITLE1, TEXT1, State.TODO)
                 .withFirstChild(null, TITLE2, TEXT2, State.TODO)
-                .build();
+                .buildList();
         nextId = 3L;
         mockSaveAll();
 
         // When
-        List<Item> actual = itemService.saveTreeItems(optionalLastItem, itemsToSave);
+        List<Item> actual = itemService.createTreeItems(optionalLastItem, -1L, itemsToSave);
         Item actualPrevious = actual.get(0);
         Item actualItem = actual.get(1);
         Item actualChildItem = actual.get(2);
@@ -324,7 +359,7 @@ public class ItemServiceTest {
     }
 
     @Test
-    void saveTreeItems_shouldKeepTree_shouldUpdateNextId_when2LevelTree() {
+    void createTreeItems_shouldKeepTree_shouldUpdateNextId_when2LevelTree() {
         // Given
         Item lastItem = new Item(2L, TITLE, TEXT, State.TODO, -1L, null);
         Optional<Item> optionalLastItem = Optional.of(lastItem);
@@ -333,7 +368,7 @@ public class ItemServiceTest {
                 .withNextRootItem(null, TITLE3, TEXT3, State.DONE)
                 .withFirstChild(null, TITLE4, TEXT4, State.TODO)
                 .withNextChild(null, TITLE5, TEXT5, State.IN_PROGRESS)
-                .build();
+                .buildList();
         nextId = 3L;
         mockSaveAll();
         Item itemToSave1 = itemsToSave.getFirst().getData();
@@ -343,7 +378,7 @@ public class ItemServiceTest {
         Item itemToSave2Child2 = itemsToSave.get(1).getChildData(1);
 
         // When
-        List<Item> actual = itemService.saveTreeItems(optionalLastItem, itemsToSave);
+        List<Item> actual = itemService.createTreeItems(optionalLastItem, -1L, itemsToSave);
         Item actualPrevious = actual.get(0);
         Item actual1 = actual.get(1);
         Item actual1Child1 = actual.get(2);
@@ -384,7 +419,7 @@ public class ItemServiceTest {
     }
 
     @Test
-    void saveTreeItems_shouldKeepTree_shouldUpdateNextId_when3LevelTree() {
+    void createTreeItems_shouldKeepTree_shouldUpdateNextId_when3LevelTree() {
         // Given
         Item lastItem = new Item(2L, TITLE, TEXT, State.TODO, -1L, null);
         Optional<Item> optionalLastItem = Optional.of(lastItem);
@@ -393,7 +428,7 @@ public class ItemServiceTest {
                 .withFirstChild(null, TITLE3, TEXT3, State.DONE)
                 .withNextChild(null, TITLE4, TEXT4, State.TODO)
                 .withFirstChild(null, TITLE5, TEXT5, State.IN_PROGRESS)
-                .build();
+                .buildList();
         nextId = 3L;
         mockSaveAll();
         Tree<Item> treeToSave1 = itemsToSave.getFirst();
@@ -408,7 +443,7 @@ public class ItemServiceTest {
         Item itemToSave1Child1_2_1 = treeToSave1Child1_2_1.getData();
 
         // When
-        List<Item> actual = itemService.saveTreeItems(optionalLastItem, itemsToSave);
+        List<Item> actual = itemService.createTreeItems(optionalLastItem, -1L, itemsToSave);
         Item actualPrevious = actual.get(0);
         Item actual1 = actual.get(1);
         Item actual1Child1 = actual.get(2);
@@ -448,11 +483,72 @@ public class ItemServiceTest {
         assertEquals(actual1Child1_2.getId(), actual1Child1_2_1.getParentId());
     }
 
-    private String toStringValues(Item item) {
-        return "title=" + item.getTitle() + ", text=" + item.getText() + ", state=" + item.getState();
+    @Test
+    void saveTreeItemList_shouldKeepTree_shouldUpdateNextId_when2LevelTree() {
+        // Given
+        Item lastItem = new Item(2L, TITLE, TEXT, State.TODO, -1L, null);
+        Tree<Item> rootItem1 = new TreeItemBuilder().withRootItem(null, TITLE1, TEXT1, State.TODO)
+                .withFirstChild(null, TITLE2, TEXT2, State.TODO)
+                .build();
+        Tree<Item> rootItem2 = new TreeItemBuilder().withRootItem(null, TITLE3, TEXT3, State.DONE)
+                .withFirstChild(null, TITLE4, TEXT4, State.TODO)
+                .withNextChild(null, TITLE5, TEXT5, State.IN_PROGRESS)
+                .build();
+        nextId = 3L;
+        mockSaveAll();
+        Item itemToSave1 = rootItem1.getData();
+        Item itemToSave1Child1 = rootItem1.getChildData(0);
+        Item itemToSave2 = rootItem2.getData();
+        Item itemToSave2Child1 = rootItem2.getChildData(0);
+        Item itemToSave2Child2 = rootItem2.getChildData(1);
+        List<TreeInfos> treeInfosList = List.of(new TreeInfos(rootItem1, lastItem, -1L, null),
+                new TreeInfos(rootItem2, itemToSave1, -1L, null));
+
+        // When
+        List<TreeInfos> actual = itemService.saveTreeItemList(treeInfosList);
+        TreeInfos actualToSave1 = actual.get(0);
+        TreeInfos actualToSave2 = actual.get(1);
+        Item actualPrevious = actualToSave1.getPreviousItem().orElse(null);
+        Item actual1 = actualToSave1.getTreeItem().getData();
+        Item actual1Child1 = actualToSave1.getTreeItem().getChildData(0);
+        Item actual2 = actualToSave2.getTreeItem().getData();
+        Item actual2Child1 = actualToSave2.getTreeItem().getChildData(0);
+        Item actual2Child2 = actualToSave2.getTreeItem().getChildData(1);
+
+        // Then
+        verify(itemRepository, times(2)).saveAll(any());
+        // Vérifier les valeurs
+        assertNotNull(actualPrevious);
+        assertEquals(toStringValues(lastItem), toStringValues(actualPrevious));
+        assertEquals(toStringValues(itemToSave1), toStringValues(actual1));
+        assertEquals(toStringValues(itemToSave2), toStringValues(actual2));
+        assertEquals(toStringValues(itemToSave1Child1), toStringValues(actual1Child1));
+        assertEquals(toStringValues(itemToSave2Child1), toStringValues(actual2Child1));
+        assertEquals(toStringValues(itemToSave2Child2), toStringValues(actual2Child2));
+        // Vérifier que les ids sont corrects
+        assertEquals(lastItem.getId(), actualPrevious.getId());
+        assertTrue(actual1.getId() > lastItem.getId());
+        assertTrue(actual2.getId() > lastItem.getId());
+        assertTrue(actual1Child1.getId() > lastItem.getId());
+        assertTrue(actual2Child1.getId() > lastItem.getId());
+        assertTrue(actual2Child2.getId() > lastItem.getId());
+        // Vérifier les suivants
+        assertEquals(actual1.getId(), actualPrevious.getNextId());
+        assertEquals(actual2.getId(), actual1.getNextId());
+        assertNull(actual2.getNextId());
+        assertNull(actual1Child1.getNextId());
+        assertEquals(actual2Child2.getId(), actual2Child1.getNextId());
+        assertNull(actual2Child2.getNextId());
+        // Vérifier les parents
+        assertEquals(-1L, actualPrevious.getParentId());
+        assertEquals(-1L, actual1.getParentId());
+        assertEquals(-1L, actual2.getParentId());
+        assertEquals(actual1.getId(), actual1Child1.getParentId());
+        assertEquals(actual2.getId(), actual2Child1.getParentId());
+        assertEquals(actual2.getId(), actual2Child2.getParentId());
     }
 
-    private String toStringValues(ItemModel item) {
+    private String toStringValues(Item item) {
         return "title=" + item.getTitle() + ", text=" + item.getText() + ", state=" + item.getState();
     }
 

@@ -1,10 +1,16 @@
 package com.brutos.tool.model;
 
+import com.brutos.tool.entity.ChainEntity;
+import com.brutos.tool.entity.Status;
 import com.opencsv.bean.CsvBindByName;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
 @Table(name = "item")
-public class ItemModel extends AbstractModel {
+public class ItemModel implements ChainEntity {
+    @Id
+    @CsvBindByName(column = "id")
+    private Long id = null;
     @CsvBindByName(column = "title")
     private String title;
     @CsvBindByName(column = "text")
@@ -20,12 +26,20 @@ public class ItemModel extends AbstractModel {
     }
 
     public ItemModel(Long id, String title, String text, String state, Long parentId, Long nextId) {
-        this.setId(id);
+        this.id = id;
         this.title = title;
         this.text = text;
         this.state = state;
         this.parentId = parentId;
         this.nextId = nextId;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getTitle() {
@@ -68,14 +82,23 @@ public class ItemModel extends AbstractModel {
         this.nextId = nextId;
     }
 
+    public Status getStatus() {
+        return null;
+    }
+
+    public void setStatus(Status status) {
+        //this.status = status;
+    }
+
     @Override
     public String toString() {
         return "ItemModel{" +
-                "title='" + title + '\'' +
+                "id=" + id +
+                ", title='" + title + '\'' +
                 ", text='" + text + '\'' +
                 ", state='" + state + '\'' +
                 ", parentId=" + parentId +
                 ", nextId=" + nextId +
-                "} " + super.toString();
+                '}';
     }
 }

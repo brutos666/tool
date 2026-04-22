@@ -19,14 +19,9 @@ import java.util.List;
 
 @Service
 public class CsvService {
-    private final ItemMapper itemMapper;
-
-    public CsvService(ItemMapper itemMapper) {
-        this.itemMapper = itemMapper;
-    }
 
     public String convertAllItemsToCsv(List<Item> items) throws CsvRequiredFieldEmptyException, CsvDataTypeMismatchException {
-        List<ItemModel> itemsModel = itemMapper.toModel(items);
+        List<ItemModel> itemsModel = ItemMapper.toModel(items);
         StringWriter writer = new StringWriter();
         StatefulBeanToCsv<ItemModel> beanToCsv = new StatefulBeanToCsvBuilder<ItemModel>(writer)
                 .withSeparator(';') // utile en France
@@ -43,6 +38,6 @@ public class CsvService {
                 .withSeparator(';') // important en France
                 .withIgnoreLeadingWhiteSpace(true)
                 .build();
-        return itemMapper.toEntity(csvToBean.parse());
+        return ItemMapper.toEntity(csvToBean.parse());
     }
 }

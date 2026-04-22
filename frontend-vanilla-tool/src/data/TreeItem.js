@@ -105,12 +105,18 @@ class TreeItem {
     this.alertObservers('addItem');
   }
   getPrevious() {
+    if (!this.getParentItem()) {
+      return null;
+    }
     return this.getParentItem()
       .getTreeItemList()
       .getPrevious(this);
   }
 
   getNext() {
+    if (!this.getParentItem()) {
+      return null;
+    }
     return this.getParentItem()
       .getTreeItemList()
       .getNext(this);
@@ -134,7 +140,7 @@ class TreeItem {
     Object.assign(this.#item, itemInfos);
     for (const key in itemInfos) {
       delete this.#updates[key];
-      if (key === 'id' && itemInfos[key] !== oldId) {
+      if (key === 'id' && itemInfos[key] !== oldId && this.getParentItem()) {
         this.getParentItem()
           .updatePrevious(this);
       }
@@ -143,6 +149,9 @@ class TreeItem {
   }
   deleteItem() {
     this.#deleted = true;
+    for (const childItem of this.#treeItemList.getTreeList()) {
+      childItem.deleteItem();
+    }
     this.alertObservers('deleted');
   }
 

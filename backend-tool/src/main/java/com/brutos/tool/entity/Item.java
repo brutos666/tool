@@ -4,21 +4,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class Item extends AbstractEntity {
+public class Item implements ChainEntity {
+    private Long id = null;
     private String title = "";
     private String text = "";
     private State state = State.TODO;
-    private Long parentId;
+    private Long parentId = -1L;
     private Long nextId;
     private List<Item> children = new ArrayList<>();
     private Status status = Status.OK;
-    private CRUDMode CRUDMode;
+    private CRUDMode mode = CRUDMode.READ;
 
     public Item() {
     }
 
     public Item(Long id) {
-        this.setId(id);
+        this.id = id;
     }
 
     public Item(String title, String text) {
@@ -27,12 +28,20 @@ public class Item extends AbstractEntity {
     }
 
     public Item(Long id, String title, String text, State state, Long parentId, Long nextId) {
-        this.setId(id);
+        this.id = id;
         this.title = title;
         this.text = text;
         this.state = state;
         this.parentId = parentId;
         this.nextId = nextId;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getTitle() {
@@ -60,7 +69,7 @@ public class Item extends AbstractEntity {
     }
 
     public Long getParentId() {
-        return parentId == null ? -1L : parentId;
+        return parentId;
     }
 
     public void setParentId(Long parentId) {
@@ -100,11 +109,11 @@ public class Item extends AbstractEntity {
     }
 
     public CRUDMode getCRUDMode() {
-        return CRUDMode;
+        return mode;
     }
 
     public void setCRUDMode(CRUDMode CRUDMode) {
-        this.CRUDMode = CRUDMode;
+        this.mode = CRUDMode;
     }
 
     @Override
@@ -117,7 +126,7 @@ public class Item extends AbstractEntity {
                 ", nextId=" + nextId +
                 ", children=" + children +
                 ", status=" + status +
-                ", CRUDMode=" + CRUDMode +
+                ", CRUDMode=" + mode +
                 "} " + super.toString();
     }
 
@@ -126,7 +135,7 @@ public class Item extends AbstractEntity {
         if (o == null || getClass() != o.getClass()) return false;
 
         Item item = (Item) o;
-        return Objects.equals(title, item.title) && Objects.equals(text, item.text) && state == item.state && Objects.equals(parentId, item.parentId) && Objects.equals(nextId, item.nextId) && Objects.equals(children, item.children) && status == item.status && CRUDMode == item.CRUDMode;
+        return Objects.equals(title, item.title) && Objects.equals(text, item.text) && state == item.state && Objects.equals(parentId, item.parentId) && Objects.equals(nextId, item.nextId) && Objects.equals(children, item.children) && status == item.status && mode == item.mode;
     }
 
     @Override
@@ -138,7 +147,8 @@ public class Item extends AbstractEntity {
         result = 31 * result + Objects.hashCode(nextId);
         result = 31 * result + Objects.hashCode(children);
         result = 31 * result + Objects.hashCode(status);
-        result = 31 * result + Objects.hashCode(CRUDMode);
+        result = 31 * result + Objects.hashCode(mode);
         return result;
     }
+
 }

@@ -70,6 +70,8 @@ class CommandSaveDecorator extends CommandSpaceDecorator {
     this.#itemToSave = {
       item: this.#treeItem.getItemInfos(),
       previousItem: this.#previousItem?.getItemInfos(),
+      parentId: this.#treeItem.getParentItem()
+        ?.getItemId(),
       nextItemId: this.#treeItem.getNext()
         ?.getItemId()
     };

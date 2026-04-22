@@ -4,6 +4,7 @@ import ActionButton from './ActionButton.js';
 import Component from './Component.js';
 import CommandActionDecorator from './decorators/CommandActionDecorator.js';
 import CommandLoadDecorator from './decorators/CommandLoadDecorator.js';
+import CommandSaveDecorator from './decorators/CommandSaveDecorator.js';
 import FileUpload from './FileUpload.js';
 import Toolbar from './Toolbar.js';
 import TreeList from './TreeList.js';
@@ -22,13 +23,18 @@ class NavTree extends Component {
     addButton.setDoActionCallback(items.addNewItem.bind(items, 'Nouvel espace'));
     items.setStaticChild('addItemAction', addButton);
 
-    const itemsWithCommands = new CommandLoadDecorator(items);
+    const itemsWithLoad = new CommandLoadDecorator(items);
+    const itemsWithCommands = new CommandSaveDecorator(itemsWithLoad, { treeItem: StoreData.getTreeItem() });
     this.setStaticChild('treeItems', itemsWithCommands);
 
     const reloadAction = new ActionButton({ id: 'reload', label: 'Rafraîchir' });
-    reloadAction.setDoActionCallback(itemsWithCommands.loadItems.bind(itemsWithCommands));
+    reloadAction.setDoActionCallback(itemsWithLoad.loadItems.bind(itemsWithLoad));
     const toolbar = new Toolbar();
     toolbar.addChild(reloadAction);
+
+    const saveAction = new ActionButton({ id: 'save', label: 'Sauvegarder' });
+    saveAction.setDoActionCallback(itemsWithCommands.doSave.bind(itemsWithCommands));
+    toolbar.addChild(saveAction);
 
     const exportAction = new ActionButton({ id: 'export', label: 'Exporter' });
     const exportActionWithCommands = new CommandActionDecorator(exportAction);
@@ -42,7 +48,7 @@ class NavTree extends Component {
 
     this.setStaticChild('toolbar', toolbar);
 
-    itemsWithCommands.loadItems();
+    itemsWithLoad.loadItems();
   }
 
 }

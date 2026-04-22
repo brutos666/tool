@@ -4,7 +4,7 @@ import com.brutos.tool.entity.Item;
 import com.brutos.tool.entity.Tree;
 import com.brutos.tool.service.CsvService;
 import com.brutos.tool.service.ItemService;
-import com.brutos.tool.service.TreeService;
+import com.brutos.tool.utilities.TreeUtils;
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import org.springframework.http.HttpHeaders;
@@ -22,21 +22,19 @@ public class ExportController {
 
     private final CsvService csvService;
     private final ItemService itemService;
-    private final TreeService<Item> treeService;
 
     // @Autowired
-    public ExportController(CsvService csvService, ItemService itemService, TreeService<Item> treeService) {
+    public ExportController(CsvService csvService, ItemService itemService) {
         this.csvService = csvService;
         this.itemService = itemService;
-        this.treeService = treeService;
     }
 
     @GetMapping("/allItems")
     public ResponseEntity<String> findAllItems() throws CsvRequiredFieldEmptyException, CsvDataTypeMismatchException {
         List<Item> items = itemService.getAllItems();
         // Permet de trier les items pour rendre le fichier exporté plus lisible
-        List<Tree<Item>> trees = treeService.transformToTrees(items);
-        List<Item> orderedItems = treeService.transformToListLevelOrder(trees);
+        List<Tree<Item>> trees = TreeUtils.transformToTrees(items);
+        List<Item> orderedItems = TreeUtils.transformToListLevelOrder(trees);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=users.csv")
                 .contentType(MediaType.TEXT_PLAIN)

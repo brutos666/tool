@@ -2,13 +2,10 @@ package com.brutos.tool.service;
 
 import com.brutos.tool.entity.Item;
 import com.brutos.tool.entity.State;
-import com.brutos.tool.mapper.ItemMapper;
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 
@@ -20,15 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
 class CsvServiceTest {
-    @Mock
-    private ItemMapper itemMapper;
-    private CsvService csvService;
-
-    @BeforeEach
-    public void setUp() {
-        itemMapper = new ItemMapper();
-        csvService = new CsvService(itemMapper);
-    }
+    private final CsvService csvService = new CsvService();
 
     @Test
     public void convertAllItemsToCsv_shouldReturnCsvString() throws CsvRequiredFieldEmptyException, CsvDataTypeMismatchException {
@@ -56,17 +45,21 @@ class CsvServiceTest {
 
         // Then
         // On ne sait pas dans quelle
-        assertEquals("\"ID\";\"NEXTID\";\"PARENTID\";\"STATE\";\"TEXT\";\"TITLE\"\n" +
-                "\"88\";\"102\";\"-1\";\"TODO\";\"Check list\";\"Liste de vacances\"\n" +
-                "\"102\";\"\";\"-1\";\"DONE\";\"\";\"Todo liste\"\n", result);
+        assertEquals("""
+                "ID";"NEXTID";"PARENTID";"STATE";"TEXT";"TITLE"
+                "88";"102";"-1";"TODO";"Check list";"Liste de vacances"
+                "102";"";"-1";"DONE";"";"Todo liste"
+                """, result);
     }
 
     @Test
     public void convertCsvToItems_shouldReturnList() throws CsvRequiredFieldEmptyException, CsvDataTypeMismatchException, IOException {
         // Given
-        String csv = "\"ID\";\"NEXTID\";\"PARENTID\";\"STATE\";\"TEXT\";\"TITLE\"\n" +
-                "\"88\";\"102\";\"-1\";\"TODO\";\"Check list\";\"Liste de vacances\"\n" +
-                "\"102\";\"\";\"-1\";\"DONE\";\"\";\"Todo liste\"\n";
+        String csv = """
+                "ID";"NEXTID";"PARENTID";"STATE";"TEXT";"TITLE"
+                "88";"102";"-1";"TODO";"Check list";"Liste de vacances"
+                "102";"";"-1";"DONE";"";"Todo liste"
+                """;
 
         // When
         List<Item> result = csvService.convertCsvToItems(new MockMultipartFile("test.csv", csv.getBytes()));

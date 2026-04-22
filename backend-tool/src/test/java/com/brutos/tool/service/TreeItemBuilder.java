@@ -64,7 +64,11 @@ public class TreeItemBuilder {
         return this;
     }
 
-    public List<Tree<Item>> build() {
+    public List<Tree<Item>> buildList() {
         return items;
+    }
+
+    public Tree<Item> build() {
+        return currentItem;
     }
 }

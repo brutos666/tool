@@ -6,7 +6,7 @@ import com.brutos.tool.handler.webResult.ItemWebResult;
 import com.brutos.tool.mapper.ItemMapper;
 import com.brutos.tool.service.CsvService;
 import com.brutos.tool.service.ItemService;
-import com.brutos.tool.service.TreeService;
+import com.brutos.tool.utilities.TreeUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,15 +22,11 @@ import java.util.Optional;
 public class ImportController {
     private final CsvService csvService;
     private final ItemService itemService;
-    private final TreeService<Item> treeService;
-    private final ItemMapper itemMapper;
 
     // @Autowired
-    public ImportController(CsvService csvService, ItemService itemService, TreeService<Item> treeService, ItemMapper itemMapper) {
+    public ImportController(CsvService csvService, ItemService itemService) {
         this.csvService = csvService;
         this.itemService = itemService;
-        this.treeService = treeService;
-        this.itemMapper = itemMapper;
     }
 
     @PostMapping("/items")
@@ -40,12 +36,12 @@ public class ImportController {
             throw new IllegalArgumentException("Le fichier est vide");
         }
         List<Item> flatItems = csvService.convertCsvToItems(file);
-        List<Tree<Item>> items = treeService.transformToTrees(flatItems);
-        treeService.applyFunctionOnEach(items, itemService::setNullIds);
+        List<Tree<Item>> items = TreeUtils.transformToTrees(flatItems);
+        TreeUtils.applyFunctionOnEach(items, itemService::setNullIds);
         Optional<Item> lastItem = itemService.getLastRootItem();
-        List<Item> savedItems = itemService.saveTreeItems(lastItem, items);
-        List<Tree<Item>> savedItemsTree = treeService.transformToTrees(savedItems);
-        return itemMapper.treeToWebResult(savedItemsTree);
+        List<Item> savedItems = itemService.createTreeItems(lastItem, -1L, items);
+        List<Tree<Item>> savedItemsTree = TreeUtils.transformToTrees(savedItems);
+        return ItemMapper.treeToWebResult(savedItemsTree);
     }
 
 }
