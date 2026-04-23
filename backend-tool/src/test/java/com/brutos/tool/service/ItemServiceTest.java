@@ -114,12 +114,12 @@ public class ItemServiceTest {
         // Given
         ItemModel lastItem = new ItemModel(2L, TITLE, TEXT, State.TODO.name(), -1L, null);
         when(itemRepository.findById(anyLong())).thenReturn(Optional.of(lastItem));
-        Item itemToSave1 = new ItemBuilder().withCrudMode(CRUDMode.CREATE).withTitle(TITLE1).withText(TEXT1)
+        Item treeInfos1 = new ItemBuilder().withCrudMode(CRUDMode.CREATE).withTitle(TITLE1).withText(TEXT1)
                 .withState(State.TODO).withParentId(-1L).build();
-        Item itemToSave1Child1 = new ItemBuilder().withCrudMode(CRUDMode.CREATE).withTitle(TITLE2).withText(TEXT2)
+        Item treeInfos1Child1 = new ItemBuilder().withCrudMode(CRUDMode.CREATE).withTitle(TITLE2).withText(TEXT2)
                 .withState(State.TODO).build();
-        Tree<Item> treeItem = new Tree<>(itemToSave1);
-        treeItem.addChild(itemToSave1Child1);
+        Tree<Item> treeItem = new Tree<>(treeInfos1);
+        treeItem.addChild(treeInfos1Child1);
         nextId = 3L;
         TreeInfos treeInfos = new TreeInfos(treeItem, 2L, -1L, 4L);
         mockSaveAll();
@@ -148,16 +148,16 @@ public class ItemServiceTest {
         // Given
         ItemModel lastItem = new ItemModel(2L, TITLE, TEXT, State.TODO.name(), -1L, null);
         when(itemRepository.findById(anyLong())).thenReturn(Optional.of(lastItem));
-        Item itemToSave1 = new ItemBuilder().withCrudMode(CRUDMode.CREATE).withTitle(TITLE1).withText(TEXT1)
+        Item treeInfos1 = new ItemBuilder().withCrudMode(CRUDMode.CREATE).withTitle(TITLE1).withText(TEXT1)
                 .withState(State.TODO).withParentId(-1L).build();
-        Item itemToSave1Child1 = new ItemBuilder().withCrudMode(CRUDMode.CREATE).withTitle(TITLE2).withText(TEXT2)
+        Item treeInfos1Child1 = new ItemBuilder().withCrudMode(CRUDMode.CREATE).withTitle(TITLE2).withText(TEXT2)
                 .withState(State.TODO).build();
-        Item itemToSave1Child2 = new ItemBuilder().withCrudMode(CRUDMode.CREATE).withTitle(TITLE3).withText(TEXT3)
+        Item treeInfos1Child2 = new ItemBuilder().withCrudMode(CRUDMode.CREATE).withTitle(TITLE3).withText(TEXT3)
                 .withState(State.DONE).build();
         Tree<Item> treeItem = new TreeBuilder<Item>()
-                .withRootItem(itemToSave1)
-                .withFirstChild(itemToSave1Child1)
-                .withNextChild(itemToSave1Child2)
+                .withRootItem(treeInfos1)
+                .withFirstChild(treeInfos1Child1)
+                .withNextChild(treeInfos1Child2)
                 .build();
         TreeInfos treeInfos = new TreeInfos(treeItem, 2L, -1L, 12L);
         nextId = 3L;
@@ -190,26 +190,26 @@ public class ItemServiceTest {
         // Given
         ItemModel lastItem = new ItemModel(2L, TITLE, TEXT, State.TODO.name(), -1L, null);
         when(itemRepository.findById(anyLong())).thenReturn(Optional.of(lastItem));
-        Item itemToSave1 = new ItemBuilder()
+        Item treeInfos1 = new ItemBuilder()
                 .withCrudMode(CRUDMode.CREATE).withParentId(-1L).withTitle(TITLE1)
                 .withText(TEXT1).withState(State.TODO).build();
-        Item itemToSave1Child1 = new ItemBuilder()
+        Item treeInfos1Child1 = new ItemBuilder()
                 .withCrudMode(CRUDMode.CREATE).withTitle(TITLE2)
                 .withText(TEXT2).withState(State.TODO).build();
-        Item itemToSave1Child1_1 = new ItemBuilder()
+        Item treeInfos1Child1_1 = new ItemBuilder()
                 .withCrudMode(CRUDMode.CREATE).withTitle(TITLE3)
                 .withText(TEXT3).withState(State.DONE).build();
-        Item itemToSave1Child1_2 = new ItemBuilder()
+        Item treeInfos1Child1_2 = new ItemBuilder()
                 .withCrudMode(CRUDMode.CREATE).withTitle(TITLE4)
                 .withText(TEXT4).withState(State.TODO).build();
-        Item itemToSave1Child1_2_1 = new ItemBuilder()
+        Item treeInfos1Child1_2_1 = new ItemBuilder()
                 .withCrudMode(CRUDMode.CREATE).withTitle(TITLE5)
                 .withText(TEXT5).withState(State.TODO).build();
-        Tree<Item> treeToSave1 = new Tree<>(itemToSave1);
-        Tree<Item> treeToSave1Child1 = treeToSave1.addChild(itemToSave1Child1);
-        treeToSave1Child1.addChild(itemToSave1Child1_1);
-        Tree<Item> treeToSave1Child1_2 = treeToSave1Child1.addChild(itemToSave1Child1_2);
-        treeToSave1Child1_2.addChild(itemToSave1Child1_2_1);
+        Tree<Item> treeToSave1 = new Tree<>(treeInfos1);
+        Tree<Item> treeToSave1Child1 = treeToSave1.addChild(treeInfos1Child1);
+        treeToSave1Child1.addChild(treeInfos1Child1_1);
+        Tree<Item> treeToSave1Child1_2 = treeToSave1Child1.addChild(treeInfos1Child1_2);
+        treeToSave1Child1_2.addChild(treeInfos1Child1_2_1);
         nextId = 3L;
         mockSaveAll();
         TreeInfos treeInfos = new TreeInfos(treeToSave1, 2L, -1L, 15L);

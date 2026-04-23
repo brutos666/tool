@@ -3,10 +3,10 @@ package com.brutos.tool.controller;
 import com.brutos.tool.entity.Item;
 import com.brutos.tool.entity.Tree;
 import com.brutos.tool.entity.TreeInfos;
-import com.brutos.tool.handler.webResult.ItemToSaveWebResult;
 import com.brutos.tool.handler.webResult.ItemWebResult;
+import com.brutos.tool.handler.webResult.TreeInfosWebResult;
 import com.brutos.tool.mapper.ItemMapper;
-import com.brutos.tool.mapper.ItemToSaveMapper;
+import com.brutos.tool.mapper.TreeInfosMapper;
 import com.brutos.tool.service.ItemService;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,11 +30,11 @@ public class ItemListController {
     }
 
     @PostMapping("/save")
-    public ItemToSaveWebResult saveItem(@RequestBody ItemToSaveWebResult itemToSaveWebRequest) {
-        TreeInfos treeInfos = ItemToSaveMapper.toEntity(itemToSaveWebRequest);
+    public TreeInfosWebResult saveItem(@RequestBody TreeInfosWebResult treeInfosWebRequest) {
+        TreeInfos treeInfos = TreeInfosMapper.toEntity(treeInfosWebRequest);
 
         TreeInfos savedItems = itemService.saveTreeItem(treeInfos);
 
-        return ItemToSaveMapper.toWebResult(savedItems);
+        return TreeInfosMapper.toWebResult(savedItems);
     }
 }

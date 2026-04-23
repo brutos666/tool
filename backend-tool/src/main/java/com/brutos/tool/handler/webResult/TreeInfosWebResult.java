@@ -1,15 +1,15 @@
 package com.brutos.tool.handler.webResult;
 
-public class ItemToSaveWebResult {
+public class TreeInfosWebResult {
     private ItemWebResult item;
     private Long previousItemId;
-    private Long parentId;
+    private Long parentItemId;
     private Long nextItemId;
 
-    public ItemToSaveWebResult(ItemWebResult item, Long previousItemId, Long parentId, Long nextItemId) {
+    public TreeInfosWebResult(ItemWebResult item, Long previousItemId, Long parentItemId, Long nextItemId) {
         this.item = item;
         this.previousItemId = previousItemId;
-        this.parentId = parentId;
+        this.parentItemId = parentItemId;
         this.nextItemId = nextItemId;
     }
 
@@ -37,11 +37,11 @@ public class ItemToSaveWebResult {
         this.nextItemId = nextItemId;
     }
 
-    public Long getParentId() {
-        return parentId;
+    public Long getParentItemId() {
+        return parentItemId;
     }
 
-    public void setParentId(Long parentId) {
-        this.parentId = parentId;
+    public void setParentItemId(Long parentItemId) {
+        this.parentItemId = parentItemId;
     }
 }

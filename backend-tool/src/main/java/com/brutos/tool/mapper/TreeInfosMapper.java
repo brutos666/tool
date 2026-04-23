@@ -1,19 +1,19 @@
 package com.brutos.tool.mapper;
 
 import com.brutos.tool.entity.TreeInfos;
-import com.brutos.tool.handler.webResult.ItemToSaveWebResult;
+import com.brutos.tool.handler.webResult.TreeInfosWebResult;
 
-public class ItemToSaveMapper {
+public class TreeInfosMapper {
 
-    public static TreeInfos toEntity(ItemToSaveWebResult webResult) {
+    public static TreeInfos toEntity(TreeInfosWebResult webResult) {
         return new TreeInfos(ItemMapper.toTreeEntity(webResult.getItem()),
                 webResult.getPreviousItemId(),
-                webResult.getParentId(),
+                webResult.getParentItemId(),
                 webResult.getNextItemId());
     }
 
-    public static ItemToSaveWebResult toWebResult(TreeInfos entity) {
-        return new ItemToSaveWebResult(ItemMapper.toWebResult(entity.getTreeItem()),
+    public static TreeInfosWebResult toWebResult(TreeInfos entity) {
+        return new TreeInfosWebResult(ItemMapper.toWebResult(entity.getTreeItem()),
                 entity.getPreviousItemId(),
                 entity.getParentItemId(),
                 entity.getNextItemId());
