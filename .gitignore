@@ -1,5 +1,7 @@
 # Backend
+backend-tool/database/*
 backend-tool/target/
+backend-tool/target-prod/
 backend-tool/.mvn/
 backend-tool/*.log
 

@@ -1,0 +1,13 @@
+{
+  "type": "module",
+  "name": "my-electron-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron . --ozone-platform=x11"
+  },
+  "devDependencies": {
+    "electron": "^41.3.0"
+  }
+}

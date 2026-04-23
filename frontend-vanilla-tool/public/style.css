@@ -8,7 +8,7 @@
   --error-color: light-dark(red, red);
   --success-color: light-dark(green, green);
   --created-color: light-dark(green, green);
-  --updated-color: light-dark(blue, blue);
+  --updated-color: light-dark(blue, rgb(0, 238, 255));
   --box-shadow-color: light-dark(#5d5d5d, black);
   --sample-color: light-dark(#cadf58, #cadf58);
   --story-color: light-dark(#fff9b2, #fff9b2);
