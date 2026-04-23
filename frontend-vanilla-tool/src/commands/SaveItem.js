@@ -7,18 +7,42 @@ class SaveItem extends Command {
 
   name = 'SaveItem';
 
+  /** @type {TreeItem} */
+  #treeItem;
   /**
    * @constructor de la classe CreateItem
    * @param {CommandSaveDecorator} commandItemDecorator - Item
-   * @param {ItemToSave} itemToSave
+   * @param {TreeItem} treeItem
    */
-  constructor(commandItemDecorator, itemToSave) {
+  constructor(commandItemDecorator, treeItem) {
     super(commandItemDecorator);
+    this.#treeItem = treeItem;
 
     this.setSuccessMessage('Les modifications ont bien été enregistrées');
     this.setErrorMessage('Une erreur est survenue lors de la sauvegarde des modifications');
 
-    this.setExecuteCallback(new ItemCallsRequests().saveItem.bind(null, itemToSave));
+    /** @type {TreeInfos} */
+    const treeInfos = {
+      item: this.#treeItem.getItemInfos(),
+      previousItemId: this.#treeItem.getPrevious()
+        ?.getItemId(),
+      parentItemId: this.#treeItem.getParentItem()
+        ?.getItemId(),
+      nextItemId: this.#treeItem.getNext()
+        ?.getItemId()
+    };
+    this.setExecuteCallback(new ItemCallsRequests().saveItem.bind(null, treeInfos));
+  }
+  /**
+   * @override
+   * @param {TreeInfos} treeInfos
+   */
+  commandDone(treeInfos) {
+    super.commandDone(treeInfos);
+
+    this.#treeItem.updateItem(treeInfos.item);
+    const treeItemList = this.#treeItem.getTreeItemList();
+    treeItemList.setItems(this.#treeItem, treeInfos.item.children);
   }
 
 }

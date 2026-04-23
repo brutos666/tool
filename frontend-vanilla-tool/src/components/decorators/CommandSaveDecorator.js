@@ -40,36 +40,13 @@ class CommandSaveDecorator extends CommandSpaceDecorator {
   }
 
   /**
-   * @override
-   * @param {string} name
-   * @param {TreeInfos} treeInfos
-   */
-  commandDone(name, treeInfos) {
-    super.commandDone(name, treeInfos);
-
-    this.#treeItem.updateItem(treeInfos.item);
-    const treeItemList = this.#treeItem.getTreeItemList();
-    treeItemList.setItems(this.#treeItem, treeInfos.item.children);
-  }
-
-  /**
    * Sauvegarde d'un item et de ses enfants
    */
   doSave() {
     this.setRelaunchCallback(() => {
       this.doSave();
     });
-    /** @type {TreeInfos} */
-    const treeInfos = {
-      item: this.#treeItem.getItemInfos(),
-      previousItemId: this.#treeItem.getPrevious()
-        ?.getItemId(),
-      parentItemId: this.#treeItem.getParentItem()
-        ?.getItemId(),
-      nextItemId: this.#treeItem.getNext()
-        ?.getItemId()
-    };
-    return new SaveItem(this, treeInfos)
+    return new SaveItem(this, this.#treeItem)
       .execute();
   }
 

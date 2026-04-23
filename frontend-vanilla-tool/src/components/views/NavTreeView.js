@@ -10,7 +10,6 @@ class NavTreeView extends View {
 
   getHtmlView() {
     return String.raw`<div class="nav-tree" id="navTree">
-      <template class="nav-tree__toolbar" id="toolbar"></template>
       <template class="nav-tree__space" id="treeItems" ></template>
     </div>`;
   }

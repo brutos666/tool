@@ -10,6 +10,7 @@ class WorkingSpaceView extends View {
 
   getHtmlView() {
     return String.raw`<div id="workingSpace" class="working-space">
+    <template id="menu" class="working-space__menu"></template>
     <nav id="navSpace" class="working-space__nav"><template id="nav"></template></nav>
     <div id="splitter" class="working-space__splitter">&nbsp;</div>
     <template id="main" class="working-space__main"></template>

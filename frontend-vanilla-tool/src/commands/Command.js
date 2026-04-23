@@ -63,18 +63,29 @@ class Command {
       alert('Attendre que la commande soit terminée !!');
       return;
     }
+    this.commandInProgress();
     commandDecorator.commandInProgress(this.name, this);
     commandDecorator.setInProgress();
     return this.#executeCallback()
       .then(response => {
+        this.commandDone(response);
         commandDecorator.commandDone(this.name, response);
         commandDecorator.setSuccess(this.#successMessage);
         return Promise.resolve(response);
       }, errorResponse => {
+        this.commandFailed(errorResponse);
         commandDecorator.commandFailed(this.name);
         commandDecorator.setError(`${ this.#errorMessage } : ${ errorResponse }`);
         return Promise.reject(errorResponse);
       });
+  }
+
+  commandInProgress() {
+  }
+
+  commandDone(/* response */) {
+  }
+  commandFailed(/* response */) {
   }
 
 }

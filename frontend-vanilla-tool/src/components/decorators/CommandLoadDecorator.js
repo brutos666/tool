@@ -1,5 +1,4 @@
 import LoadItems from '../../commands/LoadItems.js';
-import StoreData from '../../data/StoreData.js';
 import CommandSpaceDecorator from './CommandSpaceDecorator.js';
 import CommandDecoratorView from './views/CommandDecoratorView.js';
 /** @import TreeList from '../TreeList.js'; */
@@ -23,22 +22,6 @@ class CommandLoadDecorator extends CommandSpaceDecorator {
    */
   getDecoratedElement() {
     return super.getDecoratedElement();
-  }
-
-  /**
-   * @override
-   * @param {string} name
-   * @param {Array<ItemInfos>} itemInfosList
-   */
-  commandDone(name, itemInfosList) {
-    super.commandDone(name, itemInfosList);
-    if (name !== 'LoadItems') {
-      return;
-    }
-    if (itemInfosList.length === 0) {
-      itemInfosList.push({ id: undefined, title: 'Nouvel espace', text: '', state: 'TODO', parentId: undefined, children: [] });
-    }
-    StoreData.storeItems(itemInfosList);
   }
 
   loadItems() {

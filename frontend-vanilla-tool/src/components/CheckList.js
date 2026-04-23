@@ -1,5 +1,4 @@
 import { RIGHT, ITEM_LAYOUT } from '../tools/Constants.js';
-import CommandItemDecorator from './decorators/CommandItemDecorator.js';
 import Item from './Item.js';
 import TreeList from './TreeList.js';
 import CheckListView from './views/CheckListView.js';
@@ -9,7 +8,6 @@ class CheckList extends TreeList {
 
   name = 'CheckList';
 
-  #commandItem;
   #item;
 
   constructor(treeItem) {
@@ -17,8 +15,7 @@ class CheckList extends TreeList {
 
     const rights = [RIGHT.update];
     this.#item = new Item({ treeItem, layout: ITEM_LAYOUT.Todo, rights });
-    this.#commandItem = new CommandItemDecorator(this.#item, { treeItem, rights });
-    this.setStaticChild('title', this.#commandItem);
+    this.setStaticChild('title', this.#item);
 
     const addButton = new ActionButton({ id: 'addNewItem', label: 'Ajouter un élément' });
     addButton.setDoActionCallback(this.addNewItem.bind(this, 'Nouveau todo'));
@@ -31,7 +28,6 @@ class CheckList extends TreeList {
    */
   setTreeItem(treeItem) {
     this.#item.updateData({ treeItem, layout: ITEM_LAYOUT.Todo, rights: [RIGHT.update] });
-    this.#commandItem.setTreeItem(treeItem);
     super.setTreeItem(treeItem);
   }
 

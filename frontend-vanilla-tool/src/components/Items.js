@@ -1,6 +1,5 @@
 import { ITEM_LAYOUT, RIGHT } from '../tools/Constants.js';
 import Component from './Component.js';
-import CommandItemDecorator from './decorators/CommandItemDecorator.js';
 import Item from './Item.js';
 import ItemsView from './views/ItemsView.js';
 /** @import TreeItem from '../data/TreeItem.js'; */
@@ -138,9 +137,7 @@ class Items extends Component {
   getItemComponent(treeItem) {
     const layout = this.getLayout();
     const rights = ITEM_LAYOUT.getRights(layout);
-    const item = new Item({ treeItem, layout, rights });
-    // Mise en place du décorateur permettant la validation en base de données
-    return new CommandItemDecorator(item, { treeItem, rights });
+    return new Item({ treeItem, layout, rights });
   }
   removeItemComponent(component) {
     component.destroy();
