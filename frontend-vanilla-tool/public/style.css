@@ -106,7 +106,6 @@ body {
 .menu__element:focus-visible {
   outline: var(--focus-color) solid 2px;
 }
-
 /* Responsive */
 @media (max-width: 768px) {
   .menu {
@@ -147,6 +146,14 @@ body {
   height: 100%;
   min-height: 0;
   overflow: hidden;
+}
+
+/** Upload d'un fichier et son bouton **/
+.file-upload {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5em;
 }
 
 /** Message d'erreur **/

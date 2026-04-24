@@ -8,6 +8,7 @@ import ActionButton from './ActionButton.js';
 import FileUpload from './FileUpload.js';
 import StoreData from '../data/StoreData.js';
 import CommandSpaceDecorator from './decorators/CommandSpaceDecorator.js';
+import ButtonDialog from './decorators/ButtonDialog.js';
 
 class WorkingSpace extends Component {
 
@@ -28,8 +29,9 @@ class WorkingSpace extends Component {
     saveMainAction.setDoActionCallback(decorateMainSpace.doSave.bind(decorateMainSpace));
     const exportAction = new ActionButton({ id: 'export', label: 'Exporter tout', role: 'menuitem' });
     exportAction.setDoActionCallback(decorateNavTree.exportItems.bind(decorateNavTree));
-    const importAction = new FileUpload({ id: 'import', label: 'Importer', role: 'menuitem' });
-    importAction.setDoActionCallback(decorateNavTree.importItems.bind(decorateNavTree));
+    const importFile = new FileUpload({ id: 'import', label: 'Importer', role: 'menuitem' });
+    importFile.setDoActionCallback(decorateNavTree.importItems.bind(decorateNavTree));
+    const importAction = new ButtonDialog(importFile, { id: 'import', label: 'Importer', role: 'menuitem' });
 
     menu.addChild(reloadAction);
     menu.addChild(saveAllAction);
