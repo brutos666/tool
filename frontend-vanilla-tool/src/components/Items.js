@@ -14,8 +14,6 @@ class Items extends Component {
   #treeItem;
   /** @type {Array<Component>} */
   #itemsComponent = [];
-  /** @type {Array<TreeItem>} */
-  #treeItemArray = [];
 
   /**
    * @constructor
@@ -39,9 +37,6 @@ class Items extends Component {
   }
   addNewItem(title) {
     this.#treeItem.addItem({ title, state: 'TODO', children: [] });
-  }
-  doDelete(treeItemToRemove) {
-    this.#treeItem.removeItem(treeItemToRemove);
   }
   getItemsComponent() {
     return this.#itemsComponent;
@@ -96,7 +91,6 @@ class Items extends Component {
     treeItemArray.forEach(treeItem => {
       const itemComponent = this.getItemComponent(treeItem);
       this.addItemView(itemComponent);
-      this.#treeItemArray.push(treeItem);
       this.#itemsComponent.push(itemComponent);
     });
   }
@@ -107,10 +101,11 @@ class Items extends Component {
    */
   removeItems(treeItemArray) {
     treeItemArray.forEach(treeItem => {
-      const index = this.#treeItemArray.indexOf(treeItem);
+      const index = this.#treeItem.getTreeItemList()
+        .getTreeList()
+        .indexOf(treeItem);
       this.removeItemView(index);
       this.removeItemComponent(this.#itemsComponent[index]);
-      this.#treeItemArray.splice(index, 1);
       this.#itemsComponent.splice(index, 1);
     });
   }
@@ -120,7 +115,6 @@ class Items extends Component {
     // Supprimer tous les observateurs
     this.#itemsComponent.forEach(item => this.removeItemComponent(item));
     this.#itemsComponent = [];
-    this.#treeItemArray = [];
   }
 
   /**

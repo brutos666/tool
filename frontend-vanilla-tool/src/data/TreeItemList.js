@@ -69,8 +69,8 @@ class TreeItemList {
     if (index === -1) {
       return;
     }
-    this.#treeList.splice(index, 1);
     this.alertObservers('remove', [treeItemToRemove]);
+    this.#treeList.splice(index, 1);
     treeItemToRemove.alertObservers('deleted');
   }
 
