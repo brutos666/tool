@@ -1,0 +1,11 @@
+.main-space {
+  width: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+.main-space__content {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+

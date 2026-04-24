@@ -29,7 +29,7 @@ class ItemsView extends View {
   }
 
   getHtmlView() {
-    return String.raw`<div class="items"><div id="itemsSpace" class="items__space"><template id="addItemAction" class="items__add-item"></template></div></div>`;
+    return String.raw`<div class="items"><div id="itemsSpace" class="items__space"><template id="addItemAction" class="items__add-item tree--root"></template></div></div>`;
   }
 
 }

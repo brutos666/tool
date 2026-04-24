@@ -1,0 +1,20 @@
+.focused {
+  outline: var(--focus-color) solid 2px;
+}
+*:focus {
+  outline: var(--focus-color) solid 2px;
+}
+
+.selected {
+  background-color: var(--selected-color);
+}
+
+.disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.clickable {
+  cursor: pointer;
+}
+

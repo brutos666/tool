@@ -66,12 +66,12 @@ class SampleMappingTablesView extends View {
   getHtmlView() {
     return String.raw`<div class ="sample-mapping"><table class="sample-mapping__table"><thead>
       <tr>
-        <th class="sample-mapping__story-item" colspan="1" ><template id="storyItem"></template></th>
+        <th class="sample-mapping__story-item post-it" colspan="1" ><template id="storyItem"></template></th>
         <th class="spacer"></th>
         <th class="sample-mapping__story-type"><span class="sample-mapping--type">Story</span></th>
       </tr>
       <tr id="spaceRules">
-        <th class="sample-mapping__add-rule sample-mapping__rule"><template id="addItemAction" class="items__add-item"></template></th>
+        <th class="sample-mapping__add-rule sample-mapping__rule "><template id="addItemAction" class="items__add-item post-it"></template></th>
         <th class="spacer"></th>
         <th class="sample-mapping__rules-type"><span class="sample-mapping--type">Rules</span></th>
       </tr></thead>

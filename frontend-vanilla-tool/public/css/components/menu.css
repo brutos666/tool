@@ -1,0 +1,73 @@
+.menu {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  background-color: var(--menu-color);
+  padding: 0.5em 1.5em;
+  min-height: 0;
+}
+.menu__button {
+  display: block;
+  font-size: 1.2em;
+  cursor: pointer;
+}
+.menu__actions {
+  display: flex;
+  flex-direction: row;
+  display: flex;
+  gap: 20px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.menu__element {
+  background-color: var(--menu-color);
+  transition: background-color 0.3s;
+}
+.menu__element:hover {
+  background-color: var(--menu-hover-color);
+}
+/* Reset indispensable sur button */
+.menu__element button {
+  all: unset; /* ou reset manuel */
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  width: max-content;
+  text-align: left;
+  border-radius: 4px;
+}
+.menu__element button:focus-visible {
+  outline: var(--focus-color) solid 2px;
+}
+/* Responsive */
+@media (max-width: 768px) {
+  .menu {
+    flex-wrap: wrap;
+  }
+  .menu__actions {
+    display: none;
+    flex-direction: column;
+    background-color: var(--menu-color);
+    position: absolute;
+    top: 2em;
+    left: 0;
+    width: 100%;
+    padding: 1em;
+    width: fit-content;
+    gap: 0.5em;
+  }
+  .menu__element {
+    background-color: var(--menu-color);
+  }
+  .menu__button {
+    display: block;
+  }
+  /* Affichage du menu verticalement si l'utilisateur clique sur le bouton de menu */
+  #menuButton:checked ~ .menu__actions {
+    display: flex;
+  }
+}
+

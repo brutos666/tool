@@ -1,0 +1,8 @@
+/** Upload d'un fichier et son bouton **/
+.file-upload {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5em;
+}
+

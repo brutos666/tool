@@ -1,0 +1,9 @@
+.nav-tree__space {
+  margin: 2px;
+}
+.nav-tree__space > .items__space {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+

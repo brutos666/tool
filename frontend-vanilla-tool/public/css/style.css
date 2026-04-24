@@ -1,0 +1,51 @@
+@layer base, components, modules, utilities;
+
+@import "base/colors.css" layer(base);
+@import "base/layout.css" layer(base);
+@import "base/reset.css" layer(base);
+@import "components/add-item.css" layer(components);
+@import "components/button.css" layer(components);
+@import "components/file-upload.css" layer(components);
+@import "components/item.css" layer(components);
+@import "components/menu.css" layer(components);
+@import "components/tree.css" layer(components);
+@import "modules/check-list.css" layer(modules);
+@import "modules/main-space.css" layer(modules);
+@import "modules/nav-tree.css" layer(modules);
+@import "modules/sample-mapping.css" layer(modules);
+@import "modules/working-space.css" layer(modules);
+@import "utilities/notification.css" layer(utilities);
+@import "utilities/status.css" layer(utilities);
+@import "utilities/visibility.css" layer(utilities);
+
+:root {
+  color-scheme: light dark;
+  --color: light-dark(#202222, #e0e0e0);
+  --background-color: light-dark(#d0d0d0, #353838);
+  --border-color: light-dark(#5d5d5d, #5d5d5d);
+  --menu-color: light-dark(#5d5d5d, #222);
+  --menu-hover-color: light-dark(#5f5fff, #005d5d);
+  --focus-color: light-dark(#0000ff, #00eeff);
+  --selected-color: light-dark(orange, orange);
+  --error-color: light-dark(red, red);
+  --success-color: light-dark(green, green);
+  --created-color: light-dark(green, green);
+  --updated-color: light-dark(blue, #00eeff);
+  --box-shadow-color: light-dark(#5d5d5d, black);
+  --sample-color: light-dark(#cadf58, #cadf58);
+  --story-color: light-dark(#fff9b2, #fff9b2);
+  --rules-color: light-dark(#a7cdf5, #a7cdf5);
+  --question-color: light-dark(#f0949e, #f0949e);
+  --item-color: light-dark(#fff9b2, #fff9b2);
+  --text-item-color: light-dark(#202222, #202222);
+  --post-it-width: 200px;
+  --post-it-height: 200px;
+}
+
+/** attributs communs **/
+
+.command--decorator {
+  display: flex;
+  flex-direction: column;
+}
+
