@@ -27,7 +27,7 @@ class TreeItem {
   /** @type {TreeItem} */
   #parentItem;
 
-  /** @type {Array<Object.<Component, Array<RIGHT>>>} */
+  /** @type {Array<Component>} */
   #observers = [];
   /** Modification effectuées */
   #updates = {};
@@ -149,9 +149,7 @@ class TreeItem {
    * @param {'update'|'updated'|'deleted'|'addItem'|'removeItem'} action
    */
   alertObservers(action) {
-    for (const observerObject of this.#observers) {
-      /** @type {Component} */
-      const observer = observerObject.observer;
+    for (const observer of this.#observers) {
       observer.update(action, this);
     }
   }
@@ -179,12 +177,12 @@ class TreeItem {
     return this.#deleted;
   }
 
-  addObserver(observer, rights) {
-    this.#observers.push({ observer, rights });
+  addObserver(observer) {
+    this.#observers.push(observer);
   }
 
   removeObserver(observer) {
-    const index = this.#observers.findIndex(observerObject => observerObject.observer === observer);
+    const index = this.#observers.indexOf(observer);
     if (index !== -1) {
       this.#observers.splice(index, 1);
     }
