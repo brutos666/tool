@@ -24,7 +24,8 @@ class CommandSpaceDecorator extends CommandDecorator {
     super(new CommandDecoratorView(decoratedElement.getView()), decoratedElement, data);
     this.#relaunchButton = new ActionButton({
       id: 'relaunchButton',
-      label: 'Relancer'
+      label: 'Relancer',
+      role: 'button'
     });
     this.#relaunchButton.setDoActionCallback(() => {
       this.#relaunchCallback();

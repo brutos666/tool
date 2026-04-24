@@ -14,7 +14,7 @@ class NavTree extends Component {
     super(new NavTreeView());
 
     const items = new TreeList(new TreeListView(), StoreData.getTreeItem(), ITEM_LAYOUT.Title);
-    const addButton = new ActionButton({ id: 'addNewItem', label: 'Ajouter un espace' });
+    const addButton = new ActionButton({ id: 'addNewItem', label: 'Ajouter un espace', role: 'button' });
     addButton.setDoActionCallback(items.addNewItem.bind(items, 'Nouvel espace'));
     items.setStaticChild('addItemAction', addButton);
 

@@ -8,7 +8,7 @@ class SampleMappingSamples extends Items {
   name = 'SampleMappingSamples';
   constructor(treeItem) {
     super(new SampleMappingSamplesView(), treeItem, ITEM_LAYOUT.Sample);
-    const buttonAddSample = new ActionButton({ label: 'Add Sample' });
+    const buttonAddSample = new ActionButton({ label: 'Ajouter un exemple', role: 'button' });
     buttonAddSample.setDoActionCallback(this.addNewItem.bind(this, 'Nouvelle exemple'));
     this.setStaticChild('addItemAction', buttonAddSample);
   }

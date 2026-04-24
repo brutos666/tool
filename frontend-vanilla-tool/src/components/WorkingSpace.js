@@ -19,16 +19,16 @@ class WorkingSpace extends Component {
     const decorateNavTree = new CommandSpaceDecorator(new NavTree(), { treeItem });
     const decorateMainSpace = new CommandSpaceDecorator(new MainSpace(), { treeItem });
 
-    const reloadAction = new ActionButton({ id: 'reload', label: 'Actualiser' });
+    const reloadAction = new ActionButton({ id: 'reload', label: 'Actualiser', role: 'menuitem' });
     reloadAction.setDoActionCallback(decorateNavTree.loadItems.bind(decorateNavTree));
-    const saveAllAction = new ActionButton({ id: 'save', label: 'Sauvegarder tout' });
+    const saveAllAction = new ActionButton({ id: 'save', label: 'Sauvegarder tout', role: 'menuitem' });
     saveAllAction.setDoActionCallback(decorateNavTree.doSave.bind(decorateNavTree));
 
-    const saveMainAction = new ActionButton({ id: 'saveCurrent', label: 'Sauvegarder la vue courante' });
+    const saveMainAction = new ActionButton({ id: 'saveCurrent', label: 'Sauvegarder la vue courante', role: 'menuitem' });
     saveMainAction.setDoActionCallback(decorateMainSpace.doSave.bind(decorateMainSpace));
-    const exportAction = new ActionButton({ id: 'export', label: 'Exporter tout' });
+    const exportAction = new ActionButton({ id: 'export', label: 'Exporter tout', role: 'menuitem' });
     exportAction.setDoActionCallback(decorateNavTree.exportItems.bind(decorateNavTree));
-    const importAction = new FileUpload({ id: 'import', label: 'Importer' });
+    const importAction = new FileUpload({ id: 'import', label: 'Importer', role: 'menuitem' });
     importAction.setDoActionCallback(decorateNavTree.importItems.bind(decorateNavTree));
 
     menu.addChild(reloadAction);

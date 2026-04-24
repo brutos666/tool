@@ -32,12 +32,12 @@ class Item extends Component {
     const toolbar = new Toolbar();
 
     if (data.rights.includes(RIGHT.create)) {
-      const addAction = new ActionButton({ id: 'addNewChild', label: '+' });
+      const addAction = new ActionButton({ id: 'addNewChild', label: '+', role: 'button' });
       addAction.setDoActionCallback(this.doAdd.bind(this, 'Nouvel item'));
       toolbar.addChild(addAction);
     }
     if (data.rights.includes(RIGHT.delete)) {
-      const deleteAction = new ActionButton({ id: 'deleteItem', label: 'X' });
+      const deleteAction = new ActionButton({ id: 'deleteItem', label: 'X', role: 'button' });
       deleteAction.setDoActionCallback(this.doDelete.bind(this));
       toolbar.addChild(deleteAction);
     }

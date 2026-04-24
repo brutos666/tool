@@ -22,7 +22,7 @@ class MainSpace extends Component {
     super(new MainSpaceView());
     const select = new Select({ id: 'select', options: LAYOUT.getOptions() });
     select.setDoSelectCallback(this.changeDisplay.bind(this));
-    const saveAction = new ActionButton({ id: 'save', label: 'Sauvegarder les modifications' });
+    const saveAction = new ActionButton({ id: 'save', label: 'Sauvegarder les modifications', role: 'button' });
     saveAction.setDoActionCallback(this.doSave.bind(this));
 
     const toolbar = new Toolbar();

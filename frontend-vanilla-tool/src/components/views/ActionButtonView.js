@@ -20,10 +20,11 @@ class ActionButtonView extends View {
    * @param {Object} data - Données à utiliser pour créer la vue
    * @param {string} data.id - Identifiant du bouton
    * @param {string} data.label - Label du bouton
+   * @param {string} data.role - Rôle du bouton
    * @returns {string} - Code HTML du bouton
    */
   getHtmlView(data) {
-    return String.raw`<button id="${ data.id }" class="clickable">${ data.label }</button>`;
+    return String.raw`<button id="${ data.id }" class="clickable action__button" role>${ data.label }</button>`;
   }
 
   setDoActionCallback(callback) {
