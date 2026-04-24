@@ -5,8 +5,8 @@ import MainSpaceView from './views/MainSpaceView.js';
 import { LAYOUT } from '../tools/Constants.js';
 import CheckList from './CheckList.js';
 import SampleMappingTables from './SampleMappingTables.js';
-import CommandSaveDecorator from './decorators/CommandSaveDecorator.js';
 import ActionButton from './ActionButton.js';
+import CommandSpaceDecorator from './decorators/CommandSpaceDecorator.js';
 /** @import Items from './Items.js'; */
 
 class MainSpace extends Component {
@@ -66,7 +66,7 @@ class MainSpace extends Component {
     if (!this.#main) {
       return;
     }
-    this.#saveDecorator = new CommandSaveDecorator(this.#main, { treeItem: this.#treeItem });
+    this.#saveDecorator = new CommandSpaceDecorator(this.#main, { treeItem: this.#treeItem });
     this.setStaticChild('main', this.#saveDecorator);
   }
 

@@ -6,16 +6,26 @@ class CommandDecorator extends Decorator {
   name = 'CommandDecorator';
 
   #commandInProgress = false;
+  /** @type {TreeItem} */
+  #treeItem;
 
   /**
    * @constructor
    * @param {CommandDecoratorView} view
-   * @param {Component} decoratedElement
+   * @param {Tree} decoratedElement
+   * @param {Object} data
+   * @param {TreeItem} data.treeItem
    */
-  constructor(view, decoratedElement) {
+  constructor(view, decoratedElement, data) {
     super(view, decoratedElement);
+    this.#treeItem = data.treeItem;
   }
-
+  getTreeItem() {
+    return this.#treeItem;
+  }
+  setTreeItem(treeItem) {
+    this.#treeItem = treeItem;
+  }
   /**
    * @override
    * @returns {CommandDecoratorView}

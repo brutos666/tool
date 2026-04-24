@@ -2,8 +2,14 @@
 
 import CallRequest from './CallRequest.js';
 /** @import {ItemInfos} from '../data/TreeItem.js'; */
-/** @import {TreeInfos} from '../components/decorators/CommandSaveDecorator.js'; */
 
+/**
+ * @typedef {Object} TreeInfos - Informations sur l'item
+ * @property {ItemInfos} item - Item à sauvegarder avec ses enfants
+ * @property {number} previousItemId - Identifiant de l'item précédent
+ * @property {number} parentItemId - Identifiant de l'item suivant
+ * @property {number} nextItemId - Identifiant de l'item suivant
+ */
 class ItemCallsRequests {
 
   constructor() {

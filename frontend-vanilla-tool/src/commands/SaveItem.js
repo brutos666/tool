@@ -1,7 +1,8 @@
 import Command from './Command.js';
 import ItemCallsRequests from '../requests/ItemCallsRequests.js';
-/** @import CommandSaveDecorator from '../components/decorators/CommandSaveDecorator.js'; */
-/** @import ItemToSave from '../components/decorators/CommandSaveDecorator.js' */
+/** @import CommandDecorator from '../components/decorators/CommandDecorator.js' */
+/** @import TreeItem from '../data/TreeItem.js' */
+/** @import {TreeInfos} from '../requests/ItemCallsRequests.js' */
 
 class SaveItem extends Command {
 
@@ -11,11 +12,11 @@ class SaveItem extends Command {
   #treeItem;
   /**
    * @constructor de la classe CreateItem
-   * @param {CommandSaveDecorator} commandItemDecorator - Item
+   * @param {CommandDecorator} commandDecorator - Item
    * @param {TreeItem} treeItem
    */
-  constructor(commandItemDecorator, treeItem) {
-    super(commandItemDecorator);
+  constructor(commandDecorator, treeItem) {
+    super(commandDecorator);
     this.#treeItem = treeItem;
 
     this.setSuccessMessage('Les modifications ont bien été enregistrées');

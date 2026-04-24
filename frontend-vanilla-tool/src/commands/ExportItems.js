@@ -1,5 +1,6 @@
 import Command from './Command.js';
 import FileCallsRequest from '../requests/FileCallsRequest.js';
+/** @import CommandDecorator from '../components/decorators/CommandDecorator.js' */
 
 class ExportItems extends Command {
 
@@ -7,10 +8,10 @@ class ExportItems extends Command {
 
   /**
    * @constructor
-   * @param {ActionsDecorator} actionDecorator
+   * @param {CommandDecorator} commandDecorator
    */
-  constructor(actionDecorator) {
-    super(actionDecorator);
+  constructor(commandDecorator) {
+    super(commandDecorator);
 
     this.setSuccessMessage('Export effectué');
     this.setErrorMessage('Une erreur est survenue lors de l\'export des éléments');

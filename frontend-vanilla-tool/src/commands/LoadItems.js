@@ -1,8 +1,7 @@
 import StoreData from '../data/StoreData.js';
 import ItemCallsRequests from '../requests/ItemCallsRequests.js';
 import Command from './Command.js';
-/** @import Items from '../components/Items.js'; */
-/** @import CommandItemsDecorator from '../components/decorators/CommandItemsDecorator.js' */
+/** @import CommandDecorator from '../components/decorators/CommandDecorator.js' */
 
 class LoadItems extends Command {
 
@@ -10,7 +9,7 @@ class LoadItems extends Command {
 
   /**
    * @constructor
-   * @param {CommandItemsDecorator} commandItemsDecorator
+   * @param {CommandDecorator} commandItemsDecorator
    */
   constructor(commandItemsDecorator) {
     super(commandItemsDecorator);

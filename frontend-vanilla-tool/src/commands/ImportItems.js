@@ -1,7 +1,7 @@
 import Command from './Command.js';
 import FileCallsRequest from '../requests/FileCallsRequest.js';
 import StoreData from '../data/StoreData.js';
-/** @import CommandActionDecorator from '../components/decorators/CommandActionDecorator.js'; */
+/** @import CommandDecorator from '../components/decorators/CommandDecorator.js'; */
 
 class ImportItems extends Command {
 
@@ -9,7 +9,7 @@ class ImportItems extends Command {
 
   /**
    * @constructor
-   * @param {CommandActionDecorator} actionDecorator
+   * @param {CommandDecorator} actionDecorator
    * @param {FileUpload} fileUpload
    */
   constructor(actionDecorator, fileUpload) {

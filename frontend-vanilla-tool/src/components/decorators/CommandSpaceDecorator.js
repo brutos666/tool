@@ -1,3 +1,7 @@
+import ExportItems from '../../commands/ExportItems.js';
+import ImportItems from '../../commands/ImportItems.js';
+import LoadItems from '../../commands/LoadItems.js';
+import SaveItem from '../../commands/SaveItem.js';
 import ActionButton from '../ActionButton.js';
 import CommandDecorator from './CommandDecorator.js';
 import CommandDecoratorView from './views/CommandDecoratorView.js';
@@ -10,8 +14,14 @@ class CommandSpaceDecorator extends CommandDecorator {
   #relaunchButton;
   #relaunchCallback = null;
 
-  constructor(view, decoratedElement) {
-    super(new CommandDecoratorView(view), decoratedElement);
+  /**
+   * @constructor
+   * @param {Tree} decoratedElement
+   * @param {Object} data
+   * @param {TreeItem} data.treeItem
+   */
+  constructor(decoratedElement, data) {
+    super(new CommandDecoratorView(decoratedElement.getView()), decoratedElement, data);
     this.#relaunchButton = new ActionButton({
       id: 'relaunchButton',
       label: 'Relancer'
@@ -22,6 +32,7 @@ class CommandSpaceDecorator extends CommandDecorator {
     this.#relaunchButton.setHidden();
     this.setStaticChild('relaunch', this.#relaunchButton);
   }
+
   setRelaunchCallback(callback) {
     this.#relaunchCallback = callback;
   }
@@ -45,6 +56,29 @@ class CommandSpaceDecorator extends CommandDecorator {
   commandFailed(name, error) {
     super.commandFailed(name, error);
     this.#relaunchButton.setVisible();
+  }
+
+  loadItems() {
+    new LoadItems(this)
+      .execute();
+  }
+
+  /**
+   * Sauvegarde d'un item et de ses enfants
+   */
+  doSave() {
+    return new SaveItem(this, this.getTreeItem())
+      .execute();
+  }
+
+  exportItems() {
+    new ExportItems(this)
+      .execute();
+  }
+
+  importItems(fileUpload) {
+    new ImportItems(this, fileUpload)
+      .execute();
   }
 
 }
