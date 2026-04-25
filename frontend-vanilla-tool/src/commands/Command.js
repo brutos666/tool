@@ -1,3 +1,4 @@
+import StoreData from '../data/StoreData.js';
 /** @import NodeElement from './NodeElement.js' */
 /** @import CommandDecorator from '../components/decorators/CommandDecorator.js' */
 
@@ -65,17 +66,14 @@ class Command {
     }
     this.commandInProgress();
     commandDecorator.commandInProgress(this.name, this);
-    commandDecorator.setInProgress();
     return this.#executeCallback()
       .then(response => {
         this.commandDone(response);
         commandDecorator.commandDone(this.name, response);
-        commandDecorator.setSuccess(this.#successMessage);
         return Promise.resolve(response);
       }, errorResponse => {
         this.commandFailed(errorResponse);
         commandDecorator.commandFailed(this.name);
-        commandDecorator.setError(`${ this.#errorMessage } : ${ errorResponse }`);
         return Promise.reject(errorResponse);
       });
   }
@@ -84,8 +82,13 @@ class Command {
   }
 
   commandDone(/* response */) {
+    StoreData.getNotificationCenter()
+      .showNotification(this.#successMessage, 'success');
   }
-  commandFailed(/* response */) {
+
+  commandFailed(errorResponse) {
+    StoreData.getNotificationCenter()
+      .showNotification(`${ this.#errorMessage } : ${ errorResponse }`, 'error');
   }
 
 }

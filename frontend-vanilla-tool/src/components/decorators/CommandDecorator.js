@@ -1,5 +1,9 @@
+import ExportItems from '../../commands/ExportItems.js';
+import ImportItems from '../../commands/ImportItems.js';
+import LoadItems from '../../commands/LoadItems.js';
+import SaveItem from '../../commands/SaveItem.js';
 import Decorator from './Decorator.js';
-/** @import CommandDecoratorView from './views/CommandDecoratorView.js'; */
+import CommandDecoratorView from './views/CommandDecoratorView.js';
 
 class CommandDecorator extends Decorator {
 
@@ -11,13 +15,12 @@ class CommandDecorator extends Decorator {
 
   /**
    * @constructor
-   * @param {CommandDecoratorView} view
-   * @param {Tree} decoratedElement
+   * @param {Component} decoratedElement
    * @param {Object} data
    * @param {TreeItem} data.treeItem
    */
-  constructor(view, decoratedElement, data) {
-    super(view, decoratedElement);
+  constructor(decoratedElement, data) {
+    super(new CommandDecoratorView(decoratedElement.getView()), decoratedElement);
     this.#treeItem = data.treeItem;
   }
   getTreeItem() {
@@ -81,19 +84,27 @@ class CommandDecorator extends Decorator {
       .hideSpinner();
   }
 
-  setInProgress() {
-    this.getView()
-      .clearMessage();
+  loadItems() {
+    new LoadItems(this)
+      .execute();
   }
 
-  setError(value) {
-    this.getView()
-      .setError(value);
+  /**
+   * Sauvegarde d'un item et de ses enfants
+   */
+  doSave() {
+    return new SaveItem(this, this.getTreeItem())
+      .execute();
   }
 
-  setSuccess(value) {
-    this.getView()
-      .setSuccess(value);
+  exportItems() {
+    new ExportItems(this)
+      .execute();
+  }
+
+  importItems(fileUpload) {
+    new ImportItems(this, fileUpload)
+      .execute();
   }
 
 }

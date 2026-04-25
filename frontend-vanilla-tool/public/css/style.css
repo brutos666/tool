@@ -15,8 +15,8 @@
 @import "modules/nav-tree.css" layer(modules);
 @import "modules/sample-mapping.css" layer(modules);
 @import "modules/sample-mapping-colors.css" layer(modules);
+@import "modules/notification-center.css" layer(modules);
 @import "modules/working-space.css" layer(modules);
-@import "utilities/notification.css" layer(utilities);
 @import "utilities/status.css" layer(utilities);
 @import "utilities/visibility.css" layer(utilities);
 

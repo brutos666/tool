@@ -29,6 +29,13 @@ class DecoratorView extends View {
    */
   setDecoratedView(view) {
     this.#decoratedView = view;
+    // Si elementView est le noeud template
+    if (this.getElementView().tagName === 'TEMPLATE') {
+      // On va juste reporter les éventuelles classes du décorateur
+      this.getElementView().classList.forEach(classItem => view.getElementView().classList.add(classItem));
+      this.setElementView(view.getElementView());
+      return;
+    }
 
     /** @type {Element} */
     const oldView = this.getElementView()

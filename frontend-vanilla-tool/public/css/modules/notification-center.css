@@ -1,0 +1,48 @@
+/* Conteneur des notifications (positionné en bas à droite) */
+.notification-center {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000; /* Assure que la notification est au-dessus des autres éléments */
+  max-width: 350px;
+}
+
+/* Style de base d'une notification */
+.notification {
+  background: var(--success-color);
+  color: var(--text-color);
+  padding: var(--global-padding);
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 12px var(--box-shadow-color);
+  margin-bottom: var(--global-margin);
+  display: flex;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+}
+
+/* Icône de succès (optionnelle) */
+.notification::before {
+  content: "✓";
+  margin-right: var(--global-margin);
+  font-weight: bold;
+}
+
+.notification.error {
+  background: var(--error-color);
+}
+
+.notification.error::before {
+  content: "✗";
+}
+

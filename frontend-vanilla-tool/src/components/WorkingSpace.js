@@ -7,7 +7,7 @@ import Menu from './Menu.js';
 import ActionButton from './ActionButton.js';
 import FileUpload from './FileUpload.js';
 import StoreData from '../data/StoreData.js';
-import CommandSpaceDecorator from './decorators/CommandSpaceDecorator.js';
+import CommandDecorator from './decorators/CommandDecorator.js';
 import ButtonDialog from './decorators/ButtonDialog.js';
 
 class WorkingSpace extends Component {
@@ -17,8 +17,8 @@ class WorkingSpace extends Component {
 
     const treeItem = StoreData.getTreeItem();
     const menu = new Menu();
-    const decorateNavTree = new CommandSpaceDecorator(new NavTree(), { treeItem });
-    const decorateMainSpace = new CommandSpaceDecorator(new MainSpace(), { treeItem });
+    const decorateNavTree = new CommandDecorator(new NavTree(), { treeItem });
+    const decorateMainSpace = new CommandDecorator(new MainSpace(), { treeItem });
 
     const reloadAction = new ActionButton({ id: 'reload', label: 'Actualiser', role: 'menuitem' });
     reloadAction.setDoActionCallback(decorateNavTree.loadItems.bind(decorateNavTree));
