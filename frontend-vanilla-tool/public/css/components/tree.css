@@ -1,9 +1,6 @@
 .tree--root {
-  margin-bottom: 5px;
-  margin-right: 5px;
-  padding: 5px;
+  padding: var(--small-padding);
   box-shadow: 3px 3px 4px var(--box-shadow-color);
-  min-height: 37px;
 }
 .tree--node:not(.tree--root) {
   padding-left: 20px;

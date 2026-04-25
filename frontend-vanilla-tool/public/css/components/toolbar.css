@@ -1,0 +1,8 @@
+.toolbar__space {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--small-gap);
+  margin: var(--small-margin);
+}
+

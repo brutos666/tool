@@ -11,7 +11,6 @@ class ItemView extends View {
   #title;
   #text;
   #done;
-  #crudMode;
 
   #rights;
   #currentStatusClass;
@@ -60,10 +59,9 @@ class ItemView extends View {
     return String.raw`<article class="item__article">
           <span id="identify" class="item__identify"></span>
           <input type="checkbox" id="done" class="item__checkbox clickable"/>
-          <span id="crudMode" class="item__crud-mode"></span>
           <div contenteditable="true" class="item__title" id="title"></div>
-          <div contenteditable="true" class="item__text" id="text"></div>
           <template id="toolbar"></template>
+          <div contenteditable="true" class="item__text" id="text"></div>
       </article>`;
   }
 
@@ -114,7 +112,6 @@ class ItemView extends View {
     this.#title = mainNode.querySelector('#title');
     this.#text = mainNode.querySelector('#text');
     this.#done = mainNode.querySelector('#done');
-    this.#crudMode = mainNode.querySelector('#crudMode');
   }
 
   /**
@@ -147,9 +144,9 @@ class ItemView extends View {
   setCRUDMode(CRUDMode) {
     const newCRUDModeClass = getClassForCRUDMode(CRUDMode);
     if (this.#currentCRUDModeClass) {
-      this.#crudMode.classList.replace(this.#currentCRUDModeClass, newCRUDModeClass);
+      this.getElementView().classList.replace(this.#currentCRUDModeClass, newCRUDModeClass);
     } else {
-      this.#crudMode.classList.add(newCRUDModeClass);
+      this.getElementView().classList.add(newCRUDModeClass);
     }
     this.#currentCRUDModeClass = newCRUDModeClass;
   }

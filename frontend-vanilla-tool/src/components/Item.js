@@ -37,7 +37,7 @@ class Item extends Component {
       toolbar.addChild(addAction);
     }
     if (data.rights.includes(RIGHT.delete)) {
-      const deleteAction = new ActionButton({ id: 'deleteItem', label: 'X', role: 'button' });
+      const deleteAction = new ActionButton({ id: 'deleteItem', label: '-', role: 'button' });
       deleteAction.setDoActionCallback(this.doDelete.bind(this));
       toolbar.addChild(deleteAction);
     }

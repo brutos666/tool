@@ -1,0 +1,36 @@
+/** Couleur des post it **/
+.item--color {
+  background-color: var(--item-color);
+}
+.story--color {
+  background-color: var(--story-color);
+}
+.rules--color {
+  background-color: var(--rules-color);
+}
+.sample--color {
+  background-color: var(--sample-color);
+}
+.question--color {
+  background-color: var(--question-color);
+}
+
+.item--color,
+.story--color,
+.rules--color,
+.sample--color,
+.question--color {
+  * {
+    color: var(--text-item-color);
+  }
+  .item--crud-created::before {
+    color: var(--created-color);
+  }
+  .item--crud-updated::before {
+    color: var(--updated-color);
+  }
+  .action__button:hover {
+    background-color: var(--hover-item-color);
+  }
+}
+

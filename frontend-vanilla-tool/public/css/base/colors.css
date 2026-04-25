@@ -3,25 +3,10 @@ body {
   color: var(--color);
 }
 
-/** Couleur des post it **/
-.item--color {
-  color: var(--text-item-color);
-  background-color: var(--item-color);
+.item--crud-created::before {
+  color: var(--created-color);
 }
-.story--color {
-  color: var(--text-item-color);
-  background-color: var(--story-color);
-}
-.rules--color {
-  color: var(--text-item-color);
-  background-color: var(--rules-color);
-}
-.sample--color {
-  color: var(--text-item-color);
-  background-color: var(--sample-color);
-}
-.question--color {
-  color: var(--text-item-color);
-  background-color: var(--question-color);
+.item--crud-updated::before {
+  color: var(--updated-color);
 }
 

@@ -1,6 +1,3 @@
-[contenteditable]:not(.item--readonly):focus {
-  outline: var(--focus-color) solid 1px;
-}
 .item--readonly {
   cursor: default;
   user-select: none;
@@ -10,9 +7,26 @@
 .item--readonly .toolbar > button {
   display: none;
 }
-.item__article:not(.item--readonly) .item__title {
-  margin: 1px;
+
+.item__article {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  overflow: auto;
+  gap: var(--medium-gap);
+  padding: var(--small-padding);
+  align-content: flex-start;
 }
+.item__title {
+  flex: 1;
+}
+.item__text {
+  font-weight: normal;
+  flex-basis: 100%;
+  align-self: stretch;
+}
+
 .item__title,
 .item__text {
   white-space: pre-wrap;
@@ -27,15 +41,10 @@
 .item--status-loop {
   border: var(--error-color) solid 1px;
 }
-.item--crud-created::before {
-  content: "•";
-  font-size: 1em;
-  color: var(--created-color);
-}
+.item--crud-created::before,
 .item--crud-updated::before {
   content: "•";
   font-size: 1em;
-  color: var(--updated-color);
 }
 .item--crud-deleted {
   cursor: default;
@@ -46,18 +55,8 @@
 }
 
 /* -- Affichage item avec que le titre */
-.item--title.item__article {
-  flex: 1;
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  overflow: auto;
-}
 .item--title.item__article:not(.item--readonly) .item__title {
   border: var(--border-color) solid 1px;
-}
-.item--title .item__title {
-  flex: 1;
 }
 .item--title .item__identify,
 .item--title .item__checkbox,
@@ -67,15 +66,10 @@
 
 /* -- Affichage item comme un post-it -- */
 .item--post-it.item__article {
-  display: grid;
-  grid-template-columns: 25px auto 1fr 30px;
-  grid-template-rows: auto 1fr;
   resize: both;
   overflow: auto;
 }
 .item--post-it .item__checkbox {
-  grid-column: 1;
-  grid-row: 1;
   appearance: none;
   width: 18px;
   height: 18px;
@@ -91,35 +85,16 @@
   font-weight: 900;
   color: var(--success-color);
 }
-.item--post-it .item__crud-mode {
-  grid-column: 2;
-  padding: 0em 0.1em;
-}
 .item--post-it .item__title {
-  grid-column: 3;
-  grid-row: 1;
   font-weight: bold;
 }
 .item--post-it .toolbar {
-  grid-column: 4;
-  grid-row: 1;
-}
-.item--post-it .item__text {
-  grid-column: 1 / span 3;
-  grid-row: 2;
-  font-weight: normal;
+  align-self: flex-start;
 }
 .item--post-it .item__identify {
   display: none;
 }
 /* -- Affichage comme un todo -- */
-.item--todo.item__article {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  overflow: auto;
-  gap: 5px;
-}
 .item--todo .item__identify {
   display: none;
 }
@@ -128,5 +103,12 @@
 }
 .item--todo .item__text {
   display: none;
+}
+#addNewChild,
+#deleteItem {
+  font-weight: bold;
+  font-size: 16px;
+  width: 20px;
+  border: none;
 }
 

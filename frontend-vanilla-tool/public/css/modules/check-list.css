@@ -9,7 +9,7 @@
 .check-list__header-title {
   font-weight: bold;
   font-size: 1.5em;
-  margin: 14px;
+  margin: var(--global-margin);
 }
 /* min-height: 0 empêche de déborder et force la contrainte de hauteur vers le bas. Utilisé pour l'affichage en colonne */
 .check-list__space {
@@ -21,10 +21,10 @@
   min-height: 0; /* important */
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(400px, max-content));
-  grid-gap: 12px;
-  margin: 2px;
+  margin: var(--small-margin);
   padding: 0;
   align-items: start; /* aligne les arbres vers le haut plutôt que de les étendre à l'espace disponible */
   align-content: start;
+  gap: var(--global-gap);
 }
 

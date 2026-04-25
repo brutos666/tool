@@ -15,9 +15,9 @@ class ButtonDialogView extends DecoratorView {
    * @returns {string} - Code HTML du bouton
    */
   getHtmlView(data) {
-    return String.raw`<div><button command="show-modal" commandfor="dialog" id="${ data.id }" class="clickable action__button" role="${ data.role }">${ data.label }</button>
-    <dialog id="dialog" class="dialog">${ super.getTemplateDecoratorHTML() }
-      <button class="clickable" commandfor="dialog" command="close" role="button">Fermer</button>
+    return String.raw`<div><button popovertarget="dialog" id="${ data.id }" class="clickable action__button" role="${ data.role }">${ data.label }</button>
+    <dialog id="dialog" class="dialog" popover>${ super.getTemplateDecoratorHTML() }
+      <button class="clickable" popovertarget="dialog" popovertargetaction="hide" role="button">Fermer</button>
     </dialog></div>`;
   }
 

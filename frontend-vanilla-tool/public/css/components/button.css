@@ -1,9 +1,14 @@
 .action__button {
-  padding: 0.1rem 0.3rem;
-  text-align: left;
-  border-radius: 4px;
+  padding: var(--small-padding);
+  text-align: center;
+  border-radius: var(--border-radius);
+  background-color: transparent;
+  border-style: ridge;
 }
 .action__button:hover {
-  background-color: var(--menu-hover-color);
+  background-color: var(--hover-color);
+}
+.action__button.items__add-item {
+  border-style: dotted;
 }
 
