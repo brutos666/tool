@@ -5,15 +5,26 @@ class ItemsView extends View {
   name = 'ItemsView';
 
   #itemNodes = [];
+  #addButton = true;
 
+  /**
+   *
+   * @param {Object} data
+   * @param {boolean} data.addButton : Indique si il faut ajouter le bouton d'ajout
+   */
   constructor(data) {
     super(data);
+    this.#addButton = data.addButton;
   }
 
   addItemView(itemView) {
     const itemsSpace = this.getElementView()
       .querySelector('.items__space');
-    itemsSpace.insertBefore(itemView.getElementView(), itemsSpace.lastChild);
+    if (this.#addButton) {
+      itemsSpace.insertBefore(itemView.getElementView(), itemsSpace.lastChild);
+    } else {
+      itemsSpace.appendChild(itemView.getElementView());
+    }
 
     this.#itemNodes.push(itemView.getElementView());
   }
@@ -27,9 +38,16 @@ class ItemsView extends View {
     this.#itemNodes.forEach(itemNode => itemNode.parentNode.removeChild(itemNode));
     this.#itemNodes = [];
   }
-
-  getHtmlView() {
-    return String.raw`<div class="items"><div id="itemsSpace" class="items__space"><template id="addItemAction" class="items__add-item tree--root"></template></div></div>`;
+  /**
+   *
+   * @param {Object} data
+   * @param {boolean} data.addButton : Indique si il faut ajouter le bouton d'ajout
+   */
+  getHtmlView(data) {
+    if (data.addButton) {
+      return String.raw`<div class="items"><div id="itemsSpace" class="items__space"><template id="addItemAction" class="item-like-button"></template></div></div>`;
+    }
+    return String.raw`<div class="items"><div id="itemsSpace" class="items__space"></div></div>`;
   }
 
 }

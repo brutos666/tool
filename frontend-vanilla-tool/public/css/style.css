@@ -1,7 +1,6 @@
 @layer base, components, modules, utilities;
 
 @import "base/colors.css" layer(base);
-@import "base/layout.css" layer(base);
 @import "base/reset.css" layer(base);
 @import "components/button.css" layer(components);
 @import "components/dialog.css" layer(components);
@@ -17,15 +16,15 @@
 @import "modules/sample-mapping-colors.css" layer(modules);
 @import "modules/notification-center.css" layer(modules);
 @import "modules/working-space.css" layer(modules);
-@import "utilities/status.css" layer(utilities);
-@import "utilities/visibility.css" layer(utilities);
+@import "utilities/utils.css" layer(utilities);
 
 :root {
   color-scheme: light dark;
   --color: light-dark(#202222, #e0e0e0);
   --background-color: light-dark(#d0d0d0, #333333);
   --border-color: light-dark(#5d5d5d, #5d5d5d);
-  --menu-color: light-dark(#999999, #222);
+  --menu-background-color: light-dark(#999999, #222);
+  --help-background-color: light-dark(#999999, #222);
   --hover-color: light-dark(#b3b3b3, #5c5c5c);
   --hover-item-color: light-dark(#b3b3b3, #b3b3b3);
   --focus-color: light-dark(#0000ff, #808080);
@@ -34,7 +33,7 @@
   --success-color: light-dark(green, green);
   --created-color: light-dark(green, #00ff00);
   --updated-color: light-dark(blue, #00ff00);
-  --box-shadow-color: light-dark(#5d5d5d, black);
+  --box-shadow-color: light-dark(#5d5d5d, rgba(0, 0, 0, 0.5));
   --sample-color: light-dark(#cadf58, #cadf58);
   --story-color: light-dark(#fff9b2, #fff9b2);
   --rules-color: light-dark(#a7cdf5, #a7cdf5);
@@ -43,6 +42,7 @@
   --text-item-color: light-dark(#202222, #202222);
   --global-padding: 10px;
   --small-padding: 4px;
+  --large-gap: 20px;
   --global-gap: 10px;
   --medium-gap: 5px;
   --small-gap: 2px;
@@ -51,12 +51,10 @@
   --border-radius: 2px;
   --post-it-width: 200px;
   --post-it-height: 200px;
-}
-
-/** attributs communs **/
-
-.command--decorator {
-  display: flex;
-  flex-direction: column;
+  --font-size: 1em;
+  --medium-font-size: 1.2em;
+  --big-font-size: 2em;
+  --font-family: sans-serif;
+  --line-height: 1.5;
 }
 

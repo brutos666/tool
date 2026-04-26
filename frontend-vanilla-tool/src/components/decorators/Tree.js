@@ -38,7 +38,7 @@ class Tree extends Decorator {
       this.setReadOnly();
     }
 
-    const treeList = new TreeList(new TreeListView(), data.treeItem, data.layout);
+    const treeList = new TreeList(new TreeListView({ addButton: false }), data.treeItem, data.layout);
     this.setStaticChild('treeList', treeList);
 
     this.setOpen(false);

@@ -16,7 +16,7 @@ class TreeList extends Items {
    * @param {ITEM_LAYOUT} itemLayout
    */
   constructor(view, treeItem, itemLayout) {
-    super(view === undefined ? new TreeListView() : view, treeItem, itemLayout);
+    super(view === undefined ? new TreeListView({ addButton: true }) : view, treeItem, itemLayout);
   }
 
   getLastTree() {

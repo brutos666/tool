@@ -159,7 +159,7 @@ class ItemView extends View {
   }
 
   setReadOnly() {
-    this.getElementView().classList.add('item--readonly');
+    super.setReadOnly();
     this.#title.contentEditable = false;
     this.#text.contentEditable = false;
     this.#done.disabled = false;

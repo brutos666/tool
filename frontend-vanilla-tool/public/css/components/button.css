@@ -1,14 +1,40 @@
-.action__button {
-  padding: var(--small-padding);
+.label-button,
+.icon-button,
+.item-like-button {
   text-align: center;
   border-radius: var(--border-radius);
-  background-color: transparent;
-  border-style: ridge;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--small-padding);
 }
-.action__button:hover {
+/* Reset indispensable sur button */
+.menu-button {
+  all: unset; /* ou reset manuel */
+  padding: var(--global-padding);
+  display: flex;
+  align-items: center;
+  width: max-content;
+  text-align: left;
+  border-radius: var(--border-radius);
+}
+.menu-button:focus-visible {
+  outline: var(--focus-color) solid 2px;
+}
+
+.label-button:hover,
+.icon-button:hover,
+.item-like-button:hover {
   background-color: var(--hover-color);
 }
-.action__button.items__add-item {
-  border-style: dotted;
+
+.label-button {
+  border: solid 1px var(--border-color);
+}
+.icon-button {
+  border: none;
+}
+.item-like-button {
+  outline: dashed 1px var(--border-color);
 }
 

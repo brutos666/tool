@@ -12,6 +12,7 @@ class ButtonDialog extends Decorator {
    * @param {string} data.id - Identifiant du bouton
    * @param {string} data.label - Label du bouton
    * @param {string} data.role - Rôle du bouton
+   * @param {icon|menu|label|item-like} data.type - Type de bouton
    */
   constructor(decoratedElement, data) {
     super(new ButtonDialogView(decoratedElement.getView(), data), decoratedElement);

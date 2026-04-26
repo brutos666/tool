@@ -32,7 +32,7 @@ class FileUploadView extends View {
     return String.raw`<div class="file-upload">
       <label for="uploadFile">Sélectionner le fichier à importer (CSV)</label>
       <input id="uploadFile" type="file" accept=".csv"/>
-      <button id="${ data.id }" class="clickable file-upload__button" role="button">${ data.label }</button></div>`;
+      <button id="${ data.id }" class="clickable label-button" role="button">${ data.label }</button></div>`;
   }
 
   setDoActionCallback(callback) {

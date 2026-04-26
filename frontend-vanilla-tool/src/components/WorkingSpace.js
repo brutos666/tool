@@ -20,18 +20,18 @@ class WorkingSpace extends Component {
     const decorateNavTree = new CommandDecorator(new NavTree(), { treeItem });
     const decorateMainSpace = new CommandDecorator(new MainSpace(), { treeItem });
 
-    const reloadAction = new ActionButton({ id: 'reload', label: 'Actualiser', role: 'menuitem' });
+    const reloadAction = new ActionButton({ id: 'reload', label: 'Actualiser', role: 'menuitem', type: 'menu' });
     reloadAction.setDoActionCallback(decorateNavTree.loadItems.bind(decorateNavTree));
-    const saveAllAction = new ActionButton({ id: 'save', label: 'Sauvegarder tout', role: 'menuitem' });
+    const saveAllAction = new ActionButton({ id: 'save', label: 'Sauvegarder tout', role: 'menuitem', type: 'menu' });
     saveAllAction.setDoActionCallback(decorateNavTree.doSave.bind(decorateNavTree));
 
-    const saveMainAction = new ActionButton({ id: 'saveCurrent', label: 'Sauvegarder la vue courante', role: 'menuitem' });
+    const saveMainAction = new ActionButton({ id: 'saveCurrent', label: 'Sauvegarder la vue courante', role: 'menuitem', type: 'menu' });
     saveMainAction.setDoActionCallback(decorateMainSpace.doSave.bind(decorateMainSpace));
-    const exportAction = new ActionButton({ id: 'export', label: 'Exporter tout', role: 'menuitem' });
+    const exportAction = new ActionButton({ id: 'export', label: 'Exporter tout', role: 'menuitem', type: 'menu' });
     exportAction.setDoActionCallback(decorateNavTree.exportItems.bind(decorateNavTree));
-    const importFile = new FileUpload({ id: 'import', label: 'Importer', role: 'menuitem' });
+    const importFile = new FileUpload({ id: 'import', label: 'Importer' });
     importFile.setDoActionCallback(decorateNavTree.importItems.bind(decorateNavTree));
-    const importAction = new ButtonDialog(importFile, { id: 'import', label: 'Importer', role: 'menuitem' });
+    const importAction = new ButtonDialog(importFile, { id: 'import', label: 'Importer', role: 'menuitem', type: 'menu' });
 
     menu.addChild(reloadAction);
     menu.addChild(saveAllAction);

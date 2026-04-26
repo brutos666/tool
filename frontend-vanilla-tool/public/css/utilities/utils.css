@@ -18,3 +18,21 @@
   cursor: pointer;
 }
 
+.readonly {
+  cursor: default;
+  user-select: none;
+  pointer-events: none;
+  border: none;
+}
+.readonly .action__button {
+  display: none;
+}
+
+.hidden {
+  display: none;
+}
+
+.spacer {
+  width: 100%;
+}
+

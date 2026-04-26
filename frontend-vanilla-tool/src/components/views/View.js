@@ -124,6 +124,12 @@ class View {
   setVisible() {
     this.getElementView().classList.remove('hidden');
   }
+  setReadOnly() {
+    this.getElementView().classList.add('readonly');
+  }
+  setClickable() {
+    this.getElementView().classList.add('clickable');
+  }
 
   isNode() {
     return false;

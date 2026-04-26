@@ -27,4 +27,9 @@
   align-content: start;
   gap: var(--global-gap);
 }
+.check-list__space > .items__space > * {
+  min-height: 50px;
+  padding: var(--small-padding);
+  box-shadow: 3px 3px 4px var(--box-shadow-color);
+}
 

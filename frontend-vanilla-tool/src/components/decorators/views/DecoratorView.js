@@ -48,6 +48,10 @@ class DecoratorView extends View {
     const newView = view.getElementView();
     oldView.parentNode.replaceChild(newView, oldView);
   }
+  /**
+   * Retourne la vue décorée
+   * @returns {View} Vue décorée
+   */
   getDecoratedView() {
     return this.#decoratedView;
   }

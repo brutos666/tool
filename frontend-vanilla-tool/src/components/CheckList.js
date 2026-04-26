@@ -17,7 +17,7 @@ class CheckList extends TreeList {
     this.#item = new Item({ treeItem, layout: ITEM_LAYOUT.Todo, rights });
     this.setStaticChild('title', this.#item);
 
-    const addButton = new ActionButton({ id: 'addNewItem', label: 'Ajouter un élément', role: 'button' });
+    const addButton = new ActionButton({ id: 'addNewItem', label: 'Ajouter un élément', role: 'button', type: 'item-like' });
     addButton.setDoActionCallback(this.addNewItem.bind(this, 'Nouveau todo'));
     this.setStaticChild('addItemAction', addButton);
   }

@@ -4,8 +4,8 @@ class SampleMappingSamplesView extends ItemsView {
 
   name = 'SampleMappingSamplesView';
 
-  constructor(data) {
-    super(data);
+  constructor() {
+    super({ addButton: true });
     this.getElementView()
       .querySelector('.items__space')
       .classList.add('sample-mapping__samples-items');

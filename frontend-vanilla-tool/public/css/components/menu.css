@@ -2,8 +2,8 @@
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  background-color: var(--menu-color);
-  padding: var(--global-padding);
+  background-color: var(--menu-background-color);
+  padding-left: var(--global-padding);
 }
 .menu__button {
   display: none;
@@ -15,29 +15,14 @@
   display: flex;
   flex-direction: row;
   gap: var(--global-gap);
-  list-style: none;
   flex-wrap: wrap;
 }
 .menu__element {
-  background-color: var(--menu-color);
+  background-color: var(--menu-background-color);
   transition: background-color 0.2s;
 }
 .menu__element:hover {
   background-color: var(--hover-color);
-}
-/* Reset indispensable sur button */
-.menu__element .action__button {
-  all: unset; /* ou reset manuel */
-  display: flex;
-  align-items: center;
-  padding: var(--global-padding);
-  cursor: pointer;
-  width: max-content;
-  text-align: left;
-  border-radius: var(--border-radius);
-}
-.menu__element .action__button:focus-visible {
-  outline: var(--focus-color) solid 2px;
 }
 
 /* Responsive */
@@ -45,15 +30,15 @@
   .menu__actions {
     display: none;
     flex-direction: column;
-    background-color: var(--menu-color);
+    background-color: var(--menu-background-color);
     position: absolute;
-    top: 55px;
+    top: 35px;
     left: var(--global-padding);
     padding: var(--global-padding);
     width: fit-content;
   }
   .menu__element {
-    background-color: var(--menu-color);
+    background-color: var(--menu-background-color);
   }
   .menu__button {
     display: block;
