@@ -1,3 +1,9 @@
+.sample-mapping__table {
+  --post-it-width: calc(200px * var(--zoom));
+  --post-it-height: calc(200px * var(--zoom));
+  --font-size: calc(1em * var(--zoom));
+  --line-height: calc(var(1.5) * var(--zoom));
+}
 .sample-mapping {
   display: flex;
   flex-direction: column;
@@ -11,6 +17,8 @@
   overflow: auto;
   margin-bottom: var(--global-margin);
   margin-right: var(--global-margin);
+  font-size: var(--font-size);
+  line-height: var(--line-height);
 }
 .sample-mapping__story-item > * {
   margin: 0 auto;
@@ -28,11 +36,6 @@
 .sample-mapping__samples .item__article,
 .sample-mapping .item-like-button {
   height: var(--post-it-height);
-  /*
-  box-shadow:
-    -6px 8px 6px rgba(0, 0, 0, 0.3),
-    6px 8px 6px rgba(0, 0, 0, 0.15);
-*/
   box-shadow:
     -7px 7px 6px var(--box-shadow-color),
     8px 10px 8px var(--box-shadow-color);

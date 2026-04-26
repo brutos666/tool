@@ -10,8 +10,15 @@ class SampleMappingTablesView extends View {
   /** @type {Array<HTMLTableCellElement>} */
   #sampleCells = [];
 
+  /** @type {HTMLTableElement} */
+  #sampleTable = null;
+
+  #zoom = 1;
+
   constructor(data) {
     super(data);
+    this.#sampleTable = this.getElementView()
+      .querySelector('.sample-mapping__table');
   }
 
   addColumn(ruleView, samplesView) {
@@ -64,7 +71,8 @@ class SampleMappingTablesView extends View {
   }
 
   getHtmlView() {
-    return String.raw`<div class ="sample-mapping"><table class="sample-mapping__table"><thead>
+    return String.raw`<div class ="sample-mapping"><template id="toolbar" class="sample-mapping__toolbar"></template>
+      <table class="sample-mapping__table"><thead>
       <tr>
         <th class="sample-mapping__story-item post-it" colspan="1" ><template id="storyItem"></template></th>
         <th class="spacer"></th>
@@ -82,6 +90,35 @@ class SampleMappingTablesView extends View {
       </tr></tbody></table></div>`;
   }
 
+  zoomMinus() {
+    resetResize(this.#sampleTable);
+    this.#zoom -= 0.1;
+    this.#sampleTable.style.setProperty('--zoom', this.#zoom);
+  }
+
+  zoomPlus() {
+    resetResize(this.#sampleTable);
+    this.#zoom += 0.1;
+    this.#sampleTable.style.setProperty('--zoom', this.#zoom);
+  }
+  sizeToContent() {
+    resetResize(this.#sampleTable);
+    this.#zoom = 1;
+    this.#sampleTable.style.setProperty('--zoom', this.#zoom);
+  }
+
+}
+/**
+ * Annuler le redimensionnement éventuel des items
+ *
+ * @param {HTMLElement} element
+ */
+function resetResize(element) {
+  const items = element.querySelectorAll('.item--post-it.item-article');
+  items.forEach(item => {
+    item.style.width = 'auto';
+    item.style.height = 'auto';
+  });
 }
 
 export default SampleMappingTablesView;

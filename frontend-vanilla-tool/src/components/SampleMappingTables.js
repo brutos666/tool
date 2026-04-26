@@ -4,6 +4,7 @@ import Items from './Items.js';
 import SampleMappingTablesView from './views/SampleMappingTablesView.js';
 import SampleMappingSamples from './SampleMappingSamples.js';
 import ActionButton from './ActionButton.js';
+import Toolbar from './Toolbar.js';
 /** @import TreeItem from '../data/TreeItem.js'; */
 
 class SampleMappingTables extends Items {
@@ -14,6 +15,18 @@ class SampleMappingTables extends Items {
 
   constructor(treeItem) {
     super(new SampleMappingTablesView(), treeItem, ITEM_LAYOUT.Rules);
+
+    const zoomMinus = new ActionButton({ id: 'zoomMinus', label: 'Zoom -', role: 'button', type: 'label' });
+    zoomMinus.setDoActionCallback(this.zoomMinus.bind(this));
+    const zoomPlus = new ActionButton({ id: 'zoomPlus', label: 'Zoom +', role: 'button', type: 'label' });
+    zoomPlus.setDoActionCallback(this.zoomPlus.bind(this));
+    const sizeToContent = new ActionButton({ id: 'sizeToContent', label: 'Taille au contenu', role: 'button', type: 'label' });
+    sizeToContent.setDoActionCallback(this.sizeToContent.bind(this));
+    const toolbar = new Toolbar();
+    toolbar.addChild(zoomMinus);
+    toolbar.addChild(zoomPlus);
+    toolbar.addChild(sizeToContent);
+    this.setStaticChild('toolbar', toolbar);
 
     const rights = ITEM_LAYOUT.getRights(ITEM_LAYOUT.Story);
     this.#item = new Item({ treeItem, layout: ITEM_LAYOUT.Story, rights });
@@ -60,6 +73,21 @@ class SampleMappingTables extends Items {
     /** @type {SampleMappingTablesView} */
     const tableView = this.getView();
     tableView.removeColumn(index);
+  }
+  zoomMinus() {
+    /** @type {SampleMappingTablesView} */
+    const tableView = this.getView();
+    tableView.zoomMinus();
+  }
+  zoomPlus() {
+    /** @type {SampleMappingTablesView} */
+    const tableView = this.getView();
+    tableView.zoomPlus();
+  }
+  sizeToContent() {
+    /** @type {SampleMappingTablesView} */
+    const tableView = this.getView();
+    tableView.sizeToContent();
   }
 
 }

@@ -65,8 +65,8 @@
 }
 .item--post-it .item__checkbox {
   appearance: none;
-  width: 18px;
-  height: 18px;
+  width: 10%;
+  aspect-ratio: 1/1;
   border: var(--border-color) solid 1px;
   background: transparent;
   align-self: flex-start;
@@ -75,7 +75,7 @@
   content: "✓";
   display: block;
   line-height: 0.3;
-  font-size: var(--big-font-size);
+  font-size: calc(var(--font-size) * 2);
   color: var(--success-color);
 }
 .item--post-it .item__title {
@@ -83,10 +83,11 @@
 }
 .item--post-it .toolbar {
   align-self: flex-start;
+  height: 10%;
+  aspect-ratio: 1/1;
 }
 .item--post-it #deleteItem {
-  font-size: var(--big-font-size);
-  height: 20px;
+  font-size: calc(var(--font-size) * 2);
 }
 .item--post-it .item__identify {
   display: none;
