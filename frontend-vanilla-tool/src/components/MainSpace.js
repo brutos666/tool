@@ -20,7 +20,7 @@ class MainSpace extends Component {
 
   constructor() {
     super(new MainSpaceView());
-    const select = new Select({ id: 'select', options: LAYOUT.getOptions() });
+    const select = new Select({ id: 'select', options: LAYOUT.getOptions(), value: LAYOUT.SampleMapping });
     select.setDoSelectCallback(this.changeDisplay.bind(this));
     const saveAction = new ActionButton({ id: 'save', label: 'Sauvegarder les modifications', role: 'button', type: 'label' });
     saveAction.setDoActionCallback(this.doSave.bind(this));
