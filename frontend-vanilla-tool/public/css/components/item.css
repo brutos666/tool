@@ -61,7 +61,6 @@
 .item--post-it.item__article {
   resize: both;
   overflow: auto;
-  padding: var(--small-padding);
   container-type: inline-size;
 }
 .add-item--post-it {
@@ -89,6 +88,9 @@
 }
 .item--post-it .item__title {
   font-weight: bold;
+}
+.item--post-it .item__text {
+  margin: var(--global-margin);
 }
 .item--post-it .toolbar {
   align-self: flex-start;

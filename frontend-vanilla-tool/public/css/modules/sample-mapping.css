@@ -44,7 +44,8 @@
   right: 0;
   background-color: var(--help-background-color);
   z-index: 1;
-  padding: var(--global-padding);
+  padding: var(--small-padding);
+  justify-self: end;
 }
 .sample-mapping__samples {
   vertical-align: top;

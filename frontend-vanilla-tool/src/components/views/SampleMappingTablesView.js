@@ -2,7 +2,7 @@ import View from './View.js';
 
 class SampleMappingTablesView extends View {
 
-  name = 'SampleMappingTablesRulesView';
+  name = 'SampleMappingTablesView';
 
   /** @type {Array<HTMLTableCellElement>} */
   #ruleHeaders = [];
@@ -74,7 +74,7 @@ class SampleMappingTablesView extends View {
     return String.raw`<div class ="sample-mapping"><template id="toolbar" class="sample-mapping__toolbar"></template>
       <table class="sample-mapping__table"><thead>
       <tr>
-        <th class="sample-mapping__story-item post-it" colspan="1" ><template id="storyItem"></template></th>
+        <th class="sample-mapping__story-item" colspan="1" ><template id="storyItem"></template></th>
         <th class="sample-mapping__spacer"></th>
         <th class="sample-mapping__story-type"><span class="sample-mapping--type">Story</span></th>
       </tr>

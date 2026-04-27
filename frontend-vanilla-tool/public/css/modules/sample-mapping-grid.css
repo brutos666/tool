@@ -1,0 +1,69 @@
+.sample-mapping-grid {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+}
+
+.sample-mapping-grid__grid {
+  display: grid;
+  width: 100%;
+  border: 1px solid #ddd;
+  gap: var(--large-gap);
+  overflow: auto;
+  --number-of-columns: 1;
+  grid-template-columns: repeat(var(--number-of-columns), minmax(0, 200px)) auto;
+  --post-it-story-width: calc((100% - (var(--number-of-columns) - 1) * var(--large-gap)) / var(--number-of-columns));
+  --post-it-width: 100%;
+}
+.zoom.sample-mapping-grid__grid {
+  width: auto;
+  --column-width: calc((100% - 44px - var(--number-of-columns) * var(--large-gap)) / var(--number-of-columns));
+  grid-template-columns: repeat(var(--number-of-columns), calc(min(200px, var(--column-width)) * var(--zoom))) auto;
+}
+.sample-mapping-grid__title {
+  grid-column: 1 / span var(--number-of-columns);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.sample-mapping-grid__row {
+  display: contents; /* Intègre les cellules directement dans la grille parent */
+}
+.sample-mapping-grid__row .sample-mapping__rules-type,
+.sample-mapping-grid__row .sample-mapping__samples-type,
+.sample-mapping-grid__row .sample-mapping__story-type {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.sample-mapping-grid__samples .items {
+  align-items: flex-start;
+}
+.sample-mapping-grid__samples .sample-mapping__samples-items {
+  width: 100%;
+}
+
+.sample-mapping-grid__samples .item__article,
+.sample-mapping-grid__rules .item__article,
+.sample-mapping-grid .item-like-button {
+  aspect-ratio: 1 / 1;
+  box-shadow:
+    -7px 7px 6px var(--box-shadow-color),
+    8px 10px 8px var(--box-shadow-color);
+}
+.sample-mapping-grid .item-like-button {
+  min-width: var(--post-it-width);
+  flex: 1;
+}
+
+.sample-mapping-grid__title .item__article {
+  min-width: min(200px, var(--post-it-story-width));
+  aspect-ratio: 1 / 1;
+  box-shadow:
+    -7px 7px 6px var(--box-shadow-color),
+    8px 10px 8px var(--box-shadow-color);
+}
+
