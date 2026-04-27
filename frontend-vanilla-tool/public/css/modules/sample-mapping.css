@@ -57,6 +57,9 @@
   flex-direction: column;
   gap: var(--large-gap);
 }
+.sample-mapping__spacer {
+  width: 100%;
+}
 .sample-mapping--type {
   writing-mode: vertical-rl;
   text-align: center;

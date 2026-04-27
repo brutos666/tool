@@ -2,7 +2,7 @@ import { RIGHT, ITEM_LAYOUT } from '../tools/Constants.js';
 import Item from './Item.js';
 import TreeList from './TreeList.js';
 import CheckListView from './views/CheckListView.js';
-import ActionButton from './ActionButton.js';
+import AddItemButton from './AddItemButton.js';
 
 class CheckList extends TreeList {
 
@@ -17,7 +17,7 @@ class CheckList extends TreeList {
     this.#item = new Item({ treeItem, layout: ITEM_LAYOUT.Todo, rights });
     this.setStaticChild('title', this.#item);
 
-    const addButton = new ActionButton({ id: 'addNewItem', label: 'Ajouter un élément', role: 'button', type: 'item-like' });
+    const addButton = new AddItemButton({ id: 'addNewItem', label: 'Ajouter un élément', layout: ITEM_LAYOUT.Todo });
     addButton.setDoActionCallback(this.addNewItem.bind(this, 'Nouveau todo'));
     this.setStaticChild('addItemAction', addButton);
   }

@@ -45,7 +45,7 @@ class ItemsView extends View {
    */
   getHtmlView(data) {
     if (data.addButton) {
-      return String.raw`<div class="items"><div id="itemsSpace" class="items__space"><template id="addItemAction" class="item-like-button"></template></div></div>`;
+      return String.raw`<div class="items"><div id="itemsSpace" class="items__space"><template id="addItemAction"></template></div></div>`;
     }
     return String.raw`<div class="items"><div id="itemsSpace" class="items__space"></div></div>`;
   }

@@ -75,17 +75,17 @@ class SampleMappingTablesView extends View {
       <table class="sample-mapping__table"><thead>
       <tr>
         <th class="sample-mapping__story-item post-it" colspan="1" ><template id="storyItem"></template></th>
-        <th class="spacer"></th>
+        <th class="sample-mapping__spacer"></th>
         <th class="sample-mapping__story-type"><span class="sample-mapping--type">Story</span></th>
       </tr>
       <tr id="spaceRules">
-        <th class="sample-mapping__add-rule sample-mapping__rule "><template id="addItemAction" class="item-like-button post-it"></template></th>
-        <th class="spacer"></th>
+        <th class="sample-mapping__add-rule sample-mapping__rule "><template id="addItemAction"></template></th>
+        <th class="sample-mapping__spacer"></th>
         <th class="sample-mapping__rules-type"><span class="sample-mapping--type">Rules</span></th>
       </tr></thead>
       <tbody><tr id="spaceSamples">
         <td class="sample-mapping__samples-empty sample-mapping__samples"></td>
-        <td class="spacer"></td>
+        <td class="sample-mapping__spacer"></td>
         <td class="sample-mapping__samples-type"><span class="sample-mapping--type">Samples / Questions</span></td>
       </tr></tbody></table></div>`;
   }

@@ -5,6 +5,7 @@ import SampleMappingTablesView from './views/SampleMappingTablesView.js';
 import SampleMappingSamples from './SampleMappingSamples.js';
 import ActionButton from './ActionButton.js';
 import Toolbar from './Toolbar.js';
+import AddItemButton from './AddItemButton.js';
 /** @import TreeItem from '../data/TreeItem.js'; */
 
 class SampleMappingTables extends Items {
@@ -32,7 +33,7 @@ class SampleMappingTables extends Items {
     this.#item = new Item({ treeItem, layout: ITEM_LAYOUT.Story, rights });
     this.setStaticChild('storyItem', this.#item);
 
-    const buttonAddRule = new ActionButton({ id: 'addRule', label: 'Ajouter une règle', role: 'button', type: 'item-like' });
+    const buttonAddRule = new AddItemButton({ id: 'addRule', label: 'Ajouter une règle', layout: ITEM_LAYOUT.Rules });
     buttonAddRule.setDoActionCallback(this.addNewItem.bind(this, 'Nouvelle règle'));
     this.setStaticChild('addItemAction', buttonAddRule);
   }
