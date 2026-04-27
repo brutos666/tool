@@ -21,12 +21,12 @@ class SampleMappingTables extends Items {
     zoomMinus.setDoActionCallback(this.zoomMinus.bind(this));
     const zoomPlus = new ActionButton({ id: 'zoomPlus', label: 'Zoom +', role: 'button', type: 'label' });
     zoomPlus.setDoActionCallback(this.zoomPlus.bind(this));
-    const sizeToContent = new ActionButton({ id: 'sizeToContent', label: 'Taille au contenu', role: 'button', type: 'label' });
-    sizeToContent.setDoActionCallback(this.sizeToContent.bind(this));
+    const reset = new ActionButton({ id: 'zoomReset', label: 'Zoom initial', role: 'button', type: 'label' });
+    reset.setDoActionCallback(this.zoomReset.bind(this));
     const toolbar = new Toolbar();
     toolbar.addChild(zoomMinus);
     toolbar.addChild(zoomPlus);
-    toolbar.addChild(sizeToContent);
+    toolbar.addChild(reset);
     this.setStaticChild('toolbar', toolbar);
 
     const rights = ITEM_LAYOUT.getRights(ITEM_LAYOUT.Story);
@@ -85,10 +85,10 @@ class SampleMappingTables extends Items {
     const tableView = this.getView();
     tableView.zoomPlus();
   }
-  sizeToContent() {
+  zoomReset() {
     /** @type {SampleMappingTablesView} */
     const tableView = this.getView();
-    tableView.sizeToContent();
+    tableView.zoomReset();
   }
 
 }

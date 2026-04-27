@@ -94,17 +94,20 @@ class SampleMappingTablesView extends View {
     resetResize(this.#sampleTable);
     this.#zoom -= 0.1;
     this.#sampleTable.style.setProperty('--zoom', this.#zoom);
+    this.#sampleTable.classList.add('zoom');
   }
 
   zoomPlus() {
     resetResize(this.#sampleTable);
     this.#zoom += 0.1;
     this.#sampleTable.style.setProperty('--zoom', this.#zoom);
+    this.#sampleTable.classList.add('zoom');
   }
-  sizeToContent() {
+  zoomReset() {
     resetResize(this.#sampleTable);
     this.#zoom = 1;
     this.#sampleTable.style.setProperty('--zoom', this.#zoom);
+    this.#sampleTable.classList.remove('zoom');
   }
 
 }
@@ -114,10 +117,10 @@ class SampleMappingTablesView extends View {
  * @param {HTMLElement} element
  */
 function resetResize(element) {
-  const items = element.querySelectorAll('.item--post-it.item-article');
+  const items = element.querySelectorAll('.item__article');
   items.forEach(item => {
-    item.style.width = 'auto';
-    item.style.height = 'auto';
+    item.style.removeProperty('width');
+    item.style.removeProperty('height');
   });
 }
 

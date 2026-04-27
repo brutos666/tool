@@ -1,9 +1,8 @@
-.sample-mapping__table {
+.zoom.sample-mapping__table {
   --post-it-width: calc(200px * var(--zoom));
   --post-it-height: calc(200px * var(--zoom));
-  --font-size: calc(1em * var(--zoom));
-  --line-height: calc(var(1.5) * var(--zoom));
 }
+
 .sample-mapping {
   display: flex;
   flex-direction: column;
@@ -17,8 +16,6 @@
   overflow: auto;
   margin-bottom: var(--global-margin);
   margin-right: var(--global-margin);
-  font-size: var(--font-size);
-  line-height: var(--line-height);
 }
 .sample-mapping__story-item > * {
   margin: 0 auto;
