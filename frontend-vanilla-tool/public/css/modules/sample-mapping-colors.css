@@ -1,36 +1,44 @@
 /** Couleur des post it **/
 .item--color {
-  background-color: var(--item-color);
+  --post-it-color-hue: var(--item-color-hue);
 }
 .story--color {
-  background-color: var(--story-color);
+  --post-it-color-hue: var(--story-color-hue);
 }
 .rules--color {
-  background-color: var(--rules-color);
+  --post-it-color-hue: var(--rules-color-hue);
 }
 .sample--color {
-  background-color: var(--sample-color);
+  --post-it-color-hue: var(--sample-color-hue);
 }
 .question--color {
-  background-color: var(--question-color);
+  --post-it-color-hue: var(--question-color-hue);
 }
-
 .item--color,
 .story--color,
 .rules--color,
 .sample--color,
 .question--color {
-  color: var(--text-item-color);
-
-  .action__button:hover {
-    background-color: var(--error-color);
-  }
+  --hover-color: var(--hover-item-color);
+  --post-it-color: hsl(var(--post-it-color-hue), 100%, 80%);
+  --darker-post-it-color: hsl(var(--post-it-color-hue), 100%, 50%);
 }
+
+/* Point d'indication des modifications en cours*/
 .item--color::before,
 .story--color::before,
 .rules--color::before,
 .sample--color::before,
 .question--color::before {
   color: var(--text-item-color);
+}
+
+.item--post-it {
+  background-color: var(--post-it-color);
+  color: var(--text-item-color);
+}
+/* Coin à en haut à droite du post-it */
+.item--post-it::after {
+  border-color: transparent var(--background-color) var(--darker-post-it-color) transparent;
 }
 

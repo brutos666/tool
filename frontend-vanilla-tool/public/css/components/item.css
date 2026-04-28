@@ -75,9 +75,6 @@
 .item--post-it .item__title {
   font-weight: 600;
 }
-.item--post-it #deleteItem {
-  font-size: calc(var(--font-size) * 2);
-}
 .item--post-it .item__identify {
   display: none;
 }
@@ -89,8 +86,10 @@
 .add-item--post-it {
   container-type: inline-size;
 }
-.item--post-it.item__article > *,
-.add-item--post-it > * {
+.item--post-it.item__article > .item__checkbox,
+.item--post-it.item__article > .item__title,
+.item--post-it.item__article > .item__text,
+.add-item--post-it > span {
   font-size: clamp(0.4rem, 8cqi, 2rem);
   line-height: clamp(0.4rem, 10cqi, 2rem);
   margin: min(3cqi, 2rem) min(3cqi, 2rem);
@@ -104,24 +103,28 @@
   line-height: clamp(0.3rem, 6cqi, 2rem);
 }
 .item--post-it .toolbar {
-  width: 10cqi;
-  aspect-ratio: 1/1;
+  width: 19cqi;
+  height: 13cqi;
 }
 /* Positionnement */
 .item--post-it.item__article {
   display: grid;
-  grid-template-columns: auto auto auto 1fr auto;
+  grid-template-columns: auto auto auto 1fr;
   grid-template-rows: auto auto 1fr;
   align-items: start;
   gap: 0;
+  position: relative;
 }
 .item--post-it .item__checkbox {
   grid-row: 1;
   grid-column: 1 / 3;
 }
 .item--post-it .toolbar {
-  grid-row: 1;
-  grid-column: 5;
+  position: absolute;
+  top: 0;
+  right: 0;
+  gap: 0;
+  margin: 0;
 }
 .item--post-it.item--crud-created::before,
 .item--post-it.item--crud-updated::before {
@@ -130,11 +133,11 @@
 }
 .item--post-it .item__title {
   grid-row: 2;
-  grid-column: 2 / 6;
+  grid-column: 2 / 5;
 }
 .item--post-it .item__text {
   grid-row: 3;
-  grid-column: 1 / 6;
+  grid-column: 1 / 5;
 }
 @container (inline-size > 7cqi) {
   .item--post-it.item--crud-created::before,
@@ -146,15 +149,44 @@
     grid-row: 1;
     grid-column: 4;
   }
-  .item--post-it .toolbar {
-    grid-row: 1;
-    grid-column: 5;
-  }
   .item--post-it .item__text {
     grid-row: 2 / 3;
-    grid-column: 1 / 6;
+    grid-column: 1 / 5;
   }
 }
+/* Effet pour la suppression d'un post-it */
+.item--post-it #deleteItem {
+  all: unset;
+  cursor: pointer;
+  z-index: 3; /* au dessus des pseudo-éléments */
+  width: 100%;
+  height: 100%;
+  position: absolute;
+}
+.item--post-it::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  border-style: solid;
+  border-width: 0 9cqi 3cqi 0;
+  z-index: 2;
+}
+.item--post-it:has(#deleteItem:hover)::after,
+.item--post-it:has(#deleteItem:focus-visible)::after {
+  border-width: 0 19cqi 13cqi 0;
+  transition: border-width 0.25s ease;
+}
+/* Cacher le texte du span */
+.item--post-it #deleteItem span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
 /* -- Affichage comme un todo -- */
 .item--todo .item__identify {
   display: none;
