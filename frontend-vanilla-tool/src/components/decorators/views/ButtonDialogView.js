@@ -1,3 +1,4 @@
+import ActionButtonView from '../../views/ActionButtonView.js';
 import DecoratorView from './DecoratorView.js';
 
 class ButtonDialogView extends DecoratorView {
@@ -5,20 +6,23 @@ class ButtonDialogView extends DecoratorView {
   name = 'DialogView';
   constructor(view, data) {
     super(view, data);
+    const buttonView = new ActionButtonView(data);
+    buttonView.getElementView()
+      .setAttribute('popovertarget', 'dialog');
+    this.setStaticView('button', buttonView);
+
+    const closeButtonView = new ActionButtonView({ id: 'close-button', label: 'Fermer', type: 'label', role: 'button' });
+    closeButtonView.getElementView()
+      .setAttribute('popovertargetaction', 'hide');
+    closeButtonView.getElementView()
+      .setAttribute('popovertarget', 'dialog');
+    this.setStaticView('close-button', closeButtonView);
   }
-  /**
-   * @override {@link View.getHtmlView}
-   * @param {Object} data - Données à utiliser pour créer la vue
-   * @param {string} data.id - Identifiant du bouton
-   * @param {string} data.label - Label du bouton
-   * @param {string} data.role - Rôle du bouton
-   * @param {icon|menu|label} data.type - Type de bouton
-   * @returns {string} - Code HTML du bouton
-   */
-  getHtmlView(data) {
-    return String.raw`<div><button popovertarget="dialog" id="${ data.id }" class="clickable ${ data.type }-button" role="${ data.role }">${ data.label }</button>
+
+  getHtmlView(/* data */) {
+    return String.raw`<div><template id="button"></template>
     <dialog id="dialog" class="dialog" popover>${ super.getTemplateDecoratorHTML() }
-      <button class="clickable label-button" popovertarget="dialog" popovertargetaction="hide" role="button">Fermer</button>
+    <template id="close-button"></template>
     </dialog></div>`;
   }
 

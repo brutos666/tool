@@ -11,6 +11,7 @@ class ButtonDialog extends Decorator {
    * @param {object} data - Informations pour afficher le bouton
    * @param {string} data.id - Identifiant du bouton
    * @param {string} data.label - Label du bouton
+   * @param {string} data.icon - Icône du bouton
    * @param {string} data.role - Rôle du bouton
    * @param {icon|menu|label} data.type - Type de bouton
    */

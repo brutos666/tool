@@ -177,8 +177,8 @@
   border-width: 0 19cqi 13cqi 0;
   transition: border-width 0.25s ease;
 }
-/* Cacher le texte du span */
-.item--post-it #deleteItem span {
+/* Cacher l’icône du bouton */
+.item--post-it #deleteItem .button__icon {
   position: absolute;
   width: 1px;
   height: 1px;
