@@ -20,17 +20,17 @@
 .rules--color,
 .sample--color,
 .question--color {
-  * {
-    color: var(--text-item-color);
-  }
-  .item--crud-created::before {
-    color: var(--created-color);
-  }
-  .item--crud-updated::before {
-    color: var(--updated-color);
-  }
+  color: var(--text-item-color);
+
   .action__button:hover {
-    background-color: var(--hover-item-color);
+    background-color: var(--error-color);
   }
+}
+.item--color::before,
+.story--color::before,
+.rules--color::before,
+.sample--color::before,
+.question--color::before {
+  color: var(--text-item-color);
 }
 
