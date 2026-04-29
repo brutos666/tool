@@ -38,7 +38,7 @@ class TreeView extends DecoratorView {
   }
 
   onFocus(event) {
-    if (!this.#treeItemNode.contains(event.relatedTarget)) {
+    if (event.relatedTarget === null || !this.#treeItemNode.contains(event.relatedTarget)) {
       this.setFocused(true);
       this.#onFocusCallback();
     }
