@@ -1,0 +1,37 @@
+/* Effet pour la suppression d'un post-it */
+.item--post-it .icon-button {
+  all: unset;
+  cursor: pointer;
+  z-index: 3; /* au dessus des pseudo-éléments */
+  width: 100%;
+  height: 100%;
+  position: absolute;
+}
+.item--post-it::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  border-style: solid;
+  border-width: 0 9cqi 3cqi 0;
+  z-index: 2;
+}
+.item--post-it:has(#markToDelete:hover)::after,
+.item--post-it:has(#markToDelete:focus-visible)::after {
+  border-width: 0 19cqi 13cqi 0;
+  transition: border-width 0.25s ease;
+}
+.item--post-it.item--crud-deleted::after {
+  border-width: 0 50cqi 50cqi 0;
+  transition: border-width 0.25s ease;
+}
+/* Cacher l’icône du bouton */
+.item--post-it #markToDelete .button__icon {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
