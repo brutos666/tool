@@ -136,17 +136,25 @@ class TreeItem {
     }
     this.alertObservers('updated');
   }
-  deleteItem() {
+  markToDeleteItem() {
     this.#deleted = true;
     for (const childItem of this.#treeItemList.getTreeList()) {
-      childItem.deleteItem();
+      childItem.markToDeleteItem();
     }
-    this.alertObservers('deleted');
+    this.alertObservers('toDelete');
+  }
+
+  undoToDelete() {
+    this.#deleted = false;
+    for (const childItem of this.#treeItemList.getTreeList()) {
+      childItem.undoToDelete();
+    }
+    this.alertObservers('undoToDelete');
   }
 
   /**
    *
-   * @param {'update'|'updated'|'deleted'|'addItem'|'removeItem'} action
+   * @param {'update'|'updated'|'toDelete'|'undoToDelete'|'addItem'|'removeItem'} action
    */
   alertObservers(action) {
     for (const observer of this.#observers) {

@@ -15,6 +15,7 @@ class ItemView extends View {
   #rights;
   #currentStatusClass;
   #currentCRUDModeClass;
+  #readOnly = false;
 
   #onInputCallback = () => {};
   #onDoneChangeCallback = () => {};
@@ -151,17 +152,44 @@ class ItemView extends View {
     this.#currentCRUDModeClass = newCRUDModeClass;
   }
 
-  setDeleted() {
+  setToDelete() {
     this.getElementView().classList.add('item--crud-deleted');
-    this.#title.contentEditable = false;
-    this.#text.contentEditable = false;
-    this.#done.disabled = true;
+    this.setDisabled();
+  }
+
+  undoToDelete() {
+    this.getElementView().classList.remove('item--crud-deleted');
+    this.setEnabled();
+    if (this.#readOnly) {
+      this.setReadOnly();
+    }
   }
 
   setReadOnly() {
     super.setReadOnly();
     this.#title.contentEditable = false;
     this.#text.contentEditable = false;
+    this.#done.disabled = false;
+    this.#readOnly = true;
+  }
+
+  /** @override */
+  setDisabled() {
+    // Laisser la barre d'outil accessible pour pouvoir annuler le marquage comme supprimé
+    this.#title.classList.add('disabled');
+    this.#text.classList.add('disabled');
+    this.#done.classList.add('disabled');
+    this.#title.contentEditable = false;
+    this.#text.contentEditable = false;
+    this.#done.disabled = true;
+  }
+
+  setEnabled() {
+    this.#title.classList.remove('disabled');
+    this.#text.classList.remove('disabled');
+    this.#done.classList.remove('disabled');
+    this.#title.contentEditable = true;
+    this.#text.contentEditable = true;
     this.#done.disabled = false;
   }
 

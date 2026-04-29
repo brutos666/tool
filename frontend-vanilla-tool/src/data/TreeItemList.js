@@ -71,7 +71,7 @@ class TreeItemList {
     }
     this.alertObservers('remove', [treeItemToRemove]);
     this.#treeList.splice(index, 1);
-    treeItemToRemove.alertObservers('deleted');
+    treeItemToRemove.alertObservers('toDelete');
   }
 
   getPrevious(treeItem) {

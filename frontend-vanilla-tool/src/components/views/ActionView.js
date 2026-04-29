@@ -43,7 +43,13 @@ class ActionView extends View {
     return this.#doActionCallback;
   }
 
-  callDoActionCallback() {
+  /**
+   * Lance l'action
+   * @param {Event} event
+   */
+
+  callDoActionCallback(event) {
+    event.stopPropagation();
     this.#doActionCallback();
   }
 

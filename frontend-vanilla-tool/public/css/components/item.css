@@ -6,6 +6,13 @@
   overflow: auto;
   gap: var(--medium-gap);
   align-content: flex-start;
+  position: relative;
+}
+.item__article .icon-button {
+  font-weight: bold;
+  font-size: var(--medium-font-size);
+  width: 20px;
+  border: none;
 }
 .item__title {
   flex: 1;
@@ -15,7 +22,6 @@
   flex-basis: 100%;
   align-self: stretch;
 }
-
 .item__title,
 .item__text {
   white-space: pre-wrap;
@@ -23,6 +29,7 @@
   overflow-wrap: break-word;
   text-align: left;
 }
+
 .item--status-orphan,
 .item--status-next-not-found,
 .item--status-total-orphan,
@@ -33,12 +40,19 @@
 .item--crud-updated::before {
   content: "•";
 }
-.item--crud-deleted {
-  cursor: default;
-  user-select: none;
-  pointer-events: none;
-  border: none;
-  opacity: 0.5;
+.item--crud-deleted #addNewChild,
+.item--crud-deleted #markToDelete {
+  display: none;
+}
+.item--crud-deleted #undoToDelete {
+  display: block;
+}
+.item__article:not(.item--crud-deleted) #addNewChild,
+.item__article:not(.item--crud-deleted) #markToDelete {
+  display: block;
+}
+.item__article:not(.item--crud-deleted) #undoToDelete {
+  display: none;
 }
 
 /* -- Affichage item avec que le titre */
@@ -50,13 +64,7 @@
 .item--title .item__text {
   display: none;
 }
-#addNewChild,
-#deleteItem {
-  font-weight: bold;
-  font-size: var(--medium-font-size);
-  width: 20px;
-  border: none;
-}
+
 /* -- Affichage item comme un post-it -- */
 /* Aspect général */
 .item--post-it.item__article {
@@ -103,7 +111,7 @@
   line-height: clamp(0.3rem, 6cqi, 2rem);
 }
 .item--post-it .toolbar {
-  width: 19cqi;
+  width: clamp(0.5rem, 10cqi, 3rem);
   height: 13cqi;
 }
 /* Positionnement */

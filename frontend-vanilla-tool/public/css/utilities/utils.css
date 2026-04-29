@@ -10,11 +10,13 @@
 }
 
 .disabled {
-  pointer-events: none;
   opacity: 0.5;
+  cursor: default;
+  user-select: none;
+  pointer-events: none;
 }
 
-.clickable {
+.clickable:not(.disabled) {
   cursor: pointer;
 }
 

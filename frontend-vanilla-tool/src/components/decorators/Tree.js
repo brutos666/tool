@@ -74,7 +74,7 @@ class Tree extends Decorator {
 
   /**
    * Modification du modèle
-   * @param {'update'|'updated'|'deleted'|'addItem'|'removeItem'} action
+   * @param {'update'|'updated'|'toDelete'|'addItem'|'removeItem'} action
    * @param {TreeItem} treeItem
    */
   update(action, treeItem) {
@@ -83,7 +83,7 @@ class Tree extends Decorator {
       this.setOpen(true);
     } else if (action === 'removeItem') {
       this.setLeaf(treeItem.isLeaf());
-    } else if (action === 'deleted') {
+    } else if (action === 'toDelete') {
       this.#treeItem.removeObserver(this);
     }
   }

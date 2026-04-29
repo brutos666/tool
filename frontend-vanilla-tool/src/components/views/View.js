@@ -130,6 +130,9 @@ class View {
   setClickable() {
     this.getElementView().classList.add('clickable');
   }
+  unsetClickable() {
+    this.getElementView().classList.remove('clickable');
+  }
 
   isNode() {
     return false;

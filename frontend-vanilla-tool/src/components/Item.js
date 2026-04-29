@@ -37,9 +37,12 @@ class Item extends Component {
       toolbar.addChild(addAction);
     }
     if (data.rights.includes(RIGHT.delete)) {
-      const deleteAction = new ActionButton({ id: 'deleteItem', label: 'Supprimer l\'item', icon: '-', role: 'button', type: 'icon' });
-      deleteAction.setDoActionCallback(this.doDelete.bind(this));
+      const deleteAction = new ActionButton({ id: 'markToDelete', label: 'Marquer à supprimer', icon: '-', role: 'button', type: 'icon' });
+      deleteAction.setDoActionCallback(this.markToDelete.bind(this));
       toolbar.addChild(deleteAction);
+      const undoToDeleteAction = new ActionButton({ id: 'undoToDelete', label: 'Annuler la suppression', icon: '+', role: 'button', type: 'icon' });
+      undoToDeleteAction.setDoActionCallback(this.undoToDelete.bind(this));
+      toolbar.addChild(undoToDeleteAction);
     }
     this.setStaticChild('toolbar', toolbar);
   }
@@ -95,8 +98,12 @@ class Item extends Component {
   doAdd(title) {
     this.#treeItem.addItem({ title, state: 'TODO', children: [] });
   }
-  doDelete() {
-    this.#treeItem.deleteItem();
+  markToDelete() {
+    this.#treeItem.markToDeleteItem();
+  }
+
+  undoToDelete() {
+    this.#treeItem.undoToDelete();
   }
 
   /**
@@ -113,7 +120,7 @@ class Item extends Component {
 
   /**
    * Modification du modèle
-   * @param {'update'|'updated'|'deleted'|'addItem'|'removeItem'} action
+   * @param {'update'|'updated'|'toDelete'|'undoToDelete'|'addItem'|'removeItem'} action
    * @param {TreeItem} treeItem
    */
   update(action, treeItem) {
@@ -124,15 +131,14 @@ class Item extends Component {
     } else if (action === 'updated') {
       this.getView()
         .setItemValues(treeItem.getItemInfos());
-    } else if (action === 'deleted') {
+    } else if (action === 'toDelete') {
+      this.getView()
+        .setToDelete();
+    } else if (action === 'undoToDelete') {
+      this.getView()
+        .undoToDelete();
+    } else if (action === 'removeItem') {
       this.#treeItem.removeObserver(this);
-      if (this.#treeItem.isNew()) {
-        this.#treeItem.getParentItem()
-          .removeItem(this.#treeItem);
-      } else {
-        this.getView()
-          .setDeleted();
-      }
     }
   }
 
