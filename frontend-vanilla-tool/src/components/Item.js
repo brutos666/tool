@@ -99,7 +99,12 @@ class Item extends Component {
     this.#treeItem.addItem({ title, state: 'TODO', children: [] });
   }
   markToDelete() {
-    this.#treeItem.markToDeleteItem();
+    if (this.#treeItem.isNew()) {
+      this.#treeItem.getParentItem()
+        .removeItem(this.#treeItem);
+    } else {
+      this.#treeItem.markToDeleteItem();
+    }
   }
 
   undoToDelete() {

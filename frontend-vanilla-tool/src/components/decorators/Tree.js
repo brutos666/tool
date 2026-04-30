@@ -83,8 +83,6 @@ class Tree extends Decorator {
       this.setOpen(true);
     } else if (action === 'removeItem') {
       this.setLeaf(treeItem.isLeaf());
-    } else if (action === 'toDelete') {
-      this.#treeItem.removeObserver(this);
     }
   }
 
