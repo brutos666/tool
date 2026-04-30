@@ -12,6 +12,11 @@ class SampleMappingTablesView extends View {
 
   /** @type {HTMLTableElement} */
   #sampleTable = null;
+  /** @type {HTMLTableRowElement} */
+  #storySpace = null;
+
+  #addRuleSpace = null;
+  #sampleEmptySpace = null;
 
   #zoom = 1;
 
@@ -19,6 +24,9 @@ class SampleMappingTablesView extends View {
     super(data);
     this.#sampleTable = this.getElementView()
       .querySelector('.sample-mapping__table');
+    this.#storySpace = this.#sampleTable.querySelector('.sample-mapping__story-item');
+    this.#addRuleSpace = this.#sampleTable.querySelector('.sample-mapping__add-rule');
+    this.#sampleEmptySpace = this.#sampleTable.querySelector('.sample-mapping__samples-empty');
   }
 
   addColumn(ruleView, samplesView) {
@@ -33,18 +41,11 @@ class SampleMappingTablesView extends View {
     this.#ruleHeaders.push(ruleNode);
     this.#sampleCells.push(samplesNode);
 
-    const rulesSpace = this.getElementView()
-      .querySelector('#spaceRules');
-    const ruleSpacer = rulesSpace.querySelector('.sample-mapping__add-rule');
-    rulesSpace.insertBefore(ruleNode, ruleSpacer);
+    this.#addRuleSpace.parentNode.insertBefore(ruleNode, this.#addRuleSpace);
+    this.#sampleEmptySpace.parentNode.insertBefore(samplesNode, this.#sampleEmptySpace);
 
-    const samplesSpace = this.getElementView()
-      .querySelector('#spaceSamples');
-    const sampleSpacer = samplesSpace.querySelector('.sample-mapping__samples-empty');
-    samplesSpace.insertBefore(samplesNode, sampleSpacer);
-
-    this.getElementView()
-      .querySelector('.sample-mapping__story-item').colSpan = this.#ruleHeaders.length + 1;
+    this.#storySpace.colSpan = this.#ruleHeaders.length + 1;
+    this.#sampleTable.style.setProperty('--number-of-columns', this.#ruleHeaders.length + 1);
   }
 
   removeAllColumns() {
@@ -52,8 +53,10 @@ class SampleMappingTablesView extends View {
     this.#sampleCells.forEach(samplesNode => samplesNode.parentNode.removeChild(samplesNode));
     this.#ruleHeaders = [];
     this.#sampleCells = [];
-    this.getElementView()
-      .querySelector('.sample-mapping__story-item').colSpan = 1;
+
+    this.#storySpace.colSpan = 1;
+    this.#sampleTable.style.setProperty('--number-of-columns', 1);
+    this.zoomReset();
   }
 
   removeColumn(index) {
@@ -66,24 +69,24 @@ class SampleMappingTablesView extends View {
     this.#ruleHeaders.splice(index, 1);
     this.#sampleCells.splice(index, 1);
 
-    this.getElementView()
-      .querySelector('.sample-mapping__story-item').colSpan = this.#ruleHeaders.length + 1;
+    this.#storySpace.colSpan = this.#ruleHeaders.length + 1;
+    this.#sampleTable.style.setProperty('--number-of-columns', this.#ruleHeaders.length + 1);
   }
 
   getHtmlView() {
     return String.raw`<div class ="sample-mapping"><template id="toolbar" class="sample-mapping__toolbar"></template>
       <table class="sample-mapping__table"><thead>
-      <tr>
+      <tr class="sample-mapping__row">
         <th class="sample-mapping__story-item" colspan="1" ><template id="storyItem"></template></th>
         <th class="sample-mapping__spacer"></th>
         <th class="sample-mapping__story-type"><span class="sample-mapping--type">Story</span></th>
       </tr>
-      <tr id="spaceRules">
-        <th class="sample-mapping__add-rule sample-mapping__rule "><template id="addItemAction"></template></th>
+      <tr id="spaceRules" class="sample-mapping__row">
+        <th class="sample-mapping__add-rule sample-mapping__rule"><template id="addItemAction"></template></th>
         <th class="sample-mapping__spacer"></th>
         <th class="sample-mapping__rules-type"><span class="sample-mapping--type">Rules</span></th>
       </tr></thead>
-      <tbody><tr id="spaceSamples">
+      <tbody><tr id="spaceSamples" class="sample-mapping__row">
         <td class="sample-mapping__samples-empty sample-mapping__samples"></td>
         <td class="sample-mapping__spacer"></td>
         <td class="sample-mapping__samples-type"><span class="sample-mapping--type">Samples / Questions</span></td>
@@ -117,7 +120,7 @@ class SampleMappingTablesView extends View {
  * @param {HTMLElement} element
  */
 function resetResize(element) {
-  const items = element.querySelectorAll('.item__article');
+  const items = element.querySelectorAll('.item');
   items.forEach(item => {
     item.style.removeProperty('width');
     item.style.removeProperty('height');

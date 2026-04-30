@@ -13,9 +13,19 @@
   gap: var(--large-gap);
   overflow: auto;
   --number-of-columns: 1;
-  grid-template-columns: repeat(var(--number-of-columns), minmax(0, 200px)) auto;
+  grid-template-columns: repeat(var(--number-of-columns), 1fr) auto;
   --post-it-story-width: calc((100% - (var(--number-of-columns) - 1) * var(--large-gap)) / var(--number-of-columns));
   --post-it-width: 100%;
+  --post-it-size: min(200px, calc((100% - var(--number-of-columns) * var(--large-gap)) / var(--number-of-columns)));
+}
+.sample-mapping-grid .item,
+.sample-mapping-grid .item-like-button {
+  /* min-width: min(var(--post-it-size), 200px);*/
+  min-width: var(--post-it-size);
+}
+.sample-mapping-grid__samples .item {
+  overflow: auto;
+  resize: both;
 }
 .zoom.sample-mapping-grid__grid {
   width: auto;
@@ -46,8 +56,7 @@
   width: 100%;
 }
 
-.sample-mapping-grid__samples .item__article,
-.sample-mapping-grid__rules .item__article,
+.sample-mapping-grid .item,
 .sample-mapping-grid .item-like-button {
   aspect-ratio: 1 / 1;
   box-shadow:
@@ -55,15 +64,10 @@
     8px 10px 8px var(--box-shadow-color);
 }
 .sample-mapping-grid .item-like-button {
-  min-width: var(--post-it-width);
+  min-width: min(var(--post-it-width), 200px);
   flex: 1;
 }
-
-.sample-mapping-grid__title .item__article {
+.sample-mapping-grid__title .item {
   min-width: min(200px, var(--post-it-story-width));
-  aspect-ratio: 1 / 1;
-  box-shadow:
-    -7px 7px 6px var(--box-shadow-color),
-    8px 10px 8px var(--box-shadow-color);
 }
 

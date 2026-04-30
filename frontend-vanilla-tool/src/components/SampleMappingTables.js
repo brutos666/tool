@@ -5,7 +5,7 @@ import SampleMappingSamples from './SampleMappingSamples.js';
 import ActionButton from './ActionButton.js';
 import Toolbar from './Toolbar.js';
 import AddItemButton from './AddItemButton.js';
-import SampleMappingGridView from './views/SampleMappingGridView.js';
+import SampleMappingTablesView from './views/SampleMappingTablesView.js';
 /** @import TreeItem from '../data/TreeItem.js'; */
 
 class SampleMappingTables extends Items {
@@ -15,7 +15,7 @@ class SampleMappingTables extends Items {
   #item;
 
   constructor(treeItem) {
-    super(new SampleMappingGridView(), treeItem, ITEM_LAYOUT.Rules);
+    super(new SampleMappingTablesView(), treeItem, ITEM_LAYOUT.Rules);
 
     const zoomMinus = new ActionButton({ id: 'zoomMinus', label: 'Zoom -', role: 'button', type: 'label' });
     zoomMinus.setDoActionCallback(this.zoomMinus.bind(this));

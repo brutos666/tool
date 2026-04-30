@@ -101,7 +101,7 @@ class SampleMappingGridView extends View {
  * @param {HTMLElement} element
  */
 function resetResize(element) {
-  const items = element.querySelectorAll('.item__article');
+  const items = element.querySelectorAll('.item');
   items.forEach(item => {
     item.style.removeProperty('width');
     item.style.removeProperty('height');
