@@ -49,21 +49,29 @@ class View {
    * @param {View} view - Vue statique
    */
   setStaticView(id, view) {
+    /** @type {Element} */
+    const templateNode = this.#templateNode[id];
+    templateNode.classList.forEach(classItem => view.getElementView().classList.add(classItem));
+    templateNode.getAttributeNames()
+      .filter(name => name !== 'id' && name !== 'class')
+      .forEach(name => {
+        view.getElementView()
+          .setAttribute(name, this.#templateNode[id].getAttribute(name));
+      });
+
     const oldView = this.#staticViews[id];
     if (oldView) {
-      this.#templateNode[id].classList.forEach(classItem => view.getElementView().classList.add(classItem));
       oldView.getElementView().parentNode.replaceChild(view.getElementView(), oldView.getElementView());
       this.#staticViews[id] = view;
       return;
     }
-    /** @type {Element} */
-    const templateNode = this.#templateNode[id];
+
     if (!templateNode) {
       const error = new Error(`Erreur de conception : on tente d'accéder à un élément qui n'a pas été défini [${ id }] dans la vue [${ this.getName() }]`);
       window.alert(error);
       throw new Error(error);
     }
-    templateNode.classList.forEach(classItem => view.getElementView().classList.add(classItem));
+
     templateNode.parentNode.replaceChild(view.getElementView(), templateNode);
     this.#staticViews[id] = view;
   }

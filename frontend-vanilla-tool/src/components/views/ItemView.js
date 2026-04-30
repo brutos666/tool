@@ -57,13 +57,14 @@ class ItemView extends View {
    * @returns {string} - Code HTML de l'item
    */
   getHtmlView() {
-    return String.raw`<article class="item__article">
+    return String.raw`<section class="item">
+      <template id="toolbar" aria-controls="itemArticle" class="item__toolbar" ></template>
+      <article id="itemArticle" class="item__article">
           <span id="identify" class="item__identify"></span>
           <input type="checkbox" id="done" class="item__checkbox clickable"/>
           <div contenteditable="true" class="item__title" id="title"></div>
-          <template id="toolbar"></template>
           <div contenteditable="true" class="item__text" id="text"></div>
-      </article>`;
+      </article></section>`;
   }
 
   /**

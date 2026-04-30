@@ -34,7 +34,7 @@
   --error-color: light-dark(red, red);
   --success-color: light-dark(green, green);
   --created-color: light-dark(green, #00ff00);
-  --updated-color: light-dark(blue, #00ff00);
+  --updated-color: light-dark(blue, #00ddff);
   --box-shadow-color: light-dark(#5d5d5d, rgba(0, 0, 0, 0.5));
   --sample-color-hue: 99;
   --story-color-hue: 55;

@@ -1,26 +1,30 @@
+.item {
+  display: flex;
+  flex-direction: row;
+  gap: var(--small-gap);
+}
+.item__toolbar {
+  order: 2;
+}
 .item__article {
+  order: 1;
+  flex: 1;
   display: flex;
   flex-direction: row;
   align-items: center;
   flex-wrap: wrap;
   overflow: auto;
   gap: var(--medium-gap);
-  align-content: flex-start;
   position: relative;
-}
-.item__article .icon-button {
-  font-weight: bold;
-  font-size: var(--medium-font-size);
-  width: 20px;
-  border: none;
 }
 .item__title {
   flex: 1;
+  margin: 1px;
 }
 .item__text {
+  align-self: stretch;
   font-weight: normal;
   flex-basis: 100%;
-  align-self: stretch;
 }
 .item__title,
 .item__text {
@@ -29,6 +33,19 @@
   overflow-wrap: break-word;
   text-align: left;
 }
+.item__toolbar .icon-button {
+  font-weight: bold;
+  font-size: var(--medium-font-size);
+  min-width: 20px;
+  aspect-ratio: 1 / 1;
+}
+.item__toolbar #addNewChild,
+.item__toolbar #markToDelete {
+  display: block;
+}
+.item__toolbar #undoToDelete {
+  display: none;
+}
 
 .item--status-orphan,
 .item--status-next-not-found,
@@ -36,29 +53,19 @@
 .item--status-loop {
   border: var(--error-color) solid 1px;
 }
-.item--crud-created::before,
-.item--crud-updated::before {
+.item--crud-created .item__article::before,
+.item--crud-updated .item__article::before {
   content: "•";
 }
-.item--crud-deleted #addNewChild,
-.item--crud-deleted #markToDelete {
+.item--crud-deleted .item__toolbar #addNewChild,
+.item--crud-deleted .item__toolbar #markToDelete {
   display: none;
 }
-.item--crud-deleted #undoToDelete {
+.item--crud-deleted .item__toolbar #undoToDelete {
   display: block;
-}
-.item__article:not(.item--crud-deleted) #addNewChild,
-.item__article:not(.item--crud-deleted) #markToDelete {
-  display: block;
-}
-.item__article:not(.item--crud-deleted) #undoToDelete {
-  display: none;
 }
 
 /* -- Affichage item avec que le titre */
-.item--title.item__article .item__title {
-  box-sizing: content-box;
-}
 .item--title .item__identify,
 .item--title .item__checkbox,
 .item--title .item__text {
@@ -67,8 +74,12 @@
 
 /* -- Affichage item comme un post-it -- */
 /* Aspect général */
-.item--post-it.item__article {
-  resize: both;
+.item--post-it .item__toolbar {
+  background-color: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+}
+.item--post-it.item:hover .item__toolbar {
+  opacity: 1;
 }
 .item--post-it .item__checkbox {
   appearance: none;
@@ -87,88 +98,113 @@
   display: none;
 }
 /* Redimensionnement */
-.item--post-it.item__article {
+.item--post-it .item__toolbar {
+  container-type: inline-size;
+}
+.item--post-it .item__toolbar .icon-button {
+  font-size: clamp(0.4rem, 15cqi, 2rem);
+  line-height: clamp(0.4rem, 7cqi, 2rem);
+  margin: min(1cqi, 2rem);
+  min-width: 10cqi;
+  aspect-ratio: 2 / 1;
+}
+.item--post-it .item__article {
   overflow: auto;
   container-type: inline-size;
 }
 .add-item--post-it {
   container-type: inline-size;
 }
-.item--post-it.item__article > .item__checkbox,
-.item--post-it.item__article > .item__title,
-.item--post-it.item__article > .item__text,
+.item--post-it .item__checkbox,
+.item--post-it .item__title,
+.item--post-it .item__text,
 .add-item--post-it > span {
-  font-size: clamp(0.4rem, 8cqi, 2rem);
-  line-height: clamp(0.4rem, 10cqi, 2rem);
-  margin: min(3cqi, 2rem) min(3cqi, 2rem);
+  font-size: clamp(0.6rem, 8cqi, 2rem);
+  line-height: clamp(0.7rem, 10cqi, 2.2rem);
+  margin: min(0.5cqi, 1rem) min(3cqi, 1rem) min(3cqi, 2rem) min(3cqi, 1rem);
+}
+.item--post-it.item--crud-created .item__article::before,
+.item--post-it.item--crud-updated .item__article::before {
+  font-size: clamp(0.4rem, 12cqi, 2rem);
+  line-height: clamp(0.4rem, 15cqi, 2rem);
 }
 .item--post-it .item__checkbox {
   aspect-ratio: 1/1;
-  width: clamp(0.5rem, 10cqi, 3rem);
+  width: clamp(0.5rem, 10cqi, 2rem);
 }
 .item--post-it .item__checkbox:checked::after {
   display: block;
-  line-height: clamp(0.3rem, 6cqi, 2rem);
+  line-height: clamp(0.3rem, 6cqi, 1rem);
 }
-.item--post-it .toolbar {
-  width: clamp(0.5rem, 10cqi, 3rem);
-  height: 13cqi;
-}
+
 /* Positionnement */
-.item--post-it.item__article {
+.item--post-it.item {
+  display: flex;
+  flex-direction: column;
+}
+.item--post-it .item__toolbar {
+  order: 1;
+  justify-content: end;
+}
+.item--post-it .item__article {
+  order: 2;
   display: grid;
-  grid-template-columns: auto auto auto 1fr;
-  grid-template-rows: auto auto 1fr;
+  grid-template-columns: auto auto 1fr;
+  grid-template-rows: auto 1fr;
   align-items: start;
   gap: 0;
   position: relative;
 }
 .item--post-it .item__checkbox {
   grid-row: 1;
-  grid-column: 1 / 3;
-}
-.item--post-it .toolbar {
-  position: absolute;
-  top: 0;
-  right: 0;
-  gap: 0;
-  margin: 0;
-}
-.item--post-it.item--crud-created::before,
-.item--post-it.item--crud-updated::before {
-  grid-row: 2;
   grid-column: 1;
+  display: block;
+}
+.item--post-it.item--crud-created .item__article::before,
+.item--post-it.item--crud-updated .item__article::before {
+  grid-row: 1;
+  grid-column: 2;
 }
 .item--post-it .item__title {
-  grid-row: 2;
-  grid-column: 2 / 5;
+  grid-row: 1;
+  grid-column: 3;
 }
 .item--post-it .item__text {
-  grid-row: 3;
-  grid-column: 1 / 5;
+  grid-row: 2;
+  grid-column: 1 / 4;
+  display: block;
 }
-@container (inline-size > 7cqi) {
-  .item--post-it.item--crud-created::before,
-  .item--post-it.item--crud-updated::before {
+@container (inline-size < 7cqi) {
+  .item--post-it .item__checkbox {
+    display: none;
+  }
+  .item--post-it.item--crud-created .item__article::before,
+  .item--post-it.item--crud-updated .item__article::before {
     grid-row: 1;
-    grid-column: 3;
+    grid-column: 1;
   }
   .item--post-it .item__title {
     grid-row: 1;
-    grid-column: 4;
+    grid-column: 2 / 4;
+  }
+}
+@container (inline-size < 6cqi) {
+  .item--post-it .item__title {
+    white-space: pre-wrap;
+    word-break: normal;
+    overflow-wrap: normal;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    font-weight: 500;
   }
   .item--post-it .item__text {
-    grid-row: 2 / 3;
-    grid-column: 1 / 5;
+    display: none;
   }
 }
 
 /* -- Affichage comme un todo -- */
 .item--todo .item__identify {
   display: none;
-}
-.item--todo .item__title {
-  flex: 1;
 }
 .item--todo .item__text {
   display: none;

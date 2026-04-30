@@ -3,10 +3,10 @@ body {
   color: var(--color);
 }
 
-.item--crud-created::before {
+.item--crud-created .item__article::before {
   color: var(--created-color);
 }
-.item--crud-updated::before {
+.item--crud-updated .item__article::before {
   color: var(--updated-color);
 }
 
