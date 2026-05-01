@@ -29,7 +29,8 @@
   --help-background-color: light-dark(#999999, #222);
   --hover-color: light-dark(#b3b3b3, #5c5c5c);
   --hover-item-color: light-dark(#b3b3b3, #949494);
-  --focus-color: light-dark(#0000ff, #808080);
+  --focus-color: light-dark(#0000ff, #0000ff);
+  --current-color: light-dark(yellow, yellow);
   --selected-color: light-dark(orange, orange);
   --error-color: light-dark(red, red);
   --success-color: light-dark(green, green);

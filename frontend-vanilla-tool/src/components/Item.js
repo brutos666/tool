@@ -12,6 +12,7 @@ import Toolbar from './Toolbar.js';
 class Item extends Component {
 
   name = 'Item';
+  static EVENTS = { focus: 'itemFocus', current: 'itemCurrent' };
 
   /** @type {TreeItem} */
   #treeItem = null;
@@ -67,7 +68,25 @@ class Item extends Component {
     } else {
       this.setReadOnly();
     }
+    this.getView()
+      .setOnFocusCallback(() => {
+        this.getView()
+          .dispatchEvent(new CustomEvent(Item.EVENTS.focus, { bubbles: true, detail: this }));
+      });
   }
+
+  setCurrent() {
+    this.getView()
+      .dispatchEvent(new CustomEvent(Item.EVENTS.current, { bubbles: true, detail: this }));
+    this.getView()
+      .setCurrent();
+  }
+
+  removeCurrent() {
+    this.getView()
+      .removeCurrent();
+  }
+
   destroy() {
     this.#treeItem.removeObserver(this);
     super.destroy();

@@ -9,7 +9,6 @@ import TreeListView from '../views/TreeListView.js';
 class Tree extends Decorator {
 
   name = 'Tree';
-  static EVENTS = { focus: 'treeItemFocus' };
 
   /** @type {TreeItem} */
   #treeItem;
@@ -26,12 +25,6 @@ class Tree extends Decorator {
     super(new TreeView(decoratedElement.getView()), decoratedElement);
     this.#treeItem = data.treeItem;
     this.#treeItem.addObserver(this, data.rights);
-
-    this.getView()
-      .setOnFocusCallback(() => {
-        this.getView()
-          .dispatchEvent(new CustomEvent(Tree.EVENTS.focus, { bubbles: true, detail: this.#treeItem }));
-      });
 
     const rights = data.rights;
     if (!rights.includes(RIGHT.update)) {

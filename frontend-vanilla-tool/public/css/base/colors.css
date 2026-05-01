@@ -9,4 +9,7 @@ body {
 .item--crud-updated .item__article::before {
   color: var(--updated-color);
 }
+.item--current.item {
+  outline: var(--current-color) solid 2px;
+}
 

@@ -1,4 +1,5 @@
 import DecoratorView from './DecoratorView.js';
+import ActionButtonView from '../../views/ActionButtonView.js';
 /** @import View from '../../views/View.js'; */
 
 class TreeView extends DecoratorView {
@@ -6,9 +7,6 @@ class TreeView extends DecoratorView {
   name = 'TreeView';
 
   #toggle;
-  #treeItemNode;
-
-  #onFocusCallback = () => {};
 
   /**
    * @constructor
@@ -24,29 +22,12 @@ class TreeView extends DecoratorView {
     this.#toggle = toggleAction.getElementView();
   }
 
-  setOnFocusCallback(onFocusCallback) {
-    this.#onFocusCallback = onFocusCallback;
-  }
-
   getHtmlView() {
     return String.raw`<div id="tree" class="tree">
       <section class="tree__header">
       <template id="toggle" class="tree__toggle icon-button clickable"></template>
       <div id="treeItem" class="tree__item">${ super.getTemplateDecoratorHTML() }</div></section>
       <template id="treeList" class="tree__list"></template></div>`;
-  }
-
-  onFocus(event) {
-    if (event.relatedTarget === null || !this.#treeItemNode.contains(event.relatedTarget)) {
-      this.setFocused(true);
-      this.#onFocusCallback();
-    }
-  }
-
-  onBlur(event) {
-    if (!this.#treeItemNode.contains(event.relatedTarget)) {
-      this.setFocused(false);
-    }
   }
 
   setOpen(open) {
@@ -78,14 +59,6 @@ class TreeView extends DecoratorView {
     classList.remove('tree--leaf');
     classList.add('tree--node');
     this.#toggle.classList.remove('hidden');
-  }
-
-  setFocused(focused) {
-    if (focused) {
-      this.getElementView().classList.add('focused');
-    } else {
-      this.getElementView().classList.remove('focused');
-    }
   }
 
 }

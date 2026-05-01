@@ -19,6 +19,7 @@ class ItemView extends View {
 
   #onInputCallback = () => {};
   #onDoneChangeCallback = () => {};
+  #onFocusCallback = () => {};
 
   /**
    * @param {Object} data - Données à utiliser pour créer la vue
@@ -28,6 +29,9 @@ class ItemView extends View {
    */
   constructor(data) {
     super(data);
+    this.getElementView()
+      .addEventListener('focus', this.onFocus.bind(this), true);
+
     this.viewAdded(data);
   }
 
@@ -105,6 +109,16 @@ class ItemView extends View {
     this.#done.addEventListener('change', this.#onDoneChangeCallback);
   }
 
+  setOnFocusCallback(onFocusCallback) {
+    this.#onFocusCallback = onFocusCallback;
+  }
+  onFocus(event) {
+    if (event.relatedTarget === null || (!this.getElementView()
+      .contains(event.relatedTarget))) {
+      this.#onFocusCallback();
+    }
+  }
+
   majNodes() {
     const mainNode = this.getElementView();
     this.#identify = mainNode.querySelector('#identify');
@@ -163,12 +177,22 @@ class ItemView extends View {
     }
   }
 
+  setCurrent() {
+    this.getElementView().classList.add('item--current');
+  }
+
+  removeCurrent() {
+    this.getElementView().classList.remove('item--current');
+  }
+
   setReadOnly() {
     super.setReadOnly();
+    this.#readOnly = true;
     this.#title.contentEditable = false;
     this.#text.contentEditable = false;
-    this.#done.disabled = false;
-    this.#readOnly = true;
+    this.#done.disabled = true;
+    this.getElementView()
+      .setAttribute('tabindex', '0');
   }
 
   /** @override */
@@ -179,7 +203,7 @@ class ItemView extends View {
     this.#done.classList.add('disabled');
     this.#title.contentEditable = false;
     this.#text.contentEditable = false;
-    this.#done.disabled = true;
+    this.#done.disabled = false;
   }
 
   setEnabled() {

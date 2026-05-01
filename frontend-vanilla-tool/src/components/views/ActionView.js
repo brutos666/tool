@@ -17,6 +17,9 @@ class ActionView extends View {
     super(data);
     this.getElementView()
       .addEventListener('click', this.callDoActionCallback.bind(this));
+    // Empêche le comportement par défaut du bouton, soit la perte de focus sur un élément lorsque l'on clique sur un bouton
+    this.getElementView()
+      .addEventListener('mousedown', e => e.preventDefault());
   }
 
   /**

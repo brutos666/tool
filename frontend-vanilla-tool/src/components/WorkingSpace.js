@@ -1,6 +1,5 @@
 import NavTree from './NavTree.js';
 import WorkingSpaceView from './views/WorkingSpaceView.js';
-import Tree from './decorators/Tree.js';
 import Component from './Component.js';
 import MainSpace from './MainSpace.js';
 import Menu from './Menu.js';
@@ -9,6 +8,8 @@ import FileUpload from './FileUpload.js';
 import StoreData from '../data/StoreData.js';
 import CommandDecorator from './decorators/CommandDecorator.js';
 import ButtonDialog from './decorators/ButtonDialog.js';
+import Item from './Item.js';
+import ManagerItemsDecorator from './decorators/ManagerItemsDecorator.js';
 
 class WorkingSpace extends Component {
 
@@ -17,8 +18,8 @@ class WorkingSpace extends Component {
 
     const treeItem = StoreData.getTreeItem();
     const menu = new Menu();
-    const decorateNavTree = new CommandDecorator(new NavTree(), { treeItem });
-    const decorateMainSpace = new CommandDecorator(new MainSpace(), { treeItem });
+    const decorateNavTree = new CommandDecorator(new ManagerItemsDecorator(new NavTree()), { treeItem });
+    const decorateMainSpace = new CommandDecorator(new ManagerItemsDecorator(new MainSpace()), { treeItem });
 
     const reloadAction = new ActionButton({ id: 'reload', label: 'Actualiser', role: 'menuitem', type: 'menu' });
     reloadAction.setDoActionCallback(decorateNavTree.loadItems.bind(decorateNavTree));
@@ -44,10 +45,11 @@ class WorkingSpace extends Component {
     this.setStaticChild('main', decorateMainSpace);
 
     decorateNavTree.getView()
-      .addEventListener(Tree.EVENTS.focus, event => {
+      .addEventListener(Item.EVENTS.current, event => {
+        const treeItem = event.detail.getTreeItem();
         decorateMainSpace.getDecoratedElement()
-          .setTreeItem(event.detail);
-        decorateMainSpace.setTreeItem(event.detail);
+          .setTreeItem(treeItem);
+        decorateMainSpace.setTreeItem(treeItem);
       });
 
     decorateNavTree.loadItems();
