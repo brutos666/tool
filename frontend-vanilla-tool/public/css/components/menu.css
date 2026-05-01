@@ -2,7 +2,7 @@
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  background-color: var(--menu-background-color);
+  background-color: var(--color-bg-surface);
   padding-left: var(--global-padding);
 }
 .menu__button {
@@ -18,11 +18,10 @@
   flex-wrap: wrap;
 }
 .menu__element {
-  background-color: var(--menu-background-color);
-  transition: background-color 0.2s;
+  background-color: var(--color-bg-surface);
 }
 .menu__element:hover {
-  background-color: var(--hover-color);
+  background-color: var(--color-bg-surface-hover);
 }
 
 /* Responsive */
@@ -30,15 +29,12 @@
   .menu__actions {
     display: none;
     flex-direction: column;
-    background-color: var(--menu-background-color);
+    background-color: var(--color-bg-surface);
     position: absolute;
     top: 35px;
     left: var(--global-padding);
     padding: var(--global-padding);
     width: fit-content;
-  }
-  .menu__element {
-    background-color: var(--menu-background-color);
   }
   .menu__button {
     display: block;

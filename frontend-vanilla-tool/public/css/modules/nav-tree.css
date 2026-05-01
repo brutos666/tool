@@ -12,6 +12,6 @@
 }
 .nav-tree__space > .items__space > * {
   padding: var(--small-padding);
-  box-shadow: 3px 3px 4px var(--box-shadow-color);
+  box-shadow: 3px 3px 4px var(--color-box-shadow);
 }
 

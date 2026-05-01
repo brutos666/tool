@@ -15,7 +15,6 @@
   flex-wrap: wrap;
   overflow: auto;
   gap: var(--medium-gap);
-  position: relative;
 }
 .item__title {
   flex: 1;
@@ -51,7 +50,7 @@
 .item--status-next-not-found,
 .item--status-total-orphan,
 .item--status-loop {
-  border: var(--error-color) solid 1px;
+  border: var(--color-error) solid 1px;
 }
 .item--crud-created .item__article::before,
 .item--crud-updated .item__article::before {
@@ -90,12 +89,12 @@
 
 .item--post-it .item__checkbox {
   appearance: none;
-  border: var(--border-color) solid 1px;
+  border: var(--color-border) solid 1px;
   background: transparent;
 }
 .item--post-it .item__checkbox:checked::after {
   content: "✓";
-  color: var(--success-color);
+  color: var(--color-success);
   font-size: calc(var(--font-size) * 2);
 }
 .item--post-it .item__title {

@@ -59,8 +59,8 @@
 .sample-mapping-grid .item-like-button {
   aspect-ratio: 1 / 1;
   box-shadow:
-    -7px 7px 6px var(--box-shadow-color),
-    8px 10px 8px var(--box-shadow-color);
+    -7px 7px 6px var(--color-box-shadow),
+    8px 10px 8px var(--color-box-shadow);
 }
 .sample-mapping-grid .item-like-button {
   min-width: min(var(--post-it-width), var(--default-post-it-width));

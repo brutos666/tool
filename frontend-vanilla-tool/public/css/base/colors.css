@@ -1,15 +1,18 @@
 body {
-  background-color: var(--background-color);
-  color: var(--color);
+  background-color: var(--color-bg);
+  color: var(--color-text);
 }
 
 .item--crud-created .item__article::before {
-  color: var(--created-color);
+  color: var(--color-created);
 }
 .item--crud-updated .item__article::before {
-  color: var(--updated-color);
+  color: var(--color-updated);
 }
-.item--current.item {
-  outline: var(--current-color) solid 2px;
+.tree__header:has(.item--current) {
+  background-color: var(--color-bg-current);
+}
+.tree__header:has(.tree__item *:focus) {
+  background-color: var(--color-focus);
 }
 

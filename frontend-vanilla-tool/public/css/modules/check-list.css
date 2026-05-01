@@ -30,6 +30,7 @@
 .check-list__space > .items__space > * {
   min-height: 50px;
   padding: var(--small-padding);
-  box-shadow: 3px 3px 4px var(--box-shadow-color);
+  box-shadow: 3px 3px 4px var(--color-box-shadow);
+  background-color: var(--color-bg-surface);
 }
 

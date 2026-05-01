@@ -7,6 +7,23 @@
   align-items: center;
   justify-content: center;
 }
+.label-button {
+  background-color: var(--color-bg-surface);
+  border-style: solid 1px var(--color-border);
+}
+.icon-button {
+  border-style: none;
+}
+.item-like-button {
+  outline: dashed 1px var(--color-border);
+}
+.label-button:hover,
+.icon-button:hover,
+.item-like-button:hover {
+  background-color: var(--color-bg-surface-hover);
+  border-color: var(--color-border-hover);
+}
+
 /* Reset indispensable sur button */
 .menu-button {
   all: unset; /* ou reset manuel */
@@ -18,21 +35,10 @@
   border-radius: var(--border-radius);
 }
 .menu-button:focus-visible {
-  outline: var(--focus-color) solid 2px;
+  outline: var(--color-focus) solid 2px;
 }
 
-.label-button:hover,
-.icon-button:hover,
-.item-like-button:hover {
-  background-color: var(--hover-color);
-}
-
-.label-button {
-  border: solid 1px var(--border-color);
-}
-.icon-button {
-  border: none;
-}
+/** Hide label */
 .icon-button .button__label {
   position: absolute;
   width: 1px;
@@ -40,8 +46,5 @@
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
-}
-.item-like-button {
-  outline: dashed 1px var(--border-color);
 }
 

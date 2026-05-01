@@ -1,44 +1,38 @@
 /** Couleur des post it **/
 .item--color {
-  --post-it-color-hue: var(--item-color-hue);
+  --color-post-it: var(--color-classic);
 }
 .story--color {
-  --post-it-color-hue: var(--story-color-hue);
+  --color-post-it: var(--color-story);
 }
 .rules--color {
-  --post-it-color-hue: var(--rules-color-hue);
+  --color-post-it: var(--color-rules);
 }
 .sample--color {
-  --post-it-color-hue: var(--sample-color-hue);
+  --color-post-it: var(--color-sample);
 }
 .question--color {
-  --post-it-color-hue: var(--question-color-hue);
+  --color-post-it: var(--color-question);
 }
 .item--color,
 .story--color,
 .rules--color,
 .sample--color,
 .question--color {
-  --hover-color: var(--hover-item-color);
-  --post-it-color: hsl(var(--post-it-color-hue), 100%, 80%);
-  --darker-post-it-color: hsl(var(--post-it-color-hue), 100%, 50%);
+  --darker-post-it-color: oklch(var(--color-post-it) / 0.5);
 }
 
 /* Point d'indication des modifications en cours*/
-.item--color::before,
-.story--color::before,
-.rules--color::before,
-.sample--color::before,
-.question--color::before {
-  color: var(--text-item-color);
+.item--color .item__article::before,
+.story--color .item__article::before,
+.rules--color .item__article::before,
+.sample--color .item__article::before,
+.question--color .item__article::before {
+  color: var(--color-text-on-post-it);
 }
 
 .item--post-it {
-  background-color: var(--post-it-color);
-  color: var(--text-item-color);
-}
-/* Coin à en haut à droite du post-it */
-.item--post-it::after {
-  border-color: transparent var(--background-color) var(--darker-post-it-color) transparent;
+  background-color: var(--color-post-it);
+  color: var(--color-text-on-post-it);
 }
 

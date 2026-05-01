@@ -9,11 +9,11 @@
 
 /* Style de base d'une notification */
 .notification {
-  background: var(--success-color);
+  background: var(--color-success);
   color: var(--text-color);
   padding: var(--global-padding);
   border-radius: var(--border-radius);
-  box-shadow: 0 4px 12px var(--box-shadow-color);
+  box-shadow: 0 4px 12px var(--color-box-shadow);
   margin-bottom: var(--global-margin);
   display: flex;
   align-items: center;
@@ -38,7 +38,7 @@
 }
 
 .notification.error {
-  background: var(--error-color);
+  background: var(--color-error);
 }
 
 .notification.error::before {

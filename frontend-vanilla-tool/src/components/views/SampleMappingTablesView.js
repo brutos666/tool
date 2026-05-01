@@ -114,7 +114,7 @@ class SampleMappingTablesView extends View {
   }
 
   magnifyFocused() {
-    this.#sampleTable.classList.toggle('focused--magnify');
+    this.#sampleTable.classList.toggle('current--magnify');
   }
 
 }

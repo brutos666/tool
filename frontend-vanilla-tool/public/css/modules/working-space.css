@@ -22,7 +22,7 @@
 .working-space__splitter {
   grid-row: 2;
   grid-column: 2;
-  background-color: var(--border-color);
+  background-color: var(--color-border);
   cursor: ew-resize;
 }
 .working-space__main {
