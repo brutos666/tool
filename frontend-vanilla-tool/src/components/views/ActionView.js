@@ -53,5 +53,11 @@ class ActionView extends View {
     this.#doActionCallback();
   }
 
+  setReadOnly() {
+    super.setReadOnly();
+    this.getElementView()
+      .disabled = true;
+  }
+
 }
 export default ActionView;

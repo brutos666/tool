@@ -11,19 +11,20 @@
 
 .disabled {
   opacity: 0.5;
-  cursor: default;
+  cursor: not-allowed;
   user-select: none;
-  pointer-events: none;
 }
 
-.clickable:not(.disabled) {
+.clickable:not([disabled]):not(.disabled) {
   cursor: pointer;
 }
-
+[contenteditable="false"] {
+  cursor: text;
+  user-select: text;
+}
 .readonly {
   cursor: default;
   user-select: none;
-  pointer-events: none;
   border: none;
 }
 .readonly .action__button {

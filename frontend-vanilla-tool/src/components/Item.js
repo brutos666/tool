@@ -64,6 +64,8 @@ class Item extends Component {
     if (this.#rights.includes(RIGHT.update)) {
       this.getView()
         .setOnChangeCallback(this.setPropertyValue.bind(this));
+    } else {
+      this.setReadOnly();
     }
   }
   destroy() {

@@ -23,16 +23,10 @@ class Decorator extends Component {
    * @returns {Component} composant décoré
    */
   getDecoratedElement() {
-    return this.#decoratedElement;
-  }
-
-  /** @override */
-  getOriginalElement() {
-    let originalElement = this.getDecoratedElement();
-    while (originalElement instanceof Decorator) {
-      originalElement = originalElement.getDecoratedElement();
+    if (this.#decoratedElement instanceof Decorator) {
+      return this.#decoratedElement.getDecoratedElement();
     }
-    return originalElement;
+    return this.#decoratedElement;
   }
 
   destroy() {

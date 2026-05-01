@@ -53,6 +53,9 @@ class DecoratorView extends View {
    * @returns {View} Vue décorée
    */
   getDecoratedView() {
+    if (this.#decoratedView.getDecoratedView) {
+      return this.#decoratedView.getDecoratedView();
+    }
     return this.#decoratedView;
   }
 
@@ -64,6 +67,12 @@ class DecoratorView extends View {
     const oldView = this.getElementView()
       .querySelector('template');
     oldView.parentNode.replaceChild(elementView, oldView);
+  }
+
+  setReadOnly() {
+    // Par défaut, seul l'élément décoré passe en readOnly. Si un décorateur doit se comporter différemment, il faut surcharger cette fonction
+    this.getDecoratedView()
+      .setReadOnly();
   }
 
 }

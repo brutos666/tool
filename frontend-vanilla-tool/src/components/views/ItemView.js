@@ -47,9 +47,6 @@ class ItemView extends View {
     }
     this.majNodes();
     this.setItemValues(data.treeItem.getItemInfos());
-    if (!this.#rights.includes(RIGHT.update)) {
-      this.setReadOnly();
-    }
   }
 
   /**

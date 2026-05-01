@@ -16,10 +16,6 @@ class Component extends NodeElement {
     super(view);
   }
 
-  getOriginalElement() {
-    return this;
-  }
-
   /**
    * Appelé lorsque le composant est ajouté au parent
    * @param {Composite} parent - le parent du composant

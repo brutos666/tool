@@ -91,6 +91,15 @@ class NodeElement {
       .setVisible();
   }
 
+  setReadOnly() {
+    this.getView()
+      .setReadOnly();
+    // Rendre tous les enfants en lecture seule
+    for (const child in this.#staticChildren) {
+      this.#staticChildren[child].setReadOnly();
+    }
+  }
+
 }
 
 export default NodeElement;

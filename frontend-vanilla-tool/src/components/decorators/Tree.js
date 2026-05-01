@@ -66,12 +66,6 @@ class Tree extends Decorator {
     view.setRoot();
   }
 
-  setReadOnly() {
-    /** @type {TreeView} */
-    const view = this.getView();
-    view.setReadOnly();
-  }
-
   /**
    * Modification du modèle
    * @param {'update'|'updated'|'toDelete'|'addItem'|'removeItem'} action

@@ -103,6 +103,12 @@ class Composite extends Component {
   isNode() {
     return true;
   }
+  setReadOnly() {
+    super.setReadOnly();
+    // Rendre tous les enfants en lecture seule
+    this.getChildren()
+      .forEach(child => child.setReadOnly());
+  }
 
 }
 

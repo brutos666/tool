@@ -16,15 +16,12 @@ class TreeView extends DecoratorView {
    */
   constructor(view) {
     super(view);
-
-    const elementView = this.getElementView();
-    this.#toggle = elementView.querySelector('#toggle');
-    this.#toggle.addEventListener('click', () => {
-      this.setOpen(!this.#toggle.classList.contains('tree--open'));
+    const toggleAction = new ActionButtonView({ id: 'toggle', label: 'Ouvrir le noeud', type: 'icon', icon: '▼', role: 'icon' });
+    toggleAction.setDoActionCallback(() => {
+      this.setOpen(!toggleAction.getElementView().classList.contains('tree--open'));
     });
-    this.#treeItemNode = elementView.querySelector('#treeItem');
-    this.#treeItemNode.addEventListener('focus', this.onFocus.bind(this), true);
-    this.#treeItemNode.addEventListener('blur', this.onBlur.bind(this), true);
+    this.setStaticView('toggle', toggleAction);
+    this.#toggle = toggleAction.getElementView();
   }
 
   setOnFocusCallback(onFocusCallback) {
@@ -33,7 +30,9 @@ class TreeView extends DecoratorView {
 
   getHtmlView() {
     return String.raw`<div id="tree" class="tree">
-      <section class="tree__header"><button id="toggle" class="tree__toggle icon-button clickable">▼</button><div id="treeItem" class="tree__item">${ super.getTemplateDecoratorHTML() }</div></section>
+      <section class="tree__header">
+      <template id="toggle" class="tree__toggle icon-button clickable"></template>
+      <div id="treeItem" class="tree__item">${ super.getTemplateDecoratorHTML() }</div></section>
       <template id="treeList" class="tree__list"></template></div>`;
   }
 
@@ -87,13 +86,6 @@ class TreeView extends DecoratorView {
     } else {
       this.getElementView().classList.remove('focused');
     }
-  }
-
-  setReadOnly() {
-    this.getDecoratedView()
-      .setReadOnly();
-    this.setClickable();
-    this.#treeItemNode.setAttribute('tabindex', 0);
   }
 
 }
