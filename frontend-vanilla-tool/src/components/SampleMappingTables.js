@@ -6,6 +6,7 @@ import ActionButton from './ActionButton.js';
 import Toolbar from './Toolbar.js';
 import AddItemButton from './AddItemButton.js';
 import SampleMappingTablesView from './views/SampleMappingTablesView.js';
+import CheckBox from './CheckBox.js';
 /** @import TreeItem from '../data/TreeItem.js'; */
 
 class SampleMappingTables extends Items {
@@ -23,10 +24,13 @@ class SampleMappingTables extends Items {
     zoomPlus.setDoActionCallback(this.zoomPlus.bind(this));
     const reset = new ActionButton({ id: 'zoomReset', label: 'Zoom initial', role: 'button', type: 'label' });
     reset.setDoActionCallback(this.zoomReset.bind(this));
+    const magnify = new CheckBox({ id: 'magnify', label: 'Activer le zoom sur le post-it courant', role: 'switch', type: 'toggle' });
+    magnify.setToggleCallback(this.magnifyFocused.bind(this));
     const toolbar = new Toolbar();
     toolbar.addChild(zoomMinus);
     toolbar.addChild(zoomPlus);
     toolbar.addChild(reset);
+    toolbar.addChild(magnify);
     this.setStaticChild('toolbar', toolbar);
 
     const rights = ITEM_LAYOUT.getRights(ITEM_LAYOUT.Story);
@@ -89,6 +93,12 @@ class SampleMappingTables extends Items {
     /** @type {SampleMappingTablesView} */
     const tableView = this.getView();
     tableView.zoomReset();
+  }
+
+  magnifyFocused() {
+    /** @type {SampleMappingTablesView} */
+    const tableView = this.getView();
+    tableView.magnifyFocused();
   }
 
 }

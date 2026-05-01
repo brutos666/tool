@@ -16,11 +16,10 @@
   grid-template-columns: repeat(var(--number-of-columns), 1fr) auto;
   --post-it-story-width: calc((100% - (var(--number-of-columns) - 1) * var(--large-gap)) / var(--number-of-columns));
   --post-it-width: 100%;
-  --post-it-size: min(200px, calc((100% - var(--number-of-columns) * var(--large-gap)) / var(--number-of-columns)));
+  --post-it-size: min(var(--default-post-it-width), calc((100% - var(--number-of-columns) * var(--large-gap)) / var(--number-of-columns)));
 }
 .sample-mapping-grid .item,
 .sample-mapping-grid .item-like-button {
-  /* min-width: min(var(--post-it-size), 200px);*/
   min-width: var(--post-it-size);
 }
 .sample-mapping-grid__samples .item {
@@ -64,10 +63,10 @@
     8px 10px 8px var(--box-shadow-color);
 }
 .sample-mapping-grid .item-like-button {
-  min-width: min(var(--post-it-width), 200px);
+  min-width: min(var(--post-it-width), var(--default-post-it-width));
   flex: 1;
 }
 .sample-mapping-grid__title .item {
-  min-width: min(200px, var(--post-it-story-width));
+  min-width: min(var(--default-post-it-width), var(--post-it-story-width));
 }
 

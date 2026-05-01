@@ -113,6 +113,10 @@ class SampleMappingTablesView extends View {
     this.#sampleTable.classList.remove('zoom');
   }
 
+  magnifyFocused() {
+    this.#sampleTable.classList.toggle('focused--magnify');
+  }
+
 }
 /**
  * Annuler le redimensionnement éventuel des items

@@ -7,11 +7,11 @@
   --space-table-default-border: 1px;
   --space-around-post-it: calc((var(--global-padding) + var(--space-table-default-border)) * 2);
   --space-for-one-post-it: calc(var(--space-for-all-post-it) / var(--number-of-columns) - var(--space-around-post-it));
-  --post-it-width: min(200px, var(--space-for-one-post-it));
+  --post-it-width: min(var(--default-post-it-width), var(--space-for-one-post-it));
   --post-it-height: calc(var(--post-it-width) * 0.9);
 }
 .zoom .sample-mapping__row {
-  --post-it-width: calc(min(200px, var(--space-for-one-post-it)) * var(--zoom));
+  --post-it-width: calc(min(var(--default-post-it-width), var(--space-for-one-post-it)) * var(--zoom));
 }
 .sample-mapping__story-item,
 .sample-mapping__rule,
@@ -26,6 +26,10 @@
 .sample-mapping__table .item {
   overflow: auto;
   resize: both;
+}
+.sample-mapping__table.focused--magnify .item.item--current {
+  min-width: max(var(--default-post-it-width), calc(var(--post-it-width) * 1.2));
+  min-height: max(var(--default-post-it-height), calc(var(--post-it-height) * 1.2));
 }
 
 .sample-mapping {
