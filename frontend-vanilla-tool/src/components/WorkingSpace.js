@@ -13,13 +13,15 @@ import ManagerItemsDecorator from './decorators/ManagerItemsDecorator.js';
 
 class WorkingSpace extends Component {
 
+  #currentTreeItem;
+
   constructor() {
     super(new WorkingSpaceView());
 
-    const treeItem = StoreData.getTreeItem();
+    this.#currentTreeItem = StoreData.getTreeItem();
     const menu = new Menu();
-    const decorateNavTree = new CommandDecorator(new ManagerItemsDecorator(new NavTree()), { treeItem });
-    const decorateMainSpace = new CommandDecorator(new ManagerItemsDecorator(new MainSpace()), { treeItem });
+    const decorateNavTree = new CommandDecorator(new ManagerItemsDecorator(new NavTree()), { treeItem: this.#currentTreeItem });
+    const decorateMainSpace = new CommandDecorator(new ManagerItemsDecorator(new MainSpace()), { treeItem: this.#currentTreeItem });
 
     const reloadAction = new ActionButton({ id: 'reload', label: 'Actualiser', role: 'menuitem', type: 'menu' });
     reloadAction.setDoActionCallback(decorateNavTree.loadItems.bind(decorateNavTree));
@@ -47,6 +49,10 @@ class WorkingSpace extends Component {
     decorateNavTree.getView()
       .addEventListener(Item.EVENTS.current, event => {
         const treeItem = event.detail.getTreeItem();
+        if (this.#currentTreeItem === treeItem) {
+          return;
+        }
+        this.#currentTreeItem = treeItem;
         decorateMainSpace.getDecoratedElement()
           .setTreeItem(treeItem);
         decorateMainSpace.setTreeItem(treeItem);

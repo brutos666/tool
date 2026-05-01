@@ -18,6 +18,9 @@ class ManagerItemsDecorator extends Decorator {
     this.getDecoratedElement()
       .getView()
       .addEventListener(Item.EVENTS.focus, event => {
+        if (this.#currentItem && this.#currentItem === event.detail) {
+          return;
+        }
         this.#currentItem?.removeCurrent();
         /** @type {Item} */
         const item = event.detail;
