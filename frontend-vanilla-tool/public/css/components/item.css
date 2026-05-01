@@ -76,11 +76,18 @@
 /* Aspect général */
 .item--post-it .item__toolbar {
   background-color: rgba(0, 0, 0, 0.5);
+  visibility: hidden;
   opacity: 0;
+  transition:
+    opacity 0.2s,
+    visibility 0.2s;
 }
-.item--post-it.item:hover .item__toolbar {
+.item--post-it.item:hover .item__toolbar,
+.item--post-it.item:focus-within .item__toolbar {
+  visibility: visible;
   opacity: 1;
 }
+
 .item--post-it .item__checkbox {
   appearance: none;
   border: var(--border-color) solid 1px;
