@@ -4,15 +4,22 @@ import View from './views/View.js';
 
 class NodeElement {
 
+  name = 'NodeElement';
+
   #view;
   #staticChildren = {};
+  #name;
 
   /**
    * @constructor
    * @param {View} view - objet donnant l'affichage du composant. Peut définir plusieurs affichages
    */
   constructor(view) {
+    this.#name = this.constructor.name;
     this.#view = view === undefined ? new View() : view;
+  }
+  getName() {
+    return this.#name;
   }
   /**
    * Ajoute un enfant statique

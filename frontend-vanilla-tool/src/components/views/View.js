@@ -138,16 +138,6 @@ class View {
   setClickable() {
     this.getElementView().classList.add('clickable');
   }
-  setFocused(focused) {
-    if (focused) {
-      this.getElementView().classList.add('focused');
-    } else {
-      this.getElementView().classList.remove('focused');
-    }
-  }
-  isFocused() {
-    return this.getElementView().classList.contains('focused');
-  }
 
   isNode() {
     return false;
