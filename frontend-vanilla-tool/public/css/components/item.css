@@ -55,6 +55,7 @@
 .item--crud-created .item__article::before,
 .item--crud-updated .item__article::before {
   content: "•";
+  color: var(--status-color);
 }
 .item--crud-deleted .item__toolbar #addNewChild,
 .item--crud-deleted .item__toolbar #markToDelete {
@@ -73,6 +74,10 @@
 
 /* -- Affichage item comme un post-it -- */
 /* Aspect général */
+.item--post-it {
+  background-color: var(--color-post-it);
+  color: var(--color-text-on-post-it);
+}
 .item--post-it .item__toolbar {
   background-color: rgba(0, 0, 0, 0.5);
   visibility: hidden;

@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="stylesheet" href="./css/style.css" />
+    <style>
+      body {
+        background: var(--color-bg);
+        color: var(--color-text);
+        --border-color: var(--color-border);
+        margin: 20px;
+      }
+      .swatches {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .swatch {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+      }
+      .swatch-box {
+        width: 200px;
+        height: 60px;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        color: var(--text-color);
+        background: var(--background-color);
+        box-shadow: 3px 3px 4px var(--box-shadow-color);
+        padding: 5px;
+      }
+      .post-it-box {
+        width: 150px;
+        height: 120px;
+        border: none;
+        color: var(--text-color);
+        background: var(--background-color);
+        box-shadow: -7px 7px 6px var(--box-shadow-color), 8px 10px 8px var(--box-shadow-color);
+        padding: 5px;
+        margin: 10px;
+      }
+      .status-color::before {
+        content: "•";
+        color: var(--status-color);
+        margin: 5px;
+      }
+      .color-bg {
+        --background-color: var(--color-bg);
+      }
+      .color-bg-surface {
+        --background-color: var(--color-bg-surface);
+      }
+      .color-bg-hover {
+        --background-color: var(--color-bg-hover);
+      }
+      .color-bg-elevated {
+        --background-color: var(--color-bg-elevated);
+      }
+      .color-bg-current {
+        --background-color: var(--color-bg-current);
+      }
+      .color-bg-focus {
+        --background-color: var(--color-bg-focus);
+      }
+      .color-bg-selected {
+        --background-color: var(--color-bg-selected);
+      }
+      .color-text {
+        --text-color: var(--color-text);
+      }
+      .color-text-muted {
+        --text-color: var(--color-text-muted);
+      }
+      .color-text-on-primary {
+        --text-color: var(--color-text-on-primary);
+      }
+      .color-text-on-post-it {
+        --text-color: var(--color-text-on-post-it);
+      }
+      .color-border {
+        --border-color: var(--color-border);
+      }
+      .color-border-hover {
+        --border-color: var(--color-border-hover);
+      }
+      .color-box-shadow {
+        --box-shadow-color: var(--color-box-shadow);
+      }
+      .color-primary {
+        --background-color: var(--color-primary);
+      }
+      .color-primary-hover {
+        --background-color: var(--color-primary-hover);
+      }
+      .color-primary-active {
+        --background-color: var(--color-primary-active);
+      }
+      .color-primary-subtle {
+        --background-color: var(--color-primary-subtle);
+      }
+      .color-secondary {
+        --background-color: var(--color-secondary);
+      }
+      .color-secondary-hover {
+        --background-color: var(--color-secondary-hover);
+      }
+      .color-success {
+        --background-color: var(--color-success);
+      }
+      .color-warning {
+        --background-color: var(--color-warning);
+      }
+      .color-error {
+        --background-color: var(--color-error);
+      }
+      .color-sample {
+        --background-color: var(--color-sample);
+      }
+      .color-rules {
+        --background-color: var(--color-rules);
+      }
+      .color-story {
+        --background-color: var(--color-story);
+      }
+      .color-question {
+        --background-color: var(--color-question);
+      }
+      .color-classic {
+        --background-color: var(--color-classic);
+      }
+      .color-created {
+        --status-color: var(--color-created);
+      }
+      .color-updated {
+        --status-color: var(--color-updated);
+      }
+      .color-control-border {
+        --border-color: var(--color-control-border);
+      }
+      .color-control-border-hover {
+        --border-color: var(--color-control-border-hover);
+      }
+      .color-control-border-checked {
+        --border-color: var(--color-control-border-checked);
+      }
+      .color-control-bg-checked {
+        --background-color: var(--color-control-bg-checked);
+      }
+      .color-control-track-off {
+        --background-color: var(--color-control-track-off);
+      }
+    </style>
+    <title>Feuille de styles</title>
+  </head>
+  <body>
+    <div>
+      <div>
+        <h3>Fond & surfaces</h3>
+        <div class="swatches">
+          <div class="swatch color-bg">
+            <div class="swatch-box"></div>
+          </div>
+          <div class="swatch color-bg-surface">
+            <div class="swatch-box"></div>
+          </div>
+          <div class="swatch color-bg-elevated">
+            <div class="swatch-box"></div>
+          </div>
+          <div></div>
+          <div class="swatch color-bg-hover">
+            <div class="swatch-box"></div>
+          </div>
+          <div class="swatch color-bg-current">
+            <div class="swatch-box"></div>
+          </div>
+          <div class="swatch color-bg-focus">
+            <div class="swatch-box"></div>
+          </div>
+          <div class="swatch color-bg-selected">
+            <div class="swatch-box"></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <h3>Texte et bordures</h3>
+        <div class="swatches">
+          <div class="swatch color-text color-bg-surface">
+            <div class="swatch-box text-color"></div>
+          </div>
+          <div class="swatch color-text-muted color-bg-surface">
+            <div class="swatch-box text-color"></div>
+          </div>
+          <div class="swatch color-text-on-primary color-primary">
+            <div class="swatch-box text-color"></div>
+          </div>
+          <div class="swatch color-text-on-post-it color-sample">
+            <div class="swatch-box text-color"></div>
+          </div>
+          <div></div>
+          <div class="swatch color-border color-bg">
+            <div class="swatch-box border-color"></div>
+          </div>
+          <div class="swatch color-border-hover color-bg">
+            <div class="swatch-box border-color"></div>
+          </div>
+          <div class="swatch color-box-shadow color-border color-bg">
+            <div class="swatch-box border-color"></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <h3>Couleurs primaires et secondaires </h3>
+        <div class="swatches">
+          <div class="swatch color-primary">
+            <div class="swatch-box"></div>
+          </div>
+          <div class="swatch color-primary-hover">
+            <div class="swatch-box"></div>
+          </div>
+          <div class="swatch color-primary-active">
+            <div class="swatch-box"></div>
+          </div>
+          <div class="swatch color-primary-subtle">
+            <div class="swatch-box"></div>
+          </div>
+          <div></div>
+          <div class="swatch color-secondary">
+            <div class="swatch-box"></div>
+          </div>
+          <div class="swatch color-secondary-hover">
+            <div class="swatch-box"></div>
+          </div>
+      </div>
+      <div>
+        <h3>Sémantique </h3>
+        <div class="swatches">
+          <div class="swatch color-success">
+            <div class="swatch-box"></div>
+          </div>
+          <div class="swatch color-warning">
+            <div class="swatch-box"></div>
+          </div>
+          <div class="swatch color-error">
+            <div class="swatch-box"></div>
+          </div>
+      </div>
+      <div>
+        <h3>Post-it </h3>
+        <div class="swatches">
+          <div class="swatch color-story color-text-on-post-it color-box-shadow">
+            <div class="post-it-box"></div>
+          </div>
+          <div class="swatch color-rules color-text-on-post-it color-box-shadow">
+            <div class="post-it-box"></div>
+          </div>
+          <div class="swatch color-sample color-text-on-post-it color-box-shadow">
+            <div class="post-it-box"></div>
+          </div>
+          <div class="swatch color-question color-text-on-post-it color-box-shadow">
+            <div class="post-it-box"></div>
+          </div>
+          <div class="swatch color-classic color-text-on-post-it color-box-shadow">
+            <div class="post-it-box"></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <h3>Statut de modification</h3>
+        <div class="swatches">
+          <div class="swatch color-created color-bg color-text">
+            <div class="swatch-box status-color"></div>
+          </div>
+          <div class="swatch color-updated color-bg color-text">
+            <div class="swatch-box status-color"></div>
+          </div>
+          <div class="swatch color-created color-sample color-text-on-post-it">
+            <div class="swatch-box status-color"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+
+<script>
+  window.addEventListener("load", () => {
+    const elements = document.querySelectorAll(".swatch-box, .post-it-box");
+    elements.forEach(el => {
+      const secondClassName = "--" + el.parentNode.classList[1];
+      let color;
+      if (el.classList.contains("status-color")) {
+        color = getComputedStyle(el, "::before").color;
+      } else if (el.classList.contains("text-color")) {
+        color = getComputedStyle(el).color;
+      } else if (el.classList.contains("border-color")) {
+        color = getComputedStyle(el).borderColor;
+      } else {
+        color = getComputedStyle(el).backgroundColor;
+      }
+      el.insertAdjacentElement("beforeBegin", createTextElement(secondClassName));
+      el.insertAdjacentElement("beforeBegin", createTextElement(color));
+      el.appendChild(document.createTextNode(el.parentNode.classList.value.replace("swatch ", "")));
+    });
+  });
+
+  function createTextElement(text) {
+    const div = document.createElement("div");
+    div.appendChild(document.createTextNode(text));
+    return div;
+  }
+</script>
+

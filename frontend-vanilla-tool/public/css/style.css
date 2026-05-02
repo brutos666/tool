@@ -17,7 +17,6 @@
 @import "modules/nav-tree.css" layer(modules);
 @import "modules/sample-mapping.css" layer(modules);
 @import "modules/sample-mapping-grid.css" layer(modules);
-@import "modules/sample-mapping-colors.css" layer(modules);
 @import "modules/notification-center.css" layer(modules);
 @import "modules/working-space.css" layer(modules);
 @import "utilities/utils.css" layer(utilities);
@@ -32,11 +31,12 @@
   --color-bg: light-dark(oklch(0.96 0.008 var(--hue-primary)), oklch(0.22 0.015 var(--hue-primary)));
   /* cartes, boutons, panels */
   --color-bg-surface: light-dark(oklch(0.91 0.01 var(--hue-primary)), oklch(0.27 0.014 var(--hue-primary)));
-  --color-bg-surface-hover: light-dark(oklch(0.86 0.013 var(--hue-primary)), oklch(0.34 0.02 var(--hue-primary)));
+  --color-bg-hover: light-dark(oklch(0.86 0.013 var(--hue-primary)), oklch(0.34 0.02 var(--hue-primary)));
   /* modals, dropdowns */
   --color-bg-elevated: light-dark(oklch(0.86 0.013 var(--hue-primary)), oklch(0.34 0.02 var(--hue-primary)));
   /* courant */
   --color-bg-current: light-dark(oklch(0.8 0.013 var(--hue-primary)), oklch(0.4 0.02 var(--hue-primary)));
+  --color-bg-selected: light-dark(oklch(0.55 0.18 var(--hue-secondary)), oklch(0.68 0.16 var(--hue-secondary)));
 
   /* === TEXTE === */
   --color-text: light-dark(oklch(0.22 0.015 var(--hue-primary)), oklch(0.92 0.01 var(--hue-primary)));
@@ -46,7 +46,7 @@
   /* === BORDURES === */
   --color-border: light-dark(oklch(0.76 0.014 var(--hue-primary)), oklch(0.42 0.016 var(--hue-primary)));
   --color-border-hover: light-dark(oklch(0.62 0.018 var(--hue-primary)), oklch(0.54 0.018 var(--hue-primary)));
-  --color-box-shadow: light-dark(oklch(0.5 0 0 / 0), oklch(0 0 0));
+  --color-box-shadow: light-dark(oklch(0.5 0 0), oklch(0 0 0));
 
   /* === PRIMAIRE === */
   /* Primaire — la couleur de marque, pour les boutons principaux, liens, éléments actifs. */
@@ -61,7 +61,7 @@
   --color-secondary-hover: light-dark(oklch(0.47 0.18 var(--hue-secondary)), oklch(0.74 0.16 var(--hue-secondary)));
 
   /* === FOCUS === */
-  --color-focus: light-dark(oklch(0.5 0.22 var(--hue-primary) / 0.25), oklch(0.65 0.2 var(--hue-primary) / 0.3));
+  --color-bg-focus: light-dark(oklch(0.5 0.22 var(--hue-primary) / 0.25), oklch(0.65 0.2 var(--hue-primary) / 0.3));
 
   /* === COMPOSANTS === */
   --color-control-border: var(--color-border);
@@ -77,8 +77,6 @@
 
   --color-created: light-dark(oklch(0.8 0.3 142), oklch(0.86 0.3 142));
   --color-updated: light-dark(oklch(0.8 0.3 220), oklch(0.86 0.3 220));
-  --color-current: light-dark(oklch(0.5 0.22 280), oklch(0.5 0.22 280));
-  --color-selected: var(var(--color-secondary));
 
   --color-sample: light-dark(oklch(0.9 0.1 140), oklch(0.9 0.1 140));
   --color-rules: light-dark(oklch(0.8 0.1 251), oklch(0.8 0.1 251));
@@ -88,7 +86,6 @@
   --color-text-on-post-it: oklch(0.22 0.015 var(--hue-primary));
 
   /* === DIVERS === */
-  --selected-color: light-dark(orange, orange);
   --global-padding: 10px;
   --small-padding: 4px;
   --large-gap: 20px;

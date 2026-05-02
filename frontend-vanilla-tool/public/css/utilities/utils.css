@@ -1,9 +1,9 @@
 *:focus {
-  outline: var(--color-focus) solid 2px;
+  outline: var(--color-bg-focus) solid 2px;
 }
 
 .selected {
-  background-color: var(--color-selected);
+  background-color: var(--color-bg-selected);
 }
 
 .disabled {

@@ -2,17 +2,40 @@ body {
   background-color: var(--color-bg);
   color: var(--color-text);
 }
-
-.item--crud-created .item__article::before {
-  color: var(--color-created);
+/** Couleur des post it **/
+.item--color {
+  --color-post-it: var(--color-classic);
 }
-.item--crud-updated .item__article::before {
-  color: var(--color-updated);
+.story--color {
+  --color-post-it: var(--color-story);
+}
+.rules--color {
+  --color-post-it: var(--color-rules);
+}
+.sample--color {
+  --color-post-it: var(--color-sample);
+}
+.question--color {
+  --color-post-it: var(--color-question);
+}
+/* -- Création et mise à jour -- */
+.item--crud-created {
+  --status-color: var(--color-created);
+}
+.item--crud-updated {
+  --status-color: var(--color-updated);
+}
+.item--post-it {
+  --status-color: var(--color-text-on-post-it);
+}
+/* -- Statut : selection/courant/focus -- */
+.tree__header:has(.item--selected) {
+  background-color: var(--color-bg-selected);
 }
 .tree__header:has(.item--current) {
   background-color: var(--color-bg-current);
 }
 .tree__header:has(.tree__item *:focus) {
-  background-color: var(--color-focus);
+  background-color: var(--color-bg-focus);
 }
 

@@ -21,7 +21,7 @@
   background-color: var(--color-bg-surface);
 }
 .menu__element:hover {
-  background-color: var(--color-bg-surface-hover);
+  background-color: var(--color-bg-hover);
 }
 
 /* Responsive */
