@@ -49,6 +49,47 @@
         color: var(--status-color);
         margin: 5px;
       }
+      /* Boutons */
+      .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+      .btn { display: inline-flex; align-items: center; justify-content: center; padding: 0.45rem 1rem; border-radius: 4px;
+        cursor: pointer; }
+      .btn-primary { background: var(--color-primary); color: var(--color-text-on-primary); }
+      .btn-primary:hover { background: var(--color-primary-hover); }
+      .btn-ghost { background: transparent; border: 1px solid var(--color-primary); color: var(--color-primary); }
+      .btn-ghost:hover { background: var(--color-bg-hover); }
+      .btn-neutral   { background: var(--color-bg-surface); color: var(--color-text); border: 1px solid var(--color-border); }
+      .btn-neutral:hover { background: var(--color-bg-hover); }
+
+      /* Checkbox */
+      .checkbox { display: flex; align-items: center; gap: var(--medium-gap); color: var(--color-text-on-primary); cursor: pointer; }
+      .checkbox__input { appearance: none; width: 16px; height: 16px; border-radius: 4px; border: 1.5px solid var(--color-primary); background: transparent; cursor: pointer; position: relative; flex-shrink: 0; }
+      .checkbox__input:hover { border-color: var(--color-primary-hover); }
+      .checkbox__input:checked { background: var(--color-primary); border-color: var(--color-primary); }
+      .checkbox__input:checked::after { content: ''; position: absolute; left: 4px; top: 1px; width: 5px; height: 9px; 
+      border: 2px solid var(--color-text-on-primary); border-top: none; border-left: none; transform: rotate(45deg); }
+      .checkbox__input[indeterminate] { background: var(--color-primary); border-color: var(--color-primary); }
+      .checkbox__input[indeterminate]::after { content: ''; position: absolute; left: 3px; top: 6px; width: 8px; height: 2px; 
+      background: var(--color-text-on-primary); border-radius: 1px; }
+      .checkbox__input:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--color-bg-focus); }
+      .checkbox__input:disabled { opacity: 0.4; cursor: not-allowed; }
+
+      /* Switch */
+      .toggle { display: flex; align-items: center; gap: var(--medium-gap); color: var(--color-text); cursor: pointer; }
+      .toggle__input { appearance: none; width: 36px; height: 20px; border-radius: 10px; border: 1.5px solid var(--color-primary); background: var(--color-bg-surface);  cursor: pointer; position: relative;  flex-shrink: 0; }
+      .toggle__input::after { content: ''; position: absolute; width: 14px; height: 14px; background: var(--color-text); border-radius: 50%; top: 3px; left: 3px;  box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+      .toggle__input:checked { background: var(--color-primary); }
+      .toggle__input:checked::after { transform: translateX(16px); }
+      .toggle__input:hover:not(:checked) { background: var(--color-border-hover); }
+      .toggle__input:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--color-bg-focus); }
+      .toggle__input:disabled { opacity: 0.4; cursor: not-allowed; }
+
+      /* Radio */
+      .rb-wrap { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--color-text-on-primary); cursor: pointer; }
+      .rb { appearance: none; width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--color-border); background: transparent; cursor: pointer; position: relative; transition: border-color 0.15s; flex-shrink: 0; }
+      .rb:hover { border-color: var(--color-primary); }
+      .rb:checked { border-color: var(--color-control-bg-checked); border-width: 4.5px; background: var(--color-control-bg-checked); box-shadow: inset 0 0 0 3px white; }
+      .rb:focus-visible { outline: none; box-shadow: 0 0 0 3px oklch(0.50 0.22 var(--hue) / 0.25); }
+
       .color-bg {
         --background-color: var(--color-bg);
       }
@@ -85,7 +126,8 @@
       .color-border {
         --border-color: var(--color-border);
       }
-      .color-border-hover {
+      .color-border-hover,
+      .color-border:hover {
         --border-color: var(--color-border-hover);
       }
       .color-box-shadow {
@@ -94,7 +136,8 @@
       .color-primary {
         --background-color: var(--color-primary);
       }
-      .color-primary-hover {
+      .color-primary-hover,
+      .color-primary:hover {
         --background-color: var(--color-primary-hover);
       }
       .color-primary-active {
@@ -106,7 +149,8 @@
       .color-secondary {
         --background-color: var(--color-secondary);
       }
-      .color-secondary-hover {
+      .color-secondary-hover,
+      .color-secondary:hover {
         --background-color: var(--color-secondary-hover);
       }
       .color-success {
@@ -138,18 +182,6 @@
       }
       .color-updated {
         --status-color: var(--color-updated);
-      }
-      .color-control-border {
-        --border-color: var(--color-control-border);
-      }
-      .color-control-border-hover {
-        --border-color: var(--color-control-border-hover);
-      }
-      .color-control-border-checked {
-        --border-color: var(--color-control-border-checked);
-      }
-      .color-control-bg-checked {
-        --background-color: var(--color-control-bg-checked);
       }
       .color-control-track-off {
         --background-color: var(--color-control-track-off);
@@ -280,6 +312,46 @@
           </div>
           <div class="swatch color-created color-sample color-text-on-post-it">
             <div class="swatch-box status-color"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <h3>Aperçu composants</h3>
+      <div class="preview">
+        <h4>
+          <h4>Boutons</h4>
+          <div class="btn-row">
+            <button class="btn btn-primary">Sauvegarder</button>
+            <button class="btn btn-ghost">Annuler</button>
+            <button class="btn btn-neutral">Options</button>
+            <button class="btn btn-neutral" disabled style="opacity:0.4;cursor:not-allowed">Désactivé</button>
+          </div>
+        </div>
+        <div>
+          <h4>Cases à cocher</h4>
+          <div class="row">
+            <label class="checkbox"><input type="checkbox" class="checkbox__input" checked> Coché</label>
+            <label class="checkbox"><input type="checkbox" class="checkbox__input"> Non coché</label>
+            <label class="checkbox"><input type="checkbox" class="checkbox__input" indeterminate> Indéterminé</label>
+            <label class="checkbox"><input type="checkbox" class="checkbox__input" disabled> Désactivé</label>
+            <label class="checkbox"><input type="checkbox" class="checkbox__input" checked disabled> Désactivé coché</label>
+          </div>
+        </div>
+        <div>
+          <h4>Boutons radio</h4>
+          <div class="row">
+            <label class="rb-wrap"><input type="radio" class="rb" name="r" checked> Option A</label>
+            <label class="rb-wrap"><input type="radio" class="rb" name="r"> Option B</label>
+            <label class="rb-wrap"><input type="radio" class="rb" name="r"> Option C</label>
+          </div>
+        </div>
+        <div>
+          <h4>Switchs</h4>
+          <div class="row">
+            <label class="toggle"><input type="checkbox" class="toggle__input" checked> Activé</label>
+            <label class="toggle"><input type="checkbox" class="toggle__input"> Désactivé</label>
+            <label class="toggle"><input type="checkbox" class="toggle__input" disabled> Bloqué</label>
           </div>
         </div>
       </div>

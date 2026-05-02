@@ -1,30 +1,27 @@
 .toggle {
   display: flex;
-  flex-direction: row;
   align-items: center;
   gap: var(--medium-gap);
+  color: var(--color-text);
+  cursor: pointer;
 }
 .toggle__input {
-  /* On définit la hauteur de notre élément */
   --toggle-height: 1.5rem;
-  /* On désactive le style par défaut du système d'exploitation */
+  --element-top-left: 2px;
   appearance: none;
-  /* On définit les dimensions de la "piste" (le fond) */
   width: 3rem;
-  height: var(--toggle-height);
-  border-radius: 99px; /* Un grand border-radius pour l'effet pilule */
-  background: var(--color-control-track-off); /* Couleur quand c'est inactif (gris bleuté) */
-  position: relative;
+  height: calc(var(--toggle-height) + var(--element-top-left));
+  border-radius: 99px;
+  border: 1.5px solid var(--color-primary);
+  background: var(--color-bg-surface);
   cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
   transition: 0.3s;
 }
-/* On crée la "pastille" (le bouton qui glisse) avec un pseudo-élément
-    * Le pseudo-élément est intéressant car le rond qui indique l'état n'a pas de sens sémantique,
-    * ajouter un élément juste graphique est de la responsabilité de CSS.
-    */
 .toggle__input::after {
   /* On définit la hauteur et le placement de notre pastille */
-  --element-top-left: 2px;
+
   --element-size: calc(var(--toggle-height) - var(--element-top-left) * 2);
 
   content: "";
@@ -33,18 +30,26 @@
   top: var(--element-top-left);
   width: var(--element-size);
   height: var(--element-size);
-  background: white;
+  background: var(--color-text);
   border-radius: 50%;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   transition: 0.3s;
 }
-
-/* On gère l'état "Activé" grâce à la pseudo-classe :checked natif aux checkbox */
 .toggle__input:checked {
-  background: var(--color-control-bg-checked);
-  border-color: var(--color-control-border-checked);
+  background: var(--color-primary);
 }
-/* On déplace la pastille vers la droite */
 .toggle__input:checked::after {
-  transform: translateX(var(--toggle-height));
+  transform: translateX(calc(var(--toggle-height) - var(--element-top-left)));
+}
+.toggle__input:hover:not(:checked) {
+  background: var(--color-border-hover);
+}
+.toggle__input:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-bg-focus);
+}
+.toggle__input:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 

@@ -65,7 +65,7 @@
 
   /* === COMPOSANTS === */
   --color-control-border: var(--color-border);
-  --color-control-border-hover: var(--color-border-hover);
+  --color-control-border-hover: var(--color-primary-hover);
   --color-control-border-checked: var(--color-primary);
   --color-control-bg-checked: var(--color-primary);
   --color-control-track-off: var(--color-border);
