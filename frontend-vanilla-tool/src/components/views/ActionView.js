@@ -4,7 +4,7 @@ class ActionView extends View {
 
   name = 'ActionView';
 
-  #doActionCallback;
+  #doActionCallback = () => {};
 
   /**
    * @param {Object} data - Données à utiliser pour créer la vue
