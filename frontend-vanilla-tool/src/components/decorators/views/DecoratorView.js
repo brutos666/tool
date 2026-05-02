@@ -75,6 +75,11 @@ class DecoratorView extends View {
       .setReadOnly();
   }
 
+  setDisabled() {
+    this.getDecoratedView()
+      .setDisabled();
+  }
+
 }
 
 export default DecoratorView;

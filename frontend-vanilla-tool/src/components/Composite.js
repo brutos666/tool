@@ -110,6 +110,13 @@ class Composite extends Component {
       .forEach(child => child.setReadOnly());
   }
 
+  setDisabled() {
+    super.setDisabled();
+    // Rendre tous les enfants en lecture seule
+    this.getChildren()
+      .forEach(child => child.setDisabled());
+  }
+
 }
 
 export default Composite;

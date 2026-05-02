@@ -20,6 +20,18 @@ class CheckBox extends Component {
     view.setToggleCallback(callback);
   }
 
+  isChecked() {
+    /** @type {CheckBoxView} */
+    const view = this.getView();
+    return view.isChecked();
+  }
+
+  setChecked(checked) {
+    /** @type {CheckBoxView} */
+    const view = this.getView();
+    view.setChecked(checked);
+  }
+
 }
 
 export default CheckBox;

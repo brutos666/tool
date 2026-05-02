@@ -5,6 +5,7 @@ import Component from './Component.js';
 import { RIGHT } from '../tools/Constants.js';
 import ActionButton from './ActionButton.js';
 import Toolbar from './Toolbar.js';
+import CheckBox from './CheckBox.js';
 /** @import TreeItem from '../data/TreeItem.js' */
 /** @import { ITEM_LAYOUT } from '../tools/Constants.js' */
 /** @import Items from './Items.js' */
@@ -18,6 +19,9 @@ class Item extends Component {
   #treeItem = null;
   #layout = null;
   #rights;
+  #readOnly = false;
+
+  #doneCheckbox = null;
 
   /**
    * @constructor de la classe Item
@@ -28,10 +32,8 @@ class Item extends Component {
    */
   constructor(data) {
     super(new ItemView(data));
-    this.setData(data);
 
     const toolbar = new Toolbar();
-
     if (data.rights.includes(RIGHT.create)) {
       const addAction = new ActionButton({ id: 'addNewChild', label: 'Ajouter un item', icon: '+', role: 'button', type: 'icon' });
       addAction.setDoActionCallback(this.doAdd.bind(this, 'Nouvel item'));
@@ -46,6 +48,12 @@ class Item extends Component {
       toolbar.addChild(undoToDeleteAction);
     }
     this.setStaticChild('toolbar', toolbar);
+
+    this.#doneCheckbox = new CheckBox({ id: 'done', label: 'Fait', role: 'checkbox', type: 'checkbox' });
+    this.#doneCheckbox.setToggleCallback(this.toggleDone.bind(this));
+    this.setStaticChild('done', this.#doneCheckbox);
+
+    this.setData(data);
   }
 
   /** @override  */
@@ -73,6 +81,7 @@ class Item extends Component {
         this.getView()
           .dispatchEvent(new CustomEvent(Item.EVENTS.focus, { bubbles: true, detail: this }));
       });
+    this.setItemValues(this.#treeItem.getItemInfos());
   }
 
   setCurrent() {
@@ -143,6 +152,11 @@ class Item extends Component {
     this.getTreeItem()
       .setPropertyValue(property, value);
   }
+  toggleDone() {
+    const value = this.#doneCheckbox.isChecked() ? 'DONE' : 'TODO';
+    this.getTreeItem()
+      .setPropertyValue('state', value);
+  }
 
   /**
    * Modification du modèle
@@ -155,17 +169,42 @@ class Item extends Component {
       this.getView()
         .setCRUDMode(treeItem.getItemInfos().CRUDMode);
     } else if (action === 'updated') {
-      this.getView()
-        .setItemValues(treeItem.getItemInfos());
+      this.setItemValues(treeItem.getItemInfos());
     } else if (action === 'toDelete') {
-      this.getView()
-        .setToDelete();
+      this.setToDelete();
     } else if (action === 'undoToDelete') {
-      this.getView()
-        .undoToDelete();
+      this.setUndoToDelete();
     } else if (action === 'removeItem') {
       this.#treeItem.removeObserver(this);
     }
+  }
+
+  setItemValues(itemInfos) {
+    this.getView()
+      .setItemValues(itemInfos);
+    if (itemInfos.state) {
+      this.#doneCheckbox.setChecked(itemInfos.state === 'DONE');
+    }
+  }
+
+  setToDelete() {
+    this.setDisabled();
+    this.getView()
+      .setToDelete();
+  }
+
+  setUndoToDelete() {
+    this.setEnabled();
+    if (this.#readOnly) {
+      this.setReadOnly();
+    }
+    this.getView()
+      .undoToDelete();
+  }
+
+  setReadOnly() {
+    super.setReadOnly();
+    this.#readOnly = true;
   }
 
 }

@@ -76,11 +76,19 @@ class NodeElement {
   setDisabled() {
     this.getView()
       .setDisabled();
+    // Rendre tous les enfants en lecture seule
+    for (const child in this.#staticChildren) {
+      this.#staticChildren[child].setDisabled();
+    }
   }
 
   setEnabled() {
     this.getView()
       .setEnabled();
+    // Rendre tous les enfants en lecture seule
+    for (const child in this.#staticChildren) {
+      this.#staticChildren[child].setEnabled();
+    }
   }
 
   isDisabled() {

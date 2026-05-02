@@ -12,20 +12,9 @@ class AddItemButtonView extends ActionView {
    * @param {LAYOUT} data.layout - Type de bouton
    */
   constructor(data) {
-    super(data);
-  }
-
-  /**
-   * @override {@link View.getHtmlView}
-   * @param {Object} data - Données à utiliser pour créer la vue
-   * @param {string} data.id - Identifiant du bouton
-   * @param {string} data.label - Label du bouton
-   * @param {LAYOUT} data.layout - Type de bouton
-   * @returns {string} - Code HTML du bouton
-   */
-  getHtmlView(data) {
-    return String.raw`<button id="${ data.id }" class="clickable item-like-button ${ getClassForViewChoice(data.layout) }" role="button">
-      <span>${ data.label }</span></button>`;
+    super({ id: data.id, label: data.label, role: 'button', type: 'item-like' });
+    this.getElementView().classList.add('item-like-button');
+    this.getElementView().classList.add(getClassForViewChoice(data.layout));
   }
 
 }

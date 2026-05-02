@@ -62,5 +62,11 @@ class ActionView extends View {
       .disabled = true;
   }
 
+  setDisabled() {
+    super.setDisabled();
+    this.getElementView()
+      .disabled = true;
+  }
+
 }
 export default ActionView;

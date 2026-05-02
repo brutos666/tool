@@ -10,15 +10,12 @@ class ItemView extends View {
   #identify;
   #title;
   #text;
-  #done;
 
   #rights;
   #currentStatusClass;
   #currentCRUDModeClass;
-  #readOnly = false;
 
   #onInputCallback = () => {};
-  #onDoneChangeCallback = () => {};
   #onFocusCallback = () => {};
 
   /**
@@ -50,7 +47,6 @@ class ItemView extends View {
       this.getElementView().classList.add(getClassColorForViewChoice(data.layout));
     }
     this.majNodes();
-    this.setItemValues(data.treeItem.getItemInfos());
   }
 
   /**
@@ -62,7 +58,7 @@ class ItemView extends View {
       <template id="toolbar" aria-controls="itemArticle" class="item__toolbar" ></template>
       <article id="itemArticle" class="item__article">
           <span id="identify" class="item__identify"></span>
-          <input type="checkbox" id="done" class="item__checkbox clickable"/>
+          <template id="done" class="item__checkbox" ></template>
           <div contenteditable="true" class="item__title" id="title"></div>
           <div contenteditable="true" class="item__text" id="text"></div>
       </article></section>`;
@@ -73,7 +69,6 @@ class ItemView extends View {
    * @param {Object} data - Données à utiliser pour rafraîchir la vue
    * @param {TreeItem} data.treeItem - Informations sur la tache
    * @param {ITEM_LAYOUT} data.layout - Affichage souhaité
-   * @param {boolean} data.readOnly - Interdit la modification de la tâche
    */
   refreshView(data) {
     this.removeEventListeners();
@@ -92,21 +87,13 @@ class ItemView extends View {
     }
     this.#title.removeEventListener('input', this.#onInputCallback);
     this.#text.removeEventListener('input', this.#onInputCallback);
-    this.#done.removeEventListener('change', this.#onDoneChangeCallback);
-
     this.#onInputCallback = event => {
       const property = event.target.getAttribute('id');
       const value = property === 'text' || property === 'title' ? event.target.innerHTML : event.target.value;
       updateCallback(property, value);
     };
-    this.#onDoneChangeCallback = event => {
-      const value = event.target.checked ? 'DONE' : 'TODO';
-      updateCallback('state', value);
-    };
-
     this.#title.addEventListener('input', this.#onInputCallback);
     this.#text.addEventListener('input', this.#onInputCallback);
-    this.#done.addEventListener('change', this.#onDoneChangeCallback);
   }
 
   setOnFocusCallback(onFocusCallback) {
@@ -124,7 +111,6 @@ class ItemView extends View {
     this.#identify = mainNode.querySelector('#identify');
     this.#title = mainNode.querySelector('#title');
     this.#text = mainNode.querySelector('#text');
-    this.#done = mainNode.querySelector('#done');
   }
 
   /**
@@ -136,9 +122,6 @@ class ItemView extends View {
     this.#title.innerHTML = itemInfos.title;
     if (itemInfos.text) {
       this.#text.innerHTML = itemInfos.text;
-    }
-    if (itemInfos.state) {
-      this.#done.checked = itemInfos.state === 'DONE';
     }
     if (itemInfos.status) {
       const newStatusClass = getClassForStatus(itemInfos.status);
@@ -166,15 +149,10 @@ class ItemView extends View {
 
   setToDelete() {
     this.getElementView().classList.add('item--crud-deleted');
-    this.setDisabled();
   }
 
   undoToDelete() {
     this.getElementView().classList.remove('item--crud-deleted');
-    this.setEnabled();
-    if (this.#readOnly) {
-      this.setReadOnly();
-    }
   }
 
   setCurrent() {
@@ -187,10 +165,8 @@ class ItemView extends View {
 
   setReadOnly() {
     super.setReadOnly();
-    this.#readOnly = true;
     this.#title.contentEditable = false;
     this.#text.contentEditable = false;
-    this.#done.disabled = true;
     this.getElementView()
       .setAttribute('tabindex', '0');
   }
@@ -200,19 +176,15 @@ class ItemView extends View {
     // Laisser la barre d'outil accessible pour pouvoir annuler le marquage comme supprimé
     this.#title.classList.add('disabled');
     this.#text.classList.add('disabled');
-    this.#done.classList.add('disabled');
     this.#title.contentEditable = false;
     this.#text.contentEditable = false;
-    this.#done.disabled = false;
   }
 
   setEnabled() {
     this.#title.classList.remove('disabled');
     this.#text.classList.remove('disabled');
-    this.#done.classList.remove('disabled');
     this.#title.contentEditable = true;
     this.#text.contentEditable = true;
-    this.#done.disabled = false;
   }
 
   addEventListeners() {
@@ -221,7 +193,6 @@ class ItemView extends View {
     }
     this.#title.addEventListener('input', this.#onInputCallback);
     this.#text.addEventListener('input', this.#onInputCallback);
-    this.#done.addEventListener('change', this.#onDoneChangeCallback);
   }
 
   removeEventListeners() {
@@ -230,7 +201,6 @@ class ItemView extends View {
     }
     this.#title.removeEventListener('input', this.#onInputCallback);
     this.#text.removeEventListener('input', this.#onInputCallback);
-    this.#done.removeEventListener('change', this.#onDoneChangeCallback);
   }
 
 }
