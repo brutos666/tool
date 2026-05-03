@@ -2,7 +2,6 @@ import TreeList from '../TreeList.js';
 import TreeView from './views/TreeView.js';
 import Decorator from './Decorator.js';
 import { RIGHT } from '../../tools/Constants.js';
-import TreeListView from '../views/TreeListView.js';
 /** @import Component from '../Component.js'; */
 /** @import TreeItem from '../../data/TreeItem.js'; */
 
@@ -31,7 +30,7 @@ class Tree extends Decorator {
       this.setReadOnly();
     }
 
-    const treeList = new TreeList(new TreeListView({ addButton: false }), data.treeItem, data.layout);
+    const treeList = new TreeList({ addButton: false }, data.treeItem, data.layout);
     this.setStaticChild('treeList', treeList);
 
     this.setOpen(false);

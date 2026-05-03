@@ -11,17 +11,12 @@ class TreeList extends Items {
 
   /**
    *
-   * @param {ItemsView} view
+   * @param {boolean} addButton
    * @param {TreeItem} treeItem
    * @param {ITEM_LAYOUT} itemLayout
    */
-  constructor(view, treeItem, itemLayout) {
-    super(view === undefined ? new TreeListView({ addButton: true }) : view, treeItem, itemLayout);
-  }
-
-  getLastTree() {
-    const trees = super.getItemsComponent();
-    return trees[trees.length - 1];
+  constructor(addButton, treeItem, itemLayout) {
+    super(new TreeListView({ addButton }), treeItem, itemLayout);
   }
 
   /**

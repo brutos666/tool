@@ -45,27 +45,38 @@ class View {
    */
   setStaticView(id, view) {
     /** @type {Element} */
-    const templateNode = this.#templateNode[id];
-    templateNode.classList.forEach(classItem => view.getElementView().classList.add(classItem));
-    templateNode.getAttributeNames()
-      .filter(name => name !== 'id' && name !== 'class')
-      .forEach(name => {
-        view.getElementView()
-          .setAttribute(name, this.#templateNode[id].getAttribute(name));
-      });
-
+    const templateNode = this.getTemplateNode(id);
     if (!templateNode) {
       const error = new Error(`Erreur de conception : on tente d'accéder à un élément qui n'a pas été défini [${ id }] dans la vue [${ this.getName() }]`);
       window.alert(error);
       throw new Error(error);
     }
+    templateNode.classList.forEach(classItem => view.getElementView().classList.add(classItem));
+    templateNode.getAttributeNames()
+      .filter(name => name !== 'id' && name !== 'class')
+      .forEach(name => {
+        view.getElementView()
+          .setAttribute(name, templateNode.getAttribute(name));
+      });
 
-    templateNode.parentNode.replaceChild(view.getElementView(), templateNode);
+    if (templateNode.parentNode) {
+      // Cas où on part du modèle de vue donnée par getHtmlView()
+      templateNode.parentNode.replaceChild(view.getElementView(), templateNode);
+    } else {
+      const oldView = this.getStaticView(id)
+        .getElementView();
+      // Cas où on remplace la vue static par une autre
+      oldView.parentNode.replaceChild(view.getElementView(), oldView);
+    }
     this.#staticViews[id] = view;
   }
 
   getStaticView(id) {
     return this.#staticViews[id];
+  }
+
+  getTemplateNode(id) {
+    return this.#templateNode[id];
   }
 
   /**

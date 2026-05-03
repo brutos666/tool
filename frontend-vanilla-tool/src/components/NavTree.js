@@ -4,7 +4,6 @@ import AddItemButton from './AddItemButton.js';
 import Component from './Component.js';
 import TreeList from './TreeList.js';
 import NavTreeView from './views/NavTreeView.js';
-import TreeListView from './views/TreeListView.js';
 
 class NavTree extends Component {
 
@@ -13,7 +12,7 @@ class NavTree extends Component {
   constructor() {
     super(new NavTreeView());
 
-    const items = new TreeList(new TreeListView({ addButton: true }), StoreData.getTreeItem(), ITEM_LAYOUT.Title);
+    const items = new TreeList({ addButton: true }, StoreData.getTreeItem(), ITEM_LAYOUT.Title);
     const addButton = new AddItemButton({ id: 'addNewItem', label: 'Ajouter un espace', layout: ITEM_LAYOUT.Title });
     addButton.setDoActionCallback(items.addNewItem.bind(items, 'Nouvel espace'));
     items.setStaticChild('addItemAction', addButton);

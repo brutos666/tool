@@ -1,10 +1,11 @@
 import { RIGHT, ITEM_LAYOUT } from '../tools/Constants.js';
 import Item from './Item.js';
-import TreeList from './TreeList.js';
 import CheckListView from './views/CheckListView.js';
 import AddItemButton from './AddItemButton.js';
+import Items from './Items.js';
+import Tree from './decorators/Tree.js';
 
-class CheckList extends TreeList {
+class CheckList extends Items {
 
   name = 'CheckList';
 
@@ -30,11 +31,19 @@ class CheckList extends TreeList {
     this.#item.setTreeItem(treeItem);
     super.setTreeItem(treeItem);
   }
-
-  addItemView(itemComponent) {
-    super.addItemView(itemComponent);
+  /**
+   * @override
+   * @param {TreeItem} treeItem - Informations sur la tache
+   * @returns {Component} composant
+   */
+  getItemComponent(treeItem) {
+    const layout = this.getLayout();
+    const rights = ITEM_LAYOUT.getRights(layout);
+    const item = new Item({ treeItem, layout, rights });
+    const itemComponent = new Tree(item, { treeItem, layout, rights });
     itemComponent.setRoot();
     itemComponent.setOpen(true);
+    return itemComponent;
   }
 
 }
