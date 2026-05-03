@@ -23,11 +23,6 @@ class View {
   constructor(data) {
     this.#name = this.constructor.name;
     this.createView(data);
-    const templateNodes = this.getElementView()
-      .querySelectorAll('template');
-    for (const templateNode of templateNodes) {
-      this.#templateNode[templateNode.id] = templateNode;
-    }
   }
 
   getName() {
@@ -59,13 +54,6 @@ class View {
           .setAttribute(name, this.#templateNode[id].getAttribute(name));
       });
 
-    const oldView = this.#staticViews[id];
-    if (oldView) {
-      oldView.getElementView().parentNode.replaceChild(view.getElementView(), oldView.getElementView());
-      this.#staticViews[id] = view;
-      return;
-    }
-
     if (!templateNode) {
       const error = new Error(`Erreur de conception : on tente d'accéder à un élément qui n'a pas été défini [${ id }] dans la vue [${ this.getName() }]`);
       window.alert(error);
@@ -87,19 +75,21 @@ class View {
   createView(data) {
     const htmlView = this.getHtmlView(data);
     this.#elementView = createNode(htmlView);
+    const templateNodes = this.#elementView.querySelectorAll('template');
+    for (const templateNode of templateNodes) {
+      this.#templateNode[templateNode.id] = templateNode;
+    }
   }
 
   /**
    * Redessine la vue en fonction des données passées en paramètre.
-   * NOTE : pour un champ de saisie, on peut perdre l'historique des saisies (Ctrl+Z/Ctrl+Y)
-   * Pour y remédier, il faut override cette fonction
    * @param {Object} data - Données à utiliser pour redessiner la vue
    */
   refreshView(data) {
-    const htmlView = this.getHtmlView(data);
-    const nodeElement = createNode(htmlView);
-    this.#elementView.parentNode.replaceChild(nodeElement, this.#elementView);
-    this.#elementView = nodeElement;
+    const parentNode = this.getElementView().parentNode;
+    const oldElementView = this.getElementView();
+    this.createView(data);
+    parentNode.replaceChild(oldElementView, this.#elementView);
     for (const id in this.#staticViews) {
       const view = this.#staticViews[id];
       this.setStaticView(id, view);

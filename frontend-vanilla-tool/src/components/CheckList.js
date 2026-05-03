@@ -27,7 +27,7 @@ class CheckList extends TreeList {
    * @param {TreeItem} treeItem - Informations sur la tache
    */
   setTreeItem(treeItem) {
-    this.#item.updateData({ treeItem, layout: ITEM_LAYOUT.Todo, rights: [RIGHT.update] });
+    this.#item.setTreeItem(treeItem);
     super.setTreeItem(treeItem);
   }
 

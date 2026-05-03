@@ -17,8 +17,6 @@ class Item extends Component {
 
   /** @type {TreeItem} */
   #treeItem = null;
-  #layout = null;
-  #rights;
   #readOnly = false;
 
   #doneCheckbox = null;
@@ -33,13 +31,14 @@ class Item extends Component {
   constructor(data) {
     super(new ItemView(data));
 
+    const rights = data.rights;
     const toolbar = new Toolbar();
-    if (data.rights.includes(RIGHT.create)) {
+    if (rights.includes(RIGHT.create)) {
       const addAction = new ActionButton({ id: 'addNewChild', label: 'Ajouter un item', icon: '+', role: 'button', type: 'icon' });
       addAction.setDoActionCallback(this.doAdd.bind(this, 'Nouvel item'));
       toolbar.addChild(addAction);
     }
-    if (data.rights.includes(RIGHT.delete)) {
+    if (rights.includes(RIGHT.delete)) {
       const deleteAction = new ActionButton({ id: 'markToDelete', label: 'Marquer à supprimer', icon: '-', role: 'button', type: 'icon' });
       deleteAction.setDoActionCallback(this.markToDelete.bind(this));
       toolbar.addChild(deleteAction);
@@ -53,24 +52,7 @@ class Item extends Component {
     this.#doneCheckbox.setToggleCallback(this.toggleDone.bind(this));
     this.setStaticChild('done', this.#doneCheckbox);
 
-    this.setData(data);
-  }
-
-  /** @override  */
-  updateData(data) {
-    this.setData(data);
-    super.updateData(data);
-  }
-
-  setData(data) {
-    if (this.#treeItem) {
-      this.#treeItem.removeObserver(this);
-    }
-    this.#treeItem = data.treeItem;
-    this.#layout = data.layout;
-    this.#rights = data.rights;
-    this.#treeItem.addObserver(this, data.rights);
-    if (this.#rights.includes(RIGHT.update)) {
+    if (rights.includes(RIGHT.update)) {
       this.getView()
         .setOnChangeCallback(this.setPropertyValue.bind(this));
     } else {
@@ -81,7 +63,8 @@ class Item extends Component {
         this.getView()
           .dispatchEvent(new CustomEvent(Item.EVENTS.focus, { bubbles: true, detail: this }));
       });
-    this.setItemValues(this.#treeItem.getItemInfos());
+
+    this.setTreeItem(data.treeItem);
   }
 
   setCurrent() {
@@ -108,21 +91,21 @@ class Item extends Component {
     return this.#treeItem;
   }
 
+  setTreeItem(treeItem) {
+    if (this.#treeItem) {
+      this.#treeItem.removeObserver(this);
+    }
+    this.#treeItem = treeItem;
+    this.#treeItem.addObserver(this);
+    this.setItemValues(this.#treeItem.getItemInfos());
+  }
+
   /**
    * @override
    * @returns {ItemView}
    */
   getView() {
     return super.getView();
-  }
-
-  /**
-   * Changement de l'affichage de l'item
-   * @param {ITEM_LAYOUT} layout - Affichage souhaité
-   */
-  doChangeViewChoice(layout) {
-    this.#layout = layout;
-    super.updateData({ treeItem: this.getTreeItem(), layout: this.#layout, rights: this.#rights });
   }
 
   doAdd(title) {

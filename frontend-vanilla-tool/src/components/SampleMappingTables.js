@@ -42,8 +42,7 @@ class SampleMappingTables extends Items {
     this.setStaticChild('addItemAction', buttonAddRule);
   }
   setTreeItem(treeItem) {
-    const rights = ITEM_LAYOUT.getRights(ITEM_LAYOUT.Story);
-    this.#item.updateData({ treeItem, layout: ITEM_LAYOUT.Story, rights });
+    this.#item.setTreeItem(treeItem);
     super.setTreeItem(treeItem);
   }
 
