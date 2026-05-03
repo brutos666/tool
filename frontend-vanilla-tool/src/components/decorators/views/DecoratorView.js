@@ -80,6 +80,11 @@ class DecoratorView extends View {
       .setDisabled();
   }
 
+  setEnabled() {
+    this.getDecoratedView()
+      .setEnabled();
+  }
+
 }
 
 export default DecoratorView;
