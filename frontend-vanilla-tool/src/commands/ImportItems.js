@@ -28,14 +28,7 @@ class ImportItems extends Command {
 
     const treeItem = StoreData.getTreeItem();
     const treeItemList = treeItem.getTreeItemList();
-    if (treeItemList.getTreeList().length > 0) {
-      // MAJ du 1er item
-      treeItemList.getLast()
-        .updateItem(itemInfosList[0]);
-      treeItemList.addItems(treeItem, itemInfosList.slice(1));
-    } else {
-      treeItemList.addItems(treeItem, itemInfosList);
-    }
+    treeItemList.addItems(treeItem, itemInfosList);
   }
 
 }

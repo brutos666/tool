@@ -38,8 +38,7 @@ public class ImportController {
         List<Tree<Item>> items = csvService.convertCsvToItems(file);
         TreeUtils.applyFunctionOnEach(items, itemService::setNullIds);
         Optional<Item> lastItem = itemService.getLastRootItem();
-        List<Tree<Item>> savedItemsTree = itemService.createTreeItems(lastItem, -1L, items);
-        return ItemMapper.toWebResult(savedItemsTree);
+        return ItemMapper.toWebResult(items);
     }
 
 }
