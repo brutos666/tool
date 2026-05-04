@@ -6,6 +6,10 @@
   background-color: var(--color-bg-selected);
 }
 
+.current {
+  border: solid 1px var(--color-border-current);
+}
+
 .disabled {
   opacity: 0.5;
   cursor: not-allowed;

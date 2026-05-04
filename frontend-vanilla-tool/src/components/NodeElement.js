@@ -34,6 +34,15 @@ class NodeElement {
       .setStaticView(id, child.getView());
     this.#staticChildren[id] = child;
   }
+  /**
+   * Retourne un enfant statique
+   * @param {string} id - Identifiant de l'enfant statique
+   * @returns {Component} - Enfant statique
+   */
+  getStaticChild(id) {
+    return this.#staticChildren[id];
+  }
+
   destroy() {
     // destroy de tous les staticChild
     Object.values(this.#staticChildren)
@@ -73,6 +82,26 @@ class NodeElement {
     this.getView()
       .refreshView(data);
   }
+
+  giveFocus() {
+    this.getView()
+      .giveFocus();
+  }
+  setCurrent() {
+    this.getView()
+      .setCurrent();
+  }
+
+  removeCurrent() {
+    this.getView()
+      .removeCurrent();
+  }
+
+  isOnCurrentBranch() {
+    return this.getView()
+      .isOnCurrentBranch();
+  }
+
   setDisabled() {
     this.getView()
       .setDisabled();

@@ -155,12 +155,8 @@ class ItemView extends View {
     this.getElementView().classList.remove('item--crud-deleted');
   }
 
-  setCurrent() {
-    this.getElementView().classList.add('item--current');
-  }
-
-  removeCurrent() {
-    this.getElementView().classList.remove('item--current');
+  giveFocus() {
+    this.#title.focus();
   }
 
   setReadOnly() {

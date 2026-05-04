@@ -115,6 +115,22 @@ class View {
     this.#elementView = view;
   }
 
+  giveFocus() {
+    this.getElementView()
+      .focus();
+  }
+  setCurrent() {
+    this.getElementView().classList.add('current');
+  }
+
+  removeCurrent() {
+    this.getElementView().classList.remove('current');
+  }
+  isOnCurrentBranch() {
+    return !!this.getElementView()
+      .closest('.current');
+  }
+
   setDisabled() {
     this.getElementView().classList.add('disabled');
   }

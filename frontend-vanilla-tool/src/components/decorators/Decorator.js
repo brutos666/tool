@@ -29,6 +29,17 @@ class Decorator extends Component {
     return this.#decoratedElement;
   }
 
+  giveFocus() {
+    this.#decoratedElement.giveFocus();
+  }
+
+  setCurrent() {
+    this.#decoratedElement.setCurrent();
+  }
+  removeCurrent() {
+    this.#decoratedElement.removeCurrent();
+  }
+
   destroy() {
     super.destroy();
     this.#decoratedElement.destroy();

@@ -68,15 +68,9 @@ class Item extends Component {
   }
 
   setCurrent() {
+    super.setCurrent();
     this.getView()
       .dispatchEvent(new CustomEvent(Item.EVENTS.current, { bubbles: true, detail: this }));
-    this.getView()
-      .setCurrent();
-  }
-
-  removeCurrent() {
-    this.getView()
-      .removeCurrent();
   }
 
   destroy() {

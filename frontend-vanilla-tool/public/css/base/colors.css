@@ -32,7 +32,7 @@ body {
 .tree__header:has(.item--selected) {
   background-color: var(--color-bg-selected);
 }
-.tree__header:has(.item--current) {
+.tree__header:has(.current) {
   background-color: var(--color-bg-current);
 }
 .tree__header:has(.tree__item *:focus) {
