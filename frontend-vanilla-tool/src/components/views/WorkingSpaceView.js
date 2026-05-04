@@ -2,16 +2,22 @@ import View from './View.js';
 
 class WorkingSpaceView extends View {
 
+  #onCurrentCallback = () => {};
+  #currentSpace = null;
+
   constructor() {
     super();
 
     this.activateSplitter();
+
+    this.getElementView()
+      .addEventListener('mousedown', this.setCurrentSpace.bind(this));
   }
 
   getHtmlView() {
     return String.raw`<div id="workingSpace" class="working-space">
     <template id="menu" class="working-space__menu"></template>
-    <nav id="navSpace" class="working-space__nav"><template id="nav"></template></nav>
+    <template id="nav" class="working-space__nav"></template>
     <div id="splitter" class="working-space__splitter">&nbsp;</div>
     <template id="main" class="working-space__main"></template>
   </div>`;
@@ -19,12 +25,13 @@ class WorkingSpaceView extends View {
 
   activateSplitter() {
     const workingSpace = this.getElementView();
-    const navSpace = this.getElementView()
-      .querySelector('#navSpace');
+
     const splitter = this.getElementView()
       .querySelector('#splitter');
 
     const moveSplitter = event => {
+      const navSpace = this.getElementView()
+        .querySelector('.working-space__nav');
       const offset = workingSpace.getBoundingClientRect().left;
       navSpace.style.width = `${ event.clientX - offset }px`;
     };
@@ -36,6 +43,24 @@ class WorkingSpaceView extends View {
         splitter.removeEventListener('pointermove', moveSplitter);
       }, { once: true });
     });
+  }
+
+  setOnCurrentCallback(onCurrentCallback) {
+    this.#onCurrentCallback = onCurrentCallback;
+  }
+  setCurrentSpace(event) {
+    const space = event.target.closest('.working-space__nav, .working-space__main');
+    if (!space || this.#currentSpace && this.#currentSpace === space) {
+      return;
+    }
+    this.#currentSpace = space;
+    // Trouver l'identifiant de la vue statique correspondante
+    if (this.getStaticView('main')
+      .getElementView() === space) {
+      this.#onCurrentCallback('main');
+    } else {
+      this.#onCurrentCallback('nav');
+    }
   }
 
 }

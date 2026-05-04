@@ -1,4 +1,3 @@
-import NavTree from './NavTree.js';
 import WorkingSpaceView from './views/WorkingSpaceView.js';
 import Component from './Component.js';
 import MainSpace from './MainSpace.js';
@@ -10,30 +9,32 @@ import CommandDecorator from './decorators/CommandDecorator.js';
 import ButtonDialog from './decorators/ButtonDialog.js';
 import Item from './Item.js';
 import ManagerItemsDecorator from './decorators/ManagerItemsDecorator.js';
+import NavSpace from './NavSpace.js';
 
 class WorkingSpace extends Component {
 
   #currentTreeItem;
+  #currentSpace;
 
   constructor() {
     super(new WorkingSpaceView());
 
     this.#currentTreeItem = StoreData.getTreeItem();
     const menu = new Menu();
-    const decorateNavTree = new CommandDecorator(new ManagerItemsDecorator(new NavTree()), { treeItem: this.#currentTreeItem });
+    const decorateNavSpace = new CommandDecorator(new ManagerItemsDecorator(new NavSpace()), { treeItem: this.#currentTreeItem });
     const decorateMainSpace = new CommandDecorator(new ManagerItemsDecorator(new MainSpace()), { treeItem: this.#currentTreeItem });
 
     const reloadAction = new ActionButton({ id: 'reload', label: 'Actualiser', role: 'menuitem', type: 'menu' });
-    reloadAction.setDoActionCallback(decorateNavTree.loadItems.bind(decorateNavTree));
+    reloadAction.setDoActionCallback(decorateNavSpace.loadItems.bind(decorateNavSpace));
     const saveAllAction = new ActionButton({ id: 'save', label: 'Sauvegarder tout', role: 'menuitem', type: 'menu' });
-    saveAllAction.setDoActionCallback(decorateNavTree.doSave.bind(decorateNavTree));
+    saveAllAction.setDoActionCallback(decorateNavSpace.doSave.bind(decorateNavSpace));
 
     const saveMainAction = new ActionButton({ id: 'saveCurrent', label: 'Sauvegarder la vue courante', role: 'menuitem', type: 'menu' });
     saveMainAction.setDoActionCallback(decorateMainSpace.doSave.bind(decorateMainSpace));
     const exportAction = new ActionButton({ id: 'export', label: 'Exporter tout', role: 'menuitem', type: 'menu' });
-    exportAction.setDoActionCallback(decorateNavTree.exportItems.bind(decorateNavTree));
+    exportAction.setDoActionCallback(decorateNavSpace.exportItems.bind(decorateNavSpace));
     const importFile = new FileUpload({ id: 'import', label: 'Importer' });
-    importFile.setDoActionCallback(decorateNavTree.importItems.bind(decorateNavTree));
+    importFile.setDoActionCallback(decorateNavSpace.importItems.bind(decorateNavSpace));
     const importAction = new ButtonDialog(importFile, { id: 'import', label: 'Importer', role: 'menuitem', type: 'menu' });
 
     menu.addChild(reloadAction);
@@ -43,10 +44,17 @@ class WorkingSpace extends Component {
     menu.addChild(importAction);
 
     this.setStaticChild('menu', menu);
-    this.setStaticChild('nav', decorateNavTree);
+    this.setStaticChild('nav', decorateNavSpace);
     this.setStaticChild('main', decorateMainSpace);
 
-    decorateNavTree.getView()
+    this.getView()
+      .setOnCurrentCallback(staticId => {
+        this.#currentSpace?.removeCurrent();
+        this.#currentSpace = this.getStaticChild(staticId);
+        this.#currentSpace.setCurrent();
+      });
+
+    decorateNavSpace.getView()
       .addEventListener(Item.EVENTS.current, event => {
         const treeItem = event.detail.getTreeItem();
         if (this.#currentTreeItem === treeItem) {
@@ -58,7 +66,7 @@ class WorkingSpace extends Component {
         decorateMainSpace.setTreeItem(treeItem);
       });
 
-    decorateNavTree.loadItems();
+    decorateNavSpace.loadItems();
   }
 
 }

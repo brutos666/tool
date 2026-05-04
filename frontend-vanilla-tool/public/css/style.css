@@ -14,7 +14,7 @@
 @import "components/tree.css" layer(components);
 @import "modules/check-list.css" layer(modules);
 @import "modules/main-space.css" layer(modules);
-@import "modules/nav-tree.css" layer(modules);
+@import "modules/nav-space.css" layer(modules);
 @import "modules/sample-mapping.css" layer(modules);
 @import "modules/sample-mapping-grid.css" layer(modules);
 @import "modules/notification-center.css" layer(modules);
@@ -47,6 +47,7 @@
   --color-border: light-dark(oklch(0.76 0.014 var(--hue-primary)), oklch(0.42 0.016 var(--hue-primary)));
   --color-border-hover: light-dark(oklch(0.62 0.018 var(--hue-primary)), oklch(0.54 0.018 var(--hue-primary)));
   --color-box-shadow: light-dark(oklch(0.5 0 0), oklch(0 0 0));
+  --color-border-current: var(--color-bg-current);
 
   /* === PRIMAIRE === */
   /* Primaire — la couleur de marque, pour les boutons principaux, liens, éléments actifs. */

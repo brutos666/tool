@@ -3,18 +3,17 @@ import { ITEM_LAYOUT } from '../tools/Constants.js';
 import AddItemButton from './AddItemButton.js';
 import Component from './Component.js';
 import TreeList from './TreeList.js';
-import NavTreeView from './views/NavTreeView.js';
+import NavSpaceView from './views/NavSpaceView.js';
 
-class NavTree extends Component {
+class NavSpace extends Component {
 
-  name = 'NavTree';
-
+  name = 'NavSpace';
   constructor() {
-    super(new NavTreeView());
+    super(new NavSpaceView());
 
-    const items = new TreeList({ addButton: true }, StoreData.getTreeItem(), ITEM_LAYOUT.Title);
+    const items = new TreeList(true, StoreData.getTreeItem(), ITEM_LAYOUT.Title);
     const addButton = new AddItemButton({ id: 'addNewItem', label: 'Ajouter un espace', layout: ITEM_LAYOUT.Title });
-    addButton.setDoActionCallback(items.addNewItem.bind(items, 'Nouvel espace'));
+    addButton.setDoActionCallback(items.addNewItem.bind(items, 'Saisir un espace'));
     items.setStaticChild('addItemAction', addButton);
 
     this.setStaticChild('treeItems', items);
@@ -22,4 +21,4 @@ class NavTree extends Component {
 
 }
 
-export default NavTree;
+export default NavSpace;
