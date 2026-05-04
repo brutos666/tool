@@ -166,7 +166,7 @@ class TreeItem {
     return this.#treeItemList.getTreeList().length === 0;
   }
   isRoot() {
-    return this.#item.parentId === undefined || this.#item.parentId === -1;
+    return this.#item.parentId === -1;
   }
   /**
    * @returns {boolean} - Indique si la tâche est nouvelle
