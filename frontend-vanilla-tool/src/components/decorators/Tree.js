@@ -60,14 +60,14 @@ class Tree extends Decorator {
 
   /**
    * Modification du modèle
-   * @param {'update'|'updated'|'toDelete'|'addItem'|'removeItem'} action
+   * @param {'modify'|'added'|'updated'|'toDelete'|'undoToDelete'|'removed'|'addChildItem'|'removeChildItem'} action
    * @param {TreeItem} treeItem
    */
   update(action, treeItem) {
-    if (action === 'addItem') {
-      this.setLeaf(treeItem.isLeaf());
+    if (action === 'addChildItem') {
+      this.setLeaf(false);
       this.setOpen(true);
-    } else if (action === 'removeItem') {
+    } else if (action === 'removeChildItem') {
       this.setLeaf(treeItem.isLeaf());
     }
   }

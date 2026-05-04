@@ -36,7 +36,7 @@ class Items extends Component {
     return this.#treeItem.getTreeItemList();
   }
   addNewItem(title) {
-    this.#treeItem.addItem({ title, state: 'TODO', children: [] });
+    this.#treeItem.addChildItem({ title, state: 'TODO', children: [] });
   }
   getItemsComponent() {
     return this.#itemsComponent;
@@ -90,7 +90,7 @@ class Items extends Component {
   addItems(treeItemArray) {
     treeItemArray.forEach(treeItem => {
       const itemComponent = this.getItemComponent(treeItem);
-      this.addItemView(itemComponent);
+      this.addItemComponent(itemComponent);
       this.#itemsComponent.push(itemComponent);
     });
   }
@@ -133,15 +133,19 @@ class Items extends Component {
     const rights = ITEM_LAYOUT.getRights(layout);
     return new Item({ treeItem, layout, rights });
   }
-  removeItemComponent(component) {
-    component.destroy();
+  /**
+   * Suppression d'un item
+   * @param {Component} itemComponent - composant supprimé
+   */
+  removeItemComponent(itemComponent) {
+    itemComponent.destroy();
   }
 
   /**
    * Ajout d'un item
-   * @param {Object} itemComponent - objet permettant l'ajout d'un item dans le vue
+   * @param {Component} itemComponent - composant ajouté
    */
-  addItemView(itemComponent) {
+  addItemComponent(itemComponent) {
     /** @type {ItemsView} */
     const view = this.getView();
     view.addItemView(itemComponent.getView());

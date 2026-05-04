@@ -59,6 +59,7 @@ class TreeItemList {
     treeItem.setParentItem(parentTreeItem);
     this.#treeList.push(treeItem);
     this.alertObservers('add', [treeItem]);
+    treeItem.alertObservers('added');
   }
   /**
    * Suppression d'un item
@@ -69,9 +70,9 @@ class TreeItemList {
     if (index === -1) {
       return;
     }
+    treeItemToRemove.alertObservers('removed');
     this.alertObservers('remove', [treeItemToRemove]);
     this.#treeList.splice(index, 1);
-    treeItemToRemove.alertObservers('toDelete');
   }
 
   getPrevious(treeItem) {
@@ -103,7 +104,12 @@ class TreeItemList {
    * @param {Array<TreeItem>} treeItemList
    */
   alertObservers(action, treeItemList) {
-    for (const observer of this.#observers) {
+    /*
+     * NOTE : La liste des observers peut être modifiée si par exemple on alerte de la suppression d'un item
+     * On va donc travailler sur une copie
+     */
+    const observers = this.#observers.slice();
+    for (const observer of observers) {
       observer.update(action, treeItemList);
     }
   }

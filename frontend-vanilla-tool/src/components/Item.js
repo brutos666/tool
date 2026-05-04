@@ -103,12 +103,12 @@ class Item extends Component {
   }
 
   doAdd(title) {
-    this.#treeItem.addItem({ title, state: 'TODO', children: [] });
+    this.#treeItem.addChildItem({ title, state: 'TODO', children: [] });
   }
   markToDelete() {
     if (this.#treeItem.isNew()) {
       this.#treeItem.getParentItem()
-        .removeItem(this.#treeItem);
+        .removeChildItem(this.#treeItem);
     } else {
       this.#treeItem.markToDeleteItem();
     }
@@ -137,11 +137,11 @@ class Item extends Component {
 
   /**
    * Modification du modèle
-   * @param {'update'|'updated'|'toDelete'|'undoToDelete'|'addItem'|'removeItem'} action
+   * @param {'modify'|'added'|'updated'|'toDelete'|'undoToDelete'|'removed'|'addChildItem'|'removeChildItem'} action
    * @param {TreeItem} treeItem
    */
   update(action, treeItem) {
-    if (action === 'update') {
+    if (action === 'modify') {
       // MAJ éventuelle du status
       this.getView()
         .setCRUDMode(treeItem.getItemInfos().CRUDMode);
@@ -151,8 +151,6 @@ class Item extends Component {
       this.setToDelete();
     } else if (action === 'undoToDelete') {
       this.setUndoToDelete();
-    } else if (action === 'removeItem') {
-      this.#treeItem.removeObserver(this);
     }
   }
 

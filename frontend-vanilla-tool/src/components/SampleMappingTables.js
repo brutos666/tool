@@ -62,10 +62,10 @@ class SampleMappingTables extends Items {
     component.sampleItems.destroy();
   }
 
-  addItemView(data) {
+  addItemComponent(component) {
     /** @type {SampleMappingTablesView} */
     const tableView = this.getView();
-    tableView.addColumn(data.item.getView(), data.sampleItems.getView());
+    tableView.addColumn(component.item.getView(), component.sampleItems.getView());
   }
   removeAllItemsViews() {
     /** @type {SampleMappingTablesView} */

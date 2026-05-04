@@ -95,12 +95,12 @@ class TreeItem {
     } else {
       this.#updates[property] = value;
     }
-    this.alertObservers('update');
+    this.alertObservers('modify');
   }
 
-  addItem(itemInfos) {
+  addChildItem(itemInfos) {
+    this.alertObservers('addChildItem');
     this.#treeItemList.addItem(this, { ...itemInfos, parentId: this.#item.id });
-    this.alertObservers('addItem');
   }
   getPrevious() {
     if (!this.getParentItem()) {
@@ -124,9 +124,9 @@ class TreeItem {
    * Suppression d'un item fils
    * @param {TreeItem} treeItemToRemove - Item à supprimer
    */
-  removeItem(treeItemToRemove) {
+  removeChildItem(treeItemToRemove) {
     this.#treeItemList.removeItem(treeItemToRemove);
-    this.alertObservers('removeItem');
+    this.alertObservers('removeChildItem');
   }
 
   updateItem(itemInfos) {
@@ -154,10 +154,15 @@ class TreeItem {
 
   /**
    *
-   * @param {'update'|'updated'|'toDelete'|'undoToDelete'|'addItem'|'removeItem'} action
+   * @param {'modify'|'added'|'updated'|'toDelete'|'undoToDelete'|'removed'|'addChildItem'|'removeChildItem'} action
    */
   alertObservers(action) {
-    for (const observer of this.#observers) {
+    /*
+     * NOTE : La liste des observers peut être modifiée si par exemple on alerte de la suppression d'un item
+     * On va donc travailler sur une copie
+     */
+    const observers = this.#observers.slice();
+    for (const observer of observers) {
       observer.update(action, this);
     }
   }
