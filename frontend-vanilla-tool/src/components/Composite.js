@@ -39,6 +39,22 @@ class Composite extends Component {
     return this.#children[this.#children.length - 1];
   }
 
+  getPreviousChild(child) {
+    const index = this.#children.indexOf(child);
+    if (index === -1) {
+      return null;
+    }
+    return this.#children[index - 1];
+  }
+
+  getNextChild(child) {
+    const index = this.#children.indexOf(child);
+    if (index === -1) {
+      return null;
+    }
+    return this.#children[index + 1];
+  }
+
   /**
    * Ajoute un enfant. La vue du composant est ajouté au DOM dans l'espace dédié (#spaceChildren)
    * @param {Component} element : noeud

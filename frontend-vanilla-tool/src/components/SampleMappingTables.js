@@ -7,6 +7,7 @@ import Toolbar from './Toolbar.js';
 import AddItemButton from './AddItemButton.js';
 import SampleMappingTablesView from './views/SampleMappingTablesView.js';
 import CheckBox from './CheckBox.js';
+import SampleMappingColumnDecorator from './decorators/SampleMappingColumnDecorator.js';
 /** @import TreeItem from '../data/TreeItem.js'; */
 
 class SampleMappingTables extends Items {
@@ -55,17 +56,19 @@ class SampleMappingTables extends Items {
     const rights = ITEM_LAYOUT.getRights(ITEM_LAYOUT.Rules);
     const item = new Item({ treeItem, layout: ITEM_LAYOUT.Rules, rights });
     const sampleItems = new SampleMappingSamples(treeItem);
-    return { item, sampleItems };
-  }
-  removeItemComponent(component) {
-    component.item.destroy();
-    component.sampleItems.destroy();
+    return new SampleMappingColumnDecorator(item, sampleItems);
   }
 
-  addItemComponent(component) {
+  /**
+   * @override
+   * @param {SampleMappingColumnDecorator} component
+   */
+  addItemView(component) {
     /** @type {SampleMappingTablesView} */
     const tableView = this.getView();
-    tableView.addColumn(component.item.getView(), component.sampleItems.getView());
+    tableView.addColumn(component.getDecoratedElement()
+      .getView(), component.getSampleItems()
+      .getView());
   }
   removeAllItemsViews() {
     /** @type {SampleMappingTablesView} */
@@ -98,6 +101,10 @@ class SampleMappingTables extends Items {
     /** @type {SampleMappingTablesView} */
     const tableView = this.getView();
     tableView.magnifyFocused();
+  }
+
+  giveFocus() {
+    this.#item.giveFocus();
   }
 
 }

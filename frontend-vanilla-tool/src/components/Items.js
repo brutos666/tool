@@ -1,10 +1,11 @@
 import { ITEM_LAYOUT, RIGHT } from '../tools/Constants.js';
-import Component from './Component.js';
+import Composite from './Composite.js';
+import FocusManagerDecorator from './decorators/FocusManagerDecorator.js';
 import Item from './Item.js';
 import ItemsView from './views/ItemsView.js';
 /** @import TreeItem from '../data/TreeItem.js'; */
 
-class Items extends Component {
+class Items extends Composite {
 
   name = 'Items';
 
@@ -12,8 +13,6 @@ class Items extends Component {
   #itemLayout;
   /** @type {TreeItem} */
   #treeItem;
-  /** @type {Array<Component>} */
-  #itemsComponent = [];
 
   /**
    * @constructor
@@ -38,15 +37,10 @@ class Items extends Component {
   addNewItem(title) {
     this.#treeItem.addChildItem({ title, state: 'TODO', children: [] });
   }
-  getItemsComponent() {
-    return this.#itemsComponent;
-  }
-
   destroy() {
     this.#treeItem.getTreeItemList()
       .removeObserver(this);
-    // Supprimer tous les observateurs
-    this.#itemsComponent.forEach(item => this.removeItemComponent(item));
+    this.removeAllChildren();
     super.destroy();
   }
 
@@ -90,8 +84,8 @@ class Items extends Component {
   addItems(treeItemArray) {
     treeItemArray.forEach(treeItem => {
       const itemComponent = this.getItemComponent(treeItem);
-      this.addItemComponent(itemComponent);
-      this.#itemsComponent.push(itemComponent);
+      this.addItemView(itemComponent);
+      this.addChild(new FocusManagerDecorator(itemComponent, this));
     });
   }
 
@@ -105,16 +99,13 @@ class Items extends Component {
         .getTreeList()
         .indexOf(treeItem);
       this.removeItemView(index);
-      this.removeItemComponent(this.#itemsComponent[index]);
-      this.#itemsComponent.splice(index, 1);
+      this.removeChild(this.getChildren()[index]);
     });
   }
 
   removeAllItems() {
     this.removeAllItemsViews();
-    // Supprimer tous les observateurs
-    this.#itemsComponent.forEach(item => this.removeItemComponent(item));
-    this.#itemsComponent = [];
+    this.removeAllChildren();
   }
 
   /**
@@ -133,19 +124,12 @@ class Items extends Component {
     const rights = ITEM_LAYOUT.getRights(layout);
     return new Item({ treeItem, layout, rights });
   }
-  /**
-   * Suppression d'un item
-   * @param {Component} itemComponent - composant supprimé
-   */
-  removeItemComponent(itemComponent) {
-    itemComponent.destroy();
-  }
 
   /**
    * Ajout d'un item
    * @param {Component} itemComponent - composant ajouté
    */
-  addItemComponent(itemComponent) {
+  addItemView(itemComponent) {
     /** @type {ItemsView} */
     const view = this.getView();
     view.addItemView(itemComponent.getView());

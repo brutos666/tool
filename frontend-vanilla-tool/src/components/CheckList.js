@@ -46,6 +46,10 @@ class CheckList extends Items {
     return itemComponent;
   }
 
+  giveFocus() {
+    this.#item.giveFocus();
+  }
+
 }
 
 export default CheckList;

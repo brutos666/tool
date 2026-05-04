@@ -1,11 +1,11 @@
 import TreeList from '../TreeList.js';
 import TreeView from './views/TreeView.js';
-import Decorator from './Decorator.js';
+import ItemDecorator from './ItemDecorator.js';
 import { RIGHT } from '../../tools/Constants.js';
 /** @import Component from '../Component.js'; */
 /** @import TreeItem from '../../data/TreeItem.js'; */
 
-class Tree extends Decorator {
+class Tree extends ItemDecorator {
 
   name = 'Tree';
 
@@ -23,7 +23,6 @@ class Tree extends Decorator {
   constructor(decoratedElement, data) {
     super(new TreeView(decoratedElement.getView()), decoratedElement);
     this.#treeItem = data.treeItem;
-    this.#treeItem.addObserver(this, data.rights);
 
     const rights = data.rights;
     if (!rights.includes(RIGHT.update)) {
@@ -64,17 +63,13 @@ class Tree extends Decorator {
    * @param {TreeItem} treeItem
    */
   update(action, treeItem) {
+    super.update(action, treeItem);
     if (action === 'addChildItem') {
       this.setLeaf(false);
       this.setOpen(true);
     } else if (action === 'removeChildItem') {
       this.setLeaf(treeItem.isLeaf());
     }
-  }
-
-  destroy() {
-    this.#treeItem.removeObserver(this);
-    super.destroy();
   }
 
 }
