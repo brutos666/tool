@@ -163,7 +163,10 @@ class Item extends Component {
   }
 
   setToDelete() {
-    this.setDisabled();
+    // NOTE : Ne pas rendre la toolbar inaccessible car elle est utile même si l'item est supprimé
+    this.getView()
+      .setDisabled();
+    this.#doneCheckbox.setDisabled();
     this.getView()
       .setToDelete();
   }
