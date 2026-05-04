@@ -3,15 +3,33 @@ import View from './View.js';
 class WorkingSpaceView extends View {
 
   #onCurrentCallback = () => {};
-  #currentSpace = null;
+  #currentSpaceId = null;
 
   constructor() {
     super();
 
     this.activateSplitter();
+  }
 
-    this.getElementView()
-      .addEventListener('mousedown', this.setCurrentSpace.bind(this));
+  setStaticView(id, view) {
+    super.setStaticView(id, view);
+    if (!(id === 'main' || id === 'nav')) {
+      return;
+    }
+    view.getElementView()
+      .addEventListener('focusin', this.setCurrentSpace.bind(this, id));
+    view.getElementView()
+      .addEventListener('mousedown', this.setCurrentSpace.bind(this, id));
+    view.getElementView()
+      .addEventListener('keydown', e => {
+        if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+          e.preventDefault();
+          this.setCurrentSpace(id === 'main' ? 'nav' : 'main');
+        }
+      });
+    if (id === 'nav') {
+      this.setCurrentSpace('nav');
+    }
   }
 
   getHtmlView() {
@@ -48,19 +66,22 @@ class WorkingSpaceView extends View {
   setOnCurrentCallback(onCurrentCallback) {
     this.#onCurrentCallback = onCurrentCallback;
   }
-  setCurrentSpace(event) {
-    const space = event.target.closest('.working-space__nav, .working-space__main');
-    if (!space || this.#currentSpace && this.#currentSpace === space) {
+
+  setCurrentSpace(id) {
+    if (this.#currentSpaceId === id) {
       return;
     }
-    this.#currentSpace = space;
-    // Trouver l'identifiant de la vue statique correspondante
-    if (this.getStaticView('main')
-      .getElementView() === space) {
-      this.#onCurrentCallback('main');
-    } else {
-      this.#onCurrentCallback('nav');
+    if (this.#currentSpaceId) {
+      this.getStaticView(this.#currentSpaceId)
+        .getElementView()
+        .setAttribute('tabindex', '-1');
     }
+    this.#currentSpaceId = id;
+    const elementView = this.getStaticView(id)
+      .getElementView();
+    elementView.setAttribute('tabindex', '0');
+    elementView.focus();
+    this.#onCurrentCallback(id);
   }
 
 }
