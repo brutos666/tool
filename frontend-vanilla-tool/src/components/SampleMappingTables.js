@@ -38,7 +38,7 @@ class SampleMappingTables extends Items {
     this.setStaticChild('storyItem', this.#item);
 
     const buttonAddRule = new AddItemButton({ id: 'addRule', label: 'Ajouter une règle', layout: ITEM_LAYOUT.Rules });
-    buttonAddRule.setDoActionCallback(this.addNewItem.bind(this, 'Nouvelle règle'));
+    buttonAddRule.setDoActionCallback(this.addNewItem.bind(this, 'Saisir une règle'));
     this.setStaticChild('addItemAction', buttonAddRule);
   }
   setTreeItem(treeItem) {

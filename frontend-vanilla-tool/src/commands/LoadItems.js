@@ -24,10 +24,6 @@ class LoadItems extends Command {
    */
   commandDone(itemInfosList) {
     super.commandDone();
-
-    if (itemInfosList.length === 0) {
-      itemInfosList.push({ id: undefined, title: 'Nouvel espace', text: '', state: 'TODO', parentId: undefined, children: [] });
-    }
     StoreData.storeItems(itemInfosList);
   }
 

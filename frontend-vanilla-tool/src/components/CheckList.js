@@ -19,7 +19,7 @@ class CheckList extends Items {
     this.setStaticChild('title', this.#item);
 
     const addButton = new AddItemButton({ id: 'addNewItem', label: 'Ajouter un élément', layout: ITEM_LAYOUT.Todo });
-    addButton.setDoActionCallback(this.addNewItem.bind(this, 'Nouveau todo'));
+    addButton.setDoActionCallback(this.addNewItem.bind(this, 'Saisir un pense-bête'));
     this.setStaticChild('addItemAction', addButton);
   }
 
