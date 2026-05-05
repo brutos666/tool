@@ -29,13 +29,13 @@ body {
   --status-color: var(--color-text-on-post-it);
 }
 /* -- Statut : selection/courant/focus -- */
-.tree__header:has(.item--selected) {
+.tree__item:has(.item--selected) {
   background-color: var(--color-bg-selected);
 }
-.tree__header:has(.current) {
+.tree__item:has(.current) {
   background-color: var(--color-bg-current);
 }
-.tree__header:has(.tree__item *:focus) {
+.tree__item:has(*:focus) {
   background-color: var(--color-bg-focus);
 }
 

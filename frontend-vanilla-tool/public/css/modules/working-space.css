@@ -5,6 +5,7 @@
   grid-template-rows: auto 1fr;
   grid-template-columns: auto 0.2em 1fr;
   position: absolute;
+  overflow: hidden;
 }
 .working-space__menu {
   grid-row: 1;

@@ -33,6 +33,8 @@ class NodeElement {
     this.getView()
       .setStaticView(id, child.getView());
     this.#staticChildren[id] = child;
+
+    child.added(this);
   }
   /**
    * Retourne un enfant statique

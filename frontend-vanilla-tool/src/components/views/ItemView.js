@@ -54,7 +54,7 @@ class ItemView extends View {
    * @returns {string} - Code HTML de l'item
    */
   getHtmlView() {
-    return String.raw`<section class="item">
+    return String.raw`<section class="item" tabindex="-1">
       <template id="toolbar" aria-controls="itemArticle" class="item__toolbar" ></template>
       <article id="itemArticle" class="item__article">
           <span id="identify" class="item__identify"></span>

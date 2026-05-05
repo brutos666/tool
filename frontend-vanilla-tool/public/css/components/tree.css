@@ -5,15 +5,34 @@
   display: block;
   padding-left: 24px;
 }
-.tree__header {
+
+.tree__item {
   display: flex;
   flex-direction: row;
   align-items: center;
 }
-.tree__header .tree__item {
+.tree__item > *:last-child {
   flex: 1;
 }
+
 .tree__toggle {
   width: 24px;
+  position: relative;
+}
+
+.tree--leaf > .tree__item > .tree__toggle::before {
+  content: "";
+}
+.tree--node > .tree__item[aria-expanded="false"] > .tree__toggle::before {
+  content: "►";
+}
+.tree--node > .tree__item[aria-expanded="true"] > .tree__toggle::before {
+  content: "▼";
+}
+.tree__item[aria-expanded="false"] + .tree__list {
+  display: none;
+}
+.tree__item[aria-expanded="true"] + .tree__list {
+  display: block;
 }
 

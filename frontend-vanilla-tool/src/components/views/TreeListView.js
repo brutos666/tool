@@ -7,7 +7,6 @@ class TreeListView extends ItemsView {
   constructor(data) {
     super(data);
     this.getElementView()
-      .querySelector('.items__space')
       .classList.add('tree-list__space');
   }
 

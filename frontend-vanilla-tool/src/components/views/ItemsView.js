@@ -18,8 +18,11 @@ class ItemsView extends View {
   }
 
   addItemView(itemView) {
-    const itemsSpace = this.getElementView()
-      .querySelector('.items__space');
+    let itemsSpace = this.getElementView();
+    if (!itemsSpace.classList.contains('items__space')) {
+      itemsSpace = this.getElementView()
+        .querySelector('.items__space');
+    }
     if (this.#addButton) {
       itemsSpace.insertBefore(itemView.getElementView(), itemsSpace.lastChild);
     } else {
@@ -45,9 +48,9 @@ class ItemsView extends View {
    */
   getHtmlView(data) {
     if (data.addButton) {
-      return String.raw`<div class="items"><div id="itemsSpace" class="items__space"><template id="addItemAction"></template></div></div>`;
+      return String.raw`<ol id="itemsSpace" class="items__space"><template id="addItemAction"></template></ol>`;
     }
-    return String.raw`<div class="items"><div id="itemsSpace" class="items__space"></div></div>`;
+    return String.raw`<ol id="itemsSpace" class="items__space"></ol>`;
   }
 
 }

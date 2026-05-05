@@ -6,14 +6,14 @@ class CheckListView extends ItemsView {
 
   constructor() {
     super({ addButton: true });
-    this.getElementView()
-      .querySelector('.items')
-      .classList.add('check-list__space');
+    const itemsSpace = this.getElementView()
+      .querySelector('.items__space');
+    itemsSpace.setAttribute('role', 'tree');
   }
 
   getHtmlView(data) {
     const itemsViewHtml = super.getHtmlView(data);
-    return String.raw`<div class="check-list"><header class="check-list__header"><template class="check-list__header-title" id="title"></template></header>${ itemsViewHtml }</div>`;
+    return String.raw`<div class="check-list"><header class="check-list__header"><template class="check-list__header-title" id="title"></template></header><section class="check-list__space">${ itemsViewHtml }</section></div>`;
   }
 
 }

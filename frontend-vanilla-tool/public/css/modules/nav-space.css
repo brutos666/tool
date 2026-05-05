@@ -1,16 +1,15 @@
 .nav-tree__content {
   margin: var(--small-margin);
 }
-.nav-tree__content > .items__space {
-  height: 100%;
+.nav-tree__content {
   display: flex;
   flex-direction: column;
   gap: var(--global-gap);
 }
-.nav-tree__content > .items__space > .item-like-button {
+.nav-tree__content > .item-like-button {
   min-height: 40px;
 }
-.nav-tree__content > .items__space > * {
+.nav-tree__content > * {
   padding: var(--small-padding);
   box-shadow: 3px 3px 4px var(--color-box-shadow);
 }
