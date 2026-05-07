@@ -7,6 +7,7 @@ import CheckList from './CheckList.js';
 import SampleMappingTables from './SampleMappingTables.js';
 import ActionButton from './ActionButton.js';
 import CommandDecorator from './decorators/CommandDecorator.js';
+import ManagerItemsDecorator from './decorators/ManagerItemsDecorator.js';
 /** @import Items from './Items.js'; */
 
 class MainSpace extends Component {
@@ -67,7 +68,7 @@ class MainSpace extends Component {
       return;
     }
     this.#saveDecorator = new CommandDecorator(this.#main, { treeItem: this.#treeItem });
-    this.setStaticChild('main', this.#saveDecorator);
+    this.setStaticChild('main', new ManagerItemsDecorator(this.#saveDecorator));
   }
 
   doSave() {

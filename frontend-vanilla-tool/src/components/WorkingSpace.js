@@ -14,7 +14,6 @@ import NavSpace from './NavSpace.js';
 class WorkingSpace extends Component {
 
   #currentTreeItem;
-  #currentSpace;
 
   constructor() {
     super(new WorkingSpaceView());
@@ -22,7 +21,7 @@ class WorkingSpace extends Component {
     this.#currentTreeItem = StoreData.getTreeItem();
     const menu = new Menu();
     const decorateNavSpace = new CommandDecorator(new ManagerItemsDecorator(new NavSpace()), { treeItem: this.#currentTreeItem });
-    const decorateMainSpace = new CommandDecorator(new ManagerItemsDecorator(new MainSpace()), { treeItem: this.#currentTreeItem });
+    const decorateMainSpace = new CommandDecorator(new MainSpace(), { treeItem: this.#currentTreeItem });
 
     const reloadAction = new ActionButton({ id: 'reload', label: 'Actualiser', role: 'menuitem', type: 'menu' });
     reloadAction.setDoActionCallback(decorateNavSpace.loadItems.bind(decorateNavSpace));
@@ -46,13 +45,6 @@ class WorkingSpace extends Component {
     this.setStaticChild('menu', menu);
     this.setStaticChild('nav', decorateNavSpace);
     this.setStaticChild('main', decorateMainSpace);
-
-    this.getView()
-      .setOnCurrentCallback(staticId => {
-        this.#currentSpace?.removeCurrent();
-        this.#currentSpace = this.getStaticChild(staticId);
-        this.#currentSpace.setCurrent();
-      });
 
     decorateNavSpace.getView()
       .addEventListener(Item.EVENTS.current, event => {

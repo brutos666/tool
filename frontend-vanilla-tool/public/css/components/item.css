@@ -81,6 +81,9 @@
   background-color: var(--color-post-it);
   color: var(--color-text-on-post-it);
 }
+.item--post-it.current {
+  background-color: var(--darker-post-it-color);
+}
 .item--post-it .item__toolbar {
   background-color: rgba(0, 0, 0, 0.5);
   visibility: hidden;

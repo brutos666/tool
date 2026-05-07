@@ -4,6 +4,7 @@ import AddItemButtonView from './views/AddItemButtonView.js';
 class AddItemButton extends Action {
 
   name = 'AddItemButton';
+  static EVENTS = { focus: 'itemLikeButtonFocus' };
 
   /**
    * @constructor de la classe Button
@@ -13,6 +14,11 @@ class AddItemButton extends Action {
    */
   constructor(data) {
     super(new AddItemButtonView(data));
+    this.getView()
+      .setOnFocusCallback(() => {
+        this.getView()
+          .dispatchEvent(new CustomEvent(AddItemButton.EVENTS.focus, { bubbles: true, detail: this }));
+      });
   }
 
 }

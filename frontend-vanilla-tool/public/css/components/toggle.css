@@ -44,10 +44,6 @@
 .toggle__input:hover:not(:checked) {
   background: var(--color-border-hover);
 }
-.toggle__input:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 3px var(--color-bg-focus);
-}
 .toggle__input:disabled {
   opacity: 0.4;
   cursor: not-allowed;

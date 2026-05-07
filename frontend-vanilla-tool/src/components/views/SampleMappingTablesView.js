@@ -75,7 +75,7 @@ class SampleMappingTablesView extends View {
 
   getHtmlView() {
     return String.raw`<div class ="sample-mapping"><template id="toolbar" class="sample-mapping__toolbar"></template>
-      <table class="sample-mapping__table"><thead>
+      <table class="sample-mapping__table items-navigation__space" role="table"><thead>
       <tr class="sample-mapping__row">
         <th class="sample-mapping__story-item" colspan="1" ><template id="storyItem"></template></th>
         <th class="sample-mapping__spacer"></th>

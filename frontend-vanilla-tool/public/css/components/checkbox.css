@@ -51,24 +51,9 @@
   background: var(--color-text-on-primary);
   border-radius: 1px;
 }
-.checkbox__input:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 3px var(--color-bg-focus);
-}
+
 .checkbox__input:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
-/*
-.item--post-it .checkbox__input {
-  border-color: var(--color-border);
-}
-.item--post-it .checkbox__input:checked {
-  background: transparent;
-  border-color: var(--color-border);
-}
-.item--post-it .checkbox__input:checked::after {
-  border-color: var(--color-success);
-}
-*/
 

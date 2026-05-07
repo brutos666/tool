@@ -42,9 +42,6 @@
 .sample-mapping__table {
   display: block;
   height: 100%;
-  overflow: auto;
-  margin-bottom: var(--global-margin);
-  margin-right: var(--global-margin);
 }
 .sample-mapping__story-item > * {
   margin: 0 auto;

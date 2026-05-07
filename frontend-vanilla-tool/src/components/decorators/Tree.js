@@ -32,8 +32,8 @@ class Tree extends ItemDecorator {
     const treeList = new TreeList(false, data.treeItem, data.layout);
     this.setStaticChild('treeList', treeList);
 
-    this.setOpen(false);
     this.setLeaf(this.#treeItem.isLeaf());
+    this.setOpen(false);
     if (this.#treeItem.isRoot()) {
       this.setRoot();
     }

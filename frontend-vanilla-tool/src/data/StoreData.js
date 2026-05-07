@@ -6,6 +6,7 @@ class StoreData {
 
   static init() {
     window._treeItem = new TreeItem({ id: -1, title: 'Racine', state: 'TODO', children: [] });
+    window._currentSpace = null;
     window._notification_center = new NotificationCenter();
     document.body.appendChild(window._notification_center.getElementView());
   }
@@ -32,6 +33,14 @@ class StoreData {
     const treeItem = StoreData.getTreeItem();
     treeItem.getTreeItemList()
       .addItem(treeItem, itemInfos);
+  }
+
+  static setCurrentSpace(space) {
+    window._currentSpace = space;
+  }
+
+  static getCurrentSpace() {
+    return window._currentSpace;
   }
 
 }

@@ -70,25 +70,22 @@
       .checkbox__input[indeterminate] { background: var(--color-primary); border-color: var(--color-primary); }
       .checkbox__input[indeterminate]::after { content: ''; position: absolute; left: 3px; top: 6px; width: 8px; height: 2px; 
       background: var(--color-text-on-primary); border-radius: 1px; }
-      .checkbox__input:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--color-bg-focus); }
       .checkbox__input:disabled { opacity: 0.4; cursor: not-allowed; }
 
       /* Switch */
-      .toggle { display: flex; align-items: center; gap: var(--medium-gap); color: var(--color-text); cursor: pointer; }
-      .toggle__input { appearance: none; width: 36px; height: 20px; border-radius: 10px; border: 1.5px solid var(--color-primary); background: var(--color-bg-surface);  cursor: pointer; position: relative;  flex-shrink: 0; }
-      .toggle__input::after { content: ''; position: absolute; width: 14px; height: 14px; background: var(--color-text); border-radius: 50%; top: 3px; left: 3px;  box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
-      .toggle__input:checked { background: var(--color-primary); }
-      .toggle__input:checked::after { transform: translateX(16px); }
-      .toggle__input:hover:not(:checked) { background: var(--color-border-hover); }
-      .toggle__input:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--color-bg-focus); }
-      .toggle__input:disabled { opacity: 0.4; cursor: not-allowed; }
+      .tg { display: flex; align-items: center; gap: var(--medium-gap); color: var(--color-text); cursor: pointer; }
+      .tg__input { appearance: none; width: 36px; height: 20px; border-radius: 10px; border: 1.5px solid var(--color-primary); background: var(--color-bg-surface);  cursor: pointer; position: relative;  flex-shrink: 0; }
+      .tg__input::after { content: ''; position: absolute; width: 14px; height: 14px; background: var(--color-text); border-radius: 50%; top: 3px; left: 3px;  box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+      .tg__input:checked { background: var(--color-primary); }
+      .tg__input:checked::after { transform: translateX(16px); }
+      .tg__input:hover:not(:checked) { background: var(--color-border-hover); }
+      .tg__input:disabled { opacity: 0.4; cursor: not-allowed; }
 
       /* Radio */
       .rb-wrap { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--color-text-on-primary); cursor: pointer; }
       .rb { appearance: none; width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--color-border); background: transparent; cursor: pointer; position: relative; transition: border-color 0.15s; flex-shrink: 0; }
       .rb:hover { border-color: var(--color-primary); }
       .rb:checked { border-color: var(--color-control-bg-checked); border-width: 4.5px; background: var(--color-control-bg-checked); box-shadow: inset 0 0 0 3px white; }
-      .rb:focus-visible { outline: none; box-shadow: 0 0 0 3px oklch(0.50 0.22 var(--hue) / 0.25); }
 
       .color-bg {
         --background-color: var(--color-bg);
@@ -349,9 +346,9 @@
         <div>
           <h4>Switchs</h4>
           <div class="row">
-            <label class="toggle"><input type="checkbox" class="toggle__input" checked> Activé</label>
-            <label class="toggle"><input type="checkbox" class="toggle__input"> Désactivé</label>
-            <label class="toggle"><input type="checkbox" class="toggle__input" disabled> Bloqué</label>
+            <label class="tg"><input type="checkbox" class="tg__input" checked> Activé</label>
+            <label class="tg"><input type="checkbox" class="tg__input"> Désactivé</label>
+            <label class="tg"><input type="checkbox" class="tg__input" disabled> Bloqué</label>
           </div>
         </div>
       </div>

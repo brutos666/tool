@@ -5,6 +5,8 @@ class AddItemButtonView extends ActionView {
 
   name = 'AddItemButtonView';
 
+  #onFocusCallback = () => {};
+
   /**
    * @param {Object} data - Données à utiliser pour créer la vue
    * @param {string} data.id - Identifiant du bouton
@@ -15,6 +17,22 @@ class AddItemButtonView extends ActionView {
     super({ id: data.id, label: data.label, role: 'button', type: 'item-like' });
     this.getElementView().classList.add('item-like-button');
     this.getElementView().classList.add(getClassForViewChoice(data.layout));
+
+    // Ces boutons seront gérés via la navigation des items avec les flèches
+    this.getElementView()
+      .setAttribute('tabindex', '-1');
+
+    this.getElementView()
+      .addEventListener('focus', this.onFocus.bind(this), true);
+  }
+  setOnFocusCallback(onFocusCallback) {
+    this.#onFocusCallback = onFocusCallback;
+  }
+  onFocus(event) {
+    if (event.relatedTarget === null || (!this.getElementView()
+      .contains(event.relatedTarget))) {
+      this.#onFocusCallback();
+    }
   }
 
 }

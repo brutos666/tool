@@ -1,13 +1,5 @@
-*:focus {
-  outline: var(--color-bg-focus) solid 2px;
-}
-
 .selected {
   background-color: var(--color-bg-selected);
-}
-
-.current {
-  border: solid 1px var(--color-border-current);
 }
 
 .disabled {

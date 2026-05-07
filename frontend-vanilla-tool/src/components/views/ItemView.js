@@ -14,6 +14,7 @@ class ItemView extends View {
   #rights;
   #currentStatusClass;
   #currentCRUDModeClass;
+  #readOnly = false;
 
   #onInputCallback = () => {};
   #onFocusCallback = () => {};
@@ -53,15 +54,25 @@ class ItemView extends View {
    * @override {@link View.getHtmlView}
    * @returns {string} - Code HTML de l'item
    */
-  getHtmlView() {
-    return String.raw`<section class="item" tabindex="-1">
+  getHtmlView(data) {
+    const layout = data.layout;
+    if (ITEM_LAYOUT.isPostIt(layout)) {
+      return String.raw`<section class="item" tabindex="-1">
       <template id="toolbar" aria-controls="itemArticle" class="item__toolbar" ></template>
-      <article id="itemArticle" class="item__article">
+      ${ this.getHtmlArticle() }</section>`;
+    }
+    return String.raw`<section class="item" tabindex="-1">${ this.getHtmlArticle() }
+      <template id="toolbar" aria-controls="itemArticle" class="item__toolbar" ></template>
+      </section>`;
+  }
+
+  getHtmlArticle() {
+    return String.raw`<article id="itemArticle" class="item__article" aria-label="Item">
           <span id="identify" class="item__identify"></span>
-          <template id="done" class="item__checkbox" ></template>
-          <div contenteditable="true" class="item__title" id="title"></div>
-          <div contenteditable="true" class="item__text" id="text"></div>
-      </article></section>`;
+          <template id="done" class="item__checkbox" aria-label="Effectué/non effectué" aria-description="Cliquez pour marquer comme effectué"></template>
+          <div contenteditable="true" class="item__title" id="title" role="textbox" aria-label="Titre de l'item" aria-multiline="true"></div>
+          <div contenteditable="true" class="item__text" id="text" role="textbox" aria-label="Détail de l'item" aria-multiline="true"></div>
+      </article>`;
   }
 
   /**
@@ -156,15 +167,39 @@ class ItemView extends View {
   }
 
   giveFocus() {
-    this.#title.focus();
+    if (this.isEditable()) {
+      this.#title.focus();
+    } else {
+      this.getElementView()
+        .focus();
+    }
   }
 
   setReadOnly() {
     super.setReadOnly();
-    this.#title.contentEditable = false;
-    this.#text.contentEditable = false;
-    this.getElementView()
-      .setAttribute('tabindex', '0');
+    this.#readOnly = true;
+    this.setEditable(false);
+  }
+
+  setEditable(editable) {
+    if (this.#readOnly && editable) {
+      return;
+    }
+    const elementView = this.getElementView();
+    const description = editable ? 'Mode édition. Échap pour quitter.' : 'Entrée pour passer en mode édition.';
+    elementView.setAttribute('aria-description', description);
+    this.#title.contentEditable = editable;
+    this.#text.contentEditable = editable;
+    const tabIndex = editable ? '0' : '-1';
+    if (!this.isCurrent()) {
+      elementView.setAttribute('tabindex', tabIndex);
+    }
+    // Ajouter les boutons et la case à cocher de la barre d'outil
+    elementView.querySelectorAll('button, input[type="checkbox"]')
+      .forEach(button => button.setAttribute('tabindex', tabIndex));
+  }
+  isEditable() {
+    return this.#title.contentEditable === 'true';
   }
 
   /** @override */
@@ -172,15 +207,12 @@ class ItemView extends View {
     // Laisser la barre d'outil accessible pour pouvoir annuler le marquage comme supprimé
     this.#title.classList.add('disabled');
     this.#text.classList.add('disabled');
-    this.#title.contentEditable = false;
-    this.#text.contentEditable = false;
+    this.setEditable(false);
   }
 
   setEnabled() {
     this.#title.classList.remove('disabled');
     this.#text.classList.remove('disabled');
-    this.#title.contentEditable = true;
-    this.#text.contentEditable = true;
   }
 
   addEventListeners() {

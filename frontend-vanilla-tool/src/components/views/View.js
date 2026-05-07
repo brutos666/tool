@@ -122,17 +122,17 @@ class View {
   setCurrent() {
     this.getElementView().classList.add('current');
     this.getElementView()
-      .setAttribute('tabindex', '0');
-    this.getElementView()
       .setAttribute('aria-current', 'true');
   }
 
   removeCurrent() {
     this.getElementView().classList.remove('current');
     this.getElementView()
-      .setAttribute('tabindex', '-1');
-    this.getElementView()
       .setAttribute('aria-current', 'false');
+  }
+  isCurrent() {
+    return this.getElementView()
+      .classList.contains('current');
   }
   isOnCurrentBranch() {
     return !!this.getElementView()

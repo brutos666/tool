@@ -1,6 +1,6 @@
-import View from './View.js';
+import SpaceView from './SpaceView.js';
 
-class MainSpaceView extends View {
+class MainSpaceView extends SpaceView {
 
   constructor() {
     super();

@@ -2,34 +2,10 @@ import View from './View.js';
 
 class WorkingSpaceView extends View {
 
-  #onCurrentCallback = () => {};
-  #currentSpaceId = null;
-
   constructor() {
     super();
 
     this.activateSplitter();
-  }
-
-  setStaticView(id, view) {
-    super.setStaticView(id, view);
-    if (!(id === 'main' || id === 'nav')) {
-      return;
-    }
-    view.getElementView()
-      .addEventListener('focusin', this.setCurrentSpace.bind(this, id));
-    view.getElementView()
-      .addEventListener('mousedown', this.setCurrentSpace.bind(this, id));
-    view.getElementView()
-      .addEventListener('keydown', e => {
-        if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
-          e.preventDefault();
-          this.setCurrentSpace(id === 'main' ? 'nav' : 'main');
-        }
-      });
-    if (id === 'nav') {
-      this.setCurrentSpace('nav');
-    }
   }
 
   getHtmlView() {
@@ -61,27 +37,6 @@ class WorkingSpaceView extends View {
         splitter.removeEventListener('pointermove', moveSplitter);
       }, { once: true });
     });
-  }
-
-  setOnCurrentCallback(onCurrentCallback) {
-    this.#onCurrentCallback = onCurrentCallback;
-  }
-
-  setCurrentSpace(id) {
-    if (this.#currentSpaceId === id) {
-      return;
-    }
-    if (this.#currentSpaceId) {
-      this.getStaticView(this.#currentSpaceId)
-        .getElementView()
-        .setAttribute('tabindex', '-1');
-    }
-    this.#currentSpaceId = id;
-    const elementView = this.getStaticView(id)
-      .getElementView();
-    elementView.setAttribute('tabindex', '0');
-    elementView.focus();
-    this.#onCurrentCallback(id);
   }
 
 }

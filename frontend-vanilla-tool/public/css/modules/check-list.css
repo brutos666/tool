@@ -1,6 +1,7 @@
 .check-list {
   display: grid;
   grid-template-rows: min-content 1fr;
+  overflow: auto;
 }
 .check-list__header {
   display: flex;
@@ -14,7 +15,7 @@
 /* min-height: 0 empêche de déborder et force la contrainte de hauteur vers le bas. Utilisé pour l'affichage en colonne */
 .check-list__space {
   min-height: 0; /* important */
-  overflow: auto; /* scroll sur le conteneur qui affiche les racines des arbres */
+  overflow: visible;
 }
 .check-list__space > .items__space {
   overflow: visible;

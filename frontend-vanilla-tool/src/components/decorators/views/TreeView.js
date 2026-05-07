@@ -6,7 +6,6 @@ class TreeView extends DecoratorView {
 
   name = 'TreeView';
 
-  #toggle;
   #treeItem;
 
   /**
@@ -15,33 +14,35 @@ class TreeView extends DecoratorView {
    */
   constructor(view) {
     super(view);
-    const toggleAction = new ActionButtonView({ id: 'toggle', label: 'Ouvrir/Fermer le noeud', type: 'icon', icon: '', role: 'icon' });
+    const toggleAction = new ActionButtonView({ id: 'toggle', label: 'Ouvrir/Fermer le noeud', type: 'icon', icon: '', role: 'none' });
     toggleAction.setDoActionCallback(() => {
-      this.setOpen(!toggleAction.getElementView().classList.contains('tree--open'));
+      this.toggleTree();
     });
     this.setStaticView('toggle', toggleAction);
-    this.#toggle = toggleAction.getElementView();
     this.#treeItem = this.getElementView()
       .querySelector('#treeItem');
   }
 
   getHtmlView() {
-    return String.raw`<li role="none" aria-expanded="false" id="tree" class="tree">
+    return String.raw`<li role="none" id="tree" class="tree">
       <div id="treeItem" class="tree__item" role="treeitem">
-        <template id="toggle" class="tree__toggle icon-button clickable"></template>
-        ${ super.getTemplateDecoratorHTML() }
-      </div>
-      <template id="treeList" class="tree__list" role="group"></template></li>`;
+        <template id="toggle" class="tree__toggle icon-button clickable" tabindex="-1" ></template>
+        <template id="decoratedSpace" class="tree__content"></template>
+        <template id="treeList" class="tree__list" role="group"></template>
+      </div></li>`;
   }
 
   setOpen(open) {
-    if (open) {
-      this.#toggle.classList.add('tree--open');
-      this.#treeItem.setAttribute('aria-expanded', 'true');
-      return;
+    if (!this.isLeaf()) {
+      this.#treeItem.setAttribute('aria-expanded', open ? 'true' : 'false');
+      this.getStaticView('treeList')
+        .getElementView()
+        .getAttribute('id');
     }
-    this.#toggle.classList.remove('tree--open');
-    this.#treeItem.setAttribute('aria-expanded', 'false');
+  }
+
+  toggleTree() {
+    this.setOpen(this.#treeItem.getAttribute('aria-expanded') === 'false');
   }
 
   setRoot() {
@@ -52,15 +53,14 @@ class TreeView extends DecoratorView {
       const classList = this.getElementView().classList;
       classList.remove('tree--node');
       classList.add('tree--leaf');
-      this.#toggle.classList.add('hidden');
-      this.getElementView()
-        .setAttribute('role', 'treeitem');
       return;
     }
     const classList = this.getElementView().classList;
     classList.remove('tree--leaf');
     classList.add('tree--node');
-    this.#toggle.classList.remove('hidden');
+  }
+  isLeaf() {
+    return this.getElementView().classList.contains('tree--leaf');
   }
 
 }

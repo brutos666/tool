@@ -46,6 +46,7 @@ class DecoratorView extends View {
       throw new Error(error);
     }
     const newView = view.getElementView();
+    oldView.classList.forEach(classItem => newView.classList.add(classItem));
     oldView.parentNode.replaceChild(newView, oldView);
   }
   /**

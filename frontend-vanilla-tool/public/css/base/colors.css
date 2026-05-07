@@ -2,9 +2,13 @@ body {
   background-color: var(--color-bg);
   color: var(--color-text);
 }
+*:focus {
+  outline: var(--color-secondary) solid 2px;
+}
 /** Couleur des post it **/
 .item--color {
   --color-post-it: var(--color-classic);
+  --darker-post-it-color: oklch(from var(--color-post-it) l c h / calc(c + 0.2));
 }
 .story--color {
   --color-post-it: var(--color-story);
@@ -27,15 +31,6 @@ body {
 }
 .item--post-it {
   --status-color: var(--color-text-on-post-it);
-}
-/* -- Statut : selection/courant/focus -- */
-.tree__item:has(.item--selected) {
-  background-color: var(--color-bg-selected);
-}
-.tree__item:has(.current) {
-  background-color: var(--color-bg-current);
-}
-.tree__item:has(*:focus) {
-  background-color: var(--color-bg-focus);
+  --darker-post-it-color: oklch(from var(--color-post-it) calc(l + 0) calc(c + 0.45) calc(h + 0));
 }
 

@@ -65,6 +65,7 @@ class Item extends Component {
       });
 
     this.setTreeItem(data.treeItem);
+    this.setEditable(false);
   }
 
   setCurrent() {
@@ -183,6 +184,16 @@ class Item extends Component {
   setReadOnly() {
     super.setReadOnly();
     this.#readOnly = true;
+  }
+
+  setEditable(editable) {
+    this.getView()
+      .setEditable(editable);
+  }
+
+  isEditable() {
+    return this.getView()
+      .isEditable();
   }
 
 }

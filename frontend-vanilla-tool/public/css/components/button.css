@@ -15,7 +15,7 @@
   border-style: none;
 }
 .item-like-button {
-  outline: dashed 1px var(--color-border);
+  border: dashed 1px var(--color-border);
 }
 .label-button:hover,
 .icon-button:hover,
@@ -35,7 +35,7 @@
   border-radius: var(--border-radius);
 }
 .menu-button:focus-visible {
-  outline: var(--color-bg-focus) solid 2px;
+  outline: var(--color-secondary) solid 2px;
 }
 
 /** Hide label */

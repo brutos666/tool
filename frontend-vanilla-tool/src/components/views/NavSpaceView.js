@@ -1,6 +1,6 @@
-import View from './View.js';
+import SpaceView from './SpaceView.js';
 
-class NavSpaceView extends View {
+class NavSpaceView extends SpaceView {
 
   name = 'NavSpaceView';
 
@@ -10,8 +10,10 @@ class NavSpaceView extends View {
 
   getHtmlView() {
     return String.raw`<nav id="navSpace" class="nav-space">
-    <h4>Navigation</h4>
-    <template class="nav-tree__content" id="treeItems" role="tree"></template>
+    <div class="nav-space__header">Navigation</div>
+    <section class="nav-space__space items-navigation__space" tabindex="0">
+      <template class="nav-tree__content" id="treeItems" role="tree" ></template>
+    </section>
   </nav>`;
   }
 
