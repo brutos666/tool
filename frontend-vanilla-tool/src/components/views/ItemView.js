@@ -67,9 +67,9 @@ class ItemView extends View {
 
   getHtmlArticle() {
     return String.raw`<article id="itemArticle" class="item__article" aria-label="Item">
-          <template id="done" class="item__checkbox" aria-label="Effectué/non effectué" aria-description="Cliquez pour marquer comme effectué"></template>
-          <div contenteditable="true" class="item__title" role="textbox" aria-label="Titre de l'item" aria-multiline="true"></div>
-          <div contenteditable="true" class="item__text" role="textbox" aria-label="Détail de l'item" aria-multiline="true"></div>
+          <template id="done" property="done" class="item__checkbox" aria-label="Effectué/non effectué" aria-description="Cliquez pour marquer comme effectué"></template>
+          <div contenteditable="true" property="title" class="item__title" role="textbox" aria-label="Titre de l'item" aria-multiline="true"></div>
+          <div contenteditable="true" property="text" class="item__text" role="textbox" aria-label="Détail de l'item" aria-multiline="true"></div>
       </article>`;
   }
 
@@ -97,7 +97,7 @@ class ItemView extends View {
     this.#title.removeEventListener('input', this.#onInputCallback);
     this.#text.removeEventListener('input', this.#onInputCallback);
     this.#onInputCallback = event => {
-      const property = event.target.getAttribute('id');
+      const property = event.target.getAttribute('property');
       const value = property === 'text' || property === 'title' ? event.target.innerHTML : event.target.value;
       updateCallback(property, value);
     };

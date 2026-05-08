@@ -25,13 +25,18 @@ class ManagerItemsDecorator extends Decorator {
     this.getDecoratedElement()
       .getView()
       .addEventListener(AddItemButton.EVENTS.focus, this.onItemFocus.bind(this));
+    this.getDecoratedElement()
+      .getView()
+      .addEventListener(Item.EVENTS.current, event => {
+        this.setCurrentItem(event.detail);
+      });
 
     this.getView()
       .setMakeCurrentCallback(() => {
         if (this.#currentItem && this.#currentItem === this.#focusItem || !this.#focusItem) {
           return;
         }
-        this.setCurrentItem(this.#focusItem);
+        this.#focusItem.setCurrent();
       });
   }
 
@@ -62,9 +67,8 @@ class ManagerItemsDecorator extends Decorator {
   setCurrentItem(item) {
     this.#currentItem?.removeCurrent();
     this.#currentItem = item;
-    this.#currentItem.setCurrent();
     this.getView()
-      .setCurrentItemView(item.getView());
+      .setCurrentItemView(item?.getView());
   }
 
 }

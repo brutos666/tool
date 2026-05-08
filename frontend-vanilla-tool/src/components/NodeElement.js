@@ -99,6 +99,10 @@ class NodeElement {
       .removeCurrent();
   }
 
+  isCurrent() {
+    return this.getView()
+      .isCurrent();
+  }
   isOnCurrentBranch() {
     return this.getView()
       .isOnCurrentBranch();

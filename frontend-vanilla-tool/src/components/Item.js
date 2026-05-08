@@ -76,6 +76,10 @@ class Item extends Component {
 
   destroy() {
     this.#treeItem.removeObserver(this);
+    if (this.isCurrent()) {
+      this.getView()
+        .dispatchEvent(new CustomEvent(Item.EVENTS.current, { bubbles: true, detail: null }));
+    }
     super.destroy();
   }
 

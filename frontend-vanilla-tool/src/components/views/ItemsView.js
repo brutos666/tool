@@ -41,6 +41,7 @@ class ItemsView extends View {
     this.#itemNodes.forEach(itemNode => itemNode.parentNode.removeChild(itemNode));
     this.#itemNodes = [];
   }
+
   /**
    *
    * @param {Object} data

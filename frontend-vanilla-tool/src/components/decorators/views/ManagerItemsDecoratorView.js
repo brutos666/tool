@@ -5,8 +5,8 @@ import DecoratorView from './DecoratorView.js';
 /**
  * Cette classe s'occupe de la navigation entre les items
  * Lorsque le focus est sur l'espace contenant les items, il faut taper entrer pour se positionner sur le premier item
- * afin de pouvoir naviguer dans les items. Echap pour en sortir.
- * Sur le même principe, lorsque l'on est positionné sur un item, il faut taper sur Entrée pour passer en mode édition et pouvoir naviguer dans les zones de texte et les boutons. Echap pour en sortir.
+ * afin de pouvoir naviguer dans les items. Échap pour en sortir.
+ * Sur le même principe, lorsque l'on est positionné sur un item, il faut taper sur Entrée pour passer en mode édition et pouvoir naviguer dans les zones de texte et les boutons. Échap pour en sortir.
  */
 class ManagerItemsDecoratorView extends DecoratorView {
 
