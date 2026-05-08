@@ -64,7 +64,7 @@ class Composite extends Component {
     /** @type {CompositeView} */
     const view = this.getView();
     this.#children.push(element);
-    if (view.isNode()) {
+    if (view.isComposite()) {
       view.addView(element.getView());
     }
 
@@ -80,7 +80,7 @@ class Composite extends Component {
     /** @type {CompositeView} */
     const view = this.getView();
     this.#children[index] = element;
-    if (view.isNode()) {
+    if (view.isComposite()) {
       view.replaceView(element.getView(), oldElement.getView());
       oldElement.removed();
     }
@@ -95,7 +95,7 @@ class Composite extends Component {
     /** @type {CompositeView} */
     const view = this.getView();
     this.#children.splice(index, 1);
-    if (view.isNode()) {
+    if (view.isComposite()) {
       view.removeView(element.getView());
     }
     element.removed();
@@ -104,19 +104,19 @@ class Composite extends Component {
   removeAllChildren() {
     this.#children.forEach((/** @type {Component} */ child) => {
       child.removed();
-      if (child.isNode()) {
+      if (child.isComposite()) {
         child.removeAllChildren();
       }
     });
     /** @type {CompositeView} */
     const view = this.getView();
-    if (view.isNode()) {
+    if (view.isComposite()) {
       view.removeAllViews();
     }
     this.#children = [];
   }
 
-  isNode() {
+  isComposite() {
     return true;
   }
   setReadOnly() {

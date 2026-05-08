@@ -40,7 +40,11 @@ class Component extends NodeElement {
     return this.#parent;
   }
 
-  isNode() {
+  isComposite() {
+    return false;
+  }
+
+  isDecorator() {
     return false;
   }
 

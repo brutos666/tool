@@ -119,7 +119,7 @@ class CompositeView extends View {
     return null;
   }
 
-  isNode() {
+  isComposite() {
     return true;
   }
 

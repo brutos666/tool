@@ -164,7 +164,7 @@ class View {
     this.getElementView().classList.add('clickable');
   }
 
-  isNode() {
+  isComposite() {
     return false;
   }
 
