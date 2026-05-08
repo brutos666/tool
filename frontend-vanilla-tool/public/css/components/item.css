@@ -69,7 +69,6 @@
 }
 
 /* -- Affichage item avec que le titre */
-.item--title .item__identify,
 .item--title .item__checkbox,
 .item--title .item__text {
   display: none;
@@ -99,9 +98,6 @@
 }
 .item--post-it .item__title {
   font-weight: 600;
-}
-.item--post-it .item__identify {
-  display: none;
 }
 /* Redimensionnement */
 .item--post-it .item__toolbar {
@@ -206,9 +202,6 @@
 }
 
 /* -- Affichage comme un todo -- */
-.item--todo .item__identify {
-  display: none;
-}
 .item--todo .item__text {
   display: none;
 }
