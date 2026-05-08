@@ -1,8 +1,8 @@
 import View from './View.js';
 
-class SampleMappingTablesView extends View {
+class SampleMappingView extends View {
 
-  name = 'SampleMappingTablesView';
+  name = 'SampleMappingView';
 
   /** @type {Array<HTMLTableCellElement>} */
   #ruleHeaders = [];
@@ -22,8 +22,7 @@ class SampleMappingTablesView extends View {
 
   constructor(data) {
     super(data);
-    this.#sampleTable = this.getElementView()
-      .querySelector('.sample-mapping__table');
+    this.#sampleTable = this.getElementView();
     this.#storySpace = this.#sampleTable.querySelector('.sample-mapping__story-item');
     this.#addRuleSpace = this.#sampleTable.querySelector('.sample-mapping__add-rule');
     this.#sampleEmptySpace = this.#sampleTable.querySelector('.sample-mapping__samples-empty');
@@ -74,8 +73,7 @@ class SampleMappingTablesView extends View {
   }
 
   getHtmlView() {
-    return String.raw`<div class ="sample-mapping"><template id="toolbar" class="sample-mapping__toolbar"></template>
-      <table class="sample-mapping__table items-navigation__space" role="table"><thead>
+    return String.raw`<table class="sample-mapping__table" role="table"><thead>
       <tr class="sample-mapping__row">
         <th class="sample-mapping__story-item" colspan="1" ><template id="storyItem"></template></th>
         <th class="sample-mapping__spacer"></th>
@@ -90,7 +88,7 @@ class SampleMappingTablesView extends View {
         <td class="sample-mapping__samples-empty sample-mapping__samples"></td>
         <td class="sample-mapping__spacer"></td>
         <td class="sample-mapping__samples-type"><span class="sample-mapping--type">Samples / Questions</span></td>
-      </tr></tbody></table></div>`;
+      </tr></tbody></table>`;
   }
 
   zoomMinus() {
@@ -131,4 +129,4 @@ function resetResize(element) {
   });
 }
 
-export default SampleMappingTablesView;
+export default SampleMappingView;

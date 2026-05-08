@@ -41,17 +41,14 @@ class ManagerItemsDecoratorView extends DecoratorView {
     super(view);
     const decoratedView = this.getDecoratedView();
     const decoratedElementView = decoratedView.getElementView();
-    this.#itemsNavigationSpace = decoratedElementView.classList.contains('items-navigation__space')
-      ? decoratedElementView
-      : decoratedElementView.querySelector('.items-navigation__space');
-    this.#itemsNavigationSpace.tabIndex = 0;
+    this.#itemsNavigationSpace = decoratedElementView;
     decoratedElementView.addEventListener('keydown', this.onKeyDown.bind(this));
     decoratedElementView.addEventListener('mousedown', this.onMouseDown.bind(this));
     decoratedElementView.addEventListener('focusout', this.onFocusOut.bind(this));
   }
 
   getHtmlView() {
-    return String.raw`<template id="decoratedSpace" class="manager-items--decorator"></template>`;
+    return String.raw`<template id="decoratedSpace" class="manager-items--decorator" tabindex="0"></template>`;
   }
 
   setMakeCurrentCallback(callback) {
@@ -100,28 +97,24 @@ class ManagerItemsDecoratorView extends DecoratorView {
       .includes(event.key)) {
       return;
     }
+    event.preventDefault();
     this.#keyEvent[event.key]?.(event);
   }
 
-  onKeyHome(event) {
-    event.preventDefault();
+  onKeyHome() {
     this.focusToFirst();
   }
-  onKeyEnd(event) {
-    event.preventDefault();
+  onKeyEnd() {
     this.focusToLast();
   }
-  onKeyArrowDown(event) {
-    event.preventDefault();
+  onKeyArrowDown() {
     this.focusToDirection('Down');
   }
-  onKeyArrowUp(event) {
-    event.preventDefault();
+  onKeyArrowUp() {
     this.focusToDirection('Up');
   }
 
-  onKeyArrowRight(event) {
-    event.preventDefault();
+  onKeyArrowRight() {
     if (isTreeItem(this.#focusedItem)) {
       if (isClosed(this.#focusedItem)) {
         openNode(this.#focusedItem);
@@ -133,8 +126,7 @@ class ManagerItemsDecoratorView extends DecoratorView {
     }
   }
 
-  onKeyArrowLeft(event) {
-    event.preventDefault();
+  onKeyArrowLeft() {
     if (isTreeItem(this.#focusedItem)) {
       if (isOpened(this.#focusedItem)) {
         closeNode(this.#focusedItem);
@@ -145,25 +137,21 @@ class ManagerItemsDecoratorView extends DecoratorView {
       this.focusToDirection('Left');
     }
   }
-  onKeyEnter(event) {
-    if (event.key === 'Enter' && document.activeElement === this.#itemsNavigationSpace) {
-      event.preventDefault();
+  onKeyEnter() {
+    if (document.activeElement === this.#itemsNavigationSpace) {
       this.setModeNavigation(true);
       return;
     }
     if (this.#currentItemView === this.#focusItemView) {
-      event.preventDefault();
       this.setModeEdition(true);
       return;
     }
-    event.preventDefault();
     this.#setMakeCurrentCallback();
   }
 
-  onKeyEscape(event) {
+  onKeyEscape() {
     if (this.#focusItemView?.isEditable?.()) {
       // On est passé en mode édition dans l'item. Il faut pouvoir naviguer dans les zones de texte et les boutons de l'item
-      event.preventDefault();
       this.setModeEdition(false);
       return;
     }
@@ -174,9 +162,6 @@ class ManagerItemsDecoratorView extends DecoratorView {
   interceptKeys() {
     if (document.activeElement === this.#itemsNavigationSpace) {
       return ['Enter'];
-    }
-    if (!document.activeElement.closest('.items-navigation__space')) {
-      return [];
     }
     if (this.#focusItemView?.isEditable?.()) {
       return ['Escape'];
@@ -206,16 +191,14 @@ class ManagerItemsDecoratorView extends DecoratorView {
   setModeNavigation(on) {
     let description;
     if (on) {
+      description = 'Navigation active. Échap pour quitter.';
       this.focusToFirst();
-      description = 'Navigation active. Echap pour quitter.';
     } else {
-      // Redonner le focus sur la zone contenant les items
-      this.#itemsNavigationSpace.focus();
       description = 'Entrée pour activer la navigation.';
+      this.#itemsNavigationSpace.focus();
     }
     this.#itemsNavigationSpace.setAttribute('aria-description', description);
   }
-
   setModeEdition(on) {
     this.#currentItemView.setEditable(on);
     this.#currentItemView.giveFocus();
@@ -241,13 +224,10 @@ class ManagerItemsDecoratorView extends DecoratorView {
       this.setFocusItem(items[indexToFocus]);
     }
   }
-
   focusTableToDirection(direction) {
     let items;
     /** @type {HTMLTableCellElement} */
     const cell = this.#focusedItem.closest('th, td');
-    /** @type {HTMLTableRowElement} */
-    const row = this.#focusedItem.closest('tr');
     const currentColumnItems = getColumnItems(this.getElementView(), cell.cellIndex);
     const currentColumnIndex = currentColumnItems.indexOf(this.#focusedItem);
     let indexToFocus = -1;
@@ -262,26 +242,17 @@ class ManagerItemsDecoratorView extends DecoratorView {
         break;
       case 'Right':
         items = getColumnItems(this.getElementView(), cell.cellIndex + 1);
-        indexToFocus = this.giveNewColumnIndex(currentColumnIndex, row.rowIndex, items);
+        indexToFocus = giveNewColumnIndex(currentColumnIndex, items);
         break;
       case 'Left':
         items = getColumnItems(this.getElementView(), cell.cellIndex - 1);
-        indexToFocus = this.giveNewColumnIndex(currentColumnIndex, row.rowIndex, items);
+        indexToFocus = giveNewColumnIndex(currentColumnIndex, items);
         break;
     }
     if (!isOutOfRange(items, indexToFocus)) {
       this.setFocusItem(items[indexToFocus]);
     }
   }
-
-  giveNewColumnIndex(currentItemIndex, currentRowIndex, newColumnItems) {
-    if (currentItemIndex >= newColumnItems.length && newColumnItems.length > 1) {
-      // On ne veut pas se positionner sur l'item story si on se déplace sur "Ajouter une règle"
-      return newColumnItems.length - 1;
-    }
-    return currentItemIndex;
-  }
-
   focusToParent() {
     const group = this.#focusedItem.closest('[role="group"]');
     const parent = group?.previousElementSibling;
@@ -289,12 +260,10 @@ class ManagerItemsDecoratorView extends DecoratorView {
       this.setFocusItem(parent);
     }
   }
-
   focusToFirst() {
     const items = this.getItems();
     this.setFocusItem(items[0]);
   }
-
   focusToLast() {
     const items = getItems(this.getElementView());
     this.setFocusItem(items[items.length - 1]);
@@ -402,24 +371,34 @@ function getItems(elementView) {
 }
 /**
  * Récupérer tous les items d'une colonne
- * @param {HTMLElement} elementView
+ * @param {HTMLTableElement} tableElement
  * @param {number} indexColumn
  * @returns {Array<HTMLElement>}
  */
-function getColumnItems(elementView, indexColumn) {
+function getColumnItems(tableElement, indexColumn) {
   if (indexColumn < 0) {
     return [];
   }
-  /** @type {HTMLTableElement} */
-  const table = elementView.querySelector('table');
   const array = [];
   // La 1ere ligne contient l'item story qui s'étend sur plusieurs colonnes
-  array.push(table.rows[0].querySelector('.item'));
+  array.push(tableElement.rows[0].querySelector('.item'));
   // Ajout de tous les items se trouvant dans la cellule des lignes suivantes
-  for (let i = 1; i < table.rows.length; i++) {
-    array.push(...getItems(table.rows[i].cells[indexColumn]));
+  for (let i = 1; i < tableElement.rows.length; i++) {
+    array.push(...getItems(tableElement.rows[i].cells[indexColumn]));
   }
   return array;
+}
+/**
+ * Calcul l'index de l'item pour la nouvelle colonne en fonction de sa position dans la colonne courante
+ * @param {number} currentItemIndex - Index de l'item courant
+ * @param {Array<HTMLElement>} newColumnItems - Items de la nouvelle colonne
+ */
+function giveNewColumnIndex(currentItemIndex, newColumnItems) {
+  if (currentItemIndex >= newColumnItems.length && newColumnItems.length > 1) {
+    // On ne veut pas se positionner sur l'item story si on se déplace sur "Ajouter une règle"
+    return newColumnItems.length - 1;
+  }
+  return currentItemIndex;
 }
 
 export default ManagerItemsDecoratorView;

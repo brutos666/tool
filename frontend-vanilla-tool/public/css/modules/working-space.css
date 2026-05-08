@@ -36,7 +36,7 @@
   overflow: hidden;
 }
 /* Espaces dédiées à la navigation dans les items */
-.items-navigation__space {
+.manager-items--decorator {
   height: calc(100% - 4px);
   width: calc(100% - 4px);
   overflow: auto;

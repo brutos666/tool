@@ -2,37 +2,19 @@ import { ITEM_LAYOUT } from '../tools/Constants.js';
 import Item from './Item.js';
 import Items from './Items.js';
 import SampleMappingSamples from './SampleMappingSamples.js';
-import ActionButton from './ActionButton.js';
-import Toolbar from './Toolbar.js';
 import AddItemButton from './AddItemButton.js';
-import SampleMappingTablesView from './views/SampleMappingTablesView.js';
-import CheckBox from './CheckBox.js';
+import SampleMappingView from './views/SampleMappingView.js';
 import SampleMappingColumnDecorator from './decorators/SampleMappingColumnDecorator.js';
 /** @import TreeItem from '../data/TreeItem.js'; */
 
-class SampleMappingTables extends Items {
+class SampleMapping extends Items {
 
-  name = 'SampleMappingTables';
+  name = 'SampleMapping';
 
   #item;
 
   constructor(treeItem) {
-    super(new SampleMappingTablesView(), treeItem, ITEM_LAYOUT.Rules);
-
-    const zoomMinus = new ActionButton({ id: 'zoomMinus', label: 'Zoom -', role: 'button', type: 'label' });
-    zoomMinus.setDoActionCallback(this.zoomMinus.bind(this));
-    const zoomPlus = new ActionButton({ id: 'zoomPlus', label: 'Zoom +', role: 'button', type: 'label' });
-    zoomPlus.setDoActionCallback(this.zoomPlus.bind(this));
-    const reset = new ActionButton({ id: 'zoomReset', label: 'Zoom initial', role: 'button', type: 'label' });
-    reset.setDoActionCallback(this.zoomReset.bind(this));
-    const magnify = new CheckBox({ id: 'magnify', label: 'Activer le zoom sur le post-it courant', role: 'switch', type: 'toggle' });
-    magnify.setToggleCallback(this.magnifyFocused.bind(this));
-    const toolbar = new Toolbar();
-    toolbar.addChild(zoomMinus);
-    toolbar.addChild(zoomPlus);
-    toolbar.addChild(reset);
-    toolbar.addChild(magnify);
-    this.setStaticChild('toolbar', toolbar);
+    super(new SampleMappingView(), treeItem, ITEM_LAYOUT.Rules);
 
     const rights = ITEM_LAYOUT.getRights(ITEM_LAYOUT.Story);
     this.#item = new Item({ treeItem, layout: ITEM_LAYOUT.Story, rights });
@@ -64,41 +46,41 @@ class SampleMappingTables extends Items {
    * @param {SampleMappingColumnDecorator} component
    */
   addItemView(component) {
-    /** @type {SampleMappingTablesView} */
+    /** @type {SampleMappingView} */
     const tableView = this.getView();
     tableView.addColumn(component.getDecoratedElement()
       .getView(), component.getSampleItems()
       .getView());
   }
   removeAllItemsViews() {
-    /** @type {SampleMappingTablesView} */
+    /** @type {SampleMappingView} */
     const tableView = this.getView();
     tableView.removeAllColumns();
   }
 
   removeItemView(index) {
-    /** @type {SampleMappingTablesView} */
+    /** @type {SampleMappingView} */
     const tableView = this.getView();
     tableView.removeColumn(index);
   }
   zoomMinus() {
-    /** @type {SampleMappingTablesView} */
+    /** @type {SampleMappingView} */
     const tableView = this.getView();
     tableView.zoomMinus();
   }
   zoomPlus() {
-    /** @type {SampleMappingTablesView} */
+    /** @type {SampleMappingView} */
     const tableView = this.getView();
     tableView.zoomPlus();
   }
   zoomReset() {
-    /** @type {SampleMappingTablesView} */
+    /** @type {SampleMappingView} */
     const tableView = this.getView();
     tableView.zoomReset();
   }
 
   magnifyFocused() {
-    /** @type {SampleMappingTablesView} */
+    /** @type {SampleMappingView} */
     const tableView = this.getView();
     tableView.magnifyFocused();
   }
@@ -109,4 +91,4 @@ class SampleMappingTables extends Items {
 
 }
 
-export default SampleMappingTables;
+export default SampleMapping;

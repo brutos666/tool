@@ -35,6 +35,11 @@ class ManagerItemsDecorator extends Decorator {
       });
   }
 
+  setTreeItem(treeItem) {
+    this.getDecoratedElement()
+      .setTreeItem(treeItem);
+  }
+
   onItemFocus(event) {
     if (this.#focusItem && this.#focusItem === event.detail) {
       return;
