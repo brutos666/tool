@@ -16,17 +16,14 @@ class ManagerItemsDecorator extends Decorator {
   /** @type {Item} */
   #focusItem = null;
 
-  constructor(view) {
-    super(new ManagerItemsDecoratorView(view), view);
+  constructor(decoratedElement) {
+    super(new ManagerItemsDecoratorView(decoratedElement.getView()), decoratedElement);
     // Écoute la prise de focus d'un item afin de modifier l'item qui devient courant
-    this.getDecoratedElement()
-      .getView()
+    decoratedElement.getView()
       .addEventListener(Item.EVENTS.focus, this.onItemFocus.bind(this));
-    this.getDecoratedElement()
-      .getView()
+    decoratedElement.getView()
       .addEventListener(AddItemButton.EVENTS.focus, this.onItemFocus.bind(this));
-    this.getDecoratedElement()
-      .getView()
+    decoratedElement.getView()
       .addEventListener(Item.EVENTS.current, event => {
         this.setCurrentItem(event.detail);
       });
