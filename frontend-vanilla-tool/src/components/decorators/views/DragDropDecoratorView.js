@@ -19,6 +19,7 @@ class DragDropDecoratorView extends ClassDecoratorView {
   };
 
   #dragOverElement;
+  #elementView;
 
   /**
    * @constructor
@@ -28,13 +29,33 @@ class DragDropDecoratorView extends ClassDecoratorView {
   constructor(view) {
     super(view, 'drag-drop--decorator');
     const elementView = view.getElementView();
-    elementView.setAttribute('draggable', 'true');
     elementView.addEventListener('dragstart', this.dragStart.bind(this));
     elementView.addEventListener('dragover', this.dragOver.bind(this));
     elementView.addEventListener('drop', this.dropElement.bind(this));
     elementView.addEventListener('dragenter', this.dragEnter.bind(this));
     elementView.addEventListener('dragleave', this.dragLeave.bind(this));
     elementView.addEventListener('dragend', this.dragEnd.bind(this));
+    this.#elementView = elementView;
+  }
+
+  setStaticView(id, child) {
+    if (id !== 'dragAction') {
+      return;
+    }
+    const dragGrip = child.getElementView();
+    dragGrip.addEventListener('mousedown', () => {
+      this.#elementView.setAttribute('draggable', 'true');
+    });
+
+    dragGrip.addEventListener('mouseup', () => {
+      this.#elementView.setAttribute('draggable', 'false');
+    });
+    // Positionner l'icon de drag dans la barre d'outils de l'item
+    this.getDecoratedView()
+      .getElementView()
+      .querySelector('.toolbar')
+      .appendChild(child.getElementView());
+    return;
   }
 
   dragStart(event) {

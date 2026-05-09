@@ -11,7 +11,8 @@
   background-color: var(--color-bg-surface);
   border-style: solid 1px var(--color-border);
 }
-.icon-button {
+.icon-button,
+.drag-button {
   border-style: none;
 }
 .item-like-button {
@@ -39,12 +40,24 @@
 }
 
 /** Hide label */
-.icon-button .button__label {
+.icon-button .button__label,
+.drag-button .button__label {
   position: absolute;
   width: 1px;
   height: 1px;
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
+}
+
+.drag-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+.drag-button .button__icon {
+  display: flex;
+  height: 80%;
 }
 

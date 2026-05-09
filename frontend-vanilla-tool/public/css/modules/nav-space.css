@@ -22,11 +22,10 @@
 }
 
 .nav-tree__content > * {
-  padding: var(--small-padding);
+  border-radius: var(--border-radius);
   box-shadow: 3px 3px 4px var(--color-box-shadow);
   margin-right: var(--medium-margin);
   margin-bottom: var(--medium-margin);
-  border-radius: var(--border-radius);
 }
 .nav-tree__content > .item-like-button {
   min-height: 40px;

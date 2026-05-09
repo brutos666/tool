@@ -1,0 +1,36 @@
+.drag-drop--decorator.tree .drag-button {
+  border-left: solid 1px var(--color-border);
+  padding-left: var(--small-padding);
+}
+.drag-drop--decorator.tree .drag-button span {
+  transform: rotate(90deg);
+  transform-origin: center;
+  width: 20px;
+}
+.drag-drop--decorator.tree .tree__item:has(> .item .drag-button:hover) {
+  background: light-dark(oklch(from var(--color-bg) calc(l - 0.05) c h), oklch(from var(--color-bg) calc(l + 0.05) c h));
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  outline: 1px solid var(--color-border-hover);
+}
+
+.drag-drop--decorator.item--post-it .toolbar {
+  display: grid;
+  position: relative;
+}
+.drag-drop--decorator.item--post-it .toolbar .drag-button {
+  /** sortir le bouton du flux flex pour le positionner au centre de la toolbar */
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%); /* Centre parfaitement */
+  width: 70%;
+}
+.drag-drop--decorator.item--post-it .toolbar .drag-button span {
+  color: var(--color-text);
+}
+
+.drag-drop--decorator:has(> .toolbar .drag-button:hover) {
+  background: light-dark(oklch(from var(--color-post-it) calc(l - 0.05) c h), oklch(from var(--color-post-it) calc(l + 0.05) c h));
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  outline: 1px solid var(--color-border-hover);
+}
+

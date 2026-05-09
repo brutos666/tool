@@ -5,6 +5,7 @@
 @import "components/button.css" layer(components);
 @import "components/checkbox.css" layer(components);
 @import "components/dialog.css" layer(components);
+@import "components/drag-decorator.css" layer(components);
 @import "components/file-upload.css" layer(components);
 /* @import "components/post-it-effect.css" layer(components); */
 @import "components/item.css" layer(components);

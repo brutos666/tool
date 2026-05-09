@@ -11,6 +11,9 @@
 .clickable:not([disabled]):not(.disabled) {
   cursor: pointer;
 }
+.draggable:not([disabled]):not(.disabled) {
+  cursor: grab;
+}
 [contenteditable="false"] {
   cursor: text;
   user-select: text;
