@@ -20,6 +20,9 @@
   grid-column: 1 / 3;
 }
 /** Comportement **/
+.tree--leaf > .tree__item > .tree__toggle {
+  pointer-events: none;
+}
 .tree--leaf > .tree__item > .tree__toggle::before {
   content: "";
 }
@@ -48,13 +51,11 @@
 .tree__item:has(> *:focus) > .tree__toggle {
   border: var(--color-secondary) solid 2px;
   border-right: none;
+  outline: none;
 }
 .tree__item:has(> *:focus) > .tree__content {
   border: var(--color-secondary) solid 2px;
   border-left: none;
-}
-
-.tree__item .tree__content:focus-visible {
   outline: none;
 }
 

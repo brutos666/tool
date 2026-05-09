@@ -1,5 +1,6 @@
 import TreeItemList from './TreeItemList.js';
 import { CRUD_MODE } from '../tools/Constants.js';
+import StoreData from './StoreData.js';
 /** @import Component from '../components/Component.js'; */
 /** @import { STATE, STATUS } from '../tools/Constants.js'; */
 
@@ -12,7 +13,6 @@ import { CRUD_MODE } from '../tools/Constants.js';
  *                          - TODO : A faire
  *                          - IN_PROGRESS : En cours
  *                          - DONE : Fait
- * @property {number} parentId - Identifiant de l'item parent
  * @property {Array<ItemInfos>} children - Enfants (arbre)
  * @property {STATUS} status - Statut {@link STATUS}
  * @property {CRUD_MODE} CRUDMode - Création, modification, suppression ou lecture {@link CRUD_MODE}
@@ -20,6 +20,8 @@ import { CRUD_MODE } from '../tools/Constants.js';
 class TreeItem {
 
   name = 'TreeItem';
+
+  #treeItemId;
 
   #item;
   /** @type {TreeItemList} */
@@ -32,6 +34,7 @@ class TreeItem {
   /** Modification effectuées */
   #updates = {};
   #deleted = false;
+  #moved = false;
 
   constructor(itemInfos) {
     this.#item = Object.assign({}, {
@@ -39,11 +42,11 @@ class TreeItem {
       title: itemInfos.title,
       text: itemInfos.text,
       state: itemInfos.state,
-      parentId: itemInfos.parentId,
       status: itemInfos.status
     });
     this.#treeItemList = new TreeItemList();
     this.#treeItemList.setItems(this, itemInfos.children);
+    this.#treeItemId = StoreData.giveTreeItemNewId();
   }
   setParentItem(parentItem) {
     this.#parentItem = parentItem;
@@ -54,6 +57,22 @@ class TreeItem {
 
   getItemId() {
     return this.#item.id;
+  }
+  getTreeItemId() {
+    return this.#treeItemId;
+  }
+
+  getItemByTreeItemId(treeItemId) {
+    if (treeItemId === this.#treeItemId) {
+      return this;
+    }
+    for (const child of this.#treeItemList.getTreeList()) {
+      const item = child.getItemByTreeItemId(treeItemId);
+      if (item) {
+        return item;
+      }
+    }
+    return null;
   }
   /**
    * Retourne les informations de la tâche
@@ -99,9 +118,14 @@ class TreeItem {
   }
 
   addChildItem(itemInfos) {
-    this.alertObservers('addChildItem');
-    this.#treeItemList.addItem(this, { ...itemInfos, parentId: this.#item.id });
+    this.addItem(new TreeItem(itemInfos));
   }
+
+  addItem(childTreeItem) {
+    this.alertObservers('addChildItem');
+    this.#treeItemList.addItem(this, childTreeItem);
+  }
+
   getPrevious() {
     if (!this.getParentItem()) {
       return null;
@@ -144,6 +168,40 @@ class TreeItem {
     this.alertObservers('toDelete');
   }
 
+  markAsMoved() {
+    this.#moved = true;
+    this.alertObservers('updated');
+  }
+
+  moveItemInto(itemId, intoItemId) {
+    /** @type {TreeItem} */
+    const treeItem = this.getItemByTreeItemId(itemId);
+    if (treeItem) {
+      treeItem.getParentItem()
+        .removeChildItem(treeItem);
+    }
+    /** @type {TreeItem} */
+    const intoTreeItem = this.getItemByTreeItemId(intoItemId);
+    if (intoTreeItem) {
+      intoTreeItem.addItem(treeItem);
+      treeItem.markAsMoved();
+    }
+  }
+
+  isChildOf(childId, parentId) {
+    const childTreeItem = this.getItemByTreeItemId(childId);
+    const parentTreeItem = this.getItemByTreeItemId(parentId);
+    return childTreeItem.hasParent(parentTreeItem);
+  }
+
+  hasParent(treeItem) {
+    if (this.getParentItem() === treeItem) {
+      return true;
+    }
+    return this.getParentItem()
+      ?.hasParent(treeItem);
+  }
+
   undoToDelete() {
     this.#deleted = false;
     for (const childItem of this.#treeItemList.getTreeList()) {
@@ -171,7 +229,8 @@ class TreeItem {
     return this.#treeItemList.getTreeList().length === 0;
   }
   isRoot() {
-    return this.#item.parentId === -1;
+    return this.getParentItem()
+      .getItemId() === -1;
   }
   /**
    * @returns {boolean} - Indique si la tâche est nouvelle
@@ -183,7 +242,7 @@ class TreeItem {
    * @returns {boolean} - Indique si la tâche a des modifications
    */
   isModified() {
-    return Object.keys(this.#updates).length > 0;
+    return Object.keys(this.#updates).length > 0 || this.#moved;
   }
 
   isDeleted() {

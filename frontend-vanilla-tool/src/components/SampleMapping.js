@@ -5,6 +5,7 @@ import SampleMappingSamples from './SampleMappingSamples.js';
 import AddItemButton from './AddItemButton.js';
 import SampleMappingView from './views/SampleMappingView.js';
 import SampleMappingColumnDecorator from './decorators/SampleMappingColumnDecorator.js';
+import DragDropDecorator from './decorators/DragDropDecorator.js';
 /** @import TreeItem from '../data/TreeItem.js'; */
 
 class SampleMapping extends Items {
@@ -18,7 +19,7 @@ class SampleMapping extends Items {
 
     const rights = ITEM_LAYOUT.getRights(ITEM_LAYOUT.Story);
     this.#item = new Item({ treeItem, layout: ITEM_LAYOUT.Story, rights });
-    this.setStaticChild('storyItem', this.#item);
+    this.setStaticChild('storyItem', new DragDropDecorator(this.#item));
 
     const buttonAddRule = new AddItemButton({ id: 'addRule', label: 'Ajouter une règle', layout: ITEM_LAYOUT.Rules });
     buttonAddRule.setDoActionCallback(this.addNewItem.bind(this, 'Saisir une règle'));
@@ -38,7 +39,7 @@ class SampleMapping extends Items {
     const rights = ITEM_LAYOUT.getRights(ITEM_LAYOUT.Rules);
     const item = new Item({ treeItem, layout: ITEM_LAYOUT.Rules, rights });
     const sampleItems = new SampleMappingSamples(treeItem);
-    return new SampleMappingColumnDecorator(item, sampleItems);
+    return new SampleMappingColumnDecorator(new DragDropDecorator(item), sampleItems);
   }
 
   /**

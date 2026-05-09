@@ -90,6 +90,10 @@ class Item extends Component {
     return this.#treeItem;
   }
 
+  /**
+   *
+   * @param {TreeItem} treeItem
+   */
   setTreeItem(treeItem) {
     if (this.#treeItem) {
       this.#treeItem.removeObserver(this);
@@ -97,6 +101,12 @@ class Item extends Component {
     this.#treeItem = treeItem;
     this.#treeItem.addObserver(this);
     this.setItemValues(this.#treeItem.getItemInfos());
+    this.setTreeItemId(treeItem.getTreeItemId());
+  }
+
+  setTreeItemId(treeItemId) {
+    this.getView()
+      .setTreeItemId(treeItemId);
   }
 
   /**

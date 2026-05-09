@@ -1,5 +1,6 @@
 import { ITEM_LAYOUT, RIGHT } from '../tools/Constants.js';
 import Composite from './Composite.js';
+import DragDropDecorator from './decorators/DragDropDecorator.js';
 import FocusManagerDecorator from './decorators/FocusManagerDecorator.js';
 import Item from './Item.js';
 import ItemsView from './views/ItemsView.js';
@@ -155,7 +156,7 @@ class Items extends Composite {
   getItemComponent(treeItem) {
     const layout = this.getLayout();
     const rights = ITEM_LAYOUT.getRights(layout);
-    return new Item({ treeItem, layout, rights });
+    return new DragDropDecorator(new Item({ treeItem, layout, rights }));
   }
 
   /**

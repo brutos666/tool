@@ -7,6 +7,7 @@ class TreeView extends DecoratorView {
   name = 'TreeView';
 
   #treeItem;
+  #toggleActionButton;
 
   /**
    * @constructor
@@ -14,11 +15,11 @@ class TreeView extends DecoratorView {
    */
   constructor(view) {
     super(view);
-    const toggleAction = new ActionButtonView({ id: 'toggle', label: 'Ouvrir/Fermer le noeud', type: 'icon', icon: '', role: 'none' });
-    toggleAction.setDoActionCallback(() => {
+    this.#toggleActionButton = new ActionButtonView({ id: 'toggle', label: 'Ouvrir/Fermer le noeud', type: 'icon', icon: '', role: 'none' });
+    this.#toggleActionButton.setDoActionCallback(() => {
       this.toggleTree();
     });
-    this.setStaticView('toggle', toggleAction);
+    this.setStaticView('toggle', this.#toggleActionButton);
     this.#treeItem = this.getElementView()
       .querySelector('#treeItem');
   }
@@ -53,14 +54,20 @@ class TreeView extends DecoratorView {
       const classList = this.getElementView().classList;
       classList.remove('tree--node');
       classList.add('tree--leaf');
+      this.#toggleActionButton.getElementView().disabled = true;
       return;
     }
     const classList = this.getElementView().classList;
     classList.remove('tree--leaf');
     classList.add('tree--node');
+    this.#toggleActionButton.getElementView().disabled = false;
   }
   isLeaf() {
     return this.getElementView().classList.contains('tree--leaf');
+  }
+  setTreeItemId(treeItemId) {
+    this.getElementView()
+      .setAttribute('data-tree-item-id', treeItemId);
   }
 
 }

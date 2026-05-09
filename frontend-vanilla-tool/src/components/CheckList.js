@@ -4,6 +4,7 @@ import CheckListView from './views/CheckListView.js';
 import AddItemButton from './AddItemButton.js';
 import Items from './Items.js';
 import Tree from './decorators/Tree.js';
+import DragDropDecorator from './decorators/DragDropDecorator.js';
 
 class CheckList extends Items {
 
@@ -16,7 +17,7 @@ class CheckList extends Items {
 
     const rights = [RIGHT.update];
     this.#item = new Item({ treeItem, layout: ITEM_LAYOUT.Todo, rights });
-    this.setStaticChild('title', this.#item);
+    this.setStaticChild('title', new DragDropDecorator(this.#item));
 
     const addButton = new AddItemButton({ id: 'addNewItem', label: 'Ajouter un élément', layout: ITEM_LAYOUT.Todo });
     addButton.setDoActionCallback(this.addNewItem.bind(this, 'Saisir un pense-bête'));
@@ -43,7 +44,7 @@ class CheckList extends Items {
     const itemComponent = new Tree(item, { treeItem, layout, rights });
     itemComponent.setRoot();
     itemComponent.setOpen(true);
-    return itemComponent;
+    return new DragDropDecorator(itemComponent);
   }
 
   giveFocus() {

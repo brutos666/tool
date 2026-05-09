@@ -128,7 +128,7 @@ class ItemView extends View {
   setItemValues(itemInfos) {
     if (itemInfos.id) {
       this.getElementView()
-        .setAttribute('data-id', itemInfos.id);
+        .setAttribute('data-item-id', itemInfos.id);
     }
     this.#title.innerHTML = itemInfos.title;
     if (itemInfos.text) {
@@ -156,6 +156,11 @@ class ItemView extends View {
       this.getElementView().classList.add(newCRUDModeClass);
     }
     this.#currentCRUDModeClass = newCRUDModeClass;
+  }
+
+  setTreeItemId(treeItemId) {
+    this.getElementView()
+      .setAttribute('data-tree-item-id', treeItemId);
   }
 
   setToDelete() {

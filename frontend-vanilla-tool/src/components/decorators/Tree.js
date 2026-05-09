@@ -23,6 +23,7 @@ class Tree extends ItemDecorator {
   constructor(decoratedElement, data) {
     super(new TreeView(decoratedElement.getView()), decoratedElement);
     this.#treeItem = data.treeItem;
+    this.setTreeItemId(data.treeItem.getTreeItemId());
 
     const rights = data.rights;
     if (!rights.includes(RIGHT.update)) {
@@ -56,7 +57,11 @@ class Tree extends ItemDecorator {
     const view = this.getView();
     view.setRoot();
   }
-
+  setTreeItemId(treeItemId) {
+    /** @type {TreeView} */
+    const view = this.getView();
+    view.setTreeItemId(treeItemId);
+  }
   /**
    * Modification du modèle
    * @param {'modify'|'added'|'updated'|'toDelete'|'undoToDelete'|'removed'|'addChildItem'|'removeChildItem'} action

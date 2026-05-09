@@ -15,6 +15,13 @@ class StoreData {
     return window._treeItem;
   }
 
+  static giveTreeItemNewId() {
+    if (window._treeItemLastId === undefined) {
+      window._treeItemLastId = 0;
+    }
+    return String(window._treeItemLastId++);
+  }
+
   /** @returns {NotificationCenter} */
   static getNotificationCenter() {
     return window._notification_center;
@@ -32,7 +39,7 @@ class StoreData {
   static addRootItem(itemInfos) {
     const treeItem = StoreData.getTreeItem();
     treeItem.getTreeItemList()
-      .addItem(treeItem, itemInfos);
+      .addItem(treeItem, new TreeItem(itemInfos));
   }
 
   static setCurrentSpace(space) {

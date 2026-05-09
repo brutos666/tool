@@ -48,14 +48,11 @@ class TreeItemList {
   addItems(parentTreeItem, itemInfosList) {
     itemInfosList.forEach(itemInfos => {
       const treeItem = new TreeItem(itemInfos);
-      treeItem.setParentItem(parentTreeItem);
-      this.#treeList.push(treeItem);
-      this.alertObservers('add', [treeItem]);
+      this.addItem(treeItem);
     });
   }
 
-  addItem(parentTreeItem, itemInfos) {
-    const treeItem = new TreeItem(itemInfos);
+  addItem(parentTreeItem, treeItem) {
     treeItem.setParentItem(parentTreeItem);
     this.#treeList.push(treeItem);
     this.alertObservers('add', [treeItem]);
