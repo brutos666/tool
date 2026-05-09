@@ -3,7 +3,6 @@ import Item from './Item.js';
 import { ITEM_LAYOUT } from '../tools/Constants.js';
 import Items from './Items.js';
 import TreeListView from './views/TreeListView.js';
-import FocusManagerDecorator from './decorators/FocusManagerDecorator.js';
 /** @import TreeItem from '../data/TreeItem.js'; */
 
 class TreeList extends Items {
@@ -29,7 +28,7 @@ class TreeList extends Items {
     const layout = this.getLayout();
     const rights = ITEM_LAYOUT.getRights(layout);
     const item = new Item({ treeItem, layout, rights });
-    return new FocusManagerDecorator(new Tree(item, { treeItem, layout, rights }), this);
+    return new Tree(item, { treeItem, layout, rights });
   }
 
 }

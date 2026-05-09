@@ -10,19 +10,21 @@ class SampleMappingSpace extends Component {
 
   name = 'SampleMappingSpace';
 
-  #sampleMappingTable;
+  #sampleMapping;
+
   constructor(treeItem) {
     super(new SampleMappingSpaceView());
-    this.#sampleMappingTable = new SampleMapping(treeItem);
+    this.#sampleMapping = new SampleMapping(treeItem);
 
     const zoomMinus = new ActionButton({ id: 'zoomMinus', label: 'Zoom -', role: 'button', type: 'label' });
-    zoomMinus.setDoActionCallback(this.#sampleMappingTable.zoomMinus.bind(this.#sampleMappingTable));
+    zoomMinus.setDoActionCallback(this.#sampleMapping.zoomMinus.bind(this.#sampleMapping));
     const zoomPlus = new ActionButton({ id: 'zoomPlus', label: 'Zoom +', role: 'button', type: 'label' });
-    zoomPlus.setDoActionCallback(this.#sampleMappingTable.zoomPlus.bind(this.#sampleMappingTable));
+    zoomPlus.setDoActionCallback(this.#sampleMapping.zoomPlus.bind(this.#sampleMapping));
     const reset = new ActionButton({ id: 'zoomReset', label: 'Zoom initial', role: 'button', type: 'label' });
-    reset.setDoActionCallback(this.#sampleMappingTable.zoomReset.bind(this.#sampleMappingTable));
+    reset.setDoActionCallback(this.#sampleMapping.zoomReset.bind(this.#sampleMapping));
     const magnify = new CheckBox({ id: 'magnify', label: 'Activer le zoom sur le post-it courant', role: 'switch', type: 'toggle' });
-    magnify.setToggleCallback(this.#sampleMappingTable.magnifyFocused.bind(this.#sampleMappingTable));
+    magnify.setToggleCallback(this.#sampleMapping.magnifyFocused.bind(this.#sampleMapping));
+
     const toolbar = new Toolbar();
     toolbar.addChild(zoomMinus);
     toolbar.addChild(zoomPlus);
@@ -30,11 +32,11 @@ class SampleMappingSpace extends Component {
     toolbar.addChild(magnify);
 
     this.setStaticChild('toolbar', toolbar);
-    this.setStaticChild('sampleMappingTable', new ManagerItemsDecorator(this.#sampleMappingTable));
+    this.setStaticChild('sampleMappingTable', new ManagerItemsDecorator(this.#sampleMapping));
   }
 
   setTreeItem(treeItem) {
-    this.#sampleMappingTable.setTreeItem(treeItem);
+    this.#sampleMapping.setTreeItem(treeItem);
   }
 
 }
