@@ -1,7 +1,7 @@
-import DecoratorView from './DecoratorView.js';
+import ClassDecoratorView from './ClassDecoratorView.js';
 /** @import View from '../../views/View.js'; */
 
-class CommandDecoratorView extends DecoratorView {
+class CommandDecoratorView extends ClassDecoratorView {
 
   name = 'CommandDecoratorView';
 
@@ -10,11 +10,7 @@ class CommandDecoratorView extends DecoratorView {
    * @param {View} view
    */
   constructor(view) {
-    super(view);
-  }
-
-  getHtmlView() {
-    return String.raw`<template id="decoratedSpace" class="command--decorator"></template>`;
+    super(view, 'command--decorator');
   }
 
   showSpinner() {

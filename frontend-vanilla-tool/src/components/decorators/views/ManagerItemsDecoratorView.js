@@ -1,4 +1,4 @@
-import DecoratorView from './DecoratorView.js';
+import ClassDecoratorView from './ClassDecoratorView.js';
 /** @import ItemView from '../../views/ItemView.js'; */
 /** @import View from '../../views/View.js'; */
 
@@ -8,7 +8,7 @@ import DecoratorView from './DecoratorView.js';
  * afin de pouvoir naviguer dans les items. Échap pour en sortir.
  * Sur le même principe, lorsque l'on est positionné sur un item, il faut taper sur Entrée pour passer en mode édition et pouvoir naviguer dans les zones de texte et les boutons. Échap pour en sortir.
  */
-class ManagerItemsDecoratorView extends DecoratorView {
+class ManagerItemsDecoratorView extends ClassDecoratorView {
 
   name = 'ManagerItemsDecoratorView';
 
@@ -38,17 +38,14 @@ class ManagerItemsDecoratorView extends DecoratorView {
    * @param {View} view
    */
   constructor(view) {
-    super(view);
-    const decoratedView = this.getDecoratedView();
-    const decoratedElementView = decoratedView.getElementView();
+    super(view, 'manager-items--decorator');
+    const decoratedElementView = this.getDecoratedView()
+      .getElementView();
     this.#itemsNavigationSpace = decoratedElementView;
     decoratedElementView.addEventListener('keydown', this.onKeyDown.bind(this));
     decoratedElementView.addEventListener('mousedown', this.onMouseDown.bind(this));
     decoratedElementView.addEventListener('focusout', this.onFocusOut.bind(this));
-  }
-
-  getHtmlView() {
-    return String.raw`<template id="decoratedSpace" class="manager-items--decorator" tabindex="0"></template>`;
+    decoratedElementView.setAttribute('tabindex', '0');
   }
 
   setMakeCurrentCallback(callback) {
@@ -167,25 +164,9 @@ class ManagerItemsDecoratorView extends DecoratorView {
       return ['Escape'];
     }
     if (isItemButtonLike(this.#focusedItem)) {
-      return [
-        'ArrowDown',
-        'ArrowUp',
-        'ArrowRight',
-        'ArrowLeft',
-        'Home',
-        'End'
-      ];
+      return [ 'ArrowDown', 'ArrowUp', 'ArrowRight', 'ArrowLeft', 'Home', 'End' ];
     }
-    return [
-      'ArrowDown',
-      'ArrowUp',
-      'ArrowRight',
-      'ArrowLeft',
-      'Home',
-      'End',
-      'Enter',
-      'Escape'
-    ];
+    return [ 'ArrowDown', 'ArrowUp', 'ArrowRight', 'ArrowLeft', 'Home', 'End', 'Enter', 'Escape' ];
   }
 
   setModeNavigation(on) {
@@ -281,6 +262,7 @@ class ManagerItemsDecoratorView extends DecoratorView {
   }
 
 }
+
 /**
  * Vérifier si l'index est hors des limites de l'array
  * @param {Array} array

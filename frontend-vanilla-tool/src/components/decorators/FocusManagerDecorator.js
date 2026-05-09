@@ -1,5 +1,5 @@
 import ItemDecorator from './ItemDecorator.js';
-import FocusManagerDecoratorView from './views/FocusManagerDecoratorView.js';
+import ClassDecoratorView from './views/ClassDecoratorView.js';
 /** @import Component from '../Component.js'; */
 /** @import Composite from '../Composite.js'; */
 /** @import TreeItem from '../../data/TreeItem.js'; */
@@ -18,7 +18,7 @@ class FocusManagerDecorator extends ItemDecorator {
    * @param {Component} conteneur : liste qui contient l'item
    */
   constructor(decoratedElement, conteneur) {
-    super(new FocusManagerDecoratorView(decoratedElement.getView()), decoratedElement);
+    super(new ClassDecoratorView(decoratedElement.getView(), 'focus-manager--decorator'), decoratedElement);
 
     this.#conteneur = conteneur;
   }
