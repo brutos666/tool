@@ -13,9 +13,7 @@ class SpaceView extends View {
   }
 
   onFocusIn() {
-    if (!this.isCurrent()) {
-      this.setCurrentSpace();
-    }
+    this.setCurrentSpace();
   }
   /**
    * Click sur le bouton de la souris
@@ -26,6 +24,9 @@ class SpaceView extends View {
   }
 
   setCurrentSpace() {
+    if (this.isCurrent()) {
+      return;
+    }
     StoreData.getCurrentSpace()
       ?.removeCurrent();
     StoreData.setCurrentSpace(this);
