@@ -18,18 +18,19 @@ class ItemsView extends View {
   }
 
   addItemView(itemView) {
-    let itemsSpace = this.getElementView();
-    if (!itemsSpace.classList.contains('items__space')) {
-      itemsSpace = this.getElementView()
-        .querySelector('.items__space');
-    }
+    const itemsSpace = getItemsSpace(this.getElementView());
     if (this.#addButton) {
       itemsSpace.insertBefore(itemView.getElementView(), itemsSpace.lastChild);
     } else {
       itemsSpace.appendChild(itemView.getElementView());
     }
-
     this.#itemNodes.push(itemView.getElementView());
+  }
+
+  addItemViewAt(itemView, index) {
+    const itemsSpace = getItemsSpace(this.getElementView());
+    itemsSpace.insertBefore(itemView.getElementView(), itemsSpace.children[index]);
+    this.#itemNodes.splice(index, 0, itemView.getElementView());
   }
 
   removeItemView(index) {
@@ -49,11 +50,23 @@ class ItemsView extends View {
    */
   getHtmlView(data) {
     if (data.addButton) {
-      return String.raw`<ol id="itemsSpace" class="items__space"><template id="addItemAction"></template></ol>`;
+      return String.raw`<ol id="itemsSpace" class="items__space" aria-orientation="vertical"><li class="list__element"><template id="addItemAction"></template></li></ol>`;
     }
-    return String.raw`<ol id="itemsSpace" class="items__space"></ol>`;
+    return String.raw`<ol id="itemsSpace" class="items__space" aria-orientation="vertical"></ol>`;
   }
 
+}
+/**
+ * @private
+ * Determine l'espace contenant les items
+ * @param {Element} elementView
+ * @returns {Element}
+ */
+function getItemsSpace(elementView) {
+  if (!elementView.classList.contains('items__space')) {
+    return elementView.querySelector('.items__space');
+  }
+  return elementView;
 }
 
 export default ItemsView;

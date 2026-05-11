@@ -29,6 +29,10 @@ class SampleMappingView extends View {
   }
 
   addColumn(ruleView, samplesView) {
+    this.addColumnAt(ruleView, samplesView, this.#ruleHeaders.length);
+  }
+
+  addColumnAt(ruleView, samplesView, index) {
     const ruleNode = document.createElement('th');
     ruleNode.classList.add('sample-mapping__rule');
     ruleNode.appendChild(ruleView.getElementView());
@@ -37,12 +41,17 @@ class SampleMappingView extends View {
     samplesNode.classList.add('sample-mapping__samples');
     samplesNode.appendChild(samplesView.getElementView());
 
-    this.#ruleHeaders.push(ruleNode);
-    this.#sampleCells.push(samplesNode);
-
-    this.#addRuleSpace.parentNode.insertBefore(ruleNode, this.#addRuleSpace);
-    this.#sampleEmptySpace.parentNode.insertBefore(samplesNode, this.#sampleEmptySpace);
-
+    if (index === undefined || index >= this.#ruleHeaders.length) {
+      this.#addRuleSpace.parentNode.insertBefore(ruleNode, this.#addRuleSpace);
+      this.#sampleEmptySpace.parentNode.insertBefore(samplesNode, this.#sampleEmptySpace);
+      this.#ruleHeaders.push(ruleNode);
+      this.#sampleCells.push(samplesNode);
+    } else {
+      this.#ruleHeaders[index].parentNode.insertBefore(ruleNode, this.#ruleHeaders[index]);
+      this.#sampleCells[index].parentNode.insertBefore(samplesNode, this.#sampleCells[index]);
+      this.#ruleHeaders.splice(index, 0, ruleNode);
+      this.#sampleCells.splice(index, 0, samplesNode);
+    }
     this.#storySpace.colSpan = this.#ruleHeaders.length + 1;
     this.#sampleTable.style.setProperty('--number-of-columns', this.#ruleHeaders.length + 1);
   }
@@ -79,7 +88,7 @@ class SampleMappingView extends View {
         <th class="sample-mapping__spacer"></th>
         <th class="sample-mapping__story-type"><span class="sample-mapping--type">Story</span></th>
       </tr>
-      <tr id="spaceRules" class="sample-mapping__row">
+      <tr id="spaceRules" class="sample-mapping__row" aria-orientation="horizontal">
         <th class="sample-mapping__add-rule sample-mapping__rule"><template id="addItemAction"></template></th>
         <th class="sample-mapping__spacer"></th>
         <th class="sample-mapping__rules-type"><span class="sample-mapping--type">Rules</span></th>

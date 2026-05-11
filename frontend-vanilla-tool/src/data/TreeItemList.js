@@ -58,6 +58,14 @@ class TreeItemList {
     this.alertObservers('add', [treeItem]);
     treeItem.alertObservers('added');
   }
+
+  addItemAtIndex(parentTreeItem, treeItem, index) {
+    treeItem.setParentItem(parentTreeItem);
+    this.#treeList.splice(index, 0, treeItem);
+    this.alertObservers('add', [treeItem], index);
+    treeItem.alertObservers('added');
+  }
+
   /**
    * Suppression d'un item
    * @param {TreeItem} treeItemToRemove - Item à supprimer
@@ -72,8 +80,12 @@ class TreeItemList {
     this.#treeList.splice(index, 1);
   }
 
+  getIndex(treeItem) {
+    return this.#treeList.findIndex(item => item === treeItem);
+  }
+
   getPrevious(treeItem) {
-    const index = this.#treeList.findIndex(item => item === treeItem);
+    const index = this.getIndex(treeItem);
     if (index === 0) {
       return null;
     }
@@ -81,7 +93,7 @@ class TreeItemList {
   }
 
   getNext(treeItem) {
-    const index = this.#treeList.findIndex(item => item === treeItem);
+    const index = this.getIndex(treeItem);
     if (index === this.#treeList.length - 1) {
       return null;
     }
@@ -99,15 +111,16 @@ class TreeItemList {
    * Indiquer aux observateurs qu'une modification a eu lieu
    * @param {'remove'|'add'|'replaceAll'} action
    * @param {Array<TreeItem>} treeItemList
+   * @param {number|undefined} index
    */
-  alertObservers(action, treeItemList) {
+  alertObservers(action, treeItemList, index) {
     /*
      * NOTE : La liste des observers peut être modifiée si par exemple on alerte de la suppression d'un item
      * On va donc travailler sur une copie
      */
     const observers = this.#observers.slice();
     for (const observer of observers) {
-      observer.update(action, treeItemList);
+      observer.update(action, treeItemList, index);
     }
   }
 

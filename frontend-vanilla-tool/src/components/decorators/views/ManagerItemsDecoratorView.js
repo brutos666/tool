@@ -82,8 +82,10 @@ class ManagerItemsDecoratorView extends ClassDecoratorView {
     const item = itemArticle.closest('.item');
     this.setFocusItem(item);
     this.#setMakeCurrentCallback();
-    this.#currentItemView.setEditable(true);
-    this.#currentItemView.giveFocus();
+    if (this.#currentItemView) {
+      this.#currentItemView.setEditable(true);
+      this.#currentItemView.giveFocus();
+    }
   }
   /**
    * Méthode appelée lors de l'appui sur une touche de clavier

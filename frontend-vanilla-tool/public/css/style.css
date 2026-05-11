@@ -1,11 +1,10 @@
-@layer base, components, modules, utilities;
+@layer base, components, modules, decorators, utilities;
 
 @import "base/colors.css" layer(base);
 @import "base/reset.css" layer(base);
 @import "components/button.css" layer(components);
 @import "components/checkbox.css" layer(components);
 @import "components/dialog.css" layer(components);
-@import "components/drag-decorator.css" layer(components);
 @import "components/file-upload.css" layer(components);
 /* @import "components/post-it-effect.css" layer(components); */
 @import "components/item.css" layer(components);
@@ -20,6 +19,7 @@
 @import "modules/sample-mapping-grid.css" layer(modules);
 @import "modules/notification-center.css" layer(modules);
 @import "modules/working-space.css" layer(modules);
+@import "decorators/drag-decorator.css" layer(decorators);
 @import "utilities/utils.css" layer(utilities);
 
 :root {
@@ -89,7 +89,8 @@
 
   /* === DIVERS === */
   --global-padding: 10px;
-  --small-padding: 4px;
+  --medium-padding: 5px;
+  --small-padding: 2px;
   --large-gap: 20px;
   --global-gap: 10px;
   --medium-gap: 5px;

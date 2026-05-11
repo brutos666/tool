@@ -1,0 +1,121 @@
+/** bouton grip pour le drag & drop **/
+.drag-drop--decorator > .tree .drag-button {
+  border-left: solid 1px var(--color-border);
+  padding-left: var(--small-padding);
+}
+.drag-drop--decorator > .tree .drag-button span {
+  transform: rotate(90deg);
+  transform-origin: center;
+  width: 20px;
+}
+.drag-drop--decorator > .tree .tree__item:has(> .item .drag-button:hover) {
+  background: light-dark(oklch(from var(--color-bg-surface) calc(l - 0.05) c h), oklch(from var(--color-bg-surface) calc(l + 0.05) c h));
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  outline: 1px solid var(--color-border-hover);
+}
+.drag-drop--decorator .item--post-it .toolbar {
+  display: grid;
+  position: relative;
+}
+.drag-drop--decorator .item--post-it .toolbar .drag-button {
+  /** sortir le bouton du flux flex pour le positionner au centre de la toolbar */
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%); /* Centre parfaitement */
+  width: 70%;
+}
+.drag-drop--decorator .item--post-it .toolbar .drag-button span {
+  color: var(--color-text);
+}
+.drag-drop--decorator .item--post-it:has(.toolbar .drag-button:hover) {
+  background: light-dark(oklch(from var(--color-post-it) calc(l - 0.05) c h), oklch(from var(--color-post-it) calc(l + 0.05) c h));
+  outline: 1px solid var(--color-border-hover);
+}
+
+/** Indicateur de placement **/
+.drag-drop--decorator {
+  display: flex;
+  position: relative;
+  --indicator-round-size: 6px;
+  --indicator-thickness: 2px;
+}
+
+.drag-drop--decorator > .placeholder {
+  background-color: var(--color-secondary);
+  position: absolute;
+  z-index: 1;
+}
+.drag-drop--decorator > .placeholder::before {
+  content: "";
+  position: absolute;
+  border: var(--indicator-thickness) solid var(--color-secondary);
+  width: var(--indicator-round-size);
+  height: var(--indicator-round-size);
+  border-radius: 50%;
+}
+
+.drag-drop--decorator[direction="column"] {
+  flex-direction: column;
+}
+.drag-drop--decorator[direction="column"] > .placeholder {
+  height: var(--indicator-thickness);
+  width: calc(100% - var(--indicator-round-size) - var(--indicator-thickness) * 2);
+  align-self: flex-end;
+}
+.drag-drop--decorator[direction="column"] > .placeholder[position="afterbegin"] {
+  top: 0;
+}
+.drag-drop--decorator[direction="column"] > .placeholder[position="beforeend"] {
+  top: 100%;
+}
+.drag-drop--decorator[direction="column"] > .placeholder::before {
+  top: calc((var(--indicator-round-size) + var(--indicator-thickness)) * -1 / 2);
+  left: calc(-1 * (var(--indicator-round-size) + var(--indicator-thickness)));
+}
+
+.drag-drop--decorator[direction="row"] {
+  flex-direction: row;
+}
+.drag-drop--decorator[direction="row"] > .placeholder {
+  width: var(--indicator-thickness);
+  height: calc(100% - var(--indicator-round-size) - var(--indicator-thickness) * 2);
+  align-self: flex-end;
+}
+.drag-drop--decorator[direction="row"] > .placeholder[position="afterbegin"] {
+  left: 0;
+}
+.sample-mapping .drag-drop--decorator[direction="row"] > .placeholder[position="afterbegin"] {
+  /** -2px est un hack pour compenser les bordures de la table en display block pour avoir le scroll mais pour laquelle il est donc impossible d'enlever les bordures qui séparent les éléments entre eux (sample mapping) **/
+  left: -2px;
+}
+.drag-drop--decorator[direction="row"] > .placeholder[position="beforeend"] {
+  left: 100%;
+}
+.drag-drop--decorator[direction="row"] > .placeholder::before {
+  left: calc((var(--indicator-round-size) + var(--indicator-thickness)) * -1 / 2);
+  top: calc(-1 * (var(--indicator-round-size) + var(--indicator-thickness)));
+}
+
+.drag-drop--decorator > * {
+  flex: 1;
+}
+
+.drag-drop--decorator > .drag-start {
+  opacity: 0.5;
+}
+.drag-drop--decorator > .drag-over,
+.drag-drop--decorator > .list__element > .drag-over {
+  outline: 2px solid var(--color-secondary);
+}
+
+/* Encadrer le noeud de l'arbre dont on survole les enfants ou entre les enfants */
+.drag-drop--decorator > .tree:has(> .tree__item > .tree__list > .drag-drop--decorator > .placeholder),
+.drag-drop--decorator > .tree:has(> .tree__item > .tree__list > .drag-drop--decorator > .drag-over) {
+  border: 1px solid var(--color-secondary);
+}
+/*
+.drag-drop--decorator:has(> .drag-over) .item {
+  background-color: purple;
+}
+*/
+

@@ -62,12 +62,13 @@ class Items extends Composite {
    * Modification du modèle
    * @param {'remove'|'add'|'replaceAll'} action
    * @param {Array<TreeItem>} treeItemArray
+   * @param {number|undefined} index
    */
-  update(action, treeItemArray) {
+  update(action, treeItemArray, index) {
     if (action === 'replaceAll') {
       this.replaceAllItems(treeItemArray);
     } else if (action === 'add') {
-      this.addItems(treeItemArray);
+      this.addItems(treeItemArray, index);
     } else if (action === 'remove') {
       this.removeItems(treeItemArray);
     }
@@ -91,10 +92,16 @@ class Items extends Composite {
   /**
    * Ajout d'un ou plusieurs items
    * @param {Array<TreeItem>} treeItemArray
+   * @param {number|undefined} index
    */
-  addItems(treeItemArray) {
+  addItems(treeItemArray, index) {
     treeItemArray.forEach(treeItem => {
       const itemComponent = this.getItemComponent(treeItem);
+      if (index !== undefined) {
+        this.addItemViewAt(itemComponent, index);
+        this.addChildAt(new FocusManagerDecorator(itemComponent, this), index);
+        return;
+      }
       this.addItemView(itemComponent);
       this.addChild(new FocusManagerDecorator(itemComponent, this));
     });
@@ -167,6 +174,11 @@ class Items extends Composite {
     /** @type {ItemsView} */
     const view = this.getView();
     view.addItemView(itemComponent.getView());
+  }
+  addItemViewAt(itemComponent, index) {
+    /** @type {ItemsView} */
+    const view = this.getView();
+    view.addItemViewAt(itemComponent.getView(), index);
   }
   removeAllItemsViews() {
     /** @type {ItemsView} */

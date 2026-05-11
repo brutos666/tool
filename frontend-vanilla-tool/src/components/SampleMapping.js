@@ -6,6 +6,7 @@ import AddItemButton from './AddItemButton.js';
 import SampleMappingView from './views/SampleMappingView.js';
 import SampleMappingColumnDecorator from './decorators/SampleMappingColumnDecorator.js';
 import DragDropDecorator from './decorators/DragDropDecorator.js';
+import ListItemDecorator from './decorators/ListItemDecorator.js';
 /** @import TreeItem from '../data/TreeItem.js'; */
 
 class SampleMapping extends Items {
@@ -39,7 +40,7 @@ class SampleMapping extends Items {
     const rights = ITEM_LAYOUT.getRights(ITEM_LAYOUT.Rules);
     const item = new Item({ treeItem, layout: ITEM_LAYOUT.Rules, rights });
     const sampleItems = new SampleMappingSamples(treeItem);
-    return new SampleMappingColumnDecorator(new DragDropDecorator(item), sampleItems);
+    return new SampleMappingColumnDecorator(new DragDropDecorator(new ListItemDecorator(item)), sampleItems);
   }
 
   /**
@@ -49,9 +50,16 @@ class SampleMapping extends Items {
   addItemView(component) {
     /** @type {SampleMappingView} */
     const tableView = this.getView();
-    tableView.addColumn(component.getDecoratedElement()
+    tableView.addColumn(component.getRuleItem()
       .getView(), component.getSampleItems()
       .getView());
+  }
+  addItemViewAt(component, index) {
+    /** @type {SampleMappingView} */
+    const tableView = this.getView();
+    tableView.addColumnAt(component.getRuleItem()
+      .getView(), component.getSampleItems()
+      .getView(), index);
   }
   removeAllItemsViews() {
     /** @type {SampleMappingView} */

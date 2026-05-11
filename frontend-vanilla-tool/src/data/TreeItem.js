@@ -125,6 +125,20 @@ class TreeItem {
     this.alertObservers('addChildItem');
     this.#treeItemList.addItem(this, childTreeItem);
   }
+  addItemFirst(childTreeItem) {
+    this.alertObservers('addChildItem');
+    this.#treeItemList.addItemAtIndex(this, childTreeItem, 0);
+  }
+
+  addItemBefore(childTreeItem, itemBefore) {
+    this.alertObservers('addChildItem');
+    this.#treeItemList.addItemAtIndex(this, childTreeItem, this.#treeItemList.getIndex(itemBefore));
+  }
+
+  addItemAfter(childTreeItem, itemAfter) {
+    this.alertObservers('addChildItem');
+    this.#treeItemList.addItemAtIndex(this, childTreeItem, this.#treeItemList.getIndex(itemAfter) + 1);
+  }
 
   getPrevious() {
     if (!this.getParentItem()) {
@@ -173,17 +187,26 @@ class TreeItem {
     this.alertObservers('updated');
   }
 
-  moveItemInto(itemId, intoItemId) {
+  moveItem(itemId, destinationItemId, movePosition) {
     /** @type {TreeItem} */
     const treeItem = this.getItemByTreeItemId(itemId);
-    if (treeItem) {
-      treeItem.getParentItem()
-        .removeChildItem(treeItem);
+    if (!treeItem) {
+      return;
     }
+    treeItem.getParentItem()
+      .removeChildItem(treeItem);
     /** @type {TreeItem} */
-    const intoTreeItem = this.getItemByTreeItemId(intoItemId);
-    if (intoTreeItem) {
-      intoTreeItem.addItem(treeItem);
+    const destinationTreeItem = this.getItemByTreeItemId(destinationItemId);
+    if (destinationTreeItem) {
+      if (movePosition === 'inside') {
+        destinationTreeItem.addItemFirst(treeItem);
+      } else if (movePosition === 'before') {
+        destinationTreeItem.getParentItem()
+          .addItemBefore(treeItem, destinationTreeItem);
+      } else {
+        destinationTreeItem.getParentItem()
+          .addItemAfter(treeItem, destinationTreeItem);
+      }
       treeItem.markAsMoved();
     }
   }

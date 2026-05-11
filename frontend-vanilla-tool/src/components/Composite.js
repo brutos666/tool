@@ -72,6 +72,20 @@ class Composite extends Component {
     return element;
   }
 
+  addChildAt(element, index) {
+    if (index === undefined || index >= this.#children.length) {
+      this.addChild(element);
+      return;
+    }
+    /** @type {CompositeView} */
+    const view = this.getView();
+    this.#children.splice(index, 0, element);
+    if (view.isComposite()) {
+      view.addViewAt(element.getView(), index);
+    }
+    element.added(this);
+  }
+
   replaceChild(element, oldElement) {
     const index = this.#children.indexOf(oldElement);
     if (index === -1) {

@@ -10,6 +10,12 @@ class SampleMappingSamplesView extends ItemsView {
       .classList.add('sample-mapping__samples-items');
   }
 
+  addChildView() {
+    super.addChildView();
+    this.getElementView()
+      .classList.add('sample-mapping__samples-items');
+  }
+
 }
 
 export default SampleMappingSamplesView;

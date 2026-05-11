@@ -78,6 +78,12 @@ class CompositeView extends View {
       .appendChild(view.getElementView());
   }
 
+  addViewAt(view, index) {
+    // Ajout au DOM
+    this.getSpaceChildren()
+      .insertBefore(view.getElementView(), this.getSpaceChildren().children[index]);
+  }
+
   /**
    * Supprime un enfant. La vue du composant est supprimé du DOM dans l'espace dédié (id='spaceChildren)
    * @param {View} view : vue

@@ -1,10 +1,6 @@
 .item {
   display: flex;
   flex-direction: row;
-  gap: var(--small-gap);
-}
-.item.drag-over {
-  background-color: purple;
 }
 .item .checkbox__label {
   display: none;

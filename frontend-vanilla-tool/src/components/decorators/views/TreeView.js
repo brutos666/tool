@@ -25,7 +25,7 @@ class TreeView extends DecoratorView {
   }
 
   getHtmlView() {
-    return String.raw`<li role="none" id="tree" class="tree">
+    return String.raw`<li role="none" id="tree" class="tree list__element">
       <div id="treeItem" class="tree__item" role="treeitem">
         <template id="toggle" class="tree__toggle icon-button clickable" tabindex="-1" ></template>
         <template id="decoratedSpace" class="tree__content"></template>
@@ -40,6 +40,9 @@ class TreeView extends DecoratorView {
         .getElementView()
         .getAttribute('id');
     }
+  }
+  isClosed() {
+    return !this.isLeaf() && this.#treeItem.getAttribute('aria-expanded') === 'false';
   }
 
   toggleTree() {

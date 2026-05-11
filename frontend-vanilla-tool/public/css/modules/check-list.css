@@ -26,12 +26,24 @@
   padding: 0;
   align-items: start; /* aligne les arbres vers le haut plutôt que de les étendre à l'espace disponible */
   align-content: start;
-  gap: var(--global-gap);
 }
+
 .check-list__space > .items__space > * {
-  min-height: 50px;
-  padding: var(--small-padding);
+  flex: 1;
+  padding: var(--medium-padding);
+}
+.check-list__space > .items__space .tree--root,
+.check-list__space > .items__space .item-like-button {
+  background: var(--color-bg-surface);
+  border-radius: var(--border-radius);
   box-shadow: 3px 3px 4px var(--color-box-shadow);
-  background-color: var(--color-bg-surface);
+  padding: var(--medium-padding);
+}
+.check-list__space > .items__space .list__element {
+  display: flex;
+}
+.check-list__space > .items__space .item-like-button {
+  flex: 1;
+  min-height: 40px;
 }
 
