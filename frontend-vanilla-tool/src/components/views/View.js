@@ -69,7 +69,12 @@ class View {
       oldView.parentNode.replaceChild(view.getElementView(), oldView);
     }
     this.#staticViews[id] = view;
+    view.added();
   }
+
+  added() {}
+
+  removed() {}
 
   getStaticView(id) {
     return this.#staticViews[id];

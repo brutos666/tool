@@ -4,10 +4,10 @@ class SampleMappingView extends View {
 
   name = 'SampleMappingView';
 
-  /** @type {Array<HTMLTableCellElement>} */
+  /** @type {Array<View>} */
   #ruleHeaders = [];
 
-  /** @type {Array<HTMLTableCellElement>} */
+  /** @type {Array<View>} */
   #sampleCells = [];
 
   /** @type {HTMLTableElement} */
@@ -44,21 +44,33 @@ class SampleMappingView extends View {
     if (index === undefined || index >= this.#ruleHeaders.length) {
       this.#addRuleSpace.parentNode.insertBefore(ruleNode, this.#addRuleSpace);
       this.#sampleEmptySpace.parentNode.insertBefore(samplesNode, this.#sampleEmptySpace);
-      this.#ruleHeaders.push(ruleNode);
-      this.#sampleCells.push(samplesNode);
+      this.#ruleHeaders.push(ruleView);
+      this.#sampleCells.push(samplesView);
     } else {
-      this.#ruleHeaders[index].parentNode.insertBefore(ruleNode, this.#ruleHeaders[index]);
-      this.#sampleCells[index].parentNode.insertBefore(samplesNode, this.#sampleCells[index]);
-      this.#ruleHeaders.splice(index, 0, ruleNode);
-      this.#sampleCells.splice(index, 0, samplesNode);
+      const indexRuleNode = this.#ruleHeaders[index].getElementView().parentNode;
+      const indexSamplesNode = this.#sampleCells[index].getElementView().parentNode;
+      indexRuleNode.parentNode.insertBefore(ruleNode, indexRuleNode);
+      indexSamplesNode.parentNode.insertBefore(samplesNode, indexSamplesNode);
+      this.#ruleHeaders.splice(index, 0, ruleView);
+      this.#sampleCells.splice(index, 0, samplesView);
     }
     this.#storySpace.colSpan = this.#ruleHeaders.length + 1;
     this.#sampleTable.style.setProperty('--number-of-columns', this.#ruleHeaders.length + 1);
+    ruleView.added();
+    samplesView.added();
   }
 
   removeAllColumns() {
-    this.#ruleHeaders.forEach(ruleNode => ruleNode.parentNode.removeChild(ruleNode));
-    this.#sampleCells.forEach(samplesNode => samplesNode.parentNode.removeChild(samplesNode));
+    this.#ruleHeaders.forEach(ruleView => {
+      const ruleNode = ruleView.getElementView().parentNode;
+      ruleNode.parentNode.removeChild(ruleNode);
+      ruleView.removed();
+    });
+    this.#sampleCells.forEach(samplesView => {
+      const samplesNode = samplesView.getElementView().parentNode;
+      samplesNode.parentNode.removeChild(samplesNode);
+      samplesView.removed();
+    });
     this.#ruleHeaders = [];
     this.#sampleCells = [];
 
@@ -68,11 +80,14 @@ class SampleMappingView extends View {
   }
 
   removeColumn(index) {
-    const ruleNode = this.#ruleHeaders[index];
-    const samplesNode = this.#sampleCells[index];
-
+    const ruleView = this.#ruleHeaders[index];
+    const ruleNode = ruleView.getElementView().parentNode;
     ruleNode.parentNode.removeChild(ruleNode);
+    ruleView.removed();
+    const sampleView = this.#sampleCells[index];
+    const samplesNode = sampleView.getElementView().parentNode;
     samplesNode.parentNode.removeChild(samplesNode);
+    sampleView.removed();
 
     this.#ruleHeaders.splice(index, 1);
     this.#sampleCells.splice(index, 1);

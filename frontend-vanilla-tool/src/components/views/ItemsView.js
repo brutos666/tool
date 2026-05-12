@@ -4,7 +4,7 @@ class ItemsView extends View {
 
   name = 'ItemsView';
 
-  #itemNodes = [];
+  #itemViews = [];
   #addButton = true;
 
   /**
@@ -24,23 +24,32 @@ class ItemsView extends View {
     } else {
       itemsSpace.appendChild(itemView.getElementView());
     }
-    this.#itemNodes.push(itemView.getElementView());
+    this.#itemViews.push(itemView);
+    itemView.added();
   }
 
   addItemViewAt(itemView, index) {
     const itemsSpace = getItemsSpace(this.getElementView());
     itemsSpace.insertBefore(itemView.getElementView(), itemsSpace.children[index]);
-    this.#itemNodes.splice(index, 0, itemView.getElementView());
+    this.#itemViews.splice(index, 0, itemView);
+    itemView.added();
   }
 
   removeItemView(index) {
-    this.#itemNodes[index].parentNode.removeChild(this.#itemNodes[index]);
-    this.#itemNodes.splice(index, 1);
+    const itemView = this.#itemViews[index];
+    const itemElementView = itemView.getElementView();
+    itemElementView.parentNode.removeChild(itemElementView);
+    this.#itemViews.splice(index, 1);
+    itemView.removed();
   }
 
   removeAllItemsViews() {
-    this.#itemNodes.forEach(itemNode => itemNode.parentNode.removeChild(itemNode));
-    this.#itemNodes = [];
+    this.#itemViews.forEach(itemView => {
+      const itemElementView = itemView.getElementView();
+      itemElementView.parentNode.removeChild(itemElementView);
+      itemView.removed();
+    });
+    this.#itemViews = [];
   }
 
   /**

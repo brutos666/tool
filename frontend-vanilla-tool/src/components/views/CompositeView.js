@@ -76,12 +76,14 @@ class CompositeView extends View {
     // Ajout au DOM
     this.getSpaceChildren()
       .appendChild(view.getElementView());
+    view.added();
   }
 
   addViewAt(view, index) {
     // Ajout au DOM
     this.getSpaceChildren()
       .insertBefore(view.getElementView(), this.getSpaceChildren().children[index]);
+    view.added();
   }
 
   /**
@@ -91,6 +93,7 @@ class CompositeView extends View {
   removeView(view) {
     this.getSpaceChildren()
       .removeChild(view.getElementView());
+    view.removed();
   }
 
   /**
@@ -101,10 +104,15 @@ class CompositeView extends View {
   replaceView(view, oldView) {
     this.getSpaceChildren()
       .replaceChild(view.getElementView(), oldView.getElementView());
+    oldView.removed();
+    view.added();
   }
 
   removeAllViews() {
     this.getSpaceChildren().innerHTML = '';
+    this.getSpaceChildren().array.forEach(view => {
+      view.removed();
+    });
   }
 
   /**

@@ -24,6 +24,11 @@ class DecoratorView extends View {
     return String.raw`<template id="decoratedSpace"></template>`;
   }
 
+  added() {
+    super.added();
+    this.#decoratedView.added();
+  }
+
   /**
    * Positionne la vue statique
    * @param {View} view - Vue statique
