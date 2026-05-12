@@ -76,6 +76,7 @@
   --color-success: light-dark(oklch(0.55 0.16 140), oklch(0.72 0.15 140));
   --color-warning: light-dark(oklch(0.6 0.16 90), oklch(0.75 0.15 90));
   --color-error: light-dark(oklch(0.52 0.2 30), oklch(0.7 0.18 30));
+  --color-info: light-dark(oklch(0.55 0.16 220), oklch(0.72 0.15 220));
 
   --color-created: light-dark(oklch(0.8 0.3 142), oklch(0.86 0.3 142));
   --color-updated: light-dark(oklch(0.8 0.3 220), oklch(0.86 0.3 220));

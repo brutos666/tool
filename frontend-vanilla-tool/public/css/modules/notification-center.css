@@ -45,3 +45,17 @@
   content: "✗";
 }
 
+.notification.warning {
+  background: var(--color-warning);
+}
+
+.notification.warning::before {
+  content: "!";
+}
+
+.notification.info {
+  background: var(--color-info);
+}
+.notification.info::before {
+  content: "i";
+}
