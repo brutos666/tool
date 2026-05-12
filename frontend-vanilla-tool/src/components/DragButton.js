@@ -1,11 +1,19 @@
-import Component from './Component.js';
+import Action from './Action.js';
 import DragButtonView from './views/DragButtonView.js';
 
-class DragButton extends Component {
+class DragButton extends Action {
 
   name = 'DragButton';
-  constructor() {
+
+  /**
+   * @constructor
+   * @param {Component} dragElement - Element sur lequel se produit le drag&drop
+   */
+  constructor(dragElement) {
     super(new DragButtonView());
+
+    this.getView()
+      .setDragElementView(dragElement.getView());
   }
 
 }

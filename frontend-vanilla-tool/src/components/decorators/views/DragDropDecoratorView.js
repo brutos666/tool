@@ -16,20 +16,19 @@ class DragDropDecoratorView extends DecoratorView {
 
   constructor(view) {
     super(view);
-    const elementView = this.getElementView();
-
     // Le drag-over sera sur l'élément décoré ou sur le placeholder
     this.#dragOverElement = view.getElementView();
-    const itemId = elementView.querySelector('[data-tree-item-id]')
+    const itemId = this.getElementView()
+      .querySelector('[data-tree-item-id]')
       .getAttribute('data-tree-item-id');
     this.#dragOverElement.setAttribute('data-over-id', itemId);
     this.#dragOverElement.setAttribute('position', 'inside');
 
-    elementView.addEventListener('dragstart', this.onDragStart.bind(this));
-    elementView.addEventListener('dragend', this.onDragEnd.bind(this));
-    elementView.addEventListener('drop', this.onDrop.bind(this));
-    elementView.addEventListener('dragover', this.onDragOver.bind(this));
-    elementView.addEventListener('dragleave', this.onDragLeave.bind(this));
+    this.addEventListener('dragstart', this.onDragStart.bind(this));
+    this.addEventListener('dragend', this.onDragEnd.bind(this));
+    this.addEventListener('drop', this.onDrop.bind(this));
+    this.addEventListener('dragover', this.onDragOver.bind(this));
+    this.addEventListener('dragleave', this.onDragLeave.bind(this));
   }
 
   getHtmlView() {
@@ -51,15 +50,6 @@ class DragDropDecoratorView extends DecoratorView {
     if (id !== 'dragAction') {
       return;
     }
-    const dragGrip = child.getElementView();
-    dragGrip.addEventListener('mousedown', () => {
-      this.#dragOverElement.setAttribute('draggable', 'true');
-    });
-
-    dragGrip.addEventListener('mouseup', () => {
-      this.#dragOverElement.setAttribute('draggable', 'false');
-    });
-
     // Positionner l'icon de drag dans la barre d'outils de l'item
     this.getDecoratedView()
       .getElementView()

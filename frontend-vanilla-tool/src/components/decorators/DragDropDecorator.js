@@ -4,12 +4,12 @@ import DragDropDecoratorView from './views/DragDropDecoratorView.js';
 
 class DragDropDecorator extends ItemDecorator {
 
-  name = 'DragDropItemDecorator';
+  name = 'DragDropDecorator';
 
   constructor(decoratedElement) {
     super(new DragDropDecoratorView(decoratedElement.getView()), decoratedElement);
 
-    const dragAction = new DragButton();
+    const dragAction = new DragButton(decoratedElement);
     this.setStaticChild('dragAction', dragAction);
   }
 
