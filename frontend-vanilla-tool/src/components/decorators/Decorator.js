@@ -29,6 +29,10 @@ class Decorator extends Component {
     return this.#decoratedElement;
   }
 
+  getImmediateDecoratedElement() {
+    return this.#decoratedElement;
+  }
+
   giveFocus() {
     this.#decoratedElement.giveFocus();
   }

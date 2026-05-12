@@ -100,10 +100,10 @@
   flex: 1;
 }
 
-.drag-drop--decorator > .drag-start {
+.drag-drop--decorator.drag-start {
   opacity: 0.5;
 }
-.drag-drop--decorator > .drag-over,
+.drag-drop--decorator > .drag-over:not(.placeholder),
 .drag-drop--decorator > .list__element > .drag-over {
   outline: 2px solid var(--color-secondary);
 }

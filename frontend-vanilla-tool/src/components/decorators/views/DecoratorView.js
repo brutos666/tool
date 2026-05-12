@@ -59,6 +59,9 @@ class DecoratorView extends View {
     }
     return this.#decoratedView;
   }
+  getImmediateDecoratedView() {
+    return this.#decoratedView;
+  }
 
   /** @override */
   refreshView(data) {
