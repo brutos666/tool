@@ -27,6 +27,11 @@ class ItemDecorator extends Decorator {
     this.#decoratedElementUpdateFunction(action, treeItem);
   }
 
+  setTreeItem(treeItem) {
+    this.getDecoratedElement()
+      .setTreeItem(treeItem);
+  }
+
 }
 
 export default ItemDecorator;

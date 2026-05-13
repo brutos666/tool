@@ -13,12 +13,12 @@
 .zoom .sample-mapping__row {
   --post-it-width: calc(min(var(--default-post-it-width), var(--space-for-one-post-it)) * var(--zoom));
 }
-.sample-mapping__story-item,
 .sample-mapping__rule,
 .sample-mapping__samples,
 .sample-mapping__table .item-like-button {
   min-width: var(--post-it-width);
 }
+
 .sample-mapping__table .item,
 .sample-mapping__table .item-like-button {
   min-height: var(--post-it-height);
@@ -47,11 +47,10 @@
 .sample-mapping__samples {
   padding: 0;
 }
-.sample-mapping__story-item > * {
+.sample-mapping__story-item .item {
   margin: 0 auto;
   width: var(--post-it-width);
 }
-.sample-mapping__story-item,
 .sample-mapping .list__element {
   padding: var(--global-padding);
 }

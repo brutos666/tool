@@ -54,12 +54,14 @@
 .current .tree__item:has(> .current) > .tree__toggle {
   background-color: var(--color-bg-focus);
 }
-.tree__item:has(> *:focus) > .tree__toggle {
+.tree__item:has(> *:focus-visible) > .tree__toggle,
+.drag-over > .tree__item > .tree__toggle {
   border: var(--color-secondary) solid 2px;
   border-right: none;
   outline: none;
 }
-.tree__item:has(> *:focus) > .tree__content {
+.tree__item:has(> *:focus-visible) > .tree__content,
+.drag-over > .tree__item > .tree__content {
   border: var(--color-secondary) solid 2px;
   border-left: none;
   outline: none;

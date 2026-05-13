@@ -17,10 +17,10 @@
   flex-wrap: wrap;
   overflow: auto;
   gap: var(--medium-gap);
+  padding: 1px;
 }
 .item__title {
   flex: 1;
-  margin: 1px;
 }
 .item__text {
   align-self: stretch;

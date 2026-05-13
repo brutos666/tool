@@ -32,6 +32,9 @@ class DragButtonView extends View {
       dragElementView.getElementView()
         .setAttribute('draggable', 'true');
     });
+    this.addEventListener('mousemove', () => {
+      document.activeElement.blur();
+    });
 
     this.addEventListener('mouseup', () => {
       dragElementView.getElementView()

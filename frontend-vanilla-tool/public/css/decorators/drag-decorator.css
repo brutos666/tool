@@ -45,6 +45,9 @@
   position: absolute;
   z-index: 1;
 }
+.drag-drop--decorator > .placeholder:focus {
+  outline: none;
+}
 .drag-drop--decorator > .placeholder::before {
   content: "";
   position: absolute;
@@ -62,10 +65,10 @@
   width: calc(100% - var(--indicator-round-size) - var(--indicator-thickness) * 2);
   align-self: flex-end;
 }
-.drag-drop--decorator[direction="column"] > .placeholder[position="afterbegin"] {
+.drag-drop--decorator[direction="column"] > .placeholder[position="before"] {
   top: 0;
 }
-.drag-drop--decorator[direction="column"] > .placeholder[position="beforeend"] {
+.drag-drop--decorator[direction="column"] > .placeholder[position="after"] {
   top: 100%;
 }
 .drag-drop--decorator[direction="column"] > .placeholder::before {
@@ -81,14 +84,14 @@
   height: calc(100% - var(--indicator-round-size) - var(--indicator-thickness) * 2);
   align-self: flex-end;
 }
-.drag-drop--decorator[direction="row"] > .placeholder[position="afterbegin"] {
+.drag-drop--decorator[direction="row"] > .placeholder[position="before"] {
   left: 0;
 }
-.sample-mapping .drag-drop--decorator[direction="row"] > .placeholder[position="afterbegin"] {
+.sample-mapping .drag-drop--decorator[direction="row"] > .placeholder[position="before"] {
   /** -2px est un hack pour compenser les bordures de la table en display block pour avoir le scroll mais pour laquelle il est donc impossible d'enlever les bordures qui séparent les éléments entre eux (sample mapping) **/
   left: -2px;
 }
-.drag-drop--decorator[direction="row"] > .placeholder[position="beforeend"] {
+.drag-drop--decorator[direction="row"] > .placeholder[position="after"] {
   left: 100%;
 }
 .drag-drop--decorator[direction="row"] > .placeholder::before {
@@ -103,14 +106,16 @@
 .drag-drop--decorator.drag-start {
   opacity: 0.5;
 }
+/*
 .drag-drop--decorator > .drag-over:not(.placeholder),
 .drag-drop--decorator > .list__element > .drag-over {
   outline: 2px solid var(--color-secondary);
 }
+  */
 
 /* Encadrer le noeud de l'arbre dont on survole les enfants ou entre les enfants */
-.drag-drop--decorator > .tree:has(> .tree__item > .tree__list > .drag-drop--decorator > .placeholder),
-.drag-drop--decorator > .tree:has(> .tree__item > .tree__list > .drag-drop--decorator > .drag-over) {
+.drag-drop--decorator:has(> .tree > .tree__item > .tree__list > .drag-drop--decorator > .placeholder),
+.drag-drop--decorator:has(> .tree > .tree__item > .tree__list > .drag-drop--decorator > .drag-over) {
   border: 1px solid var(--color-secondary);
 }
 /*
@@ -118,4 +123,8 @@
   background-color: purple;
 }
 */
+.drag-over.list__element:not(.tree) {
+  border: var(--color-secondary) solid 2px;
+  outline: none;
+}
 

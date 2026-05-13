@@ -19,13 +19,14 @@ class SampleMapping extends Items {
     super(new SampleMappingView(), treeItem, ITEM_LAYOUT.Rules);
 
     const rights = ITEM_LAYOUT.getRights(ITEM_LAYOUT.Story);
-    this.#item = new Item({ treeItem, layout: ITEM_LAYOUT.Story, rights });
-    this.setStaticChild('storyItem', new DragDropDecorator(this.#item));
+    this.#item = new DragDropDecorator(new ListItemDecorator(new Item({ treeItem, layout: ITEM_LAYOUT.Story, rights })));
+    this.setStaticChild('storyItem', this.#item);
 
     const buttonAddRule = new AddItemButton({ id: 'addRule', label: 'Ajouter une règle', layout: ITEM_LAYOUT.Rules });
     buttonAddRule.setDoActionCallback(this.addNewItem.bind(this, 'Saisir une règle'));
     this.setStaticChild('addItemAction', buttonAddRule);
   }
+
   setTreeItem(treeItem) {
     this.#item.setTreeItem(treeItem);
     super.setTreeItem(treeItem);

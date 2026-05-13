@@ -22,8 +22,7 @@
 
 .nav-tree__content > * {
   flex: 1;
-  padding-right: var(--medium-padding);
-  padding-bottom: var(--global-padding);
+  padding: var(--medium-padding);
 }
 
 .nav-tree__content .list__element.tree--root > .tree__item,

@@ -1,4 +1,5 @@
 import StoreData from '../../../data/StoreData.js';
+import TreeUtilities from '../../../tools/TreeUtilities.js';
 import DecoratorView from './DecoratorView.js';
 /** @import View from '../../views/View.js'; */
 /** @import TreeView from '../views/TreeView.js'; */
@@ -18,10 +19,6 @@ class DragDropDecoratorView extends DecoratorView {
     super(view);
     // Le drag-over sera sur l'élément décoré ou sur le placeholder
     this.#dragOverElement = view.getElementView();
-    const itemId = this.getElementView()
-      .querySelector('[data-tree-item-id]')
-      .getAttribute('data-tree-item-id');
-    this.#dragOverElement.setAttribute('data-over-id', itemId);
     this.#dragOverElement.setAttribute('position', 'inside');
 
     this.addEventListener('dragstart', this.onDragStart.bind(this));
@@ -29,6 +26,10 @@ class DragDropDecoratorView extends DecoratorView {
     this.addEventListener('drop', this.onDrop.bind(this));
     this.addEventListener('dragover', this.onDragOver.bind(this));
     this.addEventListener('dragleave', this.onDragLeave.bind(this));
+  }
+
+  setTreeItemId(treeItemId) {
+    this.#dragOverElement.setAttribute('data-over-id', treeItemId);
   }
 
   getHtmlView() {
@@ -83,10 +84,13 @@ class DragDropDecoratorView extends DecoratorView {
   onDragOver(event) {
     const draggedId = event.dataTransfer.getData('decorated-element');
     const draggedOverId = this.#dragOverElement.getAttribute('data-over-id');
+    // Vérifier que l'élément survolé est un élément direct et pas un sous enfant
+    if (event.target.closest('.drag-drop--decorator') !== this.getElementView()) {
+      return;
+    }
 
-    if (!(draggedId && draggedId !== draggedOverId
-      && !StoreData.getTreeItem()
-        .isChildOf(draggedOverId, draggedId))) {
+    if (draggedId === draggedOverId || StoreData.getTreeItem()
+      .isChildOf(draggedOverId, draggedId)) {
       return;
     }
     event.preventDefault();
@@ -96,12 +100,13 @@ class DragDropDecoratorView extends DecoratorView {
     switch (position) {
       case 'inside':
         this.addOverInside();
+        this.openNodeAfterDelay();
         return;
-      case 'afterbegin':
-        this.addOverBefore(draggedOverId);
+      case 'before':
+        this.addOverBefore();
         return;
-      case 'beforeend':
-        this.addOverAfter(draggedOverId);
+      case 'after':
+        this.addOverAfter();
         return;
     }
   }
@@ -109,16 +114,21 @@ class DragDropDecoratorView extends DecoratorView {
   addOverInside() {
     removePlaceholder();
     this.#dragOverElement.classList.add('drag-over');
-    this.openNodeAfterDelay(this);
+    this.#dragOverElement.querySelector('.item')
+      .focus();
   }
 
-  addOverBefore(draggedOverId) {
-    addPlaceholder(this, 'afterbegin', draggedOverId);
+  addOverBefore() {
+    const draggedOverId = this.#dragOverElement.getAttribute('data-over-id');
+    const placeholder = addPlaceholder(this, 'before', draggedOverId);
+    placeholder.focus();
     this.#dragOverElement.classList.remove('drag-over');
   }
 
-  addOverAfter(draggedOverId) {
-    addPlaceholder(this, 'beforeend', draggedOverId);
+  addOverAfter() {
+    const draggedOverId = this.#dragOverElement.getAttribute('data-over-id');
+    const placeholder = addPlaceholder(this, 'after', draggedOverId);
+    placeholder.focus();
     this.#dragOverElement.classList.remove('drag-over');
   }
 
@@ -134,9 +144,8 @@ class DragDropDecoratorView extends DecoratorView {
     if (dragOverElement) {
       const position = dragOverElement.getAttribute('position');
       const draggedOverId = dragOverElement.getAttribute('data-over-id');
-      const movePosition = position === 'inside' ? 'inside' : position === 'afterbegin' ? 'before' : 'after';
       StoreData.getTreeItem()
-        .moveItem(draggedId, draggedOverId, movePosition);
+        .moveItem(draggedId, draggedOverId, position);
     }
     this.endDragDrop();
   }
@@ -146,8 +155,7 @@ class DragDropDecoratorView extends DecoratorView {
   }
 
   endDragDrop() {
-    this.#dragOverElement.classList.remove('drag-over');
-    removePlaceholder();
+    this.removeOver();
     this.getElementView().classList.remove('drag-start');
   }
 
@@ -167,11 +175,15 @@ class DragDropDecoratorView extends DecoratorView {
     }, 2000);
   }
 
+  getDragDropId() {
+    return this.#dragOverElement.getAttribute('data-over-id');
+  }
+
 }
 /**
  * Ajout d'un placeholder servant de place pour l'item drag-and-drop
  * @param {DragDropDecoratorView} draggedOverView - décorateur sur lequel l'item est drag-and-drop
- * @param {number} position - position du placeholder (avant/après)
+ * @param {string} position - position du placeholder (avant/après)
  * @param {number} draggedOverId - identifiant de l'item sur lequel l'item est drag-and-drop
  * @returns {HTMLDivElement} placeholder
  */
@@ -181,6 +193,7 @@ function addPlaceholder(draggedOverView, position, draggedOverId) {
     placeHolder = document.createElement('div');
     placeHolder.classList.add('placeholder');
     placeHolder.classList.add('drag-over');
+    placeHolder.setAttribute('tabindex', 0);
   }
   /** @type {HTMLElement} */
   if (placeHolder.getAttribute('position') === position && placeHolder.getAttribute('data-over-id') === draggedOverId) {
@@ -190,7 +203,7 @@ function addPlaceholder(draggedOverView, position, draggedOverId) {
   placeHolder.setAttribute('data-over-id', draggedOverId);
   placeHolder.setAttribute('position', position);
   const dragDropDecorator = draggedOverView.getElementView();
-  dragDropDecorator.insertAdjacentElement(position, placeHolder);
+  dragDropDecorator.insertAdjacentElement(position === 'before' ? 'afterbegin' : 'beforeend', placeHolder);
   return placeHolder;
 }
 /**
@@ -205,7 +218,7 @@ function removePlaceholder() {
  * @param {DragEvent} event - Événement de survol
  * @param {'row' | 'column' | null} direction - sens des éléments
  * @param {HTMLElement} dragOverElement
- * @returns {'inside' | 'afterbegin' | 'beforeend'} position
+ * @returns {'inside' | 'before' | 'after'} position
  */
 function getDragOverPosition(event, direction, dragOverElement) {
   if (!direction) {
@@ -214,18 +227,17 @@ function getDragOverPosition(event, direction, dragOverElement) {
   let mousePosition = event.clientY;
   let dragOverElementBegin = dragOverElement.getBoundingClientRect().top;
   let limitSize = dragOverElement.offsetHeight;
-  let delta = 10;
   if (direction === 'row') {
     mousePosition = event.clientX;
     dragOverElementBegin = dragOverElement.getBoundingClientRect().left;
     limitSize = dragOverElement.offsetWidth;
-    delta = 20;
   }
+  const delta = TreeUtilities.isOpened(dragOverElement) && direction === 'column' ? 10 : limitSize / 3;
   if (mousePosition < dragOverElementBegin + delta) {
-    return 'afterbegin';
+    return 'before';
   }
   if (mousePosition > dragOverElementBegin + limitSize - delta) {
-    return 'beforeend';
+    return 'after';
   }
   return 'inside';
 }
