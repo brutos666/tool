@@ -1,5 +1,6 @@
 import DecoratorView from './DecoratorView.js';
 import ActionButtonView from '../../views/ActionButtonView.js';
+import TreeUtilities from '../../../tools/TreeUtilities.js';
 /** @import View from '../../views/View.js'; */
 
 class TreeView extends DecoratorView {
@@ -21,12 +22,12 @@ class TreeView extends DecoratorView {
     });
     this.setStaticView('toggle', this.#toggleActionButton);
     this.#treeItem = this.getElementView()
-      .querySelector('#treeItem');
+      .querySelector('.tree__item');
   }
 
   getHtmlView() {
-    return String.raw`<li role="none" id="tree" class="tree list__element">
-      <div id="treeItem" class="tree__item" role="treeitem">
+    return String.raw`<li role="none" class="tree list__element">
+      <div class="tree__item" role="treeitem">
         <template id="toggle" class="tree__toggle icon-button clickable" tabindex="-1" ></template>
         <template id="decoratedSpace" class="tree__content"></template>
         <template id="treeList" class="tree__list" role="group"></template>
@@ -35,18 +36,19 @@ class TreeView extends DecoratorView {
 
   setOpen(open) {
     if (!this.isLeaf()) {
-      this.#treeItem.setAttribute('aria-expanded', open ? 'true' : 'false');
-      this.getStaticView('treeList')
-        .getElementView()
-        .getAttribute('id');
+      if (open) {
+        TreeUtilities.openNode(this.#treeItem);
+      } else {
+        TreeUtilities.closeNode(this.#treeItem);
+      }
     }
   }
   isClosed() {
-    return !this.isLeaf() && this.#treeItem.getAttribute('aria-expanded') === 'false';
+    return !this.isLeaf() && TreeUtilities.isClosed(this.#treeItem);
   }
 
   toggleTree() {
-    this.setOpen(this.#treeItem.getAttribute('aria-expanded') === 'false');
+    this.setOpen(TreeUtilities.isClosed(this.#treeItem));
   }
 
   setRoot() {

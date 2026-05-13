@@ -1,3 +1,4 @@
+import TreeUtilities from '../../../tools/TreeUtilities.js';
 import ClassDecoratorView from './ClassDecoratorView.js';
 /** @import ItemView from '../../views/ItemView.js'; */
 /** @import View from '../../views/View.js'; */
@@ -114,10 +115,10 @@ class ManagerItemsDecoratorView extends ClassDecoratorView {
   }
 
   onKeyArrowRight() {
-    if (isTreeItem(this.#focusedItem)) {
-      if (isClosed(this.#focusedItem)) {
-        openNode(this.#focusedItem);
-      } else if (isOpened(this.#focusedItem)) {
+    if (TreeUtilities.isTreeElement(this.#focusedItem)) {
+      if (TreeUtilities.isClosed(this.#focusedItem)) {
+        TreeUtilities.openNode(this.#focusedItem);
+      } else if (TreeUtilities.isOpened(this.#focusedItem)) {
         this.focusToDirection('Down');
       }
     } else {
@@ -126,9 +127,9 @@ class ManagerItemsDecoratorView extends ClassDecoratorView {
   }
 
   onKeyArrowLeft() {
-    if (isTreeItem(this.#focusedItem)) {
-      if (isOpened(this.#focusedItem)) {
-        closeNode(this.#focusedItem);
+    if (TreeUtilities.isTreeElement(this.#focusedItem)) {
+      if (TreeUtilities.isOpened(this.#focusedItem)) {
+        TreeUtilities.closeNode(this.#focusedItem);
       } else {
         this.focusToParent();
       }
@@ -237,8 +238,7 @@ class ManagerItemsDecoratorView extends ClassDecoratorView {
     }
   }
   focusToParent() {
-    const group = this.#focusedItem.closest('[role="group"]');
-    const parent = group?.previousElementSibling;
+    const parent = TreeUtilities.getParent(this.#focusedItem);
     if (parent) {
       this.setFocusItem(parent);
     }
@@ -248,7 +248,7 @@ class ManagerItemsDecoratorView extends ClassDecoratorView {
     this.setFocusItem(items[0]);
   }
   focusToLast() {
-    const items = getItems(this.getElementView());
+    const items = this.getItems();
     this.setFocusItem(items[items.length - 1]);
   }
   setFocusItem(item) {
@@ -257,10 +257,11 @@ class ManagerItemsDecoratorView extends ClassDecoratorView {
   }
 
   getItems() {
-    if (!this.#focusedItem) {
-      return getItems(this.getElementView());
-    }
-    return isTreeItem(this.#focusedItem) ? getTreesItems(this.getElementView()) : getItems(this.getElementView());
+    const allElements = [
+      ...this.getElementView()
+        .querySelectorAll('.item, .item-like-button')
+    ];
+    return TreeUtilities.filterVisibleElements(allElements);
   }
 
 }
@@ -272,22 +273,6 @@ class ManagerItemsDecoratorView extends ClassDecoratorView {
  */
 function isOutOfRange(array, index) {
   return index < 0 || index >= array.length;
-}
-/**
- * Récupérer l'élément de l'arbre si l'item se trouve dans un arbre
- * @param {HTMLElement} item : item
- * @returns {TreeItem}
- */
-function getTreeItem(item) {
-  return item.closest('[role="treeitem"]');
-}
-/**
- * Vérifier si l'item se trouve dans un arbre
- * @param {HTMLElement} item
- * @returns {boolean}
- */
-function isTreeItem(item) {
-  return item.closest('[role="treeitem"], [role="tree"]') !== null;
 }
 /**
  * Vérifier si l'item se trouve dans une table
@@ -303,56 +288,7 @@ function isTableItem(item) {
 function isItemButtonLike(item) {
   return item.classList.contains('item-like-button');
 }
-/**
- * Vérifier si le noeud contenant l'item est ouvert
- * @param {HTMLElement} item
- */
-function isOpened(item) {
-  return getTreeItem(item)
-    ?.getAttribute('aria-expanded') === 'true';
-}
-/**
- * Vérifier si le noeud contenant l'item est fermé
- * @param {HTMLElement} item
- */
-function isClosed(item) {
-  return getTreeItem(item)
-    ?.getAttribute('aria-expanded') === 'false';
-}
-/**
- * Ouvrir le noeud contenant l'item
- * @param {HTMLElement} item
- */
-function openNode(item) {
-  getTreeItem(item)
-    ?.setAttribute('aria-expanded', 'true');
-}
-/**
- * Fermer le noeud contenant l'item
- * @param {HTMLElement} item
- */
-function closeNode(item) {
-  getTreeItem(item)
-    ?.setAttribute('aria-expanded', 'false');
-}
-/**
- * Donne les éléments de l'arbre visible
- * @param {HTMLElement} elementView
- * @returns {Array<HTMLElement>}
- */
-function getTreesItems(elementView) {
-  return getItems(elementView)
-    .filter(item => !item.closest('[aria-expanded="false"] .tree__list') && !item.closest('.hidden'));
-}
 
-/**
- * Récupérer tous les items
- * @param {HTMLElement} elementView
- * @returns {Array<HTMLElement>}
- */
-function getItems(elementView) {
-  return [...elementView.querySelectorAll('.item, .item-like-button')];
-}
 /**
  * Récupérer tous les items d'une colonne
  * @param {HTMLTableElement} tableElement
@@ -368,7 +304,7 @@ function getColumnItems(tableElement, indexColumn) {
   array.push(tableElement.rows[0].querySelector('.item'));
   // Ajout de tous les items se trouvant dans la cellule des lignes suivantes
   for (let i = 1; i < tableElement.rows.length; i++) {
-    array.push(...getItems(tableElement.rows[i].cells[indexColumn]));
+    array.push(...tableElement.rows[i].cells[indexColumn].querySelectorAll('.item, .item-like-button'));
   }
   return array;
 }
