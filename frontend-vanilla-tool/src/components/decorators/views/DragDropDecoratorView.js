@@ -61,6 +61,10 @@ class DragDropDecoratorView extends DecoratorView {
   }
 
   onDragStart(event) {
+    // Vérifier que l'élément déplacé est un élément direct et pas un sous enfant
+    if (event.target.closest('.drag-drop--decorator') !== this.getElementView()) {
+      return;
+    }
     const draggedId = this.#dragOverElement.getAttribute('data-over-id');
     event.dataTransfer.effectAllowed = 'move';
     event.dataTransfer.setData('decorated-element', draggedId);
@@ -72,11 +76,8 @@ class DragDropDecoratorView extends DecoratorView {
 
   onDragLeave(event) {
     if (this.getElementView()
-      .contains(event.relatedTarget)) {
-      // Vérifier que l'élément est quitté pour un autre élément direct et pas un sous enfant
-      if (event.relatedTarget.closest('.drag-drop--decorator') === this.getElementView()) {
-        return;
-      }
+      .contains(event.relatedTarget) && event.relatedTarget.closest('.drag-drop--decorator') === this.getElementView()) {
+      return;
     }
 
     this.removeOver();
