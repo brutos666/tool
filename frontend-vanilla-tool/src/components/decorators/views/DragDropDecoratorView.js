@@ -9,6 +9,7 @@ class DragDropDecoratorView extends DecoratorView {
   name = 'DragDropDecoratorView';
 
   #dragOverElement = null;
+  #timeoutID = null;
 
   /**
    * @constructor
@@ -69,7 +70,15 @@ class DragDropDecoratorView extends DecoratorView {
     this.endDragDrop();
   }
 
-  onDragLeave() {
+  onDragLeave(event) {
+    if (this.getElementView()
+      .contains(event.relatedTarget)) {
+      // Vérifier que l'élément est quitté pour un autre élément direct et pas un sous enfant
+      if (event.relatedTarget.closest('.drag-drop--decorator') === this.getElementView()) {
+        return;
+      }
+    }
+
     this.removeOver();
   }
   onDrop(event) {
@@ -122,18 +131,31 @@ class DragDropDecoratorView extends DecoratorView {
     const draggedOverId = this.#dragOverElement.getAttribute('data-over-id');
     const placeholder = addPlaceholder(this, 'before', draggedOverId);
     placeholder.focus();
-    this.#dragOverElement.classList.remove('drag-over');
+    this.removeInsideOver();
   }
 
   addOverAfter() {
     const draggedOverId = this.#dragOverElement.getAttribute('data-over-id');
     const placeholder = addPlaceholder(this, 'after', draggedOverId);
     placeholder.focus();
+    this.removeInsideOver();
+  }
+
+  removeInsideOver() {
     this.#dragOverElement.classList.remove('drag-over');
+    this.resetTimeout();
+  }
+
+  resetTimeout() {
+    this.#dragOverElement.classList.remove('pending');
+    if (this.#timeoutID) {
+      clearTimeout(this.#timeoutID);
+      this.#timeoutID = null;
+    }
   }
 
   removeOver() {
-    this.#dragOverElement.classList.remove('drag-over');
+    this.removeInsideOver();
     removePlaceholder();
   }
 
@@ -168,11 +190,15 @@ class DragDropDecoratorView extends DecoratorView {
     if (!treeView || !treeView.isClosed()) {
       return;
     }
-    setTimeout(() => {
-      if (this.#dragOverElement.classList.contains('drag-over')) {
-        treeView.setOpen(true);
-      }
-    }, 2000);
+    if (!this.#timeoutID) {
+      this.#dragOverElement.classList.add('pending');
+      this.#timeoutID = setTimeout(() => {
+        if (this.#dragOverElement.classList.contains('drag-over')) {
+          treeView.setOpen(true);
+        }
+        this.resetTimeout();
+      }, 2000);
+    }
   }
 
   getDragDropId() {

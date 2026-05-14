@@ -106,25 +106,37 @@
 .drag-drop--decorator.drag-start {
   opacity: 0.5;
 }
-/*
-.drag-drop--decorator > .drag-over:not(.placeholder),
-.drag-drop--decorator > .list__element > .drag-over {
-  outline: 2px solid var(--color-secondary);
-}
-  */
 
 /* Encadrer le noeud de l'arbre dont on survole les enfants ou entre les enfants */
 .drag-drop--decorator:has(> .tree > .tree__item > .tree__list > .drag-drop--decorator > .placeholder),
 .drag-drop--decorator:has(> .tree > .tree__item > .tree__list > .drag-drop--decorator > .drag-over) {
-  border: 1px solid var(--color-secondary);
+  outline: 1px solid var(--color-secondary);
 }
-/*
-.drag-drop--decorator:has(> .drag-over) .item {
-  background-color: purple;
-}
-*/
+
 .drag-over.list__element:not(.tree) {
+  outline: var(--color-secondary) solid 2px;
+}
+.drag-over > .tree__item > .tree__toggle {
   border: var(--color-secondary) solid 2px;
+  border-right: none;
   outline: none;
+}
+.drag-over > .tree__item > .tree__content {
+  border: var(--color-secondary) solid 2px;
+  border-left: none;
+  outline: none;
+}
+
+.drag-over.pending .tree__item {
+  animation: highlight-pulse 3s linear forwards;
+}
+
+@keyframes highlight-pulse {
+  0% {
+    background: transparent;
+  }
+  100% {
+    background: var(--color-secondary);
+  }
 }
 
