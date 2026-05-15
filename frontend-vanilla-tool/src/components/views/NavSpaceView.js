@@ -6,6 +6,7 @@ class NavSpaceView extends SpaceView {
 
   constructor() {
     super();
+    this.setCurrentSpace();
   }
 
   getHtmlView() {

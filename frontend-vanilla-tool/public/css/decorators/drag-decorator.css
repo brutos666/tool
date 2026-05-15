@@ -127,6 +127,7 @@
   outline: none;
 }
 
+/** ouverture du noeud pendant le survol **/
 .drag-over.pending .tree__item {
   animation: highlight-pulse 3s linear forwards;
 }
@@ -138,5 +139,10 @@
   100% {
     background: var(--color-secondary);
   }
+}
+
+/** interdiction de survol **/
+.drop--forbidden {
+  opacity: 0.5;
 }
 

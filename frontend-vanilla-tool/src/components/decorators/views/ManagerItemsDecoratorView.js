@@ -1,5 +1,6 @@
 import TreeUtilities from '../../../tools/TreeUtilities.js';
 import ClassDecoratorView from './ClassDecoratorView.js';
+import StoreData from '../../../data/StoreData.js';
 /** @import ItemView from '../../views/ItemView.js'; */
 /** @import View from '../../views/View.js'; */
 
@@ -93,7 +94,9 @@ class ManagerItemsDecoratorView extends ClassDecoratorView {
    * @param {Event} event - Event de clavier
    */
   onKeyDown(event) {
-    if (!this.interceptKeys()
+    const dragDropMode = StoreData.getDragDropCenter()
+      .isDragDropMode();
+    if (dragDropMode || !this.interceptKeys()
       .includes(event.key)) {
       return;
     }

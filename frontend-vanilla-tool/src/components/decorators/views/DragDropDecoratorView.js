@@ -60,6 +60,18 @@ class DragDropDecoratorView extends DecoratorView {
     return;
   }
 
+  authorizeDrop(dropIsAuthorized) {
+    if (dropIsAuthorized) {
+      this.getElementView().classList.remove('drop--forbidden');
+    } else {
+      this.getElementView().classList.add('drop--forbidden');
+    }
+  }
+
+  isDropForbidden() {
+    return this.getElementView().classList.contains('drop--forbidden');
+  }
+
   onDragStart(event) {
     // Vérifier que l'élément déplacé est un élément direct et pas un sous enfant
     if (event.target.closest('.drag-drop--decorator') !== this.getElementView()) {
@@ -68,7 +80,7 @@ class DragDropDecoratorView extends DecoratorView {
     const draggedId = this.#dragOverElement.getAttribute('data-over-id');
     event.dataTransfer.effectAllowed = 'move';
     event.dataTransfer.setData('decorated-element', draggedId);
-    this.startDragDrop();
+    this.startDragDrop('mouse');
   }
   onDragEnd() {
     this.endDragDrop();
@@ -92,15 +104,11 @@ class DragDropDecoratorView extends DecoratorView {
   }
 
   onDragOver(event) {
-    const draggedId = event.dataTransfer.getData('decorated-element');
-    const draggedOverId = this.#dragOverElement.getAttribute('data-over-id');
     // Vérifier que l'élément survolé est un élément direct et pas un sous enfant
     if (event.target.closest('.drag-drop--decorator') !== this.getElementView()) {
       return;
     }
-
-    if (draggedId === draggedOverId || StoreData.getTreeItem()
-      .isChildOf(draggedOverId, draggedId)) {
+    if (this.isDropForbidden()) {
       return;
     }
     event.preventDefault();
@@ -124,8 +132,8 @@ class DragDropDecoratorView extends DecoratorView {
   addOverInside() {
     removePlaceholder();
     this.#dragOverElement.classList.add('drag-over');
-    this.#dragOverElement.querySelector('.item')
-      .focus();
+    const item = this.#dragOverElement.querySelector('.item') || this.#dragOverElement;
+    item.focus();
   }
 
   addOverBefore() {
@@ -164,22 +172,30 @@ class DragDropDecoratorView extends DecoratorView {
     // L'élément peut être l'élément décoré ou un placeholder
     const dragOverElement = this.getElementView()
       .querySelector('.drag-over');
-    if (dragOverElement) {
-      const position = dragOverElement.getAttribute('position');
-      const draggedOverId = dragOverElement.getAttribute('data-over-id');
-      StoreData.getTreeItem()
-        .moveItem(draggedId, draggedOverId, position);
+    if (!dragOverElement) {
+      return;
     }
-    this.endDragDrop();
+    const position = dragOverElement.getAttribute('position');
+    const draggedOverId = dragOverElement.getAttribute('data-over-id');
+    StoreData.getTreeItem()
+      .moveItem(draggedId, draggedOverId, position);
   }
 
-  startDragDrop() {
+  /**
+   * Début du dragDrop soit par la souris soit par le clavier
+   * @param {'keyboard'|'mouse'} dragDropType - Clavier ou souris
+   */
+  startDragDrop(dragDropType) {
     this.getElementView().classList.add('drag-start');
+    StoreData.getDragDropCenter()
+      .enterDragDropMode(this, dragDropType);
   }
 
   endDragDrop() {
     this.removeOver();
     this.getElementView().classList.remove('drag-start');
+    StoreData.getDragDropCenter()
+      .exitDragDropMode();
   }
 
   openNodeAfterDelay() {

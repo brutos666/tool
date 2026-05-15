@@ -65,6 +65,11 @@ class TreeUtilities {
     return group?.previousElementSibling;
   }
 
+  static getLastChild(element) {
+    const group = element.querySelector('[role="group"]');
+    return group?.lastElementChild;
+  }
+
 }
 
 export default TreeUtilities;

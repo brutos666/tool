@@ -1,3 +1,14 @@
+.working-space.drag-drop-mode-keyboard * {
+  pointer-events: none;
+}
+.drag-drop-mode .working-space__menu {
+  opacity: 0.5;
+}
+.working-space.drag-drop-mode .item-like-button,
+.working-space.drag-drop-mode .toolbar {
+  opacity: 0.5;
+}
+
 .working-space {
   width: 100%;
   height: 100%;
@@ -35,6 +46,7 @@
   width: calc(100% - 4px);
   overflow: hidden;
 }
+
 /* Espaces dédiées à la navigation dans les items */
 .manager-items--decorator {
   height: calc(100% - 4px);

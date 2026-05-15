@@ -221,8 +221,11 @@ class TreeItem {
     if (this.getParentItem() === treeItem) {
       return true;
     }
+    if (!this.getParentItem()) {
+      return false;
+    }
     return this.getParentItem()
-      ?.hasParent(treeItem);
+      .hasParent(treeItem);
   }
 
   undoToDelete() {
