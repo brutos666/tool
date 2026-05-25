@@ -10,9 +10,12 @@
     "eslint": "^10.0.3",
     "eslint-plugin-jsdoc": "^62.8.0",
     "globals": "^17.4.0",
+    "jsdom": "^29.1.1",
+    "mocha": "^11.7.5",
     "prettier": "^3.8.1"
   },
   "scripts": {
-    "start": "cd ./backend-tool/ && mvn spring-boot:run -Dspring-boot.run.profiles=dev"
+    "start": "cd ./backend-tool/ && mvn spring-boot:run -Dspring-boot.run.profiles=dev",
+    "test": "mocha"
   }
 }
