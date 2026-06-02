@@ -23,7 +23,9 @@ Récupérer le projet par un clone du repo GitHub
 git clone https://github.com/brutos666/tool
 ```
 
-### Backend
+Le projet contient une partie back en Java et une autre en Go
+
+### Backend Java
 
 Lancer la partie back
 
@@ -36,6 +38,13 @@ ou
 
 ```shell
 npm run start
+```
+
+### Backend Go
+
+```shell
+cd backend-go
+go run src/main/go/main.go
 ```
 
 ### Frontend
