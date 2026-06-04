@@ -17,13 +17,16 @@ func main() {
 			log.Fatalf("Impossible de démarrer H2 : %s", err)
 	}
 	defer database.StopH2Server()
+		
+	handler.ServerStart()
 	
 	http.HandleFunc("/", func(response http.ResponseWriter, request *http.Request) {
 		fmt.Fprintf(response, "Le service est bien démarré")
 	})
+
 	handler.Handle("/api/item/findAllItems", controller.FindAllItems)
 	handler.Stop("/stop")
 
-	handler.Start()
+	handler.ServerWait()
 	log.Println("Le programme s'est arrêté")
 }

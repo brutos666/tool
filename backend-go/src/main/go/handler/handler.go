@@ -8,28 +8,19 @@ import (
 )
 
 const NOT_ALLOWED_MESSAGE = "Méthode non autorisée"
-var webServer requestServer
 
 // Type de fonction permettant de récupérer n'importe quel type d'objet
 type getFunction[R any] func() (R, error)
 type handleFunction[response http.ResponseWriter, request *http.Request] func(response, request)
 
-func Start() {
-	webServer = *createServer()
-	webServer.mustWaitEndOfServer()
-	go webServer.start()
-	// Attend l'arrêt du serveur
-	webServer.waitEndOfServer()
-}
 func Stop(requestPath string) {
 	stopApp := func () (any, error) {
-		webServer.setStop()
-		return errors.New("Le serveur va être arrêté dès que toutes les requêtes en cours seront terminées"), nil
+		message := createMessageWebResult("/stop", http.StatusOK, "Le serveur va être arrêté dès que toutes les requêtes en cours seront terminées")
+		return message, nil
 	}
 	functionToLaunch := func(response http.ResponseWriter, request *http.Request) {
-		log.Println("Traitement de la requête", request.URL.Path, "en cours...")
 		process(response, request, stopApp)
-		webServer.stop()
+		ServerStop()
 	}
 
 	http.HandleFunc(requestPath, functionToLaunch)
@@ -48,15 +39,21 @@ func Handle[R any](requestPath string, callback getFunction[R]) {
 
 func getFunctionToLaunch[R any](callback getFunction[R]) func(response http.ResponseWriter, request *http.Request) {
 	return func(response http.ResponseWriter, request *http.Request) {
-		webServer.addGoRoutineToWait()
-		go process(response, request, callback)
-		log.Println("Traitement de la requête", request.URL.Path, "en cours...")
+		process(response, request, callback)
 	}
 }
 
 func process[R any](response http.ResponseWriter, request *http.Request, callback getFunction[R]) {
+	defer func() {
+		panicMessage := recover()
+		if (panicMessage != nil) {
+			log.Println(panicMessage)
+			ServerStop()
+		}
+	}()
+
+	log.Println("Traitement de la requête", request.URL.Path, "en cours...")
 	values, err := callback()
-	defer webServer.alertGoRoutineIsDone()
 	if (err != nil) {
 		sendErrorInResponse(response, request, http.StatusInternalServerError, err)
 	} else {
@@ -66,30 +63,34 @@ func process[R any](response http.ResponseWriter, request *http.Request, callbac
 }
 
 func sendValues(response http.ResponseWriter, request *http.Request, values any) {
-	response.Header().Set("Access-Control-Allow-Origin", "*")
-	response.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-	response.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-	var err error
 	switch request.Method {
-	case http.MethodGet:
-		// On renvoie la réponse au format JSON
-		response.Header().Set("Content-Type", "application/json")
-		response.WriteHeader(http.StatusOK)
-		err = json.NewEncoder(response).Encode(values);
-		if (err != nil) {
-			sendErrorInResponse(response, request, http.StatusInternalServerError, err)
-		}
-	default:
-		sendErrorInResponse(response, request, http.StatusMethodNotAllowed, errors.New(NOT_ALLOWED_MESSAGE))
+		case http.MethodGet:
+			// On renvoie la réponse au format JSON
+			jsonData, err := json.Marshal(values)
+			if (err != nil) {
+				sendErrorInResponse(response, request, http.StatusInternalServerError, err)
+			}
+			writeResponse(response, jsonData, http.StatusOK)
+		default:
+			sendErrorInResponse(response, request, http.StatusMethodNotAllowed, errors.New(NOT_ALLOWED_MESSAGE))
 	}
 }
 
 func sendErrorInResponse(response http.ResponseWriter, request *http.Request, statusCode int, err error) {
-	response.WriteHeader(statusCode)
 	errorWebResult := createErrorWebResult(request.URL.Path, statusCode, err.Error())
-	err = json.NewEncoder(response).Encode(errorWebResult);
-	if (err != nil) {
-		response.WriteHeader(http.StatusInternalServerError)
+	jsonData, responseErr := json.Marshal(errorWebResult)
+	if (responseErr != nil) {
 		panic("Impossible de renvoyer l'erreur '" + err.Error() + "' dans la réponse à la requête '" + request.URL.RequestURI() + "'")
 	}
+	writeResponse(response, jsonData, statusCode)
 }
+
+func writeResponse(response http.ResponseWriter, jsonData []byte, statusCode int) {
+	response.Header().Set("Access-Control-Allow-Origin", "*")
+	response.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+	response.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+	response.Header().Set("Content-Type", "application/json")
+	response.WriteHeader(statusCode)
+	response.Write(jsonData)
+}
+

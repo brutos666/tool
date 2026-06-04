@@ -37,18 +37,21 @@ func StartH2Server() error {
 	}
 
 	// Laisser le temps à H2 de démarrer
+	log.Printf("Base H2 : attente")
 	err = waitForH2()
 	if err != nil {
 		log.Fatalf("Can't connect to H2 Database: %s", err)
 	}
+	log.Printf("Base H2 : démarrée")
 	return nil
 }
 
 func StopH2Server() {
-    if h2Process != nil {
-        h2Process.Process.Kill()
-				log.Printf("H2 Database stopped")
-    }
+	if h2Process != nil {
+		h2Process.Process.Kill()
+		h2Process.Wait()
+		log.Printf("Base H2 arrêtée")
+	}
 }
 
 func Connect() {
@@ -58,12 +61,13 @@ func Connect() {
 		if err != nil {
 			log.Fatalf("Can't connect to H2 Database: %s", err)
 		}
+		defer conn.Close()
+
     err = conn.Ping()
     if err != nil {
         log.Fatalf("Can't ping to H2 Database: %s", err)
     }
     log.Printf("H2 Database connected")
-    conn.Close()
 }
 
 func waitForH2() error {
@@ -72,7 +76,7 @@ func waitForH2() error {
 	
 	var err error
 
-	for i := 0; i < 10; i++ {
+	for range 10 {
 			if err = conn.Ping(); err == nil {
 					return nil
 			}
