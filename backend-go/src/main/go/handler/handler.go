@@ -83,6 +83,7 @@ func sendErrorInResponse(response http.ResponseWriter, request *http.Request, st
 		panic("Impossible de renvoyer l'erreur '" + err.Error() + "' dans la réponse à la requête '" + request.URL.RequestURI() + "'")
 	}
 	writeResponse(response, jsonData, statusCode)
+	log.Println("Erreur requête", request.URL.Path, err)
 }
 
 func writeResponse(response http.ResponseWriter, jsonData []byte, statusCode int) {

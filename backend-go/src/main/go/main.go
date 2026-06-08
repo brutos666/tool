@@ -6,17 +6,18 @@ import (
 	"net/http"
 
 	"goTool/controller"
-	"goTool/database"
 	"goTool/handler"
 )
 
 
 func main() {
-	err := database.StartH2Server()
+	/*
+	err := server.StartServer(repository.BaseConnection)
 	if err != nil {
 			log.Fatalf("Impossible de démarrer H2 : %s", err)
 	}
-	defer database.StopH2Server()
+	defer server.StopServer(repository.BaseConnection)
+	*/
 		
 	handler.ServerStart()
 	
