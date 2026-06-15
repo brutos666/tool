@@ -5,12 +5,15 @@ import (
 	"errors"
 	"log"
 	"net/http"
+
+	"github.com/lib/pq"
 )
 
 const NOT_ALLOWED_MESSAGE = "Méthode non autorisée"
 
 // Type de fonction permettant de récupérer n'importe quel type d'objet
 type getFunction[R any] func() (R, error)
+type postFunction[R, P any] func(P) (R, error)
 type handleFunction[response http.ResponseWriter, request *http.Request] func(response, request)
 
 func Stop(requestPath string) {
@@ -22,68 +25,110 @@ func Stop(requestPath string) {
 		process(response, request, stopApp)
 		ServerStop()
 	}
-
 	http.HandleFunc(requestPath, functionToLaunch)
 }
 
-func Handle[R any](requestPath string, callback getFunction[R]) {
+func HandleError(requestPath string, err error) {
+	errorFunc := func() (any, error) {
+		return nil, err
+	}
+	http.HandleFunc(requestPath, getFunctionToLaunch(errorFunc))
+}
+
+func HandleGet[R any](requestPath string, callback getFunction[R]) {
 	if (webServer.isStop()) {
-		errorFunc := func() (any, error) {
-			return nil, errors.New("Serveur en cours d'arrêt : la requête ne peut pas être exécutée")
-		}
-		http.HandleFunc(requestPath, getFunctionToLaunch(errorFunc))
+		HandleError(requestPath, errors.New("Serveur en cours d'arrêt : la requête ne peut pas être exécutée"))
 		return
 	}
 	http.HandleFunc(requestPath, getFunctionToLaunch(callback))
 }
 
+func HandlePost[R, P any](requestPath string, callback postFunction[R, P]) {
+	if (webServer.isStop()) {
+		HandleError(requestPath, errors.New("Serveur en cours d'arrêt : la requête ne peut pas être exécutée"))
+		return
+	}
+	http.HandleFunc(requestPath, getPostFunctionToLaunch(callback))
+}
+
 func getFunctionToLaunch[R any](callback getFunction[R]) func(response http.ResponseWriter, request *http.Request) {
 	return func(response http.ResponseWriter, request *http.Request) {
-		process(response, request, callback)
+		if (request.Method == http.MethodGet) {
+			process(response, request, callback)
+		} else {
+			sendErrorInResponse(response, request, http.StatusMethodNotAllowed, errors.New(NOT_ALLOWED_MESSAGE))
+		}
+	}
+}
+func getPostFunctionToLaunch[R, P any](callback postFunction[R, P]) func(response http.ResponseWriter, request *http.Request) {
+	return func(response http.ResponseWriter, request *http.Request) {
+		switch request.Method {
+			case http.MethodPost:
+				processPost(response, request, callback)
+			case http.MethodOptions:
+				writeResponse(response, nil, http.StatusOK)
+			default:
+				sendErrorInResponse(response, request, http.StatusMethodNotAllowed, errors.New(NOT_ALLOWED_MESSAGE))
+		}
+	}
+}
+
+func stopServerIfPanic() {
+	panicMessage := recover()
+	if (panicMessage != nil) {
+		log.Println(panicMessage)
+		ServerStop()
 	}
 }
 
 func process[R any](response http.ResponseWriter, request *http.Request, callback getFunction[R]) {
-	defer func() {
-		panicMessage := recover()
-		if (panicMessage != nil) {
-			log.Println(panicMessage)
-			ServerStop()
-		}
-	}()
+	defer stopServerIfPanic()
+	log.Println("Traitement de la requête", request.Method, request.URL.Path, "en cours...")
 
-	log.Println("Traitement de la requête", request.URL.Path, "en cours...")
 	values, err := callback()
 	if (err != nil) {
 		sendErrorInResponse(response, request, http.StatusInternalServerError, err)
 	} else {
 		sendValues(response, request, &values)
 	}
-	log.Println("Traitement de la requête", request.URL.Path, "terminée")
+
+	log.Println("Traitement de la requête", request.Method, request.URL.Path, "terminée")
+}
+
+func processPost[R, P any](response http.ResponseWriter, request *http.Request, callback postFunction[R, P]) {
+	defer stopServerIfPanic()
+	log.Println("Traitement de la requête", request.Method, request.URL.Path, "en cours...")
+
+	var parameter P
+	json.NewDecoder(request.Body).Decode(&parameter)
+	values, err := callback(parameter)
+	if (err != nil) {
+		sendErrorInResponse(response, request, http.StatusInternalServerError, err)
+	} else {
+		sendValues(response, request, &values)
+	}
+
+	log.Println("Traitement de la requête", request.Method, request.URL.Path, "terminée")
 }
 
 func sendValues(response http.ResponseWriter, request *http.Request, values any) {
-	switch request.Method {
-		case http.MethodGet:
-			// On renvoie la réponse au format JSON
-			jsonData, err := json.Marshal(values)
-			if (err != nil) {
-				sendErrorInResponse(response, request, http.StatusInternalServerError, err)
-			}
-			writeResponse(response, jsonData, http.StatusOK)
-		default:
-			sendErrorInResponse(response, request, http.StatusMethodNotAllowed, errors.New(NOT_ALLOWED_MESSAGE))
+	// On renvoie la réponse au format JSON
+	jsonData, err := json.Marshal(values)
+	if (err != nil) {
+		sendErrorInResponse(response, request, http.StatusInternalServerError, err)
 	}
+	writeResponse(response, jsonData, http.StatusOK)
 }
 
 func sendErrorInResponse(response http.ResponseWriter, request *http.Request, statusCode int, err error) {
-	errorWebResult := createErrorWebResult(request.URL.Path, statusCode, err.Error())
+	message := getDetailMessageError(err)
+	errorWebResult := createErrorWebResult(request.URL.Path, statusCode, message)
 	jsonData, responseErr := json.Marshal(errorWebResult)
 	if (responseErr != nil) {
-		panic("Impossible de renvoyer l'erreur '" + err.Error() + "' dans la réponse à la requête '" + request.URL.RequestURI() + "'")
+		panic("Impossible de renvoyer l'erreur '" + message + "' dans la réponse à la requête '" + request.URL.RequestURI() + "'")
 	}
 	writeResponse(response, jsonData, statusCode)
-	log.Println("Erreur requête", request.URL.Path, err)
+	log.Println("Erreur requête", request.Method, request.URL.Path, ":", message)
 }
 
 func writeResponse(response http.ResponseWriter, jsonData []byte, statusCode int) {
@@ -93,5 +138,13 @@ func writeResponse(response http.ResponseWriter, jsonData []byte, statusCode int
 	response.Header().Set("Content-Type", "application/json")
 	response.WriteHeader(statusCode)
 	response.Write(jsonData)
+}
+
+func getDetailMessageError(err error) string {
+	var pqErr *pq.Error
+	if (errors.As(err, &pqErr)) {
+		return pqErr.ErrorWithDetail()
+	}
+	return err.Error()
 }
 

@@ -25,7 +25,8 @@ func main() {
 		fmt.Fprintf(response, "Le service est bien démarré")
 	})
 
-	handler.Handle("/api/item/findAllItems", controller.FindAllItems)
+	handler.HandleGet("/api/item/findAllItems", controller.FindAllItems)
+	handler.HandlePost("/api/item/save", controller.SaveTreeItem)
 	handler.Stop("/stop")
 
 	handler.ServerWait()
