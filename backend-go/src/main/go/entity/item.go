@@ -78,7 +78,7 @@ func (item Item) ConvertToItemModel(parentId int64, nextId int64, nextIdIsNull b
 		return itemModel
 }
 
-func CreateItem(id int64, title string, text string, state string, status string, children []Item) *Item {
+func CreateReadItem(id int64, title string, text string, state string, status string, children []Item) *Item {
 	item := new(Item)
 	item.id = id
 	item.title = title
@@ -86,7 +86,7 @@ func CreateItem(id int64, title string, text string, state string, status string
 	item.state = state
 	item.children = children
 	item.status = status
-	item.crudMode = ""
+	item.crudMode = READ
 	return item
 }
 

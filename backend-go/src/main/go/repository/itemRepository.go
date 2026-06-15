@@ -122,41 +122,7 @@ func updateNextId(tx *sqlx.Tx, itemNode entity.ItemNode) (nbNextIdUpdates int, e
     }
     return nbNextIdUpdates, err
 }
-/*
 
-    public TreeInfos saveTreeItem(TreeInfos treeInfos) {
-
-        Tree<Item> treeItem = treeInfos.getTreeItem();
-        // Traiter les suppressions et les créations en premiers
-        List<Item> itemsToDelete = TreeUtils.applyFilter(treeItem, item -> item.getCRUDMode() == CRUDMode.DELETE);
-        if (!itemsToDelete.isEmpty()) {
-            itemRepository.deleteAll(ItemMapper.toModel(itemsToDelete));
-            TreeUtils.removeIf(treeItem, item -> item.getCRUDMode().isDelete());
-        }
-        List<Item> itemsToCreate = TreeUtils.applyFilter(treeItem, item -> item.getCRUDMode() == CRUDMode.CREATE);
-        if (!itemsToCreate.isEmpty()) {
-            Iterable<ItemModel> itemsCreated = itemRepository.saveAll(ItemMapper.toModel(itemsToCreate));
-            updateTreeItemIds(itemsToCreate, itemsCreated);
-        }
-        // Parcours de l'arbre afin de fournir la liste des itemModels : tous les itemModels sont pris en compte même
-        // s'il n'y a pas eu de modification
-        List<ItemModel> itemsToModify = getAllItemsToModify(treeInfos);
-        if (treeInfos.getPreviousItemId() != null) {
-            addFirstPrevious(treeInfos, itemsToModify);
-        }
-        Iterable<ItemModel> modifiedItems = itemRepository.saveAll(itemsToModify);
-        Iterator<ItemModel> iterator = modifiedItems.iterator();
-        if (treeInfos.getPreviousItemId() != null) {
-            // Retirer le précédent de la liste
-            removeFirstPrevious(iterator);
-        }
-
-        List<ItemModel> itemModels = new ArrayList<>();
-        iterator.forEachRemaining(itemModels::add);
-        Tree<Item> savedTreeItem = TreeUtils.transformToTree(itemModels, ItemMapper::toEntity);
-        return new TreeInfos(savedTreeItem, treeInfos.getPreviousItemId(), treeInfos.getParentItemId(), treeInfos.getNextItemId());
-    }
-*/
 func getItemsToModify(pItemNodes []*entity.ItemNode) (pItemNodesToCreate []*entity.ItemNode, itemsIdToDelete []int64) {
 	pItemNodesToCreate = make([]*entity.ItemNode, 0)
 	itemsIdToDelete = make([]int64, 0)

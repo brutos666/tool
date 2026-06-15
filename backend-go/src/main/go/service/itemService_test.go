@@ -38,7 +38,7 @@ func TestConvertToTree_shouldBeConvertToItem_whenOneItemModel(t *testing.T) {
 	actual := convertToTree(itemsModel)
 	// Then
 	expected := make([]entity.Item, 0)
-	expected = append(expected, *entity.CreateItem(1, TITLE1, TEXT1, TODO, "OK", []entity.Item{}))
+	expected = append(expected, *entity.CreateReadItem(1, TITLE1, TEXT1, TODO, "OK", []entity.Item{}))
 	assert.Equal(t, expected, actual)
 }
 
@@ -51,8 +51,8 @@ func TestConvertToTree_shouldReturnItems_shouldAllStatusOk_whenNoChildren_whenNe
 	// When
 	actual := convertToTree(itemsModel)
 	// Then
-	expected1 := entity.CreateItem(1, TITLE1, TEXT1, TODO, "OK", []entity.Item{})
-	expected2 := entity.CreateItem(2, TITLE2, TEXT2, TODO, "OK", []entity.Item{})
+	expected1 := entity.CreateReadItem(1, TITLE1, TEXT1, TODO, "OK", []entity.Item{})
+	expected2 := entity.CreateReadItem(2, TITLE2, TEXT2, TODO, "OK", []entity.Item{})
 	expected := make([]entity.Item, 0)
 	expected = append(expected, *expected1, *expected2)
 	assert.Equal(t, expected, actual)
@@ -67,8 +67,8 @@ func TestConvertToTree_shouldReturnListItems_shouldAllStatusOk_whenOneChildren_w
 	// When
 	actual := convertToTree(itemsModel)
 	// Then
-	expectedChild := entity.CreateItem(2, TITLE2, TEXT2, TODO, "OK", []entity.Item{})
-	expectedParent := entity.CreateItem(1, TITLE1, TEXT1, TODO, "OK", []entity.Item{ *expectedChild })
+	expectedChild := entity.CreateReadItem(2, TITLE2, TEXT2, TODO, "OK", []entity.Item{})
+	expectedParent := entity.CreateReadItem(1, TITLE1, TEXT1, TODO, "OK", []entity.Item{ *expectedChild })
 	expected := make([]entity.Item, 0)
 	expected = append(expected, *expectedParent)
 	assert.Equal(t, expected, actual)
@@ -85,10 +85,10 @@ func TestConvertToTree_shouldReturnListItems_shouldAllStatusOk_whenTreesWithNext
 	// When
 	actual := convertToTree(itemsModel)
 	// Then
-	expectedChild1Item1 := entity.CreateItem(2, TITLE2, TEXT2, TODO, "OK", []entity.Item{})
-	expectedChild2Item1 := entity.CreateItem(3, TITLE3, TEXT3, TODO, "OK", []entity.Item{})
-	expectedItem1 := entity.CreateItem(1, TITLE1, TEXT1, TODO, "OK", []entity.Item{ *expectedChild1Item1, * expectedChild2Item1})
-	expectedItem2 := entity.CreateItem(4, TITLE4, TEXT4, TODO, "OK", []entity.Item{})
+	expectedChild1Item1 := entity.CreateReadItem(2, TITLE2, TEXT2, TODO, "OK", []entity.Item{})
+	expectedChild2Item1 := entity.CreateReadItem(3, TITLE3, TEXT3, TODO, "OK", []entity.Item{})
+	expectedItem1 := entity.CreateReadItem(1, TITLE1, TEXT1, TODO, "OK", []entity.Item{ *expectedChild1Item1, * expectedChild2Item1})
+	expectedItem2 := entity.CreateReadItem(4, TITLE4, TEXT4, TODO, "OK", []entity.Item{})
 	expected := make([]entity.Item, 0)
 	expected = append(expected, *expectedItem1, *expectedItem2)
 	assert.Equal(t, expected, actual)
@@ -104,10 +104,10 @@ func TestConvertToTree_shouldReturnListItems_shouldHaveNextNotFoundStatus_whenTr
 	// When
 	actual := convertToTree(itemsModel)
 	// Then
-	expectedChild1Item1 := entity.CreateItem(2, TITLE2, TEXT2, TODO, "OK", []entity.Item{})
-	expectedChild2Item1 := entity.CreateItem(3, TITLE3, TEXT3, TODO, "NEXT_NOT_FOUND", []entity.Item{})
-	expectedItem1 := entity.CreateItem(1, TITLE1, TEXT1, TODO, "OK", []entity.Item{ *expectedChild1Item1, * expectedChild2Item1})
-	expectedItem2 := entity.CreateItem(4, TITLE4, TEXT4, TODO, "NEXT_NOT_FOUND", []entity.Item{})
+	expectedChild1Item1 := entity.CreateReadItem(2, TITLE2, TEXT2, TODO, "OK", []entity.Item{})
+	expectedChild2Item1 := entity.CreateReadItem(3, TITLE3, TEXT3, TODO, "NEXT_NOT_FOUND", []entity.Item{})
+	expectedItem1 := entity.CreateReadItem(1, TITLE1, TEXT1, TODO, "OK", []entity.Item{ *expectedChild1Item1, * expectedChild2Item1})
+	expectedItem2 := entity.CreateReadItem(4, TITLE4, TEXT4, TODO, "NEXT_NOT_FOUND", []entity.Item{})
 	expected := make([]entity.Item, 0)
 	expected = append(expected, *expectedItem1, *expectedItem2)
 	assert.Equal(t, expected, actual)
@@ -124,10 +124,10 @@ func TestConvertToTree_shouldReturnListItems_shouldHaveLoopStatus_whenChildrenLo
 	// When
 	actual := convertToTree(itemsModel)
 	// Then
-	expectedChild1Item1 := entity.CreateItem(2, TITLE2, TEXT2, TODO, "OK", []entity.Item{})
-	expectedChild2Item1 := entity.CreateItem(3, TITLE3, TEXT3, TODO, "OK", []entity.Item{})
-	expectedChild3Item1 := entity.CreateItem(4, TITLE4, TEXT4, TODO, "LOOP", []entity.Item{})
-	expectedItem1 := entity.CreateItem(1, TITLE1, TEXT1, TODO, "OK", []entity.Item{ *expectedChild1Item1, *expectedChild2Item1, *expectedChild3Item1})
+	expectedChild1Item1 := entity.CreateReadItem(2, TITLE2, TEXT2, TODO, "OK", []entity.Item{})
+	expectedChild2Item1 := entity.CreateReadItem(3, TITLE3, TEXT3, TODO, "OK", []entity.Item{})
+	expectedChild3Item1 := entity.CreateReadItem(4, TITLE4, TEXT4, TODO, "LOOP", []entity.Item{})
+	expectedItem1 := entity.CreateReadItem(1, TITLE1, TEXT1, TODO, "OK", []entity.Item{ *expectedChild1Item1, *expectedChild2Item1, *expectedChild3Item1})
 	expected := make([]entity.Item, 0)
 	expected = append(expected, *expectedItem1)
 	assert.Equal(t, expected, actual)
@@ -144,10 +144,10 @@ func TestConvertToTree_shouldReturnListItems_shouldHaveLoopStatus_whenTwoChildre
 	// When
 	actual := convertToTree(itemsModel)
 	// Then
-	expectedChild1Item1 := entity.CreateItem(2, TITLE2, TEXT2, TODO, "LOOP", []entity.Item{})
-	expectedChild2Item1 := entity.CreateItem(3, TITLE3, TEXT3, TODO, "OK", []entity.Item{})
-	expectedChild3Item1 := entity.CreateItem(4, TITLE4, TEXT4, TODO, "LOOP", []entity.Item{})
-	expectedItem1 := entity.CreateItem(1, TITLE1, TEXT1, TODO, "OK", []entity.Item{ *expectedChild1Item1, *expectedChild2Item1, *expectedChild3Item1})
+	expectedChild1Item1 := entity.CreateReadItem(2, TITLE2, TEXT2, TODO, "LOOP", []entity.Item{})
+	expectedChild2Item1 := entity.CreateReadItem(3, TITLE3, TEXT3, TODO, "OK", []entity.Item{})
+	expectedChild3Item1 := entity.CreateReadItem(4, TITLE4, TEXT4, TODO, "LOOP", []entity.Item{})
+	expectedItem1 := entity.CreateReadItem(1, TITLE1, TEXT1, TODO, "OK", []entity.Item{ *expectedChild1Item1, *expectedChild2Item1, *expectedChild3Item1})
 	expected := make([]entity.Item, 0)
 	expected = append(expected, *expectedItem1)
 	assert.Equal(t, expected, actual)
@@ -164,10 +164,10 @@ func TestConvertToTree_shouldReturnListItems_shouldHaveOrphanNextNotFoundStatus_
 	// When
 	actual := convertToTree(itemsModel)
 	// Then
-	expectedChild1Item2 := entity.CreateItem(2, TITLE2, TEXT2, TODO, "OK", []entity.Item{})
-	expectedChild2Item2 := entity.CreateItem(3, TITLE3, TEXT3, TODO, "NEXT_NOT_FOUND", []entity.Item{})
-	expectedItem1 := entity.CreateItem(1, TITLE1, TEXT1, TODO, "ORPHAN", []entity.Item{})
-	expectedItem2 := entity.CreateItem(4, TITLE4, TEXT4, TODO, "TOTAL_ORPHAN", []entity.Item{ *expectedChild1Item2, * expectedChild2Item2})
+	expectedChild1Item2 := entity.CreateReadItem(2, TITLE2, TEXT2, TODO, "OK", []entity.Item{})
+	expectedChild2Item2 := entity.CreateReadItem(3, TITLE3, TEXT3, TODO, "NEXT_NOT_FOUND", []entity.Item{})
+	expectedItem1 := entity.CreateReadItem(1, TITLE1, TEXT1, TODO, "ORPHAN", []entity.Item{})
+	expectedItem2 := entity.CreateReadItem(4, TITLE4, TEXT4, TODO, "TOTAL_ORPHAN", []entity.Item{ *expectedChild1Item2, * expectedChild2Item2})
 	expected := make([]entity.Item, 0)
 	expected = append(expected, *expectedItem1, *expectedItem2)
 	assert.Equal(t, expected, actual)
@@ -181,8 +181,8 @@ func TestConvertToTree_shouldReturnListItems_shouldAllStatusOk_whenNextIdsCorrec
 	// When
 	actual := convertToTree(itemsModel)
 	// Then
-	expectedItem1 := entity.CreateItem(1, TITLE1, TEXT1, TODO, "OK", []entity.Item{})
-	expectedItem2 := entity.CreateItem(2, TITLE2, TEXT2, TODO, "OK", []entity.Item{})
+	expectedItem1 := entity.CreateReadItem(1, TITLE1, TEXT1, TODO, "OK", []entity.Item{})
+	expectedItem2 := entity.CreateReadItem(2, TITLE2, TEXT2, TODO, "OK", []entity.Item{})
 	expected := make([]entity.Item, 0)
 	expected = append(expected, *expectedItem1, *expectedItem2)
 	assert.Equal(t, expected, actual)
