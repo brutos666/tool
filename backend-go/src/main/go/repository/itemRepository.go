@@ -48,7 +48,7 @@ func Save(previousId int64, pItemNodes []*entity.ItemNode) (error) {
         return err
     }
     // Une fois les éléments créés, on peut mettre sereinement à jour les identifiants parent et suivant qui ont été stocké dans itemNode
-    err = updateInBase(tx, pItemNodes)
+    err = updateInBase(tx, previousId, pItemNodes)
     if (err != nil) {
         return err
     }
@@ -57,12 +57,13 @@ func Save(previousId int64, pItemNodes []*entity.ItemNode) (error) {
 }
 
 func deleteInBase(tx *sqlx.Tx, itemsIdToDelete []int64) (error) {
-    if (len(itemsIdToDelete) == 0) {
-        return nil
-    }
-    nbRows, err := requestSQL.ExecIn(tx, DELETE_SQL, "ids", itemsIdToDelete)
-    if (err != nil) {
-        return err
+    var err error
+    nbRows := 0
+    if (len(itemsIdToDelete) > 0) {
+        nbRows, err = requestSQL.ExecIn(tx, DELETE_SQL, "ids", itemsIdToDelete)
+        if (err != nil) {
+            return err
+        }
     }
     log.Println("Nombre de lignes supprimées :", nbRows)
     return nil
@@ -83,9 +84,14 @@ func createInBase(tx *sqlx.Tx, pItemNodesToCreate []*entity.ItemNode) (error) {
     return nil
 }
 
-func updateInBase(tx *sqlx.Tx, pItemNodes []*entity.ItemNode) (error) {
+func updateInBase(tx *sqlx.Tx, previousId int64, pItemNodes []*entity.ItemNode) (error) {
     nbNextIdRows := 0
     nbUpdated := 0
+    nbNextIdUpdates, err := updatePreviousNextId(tx, previousId, *pItemNodes[0])
+    if (err != nil) {
+        return err
+    }
+    nbNextIdRows = nbNextIdRows + nbNextIdUpdates
     for _, itemNode := range pItemNodes {
         nbUpdates, nbNextIdUpdates, err := updateOneInBase(tx, *itemNode)
         if (err != nil) {
@@ -111,14 +117,24 @@ func updateOneInBase(tx *sqlx.Tx, itemNode entity.ItemNode) (nbUpdates int, nbNe
 }
 func updateNextId(tx *sqlx.Tx, itemNode entity.ItemNode) (nbNextIdUpdates int, err error) {
     id := itemNode.GetStoredId()
-    if (itemNode.HasNext()) {
-        nextId := itemNode.GetNextId()
-        nbNextIdUpdates, err = requestSQL.ExecArgs(tx, UPDATE_NEXT_ID, nextId, id, nextId)
-    } else {
+    pNextId := itemNode.GetNextId()
+    if (pNextId.IsNull()) {
         nbNextIdUpdates, err = requestSQL.ExecArgs(tx, UPDATE_NULL_NEXT_ID, id)
+    } else {
+        nextId := pNextId.GetValue()
+        nbNextIdUpdates, err = requestSQL.ExecArgs(tx, UPDATE_NEXT_ID, nextId, id, nextId)
     }
     if (nbNextIdUpdates > 0) {
         log.Printf("Identifiant ligne suivante de l'item '%v' (%v) a été mis à jour", itemNode.GetItem().GetTitle(), id)
+    }
+    return nbNextIdUpdates, err
+}
+func updatePreviousNextId(tx *sqlx.Tx, previousId int64, itemNextNode entity.ItemNode) (nbNextIdUpdates int, err error) {
+    id := previousId
+    nextId := itemNextNode.GetStoredId()
+    nbNextIdUpdates, err = requestSQL.ExecArgs(tx, UPDATE_NEXT_ID, nextId, id, nextId)
+    if (nbNextIdUpdates > 0) {
+        log.Printf("L'item précédent de l'item '%v' (%v) a été mis à jour", itemNextNode.GetItem().GetTitle(), id)
     }
     return nbNextIdUpdates, err
 }

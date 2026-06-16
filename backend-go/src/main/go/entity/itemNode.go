@@ -4,7 +4,10 @@
  */
 package entity
 
-import "slices"
+import (
+	"goTool/utilities"
+	"slices"
+)
 
 type storedItem struct {
 	pItem *Item
@@ -43,12 +46,18 @@ func createItemNode(pItemWithId *storedItem, pParentWithId *storedItem, pNextWit
 	return itemNode
 }
 func (itemNode ItemNode) GetItem() *Item { return itemNode.pItemWithId.getItem() }
+func (itemNode ItemNode) GetNextItem() *Item { return itemNode.pNextWithId.getItem() }
 func (itemNode ItemNode) IsToDelete() bool { return itemNode.GetItem().IsToDelete() }
 func (itemNode ItemNode) IsToCreate() bool { return itemNode.GetItem().IsToCreate() }
 func (itemNode ItemNode) IsToUpdate() bool { return itemNode.GetItem().IsToUpdate() }
 func (itemNode ItemNode) GetStoredId() int64 { return itemNode.pItemWithId.getId() }
 func (itemNode ItemNode) HasNext() bool { return itemNode.pNextWithId != nil }
-func (itemNode ItemNode) GetNextId() int64 { return itemNode.pNextWithId.getId() }
+func (itemNode ItemNode) GetNextId() *utilities.NullInt64 {
+	if (itemNode.HasNext()) {
+		return utilities.CreateNullInt64(itemNode.pNextWithId.getId())
+	}
+	return nil
+}
 func (itemNode *ItemNode) Apply() {
 	itemNode.GetItem().SetID(itemNode.pItemWithId.getId())
 	itemNode.GetItem().SetRead()
@@ -67,16 +76,14 @@ func (itemNode ItemNode) ConvertToItemModel() ItemModel {
 	itemModel.SetId(itemNode.pItemWithId.getId())
 	return itemModel
 }
-func ConvertItemToItemsNode(item *Item, previousId int64, parentId int64, nextId int64) ([]*ItemNode) {
-	pPreviousItemId := createStoreNilItem(previousId)
+func ConvertItemToItemsNode(item *Item, parentId int64, pNextId *utilities.NullInt64) ([]*ItemNode) {
 	pItemId := createStoredItem(item)
 	pParentItemId := createStoreNilItem(parentId)
-	pNextItemId := createStoreNilItem(nextId)
-	itemsNode := convertToItemsNode(pItemId, pParentItemId, pNextItemId)
-	if (previousId != NULL_VALUE_ID) {
-		previousItemNode := createItemNode(pPreviousItemId, pParentItemId, pItemId)
-		return slices.Insert(itemsNode, 0, previousItemNode)
+	var pNextItemId *storedItem
+	if (!pNextId.IsNull()) {
+		pNextItemId = createStoreNilItem(pNextId.GetValue())
 	}
+	itemsNode := convertToItemsNode(pItemId, pParentItemId, pNextItemId)
 	return itemsNode
 }
 

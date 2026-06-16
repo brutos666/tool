@@ -17,7 +17,7 @@ func FindAll() ([]entity.Item, error) {
 
 func Save(treeInfos entity.TreeInfos) (entity.TreeInfos, error) {
 	// Construction de la liste des références aux items
-	pItemNodes := entity.ConvertItemToItemsNode(treeInfos.GetItem(), treeInfos.GetPreviousItemId(), treeInfos.GetParentItemId(), treeInfos.GetNextItemId())
+	pItemNodes := entity.ConvertItemToItemsNode(treeInfos.GetItem(), treeInfos.GetParentItemId(), treeInfos.GetNextItemId())
 	err := repository.Save(treeInfos.GetPreviousItemId(), pItemNodes)
 	if (err != nil) {
 		return treeInfos, err
