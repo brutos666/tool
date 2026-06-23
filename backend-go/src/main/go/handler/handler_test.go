@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -10,12 +11,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const fIND_USER_PATH="/findUser"
+const fIND_USER_PATH = "/findUser"
 
 type Person struct {
 	Name string `json:"name"`
-	Age uint `json:"age"`
+	Age  uint   `json:"age"`
 }
+
 func createPerson(name string, age uint) *Person {
 	person := new(Person)
 	person.Name = name
@@ -31,7 +33,7 @@ func call[OBJ any](path string, method string, callback func(http.ResponseWriter
 	request := httptest.NewRequest(method, path, nil)
 	callback(responseWriter, request)
 	response = responseWriter.Result()
-	json.NewDecoder(response.Body).Decode(&actual);
+	json.NewDecoder(response.Body).Decode(&actual)
 	return
 }
 
@@ -46,7 +48,7 @@ func call[OBJ any](path string, method string, callback func(http.ResponseWriter
 func TestFunctionToLaunch_response_should_be_user_when_function_return_person(t *testing.T) {
 	// Given
 	jules := createPerson("Jules", 34)
-	getUser := func() (*Person, error) {
+	getUser := func(ctx context.Context) (*Person, error) {
 		return jules, nil
 	}
 	// When
@@ -68,7 +70,7 @@ func TestFunctionToLaunch_response_should_be_user_when_function_return_person(t 
 func TestFunctionToLaunch_response_should_be_error_when_function_return_error(t *testing.T) {
 	// Given
 	err := errors.New("Utilisateur introuvable")
-	getUserWithError := func() (*Person, error) {
+	getUserWithError := func(ctx context.Context) (*Person, error) {
 		return nil, err
 	}
 	// When
@@ -93,10 +95,10 @@ func TestFunctionToLaunch_response_should_be_error_when_function_return_error(t 
 func TestFunctionToLaunch_response_should_be_error_when_request_method_post(t *testing.T) {
 	// Given
 	jules := createPerson("Jules", 34)
-	getUser := func() (*Person, error) {
+	getUser := func(ctx context.Context) (*Person, error) {
 		return jules, nil
 	}
-	
+
 	// When : quand je récupère la fonction à lancer en lui passant la fonction getUser() et que je l'exécute
 	functionToLaunch := getFunctionToLaunch(getUser)
 	actual, response := call[errorWebResult](fIND_USER_PATH, "POST", functionToLaunch)

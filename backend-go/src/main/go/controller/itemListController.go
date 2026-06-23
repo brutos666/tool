@@ -1,14 +1,16 @@
 package controller
 
 import (
+	"context"
+
 	"goTool/entity"
 	"goTool/service"
 )
 
-func FindAllItems() ([]entity.ItemWebResult, error) {
-	itemsWebResult := []entity.ItemWebResult {}
-	itemsFromBase, err := service.FindAll()
-	if (err != nil) {
+func FindAllItems(ctx context.Context) ([]entity.ItemWebResult, error) {
+	itemsWebResult := []entity.ItemWebResult{}
+	itemsFromBase, err := service.FindAll(ctx)
+	if err != nil {
 		return nil, err
 	}
 	for _, item := range itemsFromBase {
@@ -17,7 +19,7 @@ func FindAllItems() ([]entity.ItemWebResult, error) {
 	return itemsWebResult, nil
 }
 
-func SaveTreeItem(treeInfosWebResult entity.TreeInfosWebResult) (entity.TreeInfosWebResult, error) {
-	result, err := service.Save(treeInfosWebResult.ConvertToTreeInfos())
+func SaveTreeItem(ctx context.Context, treeInfosWebResult entity.TreeInfosWebResult) (entity.TreeInfosWebResult, error) {
+	result, err := service.Save(ctx, treeInfosWebResult.ConvertToTreeInfos())
 	return result.ConvertToTreeInfosWebResult(), err
 }
