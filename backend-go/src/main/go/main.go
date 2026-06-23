@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/server/requestSQL"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -29,11 +28,11 @@ func main() {
 	handler.ServerStart()
 
 	http.HandleFunc("/", func(response http.ResponseWriter, request *http.Request) {
-		fmt.Fprintf(response, "Le service est bien démarré")
+		log.Println(response, "Le service est bien démarré")
 	})
-
 	handler.HandleGet("/api/item/findAllItems", controller.FindAllItems)
 	handler.HandlePost("/api/item/save", controller.SaveTreeItem)
+	handler.HandleGet("/api/user/findAllUsers", controller.FindAllUsers)
 	handler.Stop("/stop")
 
 	handler.ServerWait()
