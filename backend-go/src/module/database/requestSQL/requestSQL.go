@@ -2,6 +2,7 @@ package requestSQL
 
 import (
 	"context"
+	"os"
 	"strings"
 
 	"database/server/connection"
@@ -9,6 +10,23 @@ import (
 
 	"github.com/jmoiron/sqlx"
 )
+
+// Fonction pour initialiser la base de données avec les tables si elles n'existent pas
+func CreateTables(baseConnection connection.DatabaseConnection, filePath string) error {
+	db := connection.OpenConnection(baseConnection)
+	defer Close(db)
+	// Lecture du fichier SQL contenant les instructions de création des tables
+	sqlBytes, err := os.ReadFile(filePath)
+	if err != nil {
+		return err
+	}
+	// Exécution des instructions SQL pour créer les tables
+	_, err = db.Exec(string(sqlBytes))
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
 func Open(base connection.DatabaseConnection) *sqlx.DB {
 	return connection.OpenConnection(base)

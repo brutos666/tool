@@ -1,26 +1,29 @@
 package server
 
 import (
-	"database/server/connection"
 	"log"
 	"os"
 	"os/exec"
 	"strings"
+
+	"database/server/connection"
 )
 
-const driverJar = "/home/eowyn/.m2/repository/com/h2database/h2/2.4.240/h2-2.4.240.jar"
-const driverJarOption = "org.h2.tools.Server"
+const (
+	driverJar       = "/home/eowyn/.m2/repository/com/h2database/h2/2.4.240/h2-2.4.240.jar"
+	driverJarOption = "org.h2.tools.Server"
+)
 
 var baseProcess *exec.Cmd
 
 func StartServer(baseConnection connection.DatabaseConnection) error {
 	baseProcess = exec.Command("java",
-			"-cp", driverJar,
-			driverJarOption,
-			"-tcp",
-			"-tcpAllowOthers",
-			"-ifNotExists",
-			"-trace",
+		"-cp", driverJar,
+		driverJarOption,
+		"-tcp",
+		"-tcpAllowOthers",
+		"-ifNotExists",
+		"-trace",
 	)
 	// Redirige la sortie standard et d'erreur vers la console actuelle
 	baseProcess.Stdout = os.Stdout
@@ -28,7 +31,7 @@ func StartServer(baseConnection connection.DatabaseConnection) error {
 
 	err := baseProcess.Start()
 	if err != nil {
-			return err
+		return err
 	}
 
 	databaseName := baseConnection.GetDriverName()

@@ -4,4 +4,8 @@ import (
 	"database/server/baseDescription"
 )
 
-var baseConnection baseDescription.PgSQLBase
+var BaseConnection baseDescription.PgSQLBase
+
+const (
+	SCHEMA_PATH = "../resources/schema-postgresql.sql"
+)

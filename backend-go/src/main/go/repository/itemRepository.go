@@ -21,7 +21,7 @@ const (
 
 func FindAll(ctx context.Context) ([]entity.ItemModel, error) {
 	var itemsModel []entity.ItemModel
-	db := requestSQL.Open(baseConnection)
+	db := requestSQL.Open(BaseConnection)
 	defer requestSQL.Close(db)
 	err := requestSQL.Select(ctx, db, &itemsModel, SELECT_ALL)
 	return itemsModel, err
@@ -35,7 +35,7 @@ func FindAll(ctx context.Context) ([]entity.ItemModel, error) {
  */
 func Save(ctx context.Context, previousId int64, pItemNodes []*entity.ItemNode) error {
 	var err error
-	db := requestSQL.Open(baseConnection)
+	db := requestSQL.Open(BaseConnection)
 	tx, err := requestSQL.SetModeTrans(db)
 	if err != nil {
 		return err
