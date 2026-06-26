@@ -28,7 +28,7 @@ class ActionView extends View {
    * @param {string} data.id - Identifiant du bouton
    * @param {string} data.label - Label du bouton
    * @param {string|undefined} data.icon - Icône du bouton
-   * @param {string} data.role - Rôle du bouton
+   * @param {'button'|'menuitem'} data.role - Rôle du bouton
    * @returns {string} - Code HTML du bouton
    */
   getHtmlView(data) {
@@ -53,7 +53,7 @@ class ActionView extends View {
 
   callDoActionCallback(event) {
     event.stopPropagation();
-    this.#doActionCallback();
+    this.#doActionCallback(event);
   }
 
   setReadOnly() {

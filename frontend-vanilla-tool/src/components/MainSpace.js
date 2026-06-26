@@ -1,13 +1,13 @@
-import Component from './Component.js';
-import Toolbar from './Toolbar.js';
-import Select from './Select.js';
-import MainSpaceView from './views/MainSpaceView.js';
 import { LAYOUT } from '../tools/Constants.js';
-import CheckList from './CheckList.js';
 import ActionButton from './ActionButton.js';
-import CommandDecorator from './decorators/CommandDecorator.js';
+import CheckList from './CheckList.js';
+import Component from './Component.js';
+import CommandItemsDecorator from './decorators/CommandItemsDecorator.js';
 import ManagerItemsDecorator from './decorators/ManagerItemsDecorator.js';
 import SampleMappingSpace from './SampleMappingSpace.js';
+import Select from './Select.js';
+import Toolbar from './Toolbar.js';
+import MainSpaceView from './views/MainSpaceView.js';
 /** @import Items from './Items.js'; */
 
 class MainSpace extends Component {
@@ -67,7 +67,7 @@ class MainSpace extends Component {
     if (!this.#main) {
       return;
     }
-    this.#saveDecorator = new CommandDecorator(this.#main, { treeItem: this.#treeItem });
+    this.#saveDecorator = new CommandItemsDecorator(this.#main, { treeItem: this.#treeItem });
     this.setStaticChild('main', this.#saveDecorator);
   }
 

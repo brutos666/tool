@@ -1,0 +1,14 @@
+.input {
+  display: flex;
+  flex-direction: column;
+}
+.input__component {
+  border: 1.5px solid var(--color-border);
+}
+.input__component.invalid {
+  border: var(--color-error) solid 1px;
+}
+.input__error {
+  color: var(--color-error);
+}
+

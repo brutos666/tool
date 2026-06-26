@@ -1,4 +1,5 @@
 .label-button,
+.primary-button,
 .icon-button,
 .item-like-button {
   text-align: center;
@@ -9,7 +10,12 @@
 }
 .label-button {
   background-color: var(--color-bg-surface);
-  border-style: solid 1px var(--color-border);
+  border: solid 1px var(--color-border);
+}
+.primary-button {
+  background-color: var(--color-bg-surface);
+  border: solid 1px var(--color-primary);
+  padding: var(--medium-padding);
 }
 .icon-button,
 .drag-button {
@@ -23,6 +29,10 @@
 .item-like-button:hover {
   background-color: var(--color-bg-hover);
   border-color: var(--color-border-hover);
+}
+.primary-button:hover {
+  background-color: var(--color-primary-hover);
+  border: solid 1px var(--color-primary);
 }
 
 /* Reset indispensable sur button */

@@ -1,6 +1,7 @@
-import TreeItem from './TreeItem.js';
-import NotificationCenter from '../components/NotificationCenter.js';
 import DragDropCenter from '../components/DragDropCenter.js';
+import NotificationCenter from '../components/NotificationCenter.js';
+import TreeItem from './TreeItem.js';
+import User from './User.js';
 /** @import {ItemInfos} from './TreeItem.js'; */
 /** @import {SpaceView} from '../components/views/SpaceView.js'; */
 
@@ -14,6 +15,12 @@ class StoreData {
     document.body.appendChild(window._notification_center.getElementView());
     document.body.appendChild(window._drag_drop_center.getElementView());
   }
+
+  static logPageInit() {
+    window._notification_center = new NotificationCenter();
+    document.body.appendChild(window._notification_center.getElementView());
+  }
+
   /** @returns {TreeItem} */
   static getTreeItem() {
     return window._treeItem;
@@ -48,6 +55,10 @@ class StoreData {
     const treeItem = StoreData.getTreeItem();
     treeItem.getTreeItemList()
       .addItem(treeItem, new TreeItem(itemInfos));
+  }
+
+  static storeUser(userInfos) {
+    window._user = new User(userInfos);
   }
 
   /**

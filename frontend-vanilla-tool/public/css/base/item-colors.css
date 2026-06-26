@@ -1,0 +1,29 @@
+/** Couleur des post it **/
+.item--color {
+  --color-post-it: var(--color-classic);
+  --darker-post-it-color: oklch(from var(--color-post-it) l c h / calc(c + 0.2));
+}
+.story--color {
+  --color-post-it: var(--color-story);
+}
+.rules--color {
+  --color-post-it: var(--color-rules);
+}
+.sample--color {
+  --color-post-it: var(--color-sample);
+}
+.question--color {
+  --color-post-it: var(--color-question);
+}
+/* -- Création et mise à jour -- */
+.item--crud-created {
+  --status-color: var(--color-created);
+}
+.item--crud-updated {
+  --status-color: var(--color-updated);
+}
+.item--post-it {
+  --status-color: var(--color-text-on-post-it);
+  --darker-post-it-color: oklch(from var(--color-post-it) calc(l + 0) calc(c + 0.45) calc(h + 0));
+}
+

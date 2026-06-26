@@ -12,6 +12,7 @@ class ActionButton extends Action {
    * @param {string} data.label - Label du bouton
    * @param {string} data.icon - Icône du bouton
    * @param {string} data.role - Rôle du bouton
+   * @param {icon|menu|label|primary} data.type - Type de bouton
    */
   constructor(data) {
     super(new ActionButtonView(data));

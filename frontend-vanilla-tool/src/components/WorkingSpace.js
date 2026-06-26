@@ -1,14 +1,14 @@
-import WorkingSpaceView from './views/WorkingSpaceView.js';
+import StoreData from '../data/StoreData.js';
+import ActionButton from './ActionButton.js';
 import Component from './Component.js';
+import ButtonDialog from './decorators/ButtonDialog.js';
+import CommandItemsDecorator from './decorators/CommandItemsDecorator.js';
+import FileUpload from './FileUpload.js';
+import Item from './Item.js';
 import MainSpace from './MainSpace.js';
 import Menu from './Menu.js';
-import ActionButton from './ActionButton.js';
-import FileUpload from './FileUpload.js';
-import StoreData from '../data/StoreData.js';
-import CommandDecorator from './decorators/CommandDecorator.js';
-import ButtonDialog from './decorators/ButtonDialog.js';
-import Item from './Item.js';
 import NavSpace from './NavSpace.js';
+import WorkingSpaceView from './views/WorkingSpaceView.js';
 
 class WorkingSpace extends Component {
 
@@ -19,8 +19,8 @@ class WorkingSpace extends Component {
 
     this.#currentTreeItem = StoreData.getTreeItem();
     const menu = new Menu();
-    const decorateNavSpace = new CommandDecorator(new NavSpace(), { treeItem: this.#currentTreeItem });
-    const decorateMainSpace = new CommandDecorator(new MainSpace(), { treeItem: this.#currentTreeItem });
+    const decorateNavSpace = new CommandItemsDecorator(new NavSpace(), { treeItem: this.#currentTreeItem });
+    const decorateMainSpace = new CommandItemsDecorator(new MainSpace(), { treeItem: this.#currentTreeItem });
 
     const reloadAction = new ActionButton({ id: 'reload', label: 'Actualiser', role: 'menuitem', type: 'menu' });
     reloadAction.setDoActionCallback(decorateNavSpace.loadItems.bind(decorateNavSpace));

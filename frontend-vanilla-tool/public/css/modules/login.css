@@ -1,0 +1,11 @@
+.login {
+  max-width: 300px;
+  position: relative;
+  margin: 50px auto;
+}
+.login__submission {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+

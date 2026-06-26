@@ -1,0 +1,88 @@
+:root {
+  color-scheme: light dark;
+  /* === TEINTE DE BASE === */
+  --hue-primary: 250; /* bleu */
+  --hue-secondary: 70; /* complémentaire = hue + 180 — mais on peut choisir */
+
+  /* === FOND (moins blanc / moins noir) === */
+  --color-bg: light-dark(oklch(0.96 0.008 var(--hue-primary)), oklch(0.22 0.015 var(--hue-primary)));
+  /* cartes, boutons, panels */
+  --color-bg-surface: light-dark(oklch(0.91 0.01 var(--hue-primary)), oklch(0.27 0.014 var(--hue-primary)));
+  --color-bg-hover: light-dark(oklch(0.86 0.013 var(--hue-primary)), oklch(0.34 0.02 var(--hue-primary)));
+  /* modals, dropdowns */
+  --color-bg-elevated: light-dark(oklch(0.86 0.013 var(--hue-primary)), oklch(0.34 0.02 var(--hue-primary)));
+  /* courant */
+  --color-bg-current: light-dark(oklch(0.8 0.013 var(--hue-primary)), oklch(0.4 0.02 var(--hue-primary)));
+  --color-bg-selected: light-dark(oklch(0.55 0.18 var(--hue-secondary)), oklch(0.68 0.16 var(--hue-secondary)));
+
+  /* === TEXTE === */
+  --color-text: light-dark(oklch(0.22 0.015 var(--hue-primary)), oklch(0.92 0.01 var(--hue-primary)));
+  --color-text-muted: light-dark(oklch(0.48 0.02 var(--hue-primary)), oklch(0.65 0.015 var(--hue-primary)));
+  --color-text-on-primary: oklch(0.99 0 0);
+
+  /* === BORDURES === */
+  --color-border: light-dark(oklch(0.76 0.014 var(--hue-primary)), oklch(0.42 0.016 var(--hue-primary)));
+  --color-border-hover: light-dark(oklch(0.62 0.018 var(--hue-primary)), oklch(0.54 0.018 var(--hue-primary)));
+  --color-box-shadow: light-dark(oklch(0.5 0 0), oklch(0 0 0));
+  --color-border-current: var(--color-bg-current);
+
+  /* === PRIMAIRE === */
+  /* Primaire — la couleur de marque, pour les boutons principaux, liens, éléments actifs. */
+  --color-primary: light-dark(oklch(0.5 0.22 var(--hue-primary)), oklch(0.65 0.2 var(--hue-primary)));
+  --color-primary-hover: light-dark(oklch(0.42 0.22 var(--hue-primary)), oklch(0.72 0.2 var(--hue-primary)));
+  --color-primary-active: light-dark(oklch(0.35 0.22 var(--hue-primary)), oklch(0.78 0.2 var(--hue-primary)));
+  --color-primary-subtle: light-dark(oklch(0.5 0.22 var(--hue-primary) / 0.1), oklch(0.65 0.2 var(--hue-primary) / 0.15));
+
+  /* === SECONDAIRE === */
+  /* Secondaire — couleur d'accentuation complémentaire, pour les badges, tags, éléments secondaires. */
+  --color-secondary: light-dark(oklch(0.55 0.18 var(--hue-secondary)), oklch(0.68 0.16 var(--hue-secondary)));
+  --color-secondary-hover: light-dark(oklch(0.47 0.18 var(--hue-secondary)), oklch(0.74 0.16 var(--hue-secondary)));
+
+  /* === FOCUS === */
+  --color-bg-focus: light-dark(oklch(0.5 0.22 var(--hue-primary) / 0.25), oklch(0.65 0.2 var(--hue-primary) / 0.3));
+
+  /* === COMPOSANTS === */
+  --color-control-border: var(--color-border);
+  --color-control-border-hover: var(--color-primary-hover);
+  --color-control-border-checked: var(--color-primary);
+  --color-control-bg-checked: var(--color-primary);
+  --color-control-track-off: var(--color-border);
+
+  /* === SÉMANTIQUE === */
+  --color-success: light-dark(oklch(0.55 0.16 140), oklch(0.72 0.15 140));
+  --color-warning: light-dark(oklch(0.6 0.16 90), oklch(0.75 0.15 90));
+  --color-error: light-dark(oklch(0.52 0.2 30), oklch(0.7 0.18 30));
+  --color-info: light-dark(oklch(0.55 0.16 220), oklch(0.72 0.15 220));
+
+  --color-created: light-dark(oklch(0.8 0.3 142), oklch(0.86 0.3 142));
+  --color-updated: light-dark(oklch(0.8 0.3 220), oklch(0.86 0.3 220));
+
+  --color-sample: light-dark(oklch(0.9 0.1 140), oklch(0.9 0.1 140));
+  --color-rules: light-dark(oklch(0.8 0.1 251), oklch(0.8 0.1 251));
+  --color-story: light-dark(oklch(0.9 0.1 104), oklch(0.9 0.1 104));
+  --color-question: light-dark(oklch(0.9 0.1 15), oklch(0.9 0.1 15));
+  --color-classic: light-dark(oklch(0.9 0.1 104), oklch(0.9 0.1 104));
+  --color-text-on-post-it: oklch(0.22 0.015 var(--hue-primary));
+
+  /* === DIVERS === */
+  --global-padding: 10px;
+  --medium-padding: 5px;
+  --small-padding: 2px;
+  --large-gap: 20px;
+  --global-gap: 10px;
+  --medium-gap: 5px;
+  --small-gap: 2px;
+  --global-margin: 10px;
+  --medium-margin: 5px;
+  --small-margin: 2px;
+  --border-radius: 0.25rem;
+  --default-post-it-width: 200px;
+  --default-post-it-height: 200px;
+  --font-size: 1em;
+  --medium-font-size: 1.2em;
+  --big-font-size: 2em;
+  --font-family: sans-serif;
+  --line-height: 1.5;
+  --zoom: 1;
+}
+
