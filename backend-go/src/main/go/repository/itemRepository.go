@@ -2,12 +2,11 @@ package repository
 
 import (
 	"context"
+	"database/server/connection"
 	"database/server/requestSQL"
 	"log"
 
 	"goTool/entity"
-
-	"github.com/jmoiron/sqlx"
 )
 
 const (
@@ -19,12 +18,22 @@ const (
 	UPDATE_ITEM                = "UPDATE item SET title=:title, text=:text, state=:state, parent_id=:parent_id, next_id=:next_id where id=:id"
 )
 
+type itemArgs struct {
+	previousId int64
+	pItemNodes []*entity.ItemNode
+}
+
 func FindAll(ctx context.Context) ([]entity.ItemModel, error) {
+	return connection.LaunchNormalWay(ctx, BaseConnection, selectAllItems, "")
+}
+
+func selectAllItems(connection connection.Connection, notUsed string) ([]entity.ItemModel, error) {
 	var itemsModel []entity.ItemModel
-	db := requestSQL.Open(BaseConnection)
-	defer requestSQL.Close(db)
-	err := requestSQL.Select(ctx, db, &itemsModel, SELECT_ALL)
-	return itemsModel, err
+	err := requestSQL.Select(connection, &itemsModel, SELECT_ALL)
+	if err != nil {
+		return nil, err
+	}
+	return itemsModel, nil
 }
 
 /**
@@ -34,38 +43,35 @@ func FindAll(ctx context.Context) ([]entity.ItemModel, error) {
 * les identifiants et l'état CRUDMode de l'item
  */
 func Save(ctx context.Context, previousId int64, pItemNodes []*entity.ItemNode) error {
-	var err error
-	db := requestSQL.Open(BaseConnection)
-	tx, err := requestSQL.SetModeTrans(db)
-	if err != nil {
-		return err
-	}
-	defer requestSQL.Close(db)
-	defer requestSQL.Rollback(tx)
-
-	pItemNodesToCreate, itemsIdToDelete := getItemsToModify(pItemNodes)
-	err = deleteInBase(ctx, tx, itemsIdToDelete)
-	if err != nil {
-		return err
-	}
-	err = createInBase(ctx, tx, pItemNodesToCreate)
-	if err != nil {
-		return err
-	}
-	// Une fois les éléments créés, on peut mettre sereinement à jour les identifiants parent et suivant qui ont été stocké dans itemNode
-	err = updateInBase(ctx, tx, previousId, pItemNodes)
-	if err != nil {
-		return err
-	}
-	tx.Commit()
-	return nil
+	_, err := connection.LaunchTransactionnelWay(ctx, BaseConnection, saveAllItems, itemArgs{previousId, pItemNodes})
+	return err
 }
 
-func deleteInBase(ctx context.Context, tx *sqlx.Tx, itemsIdToDelete []int64) error {
+func saveAllItems(connection connection.Connection, args itemArgs) ([]entity.ItemModel, error) {
+	previousId := args.previousId
+	pItemNodes := args.pItemNodes
+	pItemNodesToCreate, itemsIdToDelete := getItemsToModify(pItemNodes)
+	err := deleteInBase(connection, itemsIdToDelete)
+	if err != nil {
+		return nil, err
+	}
+	err = createInBase(connection, pItemNodesToCreate)
+	if err != nil {
+		return nil, err
+	}
+	// Une fois les éléments créés, on peut mettre sereinement à jour les identifiants parent et suivant qui ont été stocké dans itemNode
+	err = updateInBase(connection, previousId, pItemNodes)
+	if err != nil {
+		return nil, err
+	}
+	return nil, nil
+}
+
+func deleteInBase(connection connection.Connection, itemsIdToDelete []int64) error {
 	var err error
 	nbRows := 0
 	if len(itemsIdToDelete) > 0 {
-		nbRows, err = requestSQL.ExecIn(ctx, tx, DELETE_SQL, "ids", itemsIdToDelete)
+		nbRows, err = requestSQL.ExecIn(connection, DELETE_SQL, "ids", itemsIdToDelete)
 		if err != nil {
 			return err
 		}
@@ -74,11 +80,11 @@ func deleteInBase(ctx context.Context, tx *sqlx.Tx, itemsIdToDelete []int64) err
 	return nil
 }
 
-func createInBase(ctx context.Context, tx *sqlx.Tx, pItemNodesToCreate []*entity.ItemNode) error {
+func createInBase(connection connection.Connection, pItemNodesToCreate []*entity.ItemNode) error {
 	nbRows := 0
 	for index, itemNode := range pItemNodesToCreate {
 		itemModel := itemNode.ConvertToItemModel()
-		err := requestSQL.ExecWithReturn(ctx, tx, itemModel, &itemModel, INSERT_SQL)
+		err := requestSQL.ExecWithReturn(connection, itemModel, &itemModel, INSERT_SQL)
 		if err != nil {
 			return err
 		}
@@ -89,16 +95,16 @@ func createInBase(ctx context.Context, tx *sqlx.Tx, pItemNodesToCreate []*entity
 	return nil
 }
 
-func updateInBase(ctx context.Context, tx *sqlx.Tx, previousId int64, pItemNodes []*entity.ItemNode) error {
+func updateInBase(connection connection.Connection, previousId int64, pItemNodes []*entity.ItemNode) error {
 	nbNextIdRows := 0
 	nbUpdated := 0
-	nbNextIdUpdates, err := updatePreviousNextId(ctx, tx, previousId, *pItemNodes[0])
+	nbNextIdUpdates, err := updatePreviousNextId(connection, previousId, *pItemNodes[0])
 	if err != nil {
 		return err
 	}
 	nbNextIdRows = nbNextIdRows + nbNextIdUpdates
 	for _, itemNode := range pItemNodes {
-		nbUpdates, nbNextIdUpdates, err := updateOneInBase(ctx, tx, *itemNode)
+		nbUpdates, nbNextIdUpdates, err := updateOneInBase(connection, *itemNode)
 		if err != nil {
 			return err
 		}
@@ -109,26 +115,26 @@ func updateInBase(ctx context.Context, tx *sqlx.Tx, previousId int64, pItemNodes
 	return nil
 }
 
-func updateOneInBase(ctx context.Context, tx *sqlx.Tx, itemNode entity.ItemNode) (nbUpdates int, nbNextIdUpdates int, err error) {
+func updateOneInBase(connection connection.Connection, itemNode entity.ItemNode) (nbUpdates int, nbNextIdUpdates int, err error) {
 	nbUpdates = 0
 	nbNextIdUpdates = 0
 	if itemNode.IsToUpdate() {
 		itemModel := itemNode.ConvertToItemModel()
-		nbUpdates, err = requestSQL.Exec(ctx, tx, UPDATE_ITEM, itemModel)
+		nbUpdates, err = requestSQL.Exec(connection, UPDATE_ITEM, itemModel)
 	} else if !itemNode.IsToDelete() {
-		nbNextIdUpdates, err = updateNextId(ctx, tx, itemNode)
+		nbNextIdUpdates, err = updateNextId(connection, itemNode)
 	}
 	return nbUpdates, nbNextIdUpdates, err
 }
 
-func updateNextId(ctx context.Context, tx *sqlx.Tx, itemNode entity.ItemNode) (nbNextIdUpdates int, err error) {
+func updateNextId(connection connection.Connection, itemNode entity.ItemNode) (nbNextIdUpdates int, err error) {
 	id := itemNode.GetStoredId()
 	pNextId := itemNode.GetNextId()
 	if pNextId.IsNull() {
-		nbNextIdUpdates, err = requestSQL.ExecArgs(ctx, tx, UPDATE_NULL_NEXT_ID, id)
+		nbNextIdUpdates, err = requestSQL.ExecArgs(connection, UPDATE_NULL_NEXT_ID, id)
 	} else {
 		nextId := pNextId.GetValue()
-		nbNextIdUpdates, err = requestSQL.ExecArgs(ctx, tx, UPDATE_NEXT_ID, nextId, id, nextId)
+		nbNextIdUpdates, err = requestSQL.ExecArgs(connection, UPDATE_NEXT_ID, nextId, id, nextId)
 	}
 	if nbNextIdUpdates > 0 {
 		log.Printf("Identifiant ligne suivante de l'item '%v' (%v) a été mis à jour", itemNode.GetItem().GetTitle(), id)
@@ -136,10 +142,10 @@ func updateNextId(ctx context.Context, tx *sqlx.Tx, itemNode entity.ItemNode) (n
 	return nbNextIdUpdates, err
 }
 
-func updatePreviousNextId(ctx context.Context, tx *sqlx.Tx, previousId int64, itemNextNode entity.ItemNode) (nbNextIdUpdates int, err error) {
+func updatePreviousNextId(connection connection.Connection, previousId int64, itemNextNode entity.ItemNode) (nbNextIdUpdates int, err error) {
 	id := previousId
 	nextId := itemNextNode.GetStoredId()
-	nbNextIdUpdates, err = requestSQL.ExecArgs(ctx, tx, UPDATE_NEXT_ID, nextId, id, nextId)
+	nbNextIdUpdates, err = requestSQL.ExecArgs(connection, UPDATE_NEXT_ID, nextId, id, nextId)
 	if nbNextIdUpdates > 0 {
 		log.Printf("L'item précédent de l'item '%v' (%v) a été mis à jour", itemNextNode.GetItem().GetTitle(), id)
 	}

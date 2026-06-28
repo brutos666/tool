@@ -1,7 +1,6 @@
 package requestSQL
 
 import (
-	"context"
 	"os"
 	"strings"
 
@@ -36,23 +35,11 @@ func Close(db *sqlx.DB) {
 	db.Close()
 }
 
-func SetModeTrans(db *sqlx.DB) (*sqlx.Tx, error) {
-	return db.Beginx()
+func Select(connection connection.Connection, dest interface{}, query string, args ...interface{}) error {
+	return connection.GetDb().SelectContext(connection.GetContext(), dest, query, args...)
 }
 
-func Rollback(tx *sqlx.Tx) error {
-	return tx.Rollback()
-}
-
-func Commit(tx *sqlx.Tx) error {
-	return tx.Commit()
-}
-
-func Select(ctx context.Context, db *sqlx.DB, dest interface{}, query string) error {
-	return db.SelectContext(ctx, dest, query)
-}
-
-func ExecIn(ctx context.Context, tx *sqlx.Tx, query string, inName string, inValues interface{}) (int, error) {
+func ExecIn(connection connection.Connection, query string, inName string, inValues interface{}) (int, error) {
 	query = strings.Replace(query, "?", ":"+inName, 1)
 	arg := make(map[string]interface{}, 0)
 	arg[inName] = inValues
@@ -65,26 +52,30 @@ func ExecIn(ctx context.Context, tx *sqlx.Tx, query string, inName string, inVal
 	if err != nil {
 		return 0, err
 	}
+	tx := connection.GetTx()
 	query = tx.Rebind(query)
-	return returnResult(tx.ExecContext(ctx, query, args...))
+	return returnResult(tx.ExecContext(connection.GetContext(), query, args...))
 }
 
-func ExecArgs(ctx context.Context, tx *sqlx.Tx, query string, args ...any) (int, error) {
+func ExecArgs(connection connection.Connection, query string, args ...any) (int, error) {
+	tx := connection.GetTx()
 	query = tx.Rebind(query)
-	return returnResult(tx.ExecContext(ctx, query, args...))
+	return returnResult(tx.ExecContext(connection.GetContext(), query, args...))
 }
 
-func Exec(ctx context.Context, tx *sqlx.Tx, query string, values interface{}) (int, error) {
-	return returnResult(tx.NamedExecContext(ctx, query, values))
+func Exec(connection connection.Connection, query string, values interface{}) (int, error) {
+	tx := connection.GetTx()
+	return returnResult(tx.NamedExecContext(connection.GetContext(), query, values))
 }
 
-func ExecWithReturn(ctx context.Context, tx *sqlx.Tx, values interface{}, dest interface{}, query string) error {
+func ExecWithReturn(connection connection.Connection, values interface{}, dest interface{}, query string) error {
 	query, args, err := sqlx.Named(query, values)
 	if err != nil {
 		return err
 	}
+	tx := connection.GetTx()
 	query = tx.Rebind(query)
-	return tx.GetContext(ctx, dest, query, args...)
+	return tx.GetContext(connection.GetContext(), dest, query, args...)
 }
 
 func returnResult(result sql.Result, err error) (int, error) {
