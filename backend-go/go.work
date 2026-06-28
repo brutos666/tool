@@ -3,3 +3,5 @@ go 1.26.3
 use ./src/main/go
 
 use ./src/module/database
+
+use ./src/module/authentication

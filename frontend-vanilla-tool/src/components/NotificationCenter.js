@@ -16,6 +16,9 @@ class NotificationCenter extends Composite {
    * @returns {Notification} La notification crée.
    */
   showNotification(message, type) {
+    if (type === 'error') {
+      return this.addChild(new Notification({ message, type, duration: 10_000 }));
+    }
     return this.addChild(new Notification({ message, type, duration: 3000 }));
   }
 

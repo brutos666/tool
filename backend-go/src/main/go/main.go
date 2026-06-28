@@ -32,7 +32,10 @@ func main() {
 	})
 	handler.HandleGet("/api/item/findAllItems", controller.FindAllItems)
 	handler.HandlePost("/api/item/save", controller.SaveTreeItem)
+
+	handler.HandlePost("/api/user/signup", controller.Signup)
 	handler.HandleGet("/api/user/findAllUsers", controller.FindAllUsers)
+
 	handler.Stop("/stop")
 
 	handler.ServerWait()

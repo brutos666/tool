@@ -23,23 +23,21 @@ func (user User) GetRole() string                { return user.role }
 func (user *User) SetRole(role string)           { user.role = role }
 
 func (user User) ConvertToUserWebResult() *UserWebResult {
-	return &UserWebResult{
-		ID:         user.id,
-		First_name: &user.firstName,
-		Last_name:  &user.lastName,
-		Password:   &user.password,
-		Email:      &user.email,
-		Role:       &user.role,
-	}
+	userWebResult := new(UserWebResult)
+	userWebResult.FirstName = user.firstName
+	userWebResult.LastName = user.lastName
+	userWebResult.Email = user.email
+	userWebResult.Role = user.role
+	return userWebResult
 }
 
 func (user User) ConvertToUserModel() *UserModel {
 	return &UserModel{
-		ID:         user.id,
-		First_name: &user.firstName,
-		Last_name:  &user.lastName,
-		Password:   &user.password,
-		Email:      &user.email,
-		Role:       &user.role,
+		ID:        user.id,
+		FirstName: &user.firstName,
+		LastName:  &user.lastName,
+		Password:  &user.password,
+		Email:     &user.email,
+		Role:      &user.role,
 	}
 }

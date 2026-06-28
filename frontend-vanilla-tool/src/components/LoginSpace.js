@@ -5,8 +5,13 @@ import Input from './Input.js';
 import SubmitButton from './SubmitButton.js';
 import InputView from './views/InputView.js';
 import LoginSpaceView from './views/LoginSpaceView.js';
-/** @import {UserInfos} from '../data/User.js' */
-
+/**
+ * @typedef {Object} RegisterUserInfos - Informations sur l'utilisateur qui veut s'enregistrer
+ * @property {string} email - Email
+ * @property {string} firstName - Prénom
+ * @property {string} lastName - Nom
+ * @property {string} password - Mot de passe
+ */
 class LoginSpace extends Component {
 
   #emailInput;
@@ -70,16 +75,15 @@ class LoginSpace extends Component {
   }
 
   /**
-   * Retourne les informations saisies pour l'utilisateur
-   * @returns {UserInfos}
+   * Retourne les informations saisies pour inscrire l'utilisateur
+   * @returns {RegisterUserInfos}
    */
-  getUserInfos() {
+  getRegisterUserInfos() {
     return {
       email: this.#emailInput.getValue(),
       firstName: this.#firstNameInput.getValue(),
       lastName: this.#lastNameInput.getValue(),
-      password: this.#passwordInput.getValue(),
-      role: 'USER'
+      password: this.#passwordInput.getValue()
     };
   }
 
@@ -96,7 +100,7 @@ class LoginSpace extends Component {
     if (!this.checkValidity()) {
       return;
     }
-    this.#signUpDecorator.signup(this.getUserInfos());
+    this.#signUpDecorator.signup(this.getRegisterUserInfos());
   }
 
   checkValidity() {

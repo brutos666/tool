@@ -10,7 +10,7 @@ create table if not exists users
     token       VARCHAR,
     refresh_token VARCHAR,
     created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    update_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    updated_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 comment on table users is 'Utilisateur';
 comment on column users.first_name is 'Prénom';
@@ -21,7 +21,7 @@ comment on column users.role is 'Rôle';
 comment on column users.token is 'Jeton de connexion';
 comment on column users.refresh_token is 'Jeton de rafraîchissement';
 comment on column users.created_at is 'Date de création';
-comment on column users.update_at is 'Date de mise à jour';
+comment on column users.updated_at is 'Date de mise à jour';
 
 comment on table item is 'Item';
 comment on column item.title is 'Titre';

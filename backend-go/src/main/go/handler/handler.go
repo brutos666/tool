@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/lib/pq"
 )
 
@@ -15,6 +16,8 @@ const (
 	NOT_ALLOWED_MESSAGE = "Méthode non autorisée"
 	REQUEST_TIMEOUT     = 10 * time.Second
 )
+
+var validate = validator.New()
 
 // Type de fonction permettant de récupérer n'importe quel type d'objet
 type (
@@ -60,11 +63,13 @@ func HandlePost[R, P any](requestPath string, callback postFunction[R, P]) {
 
 func getFunctionToLaunch[R any](callback getFunction[R]) func(response http.ResponseWriter, request *http.Request) {
 	return func(response http.ResponseWriter, request *http.Request) {
+		log.Println("Traitement de la requête", request.Method, request.URL.Path, "en cours...")
 		if request.Method == http.MethodGet {
 			process(response, request, callback)
 		} else {
 			sendErrorInResponse(response, request, http.StatusMethodNotAllowed, errors.New(NOT_ALLOWED_MESSAGE))
 		}
+		log.Println("Traitement de la requête", request.Method, request.URL.Path, "terminée")
 	}
 }
 
@@ -72,7 +77,9 @@ func getPostFunctionToLaunch[R, P any](callback postFunction[R, P]) func(respons
 	return func(response http.ResponseWriter, request *http.Request) {
 		switch request.Method {
 		case http.MethodPost:
+			log.Println("Traitement de la requête", request.Method, request.URL.Path, "en cours...")
 			processPost(response, request, callback)
+			log.Println("Traitement de la requête", request.Method, request.URL.Path, "terminée")
 		case http.MethodOptions:
 			writeResponse(response, nil, http.StatusOK)
 		default:
@@ -92,9 +99,7 @@ func stopServerIfPanic() {
 func process[R any](response http.ResponseWriter, request *http.Request, callback getFunction[R]) {
 	ctx, cancel := context.WithTimeout(request.Context(), REQUEST_TIMEOUT)
 	defer cancel()
-
 	defer stopServerIfPanic()
-	log.Println("Traitement de la requête", request.Method, request.URL.Path, "en cours...")
 
 	values, err := callback(ctx)
 	if err != nil {
@@ -102,26 +107,30 @@ func process[R any](response http.ResponseWriter, request *http.Request, callbac
 	} else {
 		sendValues(response, request, &values)
 	}
-
-	log.Println("Traitement de la requête", request.Method, request.URL.Path, "terminée")
 }
 
 func processPost[R, P any](response http.ResponseWriter, request *http.Request, callback postFunction[R, P]) {
 	ctx, cancel := context.WithTimeout(request.Context(), REQUEST_TIMEOUT)
 	defer cancel()
 	defer stopServerIfPanic()
-	log.Println("Traitement de la requête", request.Method, request.URL.Path, "en cours...")
 
 	var parameter P
-	json.NewDecoder(request.Body).Decode(&parameter)
+	err := json.NewDecoder(request.Body).Decode(&parameter)
+	if err != nil {
+		sendErrorInResponse(response, request, http.StatusBadRequest, err)
+		return
+	}
+	if validationErr := validate.Struct(parameter); validationErr != nil {
+		sendErrorInResponse(response, request, http.StatusBadRequest, validationErr)
+		return
+	}
 	values, err := callback(ctx, parameter)
 	if err != nil {
 		sendErrorInResponse(response, request, http.StatusInternalServerError, err)
-	} else {
-		sendValues(response, request, &values)
+		return
 	}
 
-	log.Println("Traitement de la requête", request.Method, request.URL.Path, "terminée")
+	sendValues(response, request, &values)
 }
 
 func sendValues(response http.ResponseWriter, request *http.Request, values any) {

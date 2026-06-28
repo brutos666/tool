@@ -1,7 +1,7 @@
 import UserLogIn from '../../commands/UserLogIn.js';
 import UserSignUp from '../../commands/UserSignUp.js';
 import CommandDecorator from './CommandDecorator.js';
-/** @import {UserInfos} from '../../data/User.js' */
+/** @import {RegisterUserInfos} from '../../components/LoginSpace.js' */
 
 class CommandUserDecorator extends CommandDecorator {
 
@@ -23,10 +23,10 @@ class CommandUserDecorator extends CommandDecorator {
   }
   /**
    * Inscription
-   * @param {UserInfos} userInfos : informations sur l'utilisateur
+   * @param {RegisterUserInfos} registerUserInfos : informations sur l'utilisateur qui veut s'inscrire
    */
-  signup(userInfos) {
-    new UserSignUp(this, userInfos)
+  signup(registerUserInfos) {
+    new UserSignUp(this, registerUserInfos)
       .execute();
   }
 

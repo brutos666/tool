@@ -36,6 +36,10 @@ func Close(db *sqlx.DB) {
 }
 
 func Select(connection connection.Connection, dest interface{}, query string, args ...interface{}) error {
+	tx := connection.GetTx()
+	if strings.Contains(query, "?") {
+		query = tx.Rebind(query)
+	}
 	return connection.GetDb().SelectContext(connection.GetContext(), dest, query, args...)
 }
 

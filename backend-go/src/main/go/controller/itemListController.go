@@ -19,18 +19,6 @@ func FindAllItems(ctx context.Context) ([]entity.ItemWebResult, error) {
 	return itemsWebResult, nil
 }
 
-func FindAllUsers(ctx context.Context) ([]entity.UserWebResult, error) {
-	usersWebResult := []entity.UserWebResult{}
-	usersFromBase, err := service.FindAllUsers(ctx)
-	if err != nil {
-		return nil, err
-	}
-	for _, user := range usersFromBase {
-		usersWebResult = append(usersWebResult, *user.ConvertToUserWebResult())
-	}
-	return usersWebResult, nil
-}
-
 func SaveTreeItem(ctx context.Context, treeInfosWebResult entity.TreeInfosWebResult) (entity.TreeInfosWebResult, error) {
 	result, err := service.Save(ctx, treeInfosWebResult.ConvertToTreeInfos())
 	return result.ConvertToTreeInfosWebResult(), err

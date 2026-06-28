@@ -4,9 +4,9 @@
  * @property {string} email - Email
  * @property {string} firstName - Prénom
  * @property {string} lastName - Nom
- * @property {string} password - Mot de passe
  * @property {'ADMIN'|'USER'} role - Mot de passe
  */
+
 class User {
 
   name = 'User';

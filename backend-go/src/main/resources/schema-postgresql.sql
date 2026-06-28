@@ -1,16 +1,18 @@
 create sequence if not exists user_id_seq START 1;
 create table if not exists users
 (
-    id          bigint primary key default nextval('user_id_seq'::regclass) not null,
-    first_name  VARCHAR NOT NULL,
-    last_name   VARCHAR NOT NULL,
-    password    VARCHAR NOT NULL,
-    email       VARCHAR UNIQUE NOT NULL,
-    role        VARCHAR NOT NULL,
-    token       VARCHAR,
-    refresh_token VARCHAR,
-    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    update_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+	id bigint DEFAULT nextval('user_id_seq'::regclass) NOT NULL,
+	first_name varchar NOT NULL,
+	last_name varchar NOT NULL,
+	"password" varchar NOT NULL,
+	email varchar NOT NULL,
+	"role" varchar NOT NULL,
+	"token" varchar NULL,
+	refresh_token varchar NULL,
+	created_at timestamp DEFAULT CURRENT_TIMESTAMP NULL,
+	updated_at timestamp DEFAULT CURRENT_TIMESTAMP NULL,
+	CONSTRAINT users_email_key UNIQUE (email),
+	CONSTRAINT users_pkey PRIMARY KEY (id)
 );
 comment on table users is 'Utilisateur';
 comment on column users.first_name is 'Prénom';
@@ -21,15 +23,9 @@ comment on column users.role is 'Rôle';
 comment on column users.token is 'Jeton de connexion';
 comment on column users.refresh_token is 'Jeton de rafraîchissement';
 comment on column users.created_at is 'Date de création';
-comment on column users.update_at is 'Date de mise à jour';
+comment on column users.updated_at is 'Date de mise à jour';
 
-comment on table item is 'Item';
-comment on column item.title is 'Titre';
-comment on column item.text is 'Description';
-comment on column item.state is 'Etat';
-comment on column item.id is 'Identifiant unique';
-comment on column item.parent_id is 'Identifiant de l''item parent';
-comment on column item.next_id is 'Identifiant de l''item suivant';
+
 alter table users
     owner to postgres;
 

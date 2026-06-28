@@ -1,6 +1,6 @@
 import UserCallsRequest from '../requests/UserCallsRequest.js';
 import Command from './Command.js';
-/** @import {UserInfos} from '../data/User.js' */
+/** @import {RegisterUserInfos} from '../components/LoginSpace.js' */
 
 class UserSignUp extends Command {
 
@@ -9,14 +9,14 @@ class UserSignUp extends Command {
   /**
    * @constructor
    * @param {CommandDecorator} commandDecorator
-   * @param {UserInfos} userInfos
+   * @param {RegisterUserInfos} registerUserInfos : informations sur l'utilisateur qui veut s'inscrire
    */
-  constructor(commandDecorator, userInfos) {
+  constructor(commandDecorator, registerUserInfos) {
     super(commandDecorator);
 
     this.setSuccessMessage('Inscription effectuée avec succès');
     this.setErrorMessage('Une erreur est survenue lors de l\'inscription de l\'utilisateur');
-    this.setExecuteCallback(new UserCallsRequest().signUp.bind(null, userInfos));
+    this.setExecuteCallback(new UserCallsRequest().signUp.bind(null, registerUserInfos));
   }
 
 }

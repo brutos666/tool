@@ -1,0 +1,41 @@
+{
+	"linters": {
+		"default": "none",
+		"enable": [
+			"errcheck",
+			"govet",
+			"ineffassign",
+			"staticcheck",
+			"unused"
+		],
+		"settings": {
+			"staticcheck": {
+				"checks": [
+					"all",
+					"-S1002",
+					"-S1005",
+					"-S1007",
+					"-S1009",
+					"-S1011",
+					"-S1012",
+					"-S1016",
+					"-S1020",
+					"-S1039",
+					"-ST1001",
+					"-ST1003",
+					"-ST1005",
+					"-ST1012",
+					"-ST1016",
+					"-QF1001",
+					"-QF1002",
+					"-QF1003",
+					"-QF1004",
+					"-QF1008",
+					"-QF1012",
+					"-SA5008"
+				]
+			}
+		}
+	},
+	"version": "2"
+}

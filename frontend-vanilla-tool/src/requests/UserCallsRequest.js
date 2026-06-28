@@ -8,11 +8,11 @@ class UserCallsRequest {
 
   /**
    * Inscrit l'utilisateur
-   * @param {UserInfos} userInfos
+   * @param {RegisterUserInfos} registerUserInfos : informations sur l'utilisateur qui veut s'inscrire
    */
-  async signUp(userInfos) {
+  async signUp(registerUserInfos) {
     return new CallRequest()
-      .execute('user/signup', 'POST', userInfos);
+      .execute('user/signup', 'POST', registerUserInfos);
   }
 
   /**
