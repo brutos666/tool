@@ -10,29 +10,13 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-// Fonction pour initialiser la base de données avec les tables si elles n'existent pas
-func CreateTables(baseConnection connection.DatabaseConnection, filePath string) error {
-	db := connection.OpenConnection(baseConnection)
-	defer Close(db)
+func LaunchSQLScript(connection connection.Connection, filePath string) (int, error) {
 	// Lecture du fichier SQL contenant les instructions de création des tables
 	sqlBytes, err := os.ReadFile(filePath)
 	if err != nil {
-		return err
+		return 0, err
 	}
-	// Exécution des instructions SQL pour créer les tables
-	_, err = db.Exec(string(sqlBytes))
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func Open(base connection.DatabaseConnection) *sqlx.DB {
-	return connection.OpenConnection(base)
-}
-
-func Close(db *sqlx.DB) {
-	db.Close()
+	return returnResult(connection.GetDb().ExecContext(connection.GetContext(), string(sqlBytes)))
 }
 
 func Select(connection connection.Connection, dest interface{}, query string, args ...interface{}) error {

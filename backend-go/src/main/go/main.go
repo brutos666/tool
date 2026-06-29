@@ -1,31 +1,18 @@
 package main
 
 import (
-	"database/server/requestSQL"
 	"log"
 	"net/http"
 
 	"goTool/controller"
 	"goTool/handler"
-	"goTool/repository"
 )
 
-func main() {
-	/*
-		// Si la base de données n'est pas démarrée, on la démarre
-		err := server.StartServer(repository.BaseConnection)
-		if err != nil {
-				log.Fatalf("Impossible de démarrer H2 : %s", err)
-		}
-		defer server.StopServer(repository.BaseConnection)
-	*/
-	// Lancer le sql de création des tables si besoin
-	err := requestSQL.CreateTables(repository.BaseConnection, repository.SCHEMA_PATH)
-	if err != nil {
-		log.Fatalf("Impossible de créer les tables : %s", err)
-	}
-	go controller.StopServerOnSignal()
+func init() {
+	controller.Start()
+}
 
+func main() {
 	handler.ServerStart()
 
 	http.HandleFunc("/", func(response http.ResponseWriter, request *http.Request) {
