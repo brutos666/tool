@@ -20,7 +20,7 @@ func (webServer *requestServer) start() {
 	defer webServer.alertServerIsEnd()
 	err := webServer.server.ListenAndServe()
 	if err != nil {
-		log.Fatalf("Erreur lors du démarrage du serveur : %s", err)
+		log.Printf("Arrêt du serveur ou erreur lors du démarrage du serveur : %s", err)
 	}
 }
 

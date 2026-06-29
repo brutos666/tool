@@ -24,6 +24,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Impossible de créer les tables : %s", err)
 	}
+	go controller.StopServerOnSignal()
 
 	handler.ServerStart()
 
