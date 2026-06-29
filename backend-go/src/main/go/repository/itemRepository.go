@@ -71,7 +71,7 @@ func deleteInBase(connection connection.Connection, itemsIdToDelete []int64) err
 	var err error
 	nbRows := 0
 	if len(itemsIdToDelete) > 0 {
-		nbRows, err = requestSQL.ExecIn(connection, DELETE_SQL, "ids", itemsIdToDelete)
+		nbRows, err = requestSQL.ExecIn(connection, DELETE_SQL, itemsIdToDelete)
 		if err != nil {
 			return err
 		}

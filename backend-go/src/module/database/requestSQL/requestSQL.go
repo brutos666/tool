@@ -27,22 +27,13 @@ func Select(connection connection.Connection, dest interface{}, query string, ar
 	return connection.GetDb().SelectContext(connection.GetContext(), dest, query, args...)
 }
 
-func ExecIn(connection connection.Connection, query string, inName string, inValues interface{}) (int, error) {
-	query = strings.Replace(query, "?", ":"+inName, 1)
-	arg := make(map[string]interface{}, 0)
-	arg[inName] = inValues
-
-	query, args, err := sqlx.Named(query, arg)
+func ExecIn(connection connection.Connection, query string, inValues any) (int, error) {
+	argList := []any{inValues}
+	query, args, err := sqlx.In(query, argList...)
 	if err != nil {
 		return 0, err
 	}
-	query, args, err = sqlx.In(query, args...)
-	if err != nil {
-		return 0, err
-	}
-	tx := connection.GetTx()
-	query = tx.Rebind(query)
-	return returnResult(tx.ExecContext(connection.GetContext(), query, args...))
+	return ExecArgs(connection, query, args...)
 }
 
 func ExecArgs(connection connection.Connection, query string, args ...any) (int, error) {
