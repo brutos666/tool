@@ -3,13 +3,13 @@ package handler
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"log"
 	"net/http"
 	"time"
 
+	"goTool/errorHelper"
+
 	"github.com/go-playground/validator/v10"
-	"github.com/lib/pq"
 )
 
 const (
@@ -28,7 +28,7 @@ type (
 
 func Stop(requestPath string) {
 	stopApp := func(ctx context.Context) (any, error) {
-		message := createMessageWebResult("/stop", http.StatusOK, "Le serveur va être arrêté dès que toutes les requêtes en cours seront terminées")
+		message := errorHelper.CreateMessageWebResult("/stop", http.StatusOK, "Le serveur va être arrêté dès que toutes les requêtes en cours seront terminées")
 		return message, nil
 	}
 	functionToLaunch := func(response http.ResponseWriter, request *http.Request) {
@@ -47,7 +47,7 @@ func HandleError(requestPath string, err error) {
 
 func HandleGet[R any](requestPath string, callback getFunction[R]) {
 	if webServer.isStop() {
-		HandleError(requestPath, errors.New("Serveur en cours d'arrêt : la requête ne peut pas être exécutée"))
+		HandleError(requestPath, errorHelper.New("Serveur en cours d'arrêt : la requête ne peut pas être exécutée"))
 		return
 	}
 	http.HandleFunc(requestPath, getFunctionToLaunch(callback))
@@ -55,7 +55,7 @@ func HandleGet[R any](requestPath string, callback getFunction[R]) {
 
 func HandlePost[R, P any](requestPath string, callback postFunction[R, P]) {
 	if webServer.isStop() {
-		HandleError(requestPath, errors.New("Serveur en cours d'arrêt : la requête ne peut pas être exécutée"))
+		HandleError(requestPath, errorHelper.New("Serveur en cours d'arrêt : la requête ne peut pas être exécutée"))
 		return
 	}
 	http.HandleFunc(requestPath, getPostFunctionToLaunch(callback))
@@ -67,7 +67,7 @@ func getFunctionToLaunch[R any](callback getFunction[R]) func(response http.Resp
 		if request.Method == http.MethodGet {
 			process(response, request, callback)
 		} else {
-			sendErrorInResponse(response, request, http.StatusMethodNotAllowed, errors.New(NOT_ALLOWED_MESSAGE))
+			sendErrorInResponse(response, request, http.StatusMethodNotAllowed, errorHelper.New(NOT_ALLOWED_MESSAGE))
 		}
 		log.Println("Traitement de la requête", request.Method, request.URL.Path, "terminée")
 	}
@@ -83,7 +83,7 @@ func getPostFunctionToLaunch[R, P any](callback postFunction[R, P]) func(respons
 		case http.MethodOptions:
 			writeResponse(response, nil, http.StatusOK)
 		default:
-			sendErrorInResponse(response, request, http.StatusMethodNotAllowed, errors.New(NOT_ALLOWED_MESSAGE))
+			sendErrorInResponse(response, request, http.StatusMethodNotAllowed, errorHelper.New(NOT_ALLOWED_MESSAGE))
 		}
 	}
 }
@@ -103,7 +103,7 @@ func process[R any](response http.ResponseWriter, request *http.Request, callbac
 
 	values, err := callback(ctx)
 	if err != nil {
-		sendErrorInResponse(response, request, http.StatusInternalServerError, err)
+		sendErrorInResponse(response, request, errorHelper.GetHttpStatusError(err), err)
 	} else {
 		sendValues(response, request, &values)
 	}
@@ -126,7 +126,7 @@ func processPost[R, P any](response http.ResponseWriter, request *http.Request, 
 	}
 	values, err := callback(ctx, parameter)
 	if err != nil {
-		sendErrorInResponse(response, request, http.StatusInternalServerError, err)
+		sendErrorInResponse(response, request, errorHelper.GetHttpStatusError(err), err)
 		return
 	}
 
@@ -143,8 +143,8 @@ func sendValues(response http.ResponseWriter, request *http.Request, values any)
 }
 
 func sendErrorInResponse(response http.ResponseWriter, request *http.Request, statusCode int, err error) {
-	message := getDetailMessageError(err)
-	errorWebResult := createErrorWebResult(request.URL.Path, statusCode, message)
+	message := errorHelper.GetDetailError(err)
+	errorWebResult := errorHelper.CreateMessageWebResult(request.URL.Path, statusCode, message)
 	jsonData, responseErr := json.Marshal(errorWebResult)
 	if responseErr != nil {
 		panic("Impossible de renvoyer l'erreur '" + message + "' dans la réponse à la requête '" + request.URL.RequestURI() + "'")
@@ -160,12 +160,4 @@ func writeResponse(response http.ResponseWriter, jsonData []byte, statusCode int
 	response.Header().Set("Content-Type", "application/json")
 	response.WriteHeader(statusCode)
 	response.Write(jsonData)
-}
-
-func getDetailMessageError(err error) string {
-	var pqErr *pq.Error
-	if errors.As(err, &pqErr) {
-		return pqErr.ErrorWithDetail()
-	}
-	return err.Error()
 }

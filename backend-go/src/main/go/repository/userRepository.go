@@ -4,10 +4,10 @@ import (
 	"context"
 	"database/server/connection"
 	"database/server/requestSQL"
-	"fmt"
 	"time"
 
 	"goTool/entity"
+	"goTool/errorHelper/specificError"
 )
 
 const (
@@ -50,7 +50,9 @@ func doSignUp(connection connection.Connection, userInfos userInfosArgs) ([]enti
 		return nil, err
 	}
 	if len(existingUsers) > 0 {
-		return nil, fmt.Errorf("L'utilisateur avec l'email %s existe déjà", userInfos.user.GetEmail())
+		functionalErr := specificError.Errorf("L'utilisateur avec l'email %s existe déjà", userInfos.user.GetEmail())
+		functionalErr.AddContext("email", userInfos.user.GetEmail())
+		return nil, functionalErr
 	}
 	role := userInfos.user.GetRole()
 
