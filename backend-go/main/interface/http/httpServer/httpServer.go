@@ -1,22 +1,26 @@
-package handler
+// Package httpServer s'occupe du serveur HTTP. Ce dernier attend la fin des requêtes en cours avant de s'arrêter
+package httpServer
 
 import (
 	"context"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
 	"sync"
+	"syscall"
 	"time"
 )
 
-type requestServer struct {
+type httpServer struct {
 	groupServer sync.WaitGroup
 	stopped     bool
 	server      *http.Server
 }
 
-var webServer requestServer
+var webServer httpServer
 
-func (webServer *requestServer) start() {
+func (webServer *httpServer) start() {
 	defer webServer.alertServerIsEnd()
 	err := webServer.server.ListenAndServe()
 	if err != nil {
@@ -24,7 +28,7 @@ func (webServer *requestServer) start() {
 	}
 }
 
-func (webServer *requestServer) stop() {
+func (webServer *httpServer) stop() {
 	defer webServer.alertServerIsEnd()
 	log.Println("Attente fin des requêtes en cours")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -34,28 +38,28 @@ func (webServer *requestServer) stop() {
 	}
 }
 
-func (webServer *requestServer) setStop() {
+func (webServer *httpServer) setStop() {
 	webServer.stopped = true
 }
 
-func (webServer *requestServer) isStop() bool {
+func (webServer *httpServer) isStop() bool {
 	return webServer.stopped
 }
 
-func (webServer *requestServer) mustWaitEndOfServer() {
+func (webServer *httpServer) mustWaitEndOfServer() {
 	webServer.groupServer.Add(1)
 }
 
-func (webServer *requestServer) alertServerIsEnd() {
+func (webServer *httpServer) alertServerIsEnd() {
 	webServer.groupServer.Done()
 }
 
-func (webServer *requestServer) waitEndOfServer() {
+func (webServer *httpServer) waitEndOfServer() {
 	webServer.groupServer.Wait()
 }
 
-func createServer() *requestServer {
-	webServer := new(requestServer)
+func createServer() *httpServer {
+	webServer := new(httpServer)
 	webServer.stopped = false
 	webServer.server = &http.Server{Addr: ":8080", Handler: nil}
 	return webServer
@@ -76,4 +80,24 @@ func ServerStop() {
 	webServer.setStop()
 	webServer.mustWaitEndOfServer()
 	go webServer.stop()
+}
+
+func ServerIsStop() bool {
+	return webServer.isStop()
+}
+
+func StopServerOnSignal() {
+	// Create a channel to receive signals
+	sigChan := make(chan os.Signal, 1)
+
+	// Notify the channel for specific signals
+	signal.Notify(sigChan,
+		syscall.SIGINT,  // Ctrl+C
+		syscall.SIGTERM, // Termination signal
+	)
+
+	// Wait for signal
+	sig := <-sigChan
+	log.Printf("Réception du signal d'interruption '%v'", sig)
+	ServerStop()
 }

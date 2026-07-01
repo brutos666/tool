@@ -1,3 +1,4 @@
+// Package handler s'occupe de la réception de la requête et de l'envoi de la réponse
 package handler
 
 import (
@@ -8,6 +9,7 @@ import (
 	"time"
 
 	"goTool/errorHelper"
+	"goTool/interface/http/httpServer"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -21,9 +23,8 @@ var validate = validator.New()
 
 // Type de fonction permettant de récupérer n'importe quel type d'objet
 type (
-	getFunction[R any]                                                  func(context.Context) (R, error)
-	postFunction[R, P any]                                              func(context.Context, P) (R, error)
-	handleFunction[response http.ResponseWriter, request *http.Request] func(response, request)
+	getFunction[R any]     func(context.Context) (R, error)
+	postFunction[R, P any] func(context.Context, P) (R, error)
 )
 
 func Stop(requestPath string) {
@@ -33,7 +34,7 @@ func Stop(requestPath string) {
 	}
 	functionToLaunch := func(response http.ResponseWriter, request *http.Request) {
 		process(response, request, stopApp)
-		ServerStop()
+		httpServer.ServerStop()
 	}
 	http.HandleFunc(requestPath, functionToLaunch)
 }
@@ -46,7 +47,7 @@ func HandleError(requestPath string, err error) {
 }
 
 func HandleGet[R any](requestPath string, callback getFunction[R]) {
-	if webServer.isStop() {
+	if httpServer.ServerIsStop() {
 		HandleError(requestPath, errorHelper.New("Serveur en cours d'arrêt : la requête ne peut pas être exécutée"))
 		return
 	}
@@ -54,7 +55,7 @@ func HandleGet[R any](requestPath string, callback getFunction[R]) {
 }
 
 func HandlePost[R, P any](requestPath string, callback postFunction[R, P]) {
-	if webServer.isStop() {
+	if httpServer.ServerIsStop() {
 		HandleError(requestPath, errorHelper.New("Serveur en cours d'arrêt : la requête ne peut pas être exécutée"))
 		return
 	}
@@ -92,7 +93,7 @@ func stopServerIfPanic() {
 	panicMessage := recover()
 	if panicMessage != nil {
 		log.Println(panicMessage)
-		ServerStop()
+		httpServer.ServerStop()
 	}
 }
 
