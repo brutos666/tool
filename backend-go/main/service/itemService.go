@@ -4,18 +4,8 @@ import (
 	"context"
 
 	"goTool/entity"
-	"goTool/mapper"
 	"goTool/repository"
 )
-
-func FindAll(ctx context.Context) ([]entity.Item, error) {
-	itemsFromBase, err := repository.FindAll(ctx)
-	if err != nil {
-		return nil, err
-	}
-	// Conversion en arbre
-	return mapper.ConvertItemsModelToItems(itemsFromBase), nil
-}
 
 func Save(ctx context.Context, treeInfos entity.TreeInfos) (entity.TreeInfos, error) {
 	// Construction de la liste des références aux items

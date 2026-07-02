@@ -11,10 +11,10 @@ type ItemQryService struct {
 	repository domain.ItemQueryRepository
 }
 
-func (findCase ItemQryService) FindAll(ctx context.Context) ([]*domain.ItemFound, error) {
-	return findCase.repository.FindAll(ctx)
-}
-
 func ItemQueryService(repository domain.ItemQueryRepository) ItemQryService {
 	return ItemQryService{repository: repository}
+}
+
+func (queryService ItemQryService) FindAll(ctx context.Context) ([]*domain.ItemFound, error) {
+	return queryService.repository.FindAll(ctx)
 }
