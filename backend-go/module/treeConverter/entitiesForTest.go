@@ -1,13 +1,15 @@
 package treeConverter
 
+import "strconv"
+
 type ItemTreeEntity struct {
-	id       int64
+	id       int
 	children []TreeEntity
 	status   string
 	title    string
 }
 
-func (item *ItemTreeEntity) GetId() int64 { return item.id }
+func (item *ItemTreeEntity) GetId() string { return strconv.Itoa(item.id) }
 func (item *ItemTreeEntity) SetChildren(children []TreeEntity) {
 	item.children = children
 }
@@ -15,23 +17,16 @@ func (item *ItemTreeEntity) SetStatus(status string) { item.status = status }
 func (item *ItemTreeEntity) GetStatus() string       { return item.status }
 
 type ItemFlatBdd struct {
-	id           int64
-	parentId     int64
-	nextId       int64
+	id           int
+	parentId     int
+	nextId       int
 	nextIdIsNull bool
 	title        string
 }
 
-func (itemFlatBdd ItemFlatBdd) GetId() int64       { return itemFlatBdd.id }
-func (itemFlatBdd ItemFlatBdd) GetParentId() int64 { return itemFlatBdd.parentId }
-func (itemFlatBdd ItemFlatBdd) GetNextIdValue() int64 {
-	if itemFlatBdd.nextIdIsNull {
-		return 0
-	}
-	return itemFlatBdd.nextId
-}
-func (itemFlatBdd ItemFlatBdd) IsNextIdNull() bool   { return itemFlatBdd.nextIdIsNull }
-func (itemFlatBdd *ItemFlatBdd) SetNextIdNullValue() { itemFlatBdd.nextIdIsNull = true }
+func (itemFlatBdd ItemFlatBdd) GetId() string       { return strconv.Itoa(itemFlatBdd.id) }
+func (itemFlatBdd ItemFlatBdd) GetParentId() string { return strconv.Itoa(itemFlatBdd.parentId) }
+func (itemFlatBdd ItemFlatBdd) GetNextId() string   { return strconv.Itoa(itemFlatBdd.nextId) }
 
 func (itemFlatBdd ItemFlatBdd) ConvertToTree() TreeEntity {
 	item := new(ItemTreeEntity)
@@ -42,13 +37,12 @@ func (itemFlatBdd ItemFlatBdd) ConvertToTree() TreeEntity {
 	return item
 }
 
-func CreateItemFlatBdd(id int64, parentId int64, nextId int64, nextIdIsNull bool, title string) *ItemFlatBdd {
+func CreateItemFlatBdd(id int, parentId int, nextId int, nextIdIsNull bool, title string) *ItemFlatBdd {
 	itemFlatBdd := new(ItemFlatBdd)
 	itemFlatBdd.id = id
 	itemFlatBdd.parentId = parentId
 	if nextIdIsNull {
 		itemFlatBdd.nextIdIsNull = true
-		itemFlatBdd.nextId = 0
 	} else {
 		itemFlatBdd.nextIdIsNull = false
 		itemFlatBdd.nextId = nextId
@@ -57,7 +51,7 @@ func CreateItemFlatBdd(id int64, parentId int64, nextId int64, nextIdIsNull bool
 	return itemFlatBdd
 }
 
-func CreateItemTreeEntity(id int64, status string, title string, children []*ItemTreeEntity) *ItemTreeEntity {
+func CreateItemTreeEntity(id int, status string, title string, children []*ItemTreeEntity) *ItemTreeEntity {
 	item := new(ItemTreeEntity)
 	item.id = id
 	item.children = []TreeEntity{}

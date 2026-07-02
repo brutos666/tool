@@ -2,17 +2,16 @@ package treeConverter
 
 type (
 	TreeEntity interface {
-		GetId() int64
+		GetId() string
 		SetChildren(children []TreeEntity)
 		SetStatus(status string)
 		GetStatus() string
 	}
 
 	FlatEntity interface {
-		GetId() int64
-		GetParentId() int64
-		GetNextIdValue() int64
-		IsNextIdNull() bool
+		GetId() string
+		GetParentId() string
+		GetNextId() string
 		ConvertToTree() TreeEntity
 	}
 )

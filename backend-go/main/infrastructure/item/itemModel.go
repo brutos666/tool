@@ -3,6 +3,7 @@ package item
 
 import (
 	"database/sql"
+	"strconv"
 	"treeConverter"
 
 	"goTool/domain"
@@ -19,21 +20,15 @@ type ItemModel struct {
 	NextId   sql.NullInt64  `db:"next_id"`
 }
 
-func (itemModel ItemModel) GetId() int64                { return itemModel.Id }
-func (itemModel *ItemModel) SetId(id int64)             { itemModel.Id = id }
-func (itemModel *ItemModel) SetTitle(title string)      { itemModel.Title = title }
-func (itemModel *ItemModel) SetState(state string)      { itemModel.State = state }
-func (itemModel ItemModel) GetParentId() int64          { return itemModel.ParentId }
-func (itemModel *ItemModel) SetParentId(id int64)       { itemModel.ParentId = id }
-func (itemModel ItemModel) GetNextId() sql.NullInt64    { return itemModel.NextId }
-func (itemModel *ItemModel) SetNextId(id sql.NullInt64) { itemModel.NextId = id }
-func (itemModel ItemModel) GetNextIdValue() int64       { return getNullInt64Value(itemModel.NextId) }
-func (itemModel *ItemModel) SetNextIdValue(id int64) {
-	itemModel.NextId.Int64 = id
-	itemModel.NextId.Valid = true
+func (itemModel ItemModel) GetId() string       { return strconv.FormatInt(itemModel.Id, 10) }
+func (itemModel ItemModel) GetParentId() string { return strconv.FormatInt(itemModel.ParentId, 10) }
+func (itemModel ItemModel) GetNextId() string {
+	if itemModel.NextId.Valid {
+		return strconv.FormatInt(itemModel.NextId.Int64, 10)
+	}
+	return ""
 }
-func (itemModel ItemModel) IsNextIdNull() bool   { return !itemModel.NextId.Valid }
-func (itemModel *ItemModel) SetNextIdNullValue() { itemModel.NextId.Valid = false }
+
 func (itemModel *ItemModel) SetText(text string) {
 	if text == "" {
 		itemModel.Text.Valid = false
@@ -45,7 +40,7 @@ func (itemModel *ItemModel) SetText(text string) {
 
 func (itemModel ItemModel) ConvertToTree() treeConverter.TreeEntity {
 	item := new(domain.ItemFound)
-	item.SetId(itemModel.Id)
+	item.SetId(itemModel.GetId())
 	item.SetChildren([]treeConverter.TreeEntity{})
 	item.SetStatus(treeConverter.OK)
 	item.SetTitle(itemModel.Title)

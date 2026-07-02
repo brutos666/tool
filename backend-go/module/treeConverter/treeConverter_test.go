@@ -18,7 +18,7 @@ func TestConvertFlatToTree_shouldBeEmpty_whenNoItems(t *testing.T) {
 	// Given
 	itemsFlat := []ItemFlatBdd{}
 	// When
-	actual := ConvertFlatToTree[ItemFlatBdd, *ItemTreeEntity](itemsFlat)
+	actual := ConvertFlatToTree[ItemFlatBdd, *ItemTreeEntity]("-1", itemsFlat)
 	// Then
 	expected := make([]*ItemTreeEntity, 0)
 	assert.Equal(t, expected, actual)
@@ -28,7 +28,7 @@ func TestConvertFlatToTree_shouldBeConvertToItem_whenOneItemModel(t *testing.T) 
 	// Given
 	itemsFlat := []ItemFlatBdd{*CreateItemFlatBdd(1, -1, 0, true, TITLE1)}
 	// When
-	actual := ConvertFlatToTree[ItemFlatBdd, *ItemTreeEntity](itemsFlat)
+	actual := ConvertFlatToTree[ItemFlatBdd, *ItemTreeEntity]("-1", itemsFlat)
 	// Then
 	expected := []*ItemTreeEntity{CreateItemTreeEntity(1, OK, TITLE1, []*ItemTreeEntity{})}
 	assert.Equal(t, expected, actual)
@@ -40,7 +40,7 @@ func TestConvertFlatToTree_shouldReturnItems_shouldAllStatusOk_whenNoChildren_wh
 	itemFlatBdd2 := *CreateItemFlatBdd(2, -1, 0, true, TITLE2)
 	itemsFlat := []ItemFlatBdd{itemFlatBdd1, itemFlatBdd2}
 	// When
-	actual := ConvertFlatToTree[ItemFlatBdd, *ItemTreeEntity](itemsFlat)
+	actual := ConvertFlatToTree[ItemFlatBdd, *ItemTreeEntity]("-1", itemsFlat)
 	// Then
 	expected1 := CreateItemTreeEntity(1, OK, TITLE1, []*ItemTreeEntity{})
 	expected2 := CreateItemTreeEntity(2, OK, TITLE2, []*ItemTreeEntity{})
@@ -54,7 +54,7 @@ func TestConvertFlatToTree_shouldReturnListItems_shouldAllStatusOk_whenOneChildr
 	itemFlatBdd2 := *CreateItemFlatBdd(2, 1, 0, true, TITLE2)
 	itemsFlat := []ItemFlatBdd{itemFlatBdd1, itemFlatBdd2}
 	// When
-	actual := ConvertFlatToTree[ItemFlatBdd, *ItemTreeEntity](itemsFlat)
+	actual := ConvertFlatToTree[ItemFlatBdd, *ItemTreeEntity]("-1", itemsFlat)
 	// Then
 	expectedChild := CreateItemTreeEntity(2, OK, TITLE2, []*ItemTreeEntity{})
 	expectedParent := CreateItemTreeEntity(1, OK, TITLE1, []*ItemTreeEntity{expectedChild})
@@ -70,7 +70,7 @@ func TestConvertFlatToTree_shouldReturnListItems_shouldAllStatusOk_whenTreesWith
 	child2parent1 := *CreateItemFlatBdd(3, 1, 0, true, TITLE3)
 	itemsFlat := []ItemFlatBdd{parent1, parent2, child1parent1, child2parent1}
 	// When
-	actual := ConvertFlatToTree[ItemFlatBdd, *ItemTreeEntity](itemsFlat)
+	actual := ConvertFlatToTree[ItemFlatBdd, *ItemTreeEntity]("-1", itemsFlat)
 	// Then
 	expectedChild1Item1 := CreateItemTreeEntity(2, OK, TITLE2, []*ItemTreeEntity{})
 	expectedChild2Item1 := CreateItemTreeEntity(3, OK, TITLE3, []*ItemTreeEntity{})
@@ -87,7 +87,7 @@ func TestConvertFlatToTree_shouldReturnListItems_shouldHaveNextNotFoundStatus_wh
 	child2parent1 := *CreateItemFlatBdd(3, 1, 10, false, TITLE3)
 	itemsFlat := []ItemFlatBdd{parent1, child2parent1, child1parent1, parent2}
 	// When
-	actual := ConvertFlatToTree[ItemFlatBdd, *ItemTreeEntity](itemsFlat)
+	actual := ConvertFlatToTree[ItemFlatBdd, *ItemTreeEntity]("-1", itemsFlat)
 	// Then
 	expectedChild1Item1 := CreateItemTreeEntity(2, OK, TITLE2, []*ItemTreeEntity{})
 	expectedChild2Item1 := CreateItemTreeEntity(3, NEXT_NOT_FOUND, TITLE3, []*ItemTreeEntity{})
@@ -105,7 +105,7 @@ func TestConvertFlatToTree_shouldReturnListItems_shouldHaveLoopStatus_whenChildr
 	child3Parent1 := *CreateItemFlatBdd(4, 1, 2, false, TITLE4)
 	itemsFlat := []ItemFlatBdd{parent1, child2parent1, child1parent1, child3Parent1}
 	// When
-	actual := ConvertFlatToTree[ItemFlatBdd, *ItemTreeEntity](itemsFlat)
+	actual := ConvertFlatToTree[ItemFlatBdd, *ItemTreeEntity]("-1", itemsFlat)
 	// Then
 	expectedChild1Item1 := CreateItemTreeEntity(2, OK, TITLE2, []*ItemTreeEntity{})
 	expectedChild2Item1 := CreateItemTreeEntity(3, OK, TITLE3, []*ItemTreeEntity{})
@@ -123,7 +123,7 @@ func TestConvertFlatToTree_shouldReturnListItems_shouldHaveLoopStatus_whenTwoChi
 	child3Parent1 := *CreateItemFlatBdd(4, 1, 3, false, TITLE4)
 	itemsFlat := []ItemFlatBdd{parent1, child2parent1, child1parent1, child3Parent1}
 	// When
-	actual := ConvertFlatToTree[ItemFlatBdd, *ItemTreeEntity](itemsFlat)
+	actual := ConvertFlatToTree[ItemFlatBdd, *ItemTreeEntity]("-1", itemsFlat)
 	// Then
 	expectedChild1Item1 := CreateItemTreeEntity(2, LOOP, TITLE2, []*ItemTreeEntity{})
 	expectedChild2Item1 := CreateItemTreeEntity(3, OK, TITLE3, []*ItemTreeEntity{})
@@ -141,7 +141,7 @@ func TestConvertFlatToTree_shouldReturnListItems_shouldHaveOrphanNextNotFoundSta
 	child2parent2 := *CreateItemFlatBdd(3, 4, 10, false, TITLE3)
 	itemsFlat := []ItemFlatBdd{parent1, child2parent2, child1parent2, parent2}
 	// When
-	actual := ConvertFlatToTree[ItemFlatBdd, *ItemTreeEntity](itemsFlat)
+	actual := ConvertFlatToTree[ItemFlatBdd, *ItemTreeEntity]("-1", itemsFlat)
 	// Then
 	expectedChild1Item2 := CreateItemTreeEntity(2, OK, TITLE2, []*ItemTreeEntity{})
 	expectedChild2Item2 := CreateItemTreeEntity(3, NEXT_NOT_FOUND, TITLE3, []*ItemTreeEntity{})
@@ -157,7 +157,7 @@ func TestConvertFlatToTree_shouldReturnListItems_shouldAllStatusOk_whenNextIdsCo
 		*CreateItemFlatBdd(2, -1, 0, true, TITLE2),
 	}
 	// When
-	actual := ConvertFlatToTree[ItemFlatBdd, *ItemTreeEntity](itemsFlat)
+	actual := ConvertFlatToTree[ItemFlatBdd, *ItemTreeEntity]("-1", itemsFlat)
 	// Then
 	expectedItem1 := CreateItemTreeEntity(1, OK, TITLE1, []*ItemTreeEntity{})
 	expectedItem2 := CreateItemTreeEntity(2, OK, TITLE2, []*ItemTreeEntity{})

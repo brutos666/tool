@@ -1,7 +1,9 @@
 // Package domain permet de définir les règles métier
 package domain
 
-import "treeConverter"
+import (
+	"treeConverter"
+)
 
 const (
 	OK             = "OK"
@@ -18,13 +20,8 @@ const (
 	READ   = "READ"
 )
 
-type Item interface {
-	GetId() int64
-	GetTitle() string
-	GetChildren() string
-}
 type ItemFound struct {
-	id       int64
+	id       string
 	title    string
 	text     string
 	state    string
@@ -32,8 +29,8 @@ type ItemFound struct {
 	status   string // Lié à la manière dont sont stockés les données. Le statut permet d'identifier les incohérences en terme de hiérarchie lors de la récupération des données (Orphelin, boucle, ...)
 }
 
-func (item *ItemFound) GetId() int64                                    { return item.id }
-func (item *ItemFound) SetId(id int64)                                  { item.id = id }
+func (item *ItemFound) GetId() string                                   { return item.id }
+func (item *ItemFound) SetId(id string)                                 { item.id = id }
 func (item *ItemFound) GetTitle() string                                { return item.title }
 func (item *ItemFound) SetTitle(title string)                           { item.title = title }
 func (item *ItemFound) GetText() string                                 { return item.text }
@@ -46,7 +43,7 @@ func (item *ItemFound) GetStatus() string                               { return
 func (item *ItemFound) SetStatus(status string)                         { item.status = status }
 
 type ItemToSave struct {
-	id       int64
+	id       string
 	title    string
 	text     string
 	state    string
@@ -54,8 +51,8 @@ type ItemToSave struct {
 	crudMode string
 }
 
-func (item ItemToSave) GetId() int64                       { return item.id }
-func (item *ItemToSave) SetID(id int64)                    { item.id = id }
+func (item ItemToSave) GetId() string                      { return item.id }
+func (item *ItemToSave) SetID(id string)                   { item.id = id }
 func (item ItemToSave) GetTitle() string                   { return item.title }
 func (item ItemToSave) GetChildren() []ItemToSave          { return item.children }
 func (item *ItemToSave) SetChildren(children []ItemToSave) { item.children = children }

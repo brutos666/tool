@@ -1,4 +1,10 @@
-// Package treeConverter permet la conversion d'entité en arbre selon des contrats bien définis
+// Package treeConverter permet la conversion d'entité en arbre selon un contrat bien défini :
+// Chaque entité doit avoir :
+//	- un identifiant
+//	- l'identifiant de l'entité parente
+//	- l'identifiant de l'entité suivante (ou rien si pas de suivante)
+// Ces identifiants doivent être retourné en chaines de caractères par les méthodes GetId(), GetParentId() et GetNExtId() (contrat pour cette conversion de liste plate en arbre)
+
 package treeConverter
 
 import (
@@ -14,13 +20,13 @@ const (
 	TOTAL_ORPHAN   = "TOTAL_ORPHAN"
 )
 
-func ConvertFlatToTree[F FlatEntity, T TreeEntity](flats []F) []T {
+func ConvertFlatToTree[F FlatEntity, T TreeEntity](rootIdKey string, flats []F) []T {
 	// Convertis explicitement en []FlatEntity
 	flatItems := make([]FlatEntity, len(flats))
 	for i, item := range flats {
 		flatItems[i] = item
 	}
-	treeItems := ConvertFlatEntitiesToTreeEntities(flatItems)
+	treeItems := ConvertFlatEntitiesToTreeEntities(rootIdKey, flatItems)
 	trees := make([]T, len(treeItems))
 	for i, item := range treeItems {
 		trees[i] = item.(T)
@@ -28,19 +34,19 @@ func ConvertFlatToTree[F FlatEntity, T TreeEntity](flats []F) []T {
 	return trees
 }
 
-func ConvertFlatEntitiesToTreeEntities(flatItems []FlatEntity) []TreeEntity {
+func ConvertFlatEntitiesToTreeEntities(rootIdKey string, flatItems []FlatEntity) []TreeEntity {
 	groupedByParent := utilities.GroupBy(
 		flatItems,
-		func(flatItem FlatEntity) int64 { return flatItem.GetParentId() })
+		func(flatItem FlatEntity) string { return flatItem.GetParentId() })
 	// Trier les enfants directs entre eux
-	sortedItems := make(map[int64][]TreeEntity)
+	sortedItems := make(map[string][]TreeEntity)
 	for key, flatItems := range groupedByParent {
 		sortedItems[key] = sortSameParentItems(flatItems)
 	}
-	return getChildren(-1, sortedItems)
+	return getChildren(rootIdKey, sortedItems)
 }
 
-func getChildren(IdKey int64, sortedItems map[int64][]TreeEntity) []TreeEntity {
+func getChildren(IdKey string, sortedItems map[string][]TreeEntity) []TreeEntity {
 	children := sortedItems[IdKey]
 	if children == nil {
 		return []TreeEntity{}
@@ -80,18 +86,18 @@ func sortSameParentItems(flatItems []FlatEntity) []TreeEntity {
 	return allSortedItems
 }
 
-func collectInformations(flatItems []FlatEntity) (allIds []int64, firstIds []int64, flatItemById map[int64]FlatEntity) {
+func collectInformations(flatItems []FlatEntity) (allIds []string, firstIds []string, flatItemById map[string]FlatEntity) {
 	nbItems := len(flatItems)
-	allNextIds := make([]int64, nbItems)
-	allIds = make([]int64, nbItems)
-	flatItemById = make(map[int64]FlatEntity, nbItems)
+	allNextIds := make([]string, nbItems)
+	allIds = make([]string, nbItems)
+	flatItemById = make(map[string]FlatEntity, nbItems)
 	for index, flatItem := range flatItems {
-		allNextIds[index] = flatItem.GetNextIdValue()
+		allNextIds[index] = flatItem.GetNextId()
 		flatItemById[flatItem.GetId()] = flatItem
 		allIds[index] = flatItem.GetId()
 	}
 	slices.Sort(allIds)
-	firstIds = make([]int64, 0)
+	firstIds = make([]string, 0)
 	for _, flatItem := range flatItems {
 		id := flatItem.GetId()
 		if isFirst(allNextIds, id) {
@@ -102,7 +108,7 @@ func collectInformations(flatItems []FlatEntity) (allIds []int64, firstIds []int
 }
 
 // Un item est le premier s'il n'existe pas en tant que suivant
-func isFirst(allNextIds []int64, id int64) bool {
+func isFirst(allNextIds []string, id string) bool {
 	return !slices.Contains(allNextIds, id)
 }
 
@@ -115,22 +121,22 @@ func isFirst(allNextIds []int64, id int64) bool {
 * 	- LOOP si l'item suivant est déjà dans les items triés
 *		- NEXT_NOT_FOUND, si l'identifiant n'est pas trouvé
  */
-func process(flatItemById map[int64]FlatEntity, id int64, ids []int64) ([]TreeEntity, []int64) {
+func process(flatItemById map[string]FlatEntity, id string, ids []string) ([]TreeEntity, []string) {
 	sortedItems := make([]TreeEntity, 0)
-	sortedIds := make([]int64, 0)
+	sortedIds := make([]string, 0)
 	currentItem := flatItemById[id]
 	// Si l'identifiant n'existe pas en tant que suivant, alors il s'agit du 1er. On va construire
 	// la liste ordonnée à partir du 1er en recherchant les suivants
 	for {
 		sortedItems = append(sortedItems, currentItem.ConvertToTree())
 		sortedIds = append(sortedIds, currentItem.GetId())
-		ids = slices.DeleteFunc(ids, func(value int64) bool {
+		ids = slices.DeleteFunc(ids, func(value string) bool {
 			return value == currentItem.GetId()
 		})
-		if currentItem.IsNextIdNull() {
+		if len(currentItem.GetNextId()) == 0 {
 			break
 		}
-		nextId := currentItem.GetNextIdValue()
+		nextId := currentItem.GetNextId()
 		if nextIdNotFound(ids, nextId) {
 			item := sortedItems[len(sortedItems)-1]
 			if isLoop(sortedIds, nextId) {
@@ -145,11 +151,11 @@ func process(flatItemById map[int64]FlatEntity, id int64, ids []int64) ([]TreeEn
 	return sortedItems, ids
 }
 
-func nextIdNotFound(ids []int64, nextId int64) bool {
+func nextIdNotFound(ids []string, nextId string) bool {
 	return !slices.Contains(ids, nextId)
 }
 
-func isLoop(sortedIds []int64, nextId int64) bool {
+func isLoop(sortedIds []string, nextId string) bool {
 	return slices.Contains(sortedIds, nextId)
 }
 

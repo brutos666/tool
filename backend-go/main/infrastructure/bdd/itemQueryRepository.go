@@ -23,16 +23,12 @@ func (repo *itemQryRepository) FindAll(ctx context.Context) ([]*domain.ItemFound
 	return connection.LaunchNormalWay(ctx, configuration.BaseConnection, selectAllItems, "")
 }
 
-func (repo *itemQryRepository) Save(ctx context.Context, item *domain.ItemToSave) error {
-	return nil
-}
-
 func selectAllItems(connection connection.Connection, notUsed string) ([]*domain.ItemFound, error) {
 	var itemsModel []item.ItemModel
 	err := requestSQL.Select(connection, &itemsModel, SELECT_ALL)
 	if err != nil {
 		return nil, err
 	}
-	itemsFound := treeConverter.ConvertFlatToTree[item.ItemModel, *domain.ItemFound](itemsModel)
+	itemsFound := treeConverter.ConvertFlatToTree[item.ItemModel, *domain.ItemFound]("-1", itemsModel)
 	return itemsFound, nil
 }

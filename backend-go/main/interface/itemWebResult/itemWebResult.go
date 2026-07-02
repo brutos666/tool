@@ -4,7 +4,7 @@ package itemWebResult
 import "goTool/domain"
 
 type ItemWebResult struct {
-	ID       int64            `json:"id"`
+	ID       string           `json:"id"`
 	Title    string           `json:"title"`
 	Text     string           `json:"text"`
 	State    string           `json:"state"`
