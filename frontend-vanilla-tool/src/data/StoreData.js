@@ -1,5 +1,6 @@
 import DragDropCenter from '../components/DragDropCenter.js';
 import NotificationCenter from '../components/NotificationCenter.js';
+import { ROOT_ID } from '../tools/Constants.js';
 import TreeItem from './TreeItem.js';
 import User from './User.js';
 /** @import {ItemInfos} from './TreeItem.js'; */
@@ -8,7 +9,7 @@ import User from './User.js';
 class StoreData {
 
   static init() {
-    window._treeItem = new TreeItem({ id: -1, title: 'Racine', state: 'TODO', children: [] });
+    window._treeItem = new TreeItem({ id: ROOT_ID, title: 'Racine', state: 'TODO', children: [] });
     window._currentSpace = null;
     window._notification_center = new NotificationCenter();
     window._drag_drop_center = new DragDropCenter();

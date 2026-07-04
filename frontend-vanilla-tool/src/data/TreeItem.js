@@ -1,6 +1,6 @@
-import TreeItemList from './TreeItemList.js';
-import { CRUD_MODE } from '../tools/Constants.js';
+import { CRUD_MODE, ROOT_ID } from '../tools/Constants.js';
 import StoreData from './StoreData.js';
+import TreeItemList from './TreeItemList.js';
 /** @import Component from '../components/Component.js'; */
 /** @import { STATE, STATUS } from '../tools/Constants.js'; */
 
@@ -256,7 +256,7 @@ class TreeItem {
   }
   isRoot() {
     return this.getParentItem()
-      .getItemId() === -1;
+      .getItemId() === ROOT_ID;
   }
   /**
    * @returns {boolean} - Indique si la tâche est nouvelle

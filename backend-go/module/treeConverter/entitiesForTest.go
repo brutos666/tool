@@ -9,12 +9,11 @@ type ItemTreeEntity struct {
 	title    string
 }
 
-func (item *ItemTreeEntity) GetId() string { return strconv.Itoa(item.id) }
-func (item *ItemTreeEntity) SetChildren(children []TreeEntity) {
-	item.children = children
-}
-func (item *ItemTreeEntity) SetStatus(status string) { item.status = status }
-func (item *ItemTreeEntity) GetStatus() string       { return item.status }
+func (item *ItemTreeEntity) GetId() string                     { return strconv.Itoa(item.id) }
+func (item *ItemTreeEntity) SetChildren(children []TreeEntity) { item.children = children }
+func (item *ItemTreeEntity) GetChildren() []TreeEntity         { return item.children }
+func (item *ItemTreeEntity) SetStatus(status string)           { item.status = status }
+func (item *ItemTreeEntity) GetStatus() string                 { return item.status }
 
 type ItemFlatBdd struct {
 	id           int

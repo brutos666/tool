@@ -28,7 +28,35 @@ func (connection Connection) IsModeTrans() bool           { return connection.mo
 
 type (
 	CallbackWithResult[R any, A any] func(Connection, A) ([]R, error)
+	CallbackWithoutResult[A any]     func(Connection, A) error
 )
+
+// LaunchTransactionnel permet l'appel d'une fonction de mise à jour de la base de données en mode transactionnel
+//
+// Ouvre une connection à la base de données en mode transaction.
+// Appel la fonction qui doit mettre à jour la base de données.
+// Rollback et ferme la connection si une erreur survient.
+// Commit et ferme la connection si tout se passe bien.
+func LaunchTransactionnel[A any](ctx context.Context, base DatabaseConnection, callback CallbackWithoutResult[A], arguments A) (err error) {
+	var connection *Connection
+	connection, err = openTransactionnelConnection(ctx, base)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		err = errors.Join(err, close(connection))
+	}()
+	defer func() {
+		err = errors.Join(err, rollback(connection))
+	}()
+
+	err = callback(*connection, arguments)
+	if err != nil {
+		return err
+	}
+
+	return commit(connection)
+}
 
 func LaunchTransactionnelWay[R any, A any](ctx context.Context, base DatabaseConnection, callback CallbackWithResult[R, A], arguments A) (result []R, err error) {
 	var connection *Connection

@@ -6,22 +6,23 @@ import (
 	"log"
 	"net/http"
 
+	"goTool/domain"
 	"goTool/errorHelper"
 	"goTool/interface/http/httpServer"
+	"goTool/interface/itemWebResult"
 )
 
 type (
 	get[R any]                   func(context.Context) (R, error)
-	post[R, P any]               func(context.Context, P) (R, error)
+	post[P, R any]               func(context.Context, P) (R, error)
 	convertToWebResult[R, W any] func(R) W
 )
 
-type commandRoute[R, P, W any] struct {
-	commandFunc post[R, P]
-	convertFunc convertToWebResult[R, W]
+type commandRoute[P, R any] struct {
+	commandFunc post[P, R]
 }
 
-func (route *commandRoute[R, P, W]) WrapHandler() func(response http.ResponseWriter, request *http.Request) {
+func (route *commandRoute[P, R]) WrapHandler() func(response http.ResponseWriter, request *http.Request) {
 	return func(response http.ResponseWriter, request *http.Request) {
 		switch request.Method {
 		case http.MethodPost:
@@ -62,12 +63,12 @@ func HandleQueryRoute[R, W any](requestPath string, launchFunc get[R], convertFu
 	http.HandleFunc(requestPath, route.WrapHandler())
 }
 
-func HandleCommandRoute[R, P, W any](requestPath string, launchFunc post[R, P], convertFunc convertToWebResult[R, W]) {
+func HandleCommandRoute[P, R any](requestPath string, launchFunc post[P, R]) {
 	if httpServer.ServerIsStop() {
 		HandleError(requestPath, errorHelper.New("Serveur en cours d'arrêt : la requête ne peut pas être exécutée"))
 		return
 	}
-	route := &commandRoute[R, P, W]{commandFunc: launchFunc, convertFunc: convertFunc}
+	route := &commandRoute[P, R]{commandFunc: launchFunc}
 	http.HandleFunc(requestPath, route.WrapHandler())
 }
 
@@ -85,26 +86,48 @@ func processQueryRoute[R, W any](response http.ResponseWriter, request *http.Req
 	}
 }
 
-func processCommandRoute[R, P, W any](response http.ResponseWriter, request *http.Request, route *commandRoute[R, P, W]) {
+func processCommandRoute[P, R any](response http.ResponseWriter, request *http.Request, route *commandRoute[P, R]) {
 	ctx, cancel := context.WithTimeout(request.Context(), REQUEST_TIMEOUT)
 	defer cancel()
 	defer stopServerIfPanic()
 
 	var parameter P
-	err := json.NewDecoder(request.Body).Decode(&parameter)
+	webParameter := GetWebResultInstance(parameter)
+	err := json.NewDecoder(request.Body).Decode(&webParameter)
 	if err != nil {
 		sendErrorInResponse(response, request, http.StatusBadRequest, err)
 		return
 	}
-	if validationErr := validate.Struct(parameter); validationErr != nil {
+	if validationErr := validate.Struct(webParameter); validationErr != nil {
 		sendErrorInResponse(response, request, http.StatusBadRequest, validationErr)
 		return
 	}
+	parameter = webParameter.ConvertToParam().(P)
 	values, err := route.commandFunc(ctx, parameter)
 	if err != nil {
 		sendErrorInResponse(response, request, errorHelper.GetHttpStatusError(err), err)
 		return
 	}
-	webResultValues := route.convertFunc(values)
+	webResultValues := ConvertToWebResult(values)
 	sendValues(response, request, &webResultValues)
+}
+
+type WebResult interface {
+	ConvertToParam() any
+}
+
+func GetWebResultInstance(entity any) WebResult {
+	switch entity.(type) {
+	case *domain.NodeSpace:
+		return new(itemWebResult.NodeSpaceWebResult)
+	}
+	return nil
+}
+
+func ConvertToWebResult(entity interface{}) any {
+	switch v := entity.(type) {
+	case *domain.NodeSpace:
+		return itemWebResult.ConvertNodeSpaceToWebResult(v)
+	}
+	return nil
 }

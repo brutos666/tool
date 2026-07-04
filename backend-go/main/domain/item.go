@@ -13,13 +13,8 @@ const (
 	TOTAL_ORPHAN   = "TOTAL_ORPHAN"
 )
 
-const (
-	CREATE = "CREATE"
-	UPDATE = "UPDATE"
-	DELETE = "DELETE"
-	READ   = "READ"
-)
-
+// Un item est une catégorie, une idée ou une tâche à faire. Elle peut être décomposée en sous-items, eux-même décomposés en sous et ainsi de suite...
+// Il s'agit donc d'un arbre dont la racine représente l'idée générale et les feuilles les plus petites parties de cette idée
 type ItemFound struct {
 	id       string
 	title    string
@@ -41,18 +36,3 @@ func (item *ItemFound) GetChildren() []treeConverter.TreeEntity         { return
 func (item *ItemFound) SetChildren(children []treeConverter.TreeEntity) { item.children = children }
 func (item *ItemFound) GetStatus() string                               { return item.status }
 func (item *ItemFound) SetStatus(status string)                         { item.status = status }
-
-type ItemToSave struct {
-	id       string
-	title    string
-	text     string
-	state    string
-	children []ItemToSave
-	crudMode string
-}
-
-func (item ItemToSave) GetId() string                      { return item.id }
-func (item *ItemToSave) SetID(id string)                   { item.id = id }
-func (item ItemToSave) GetTitle() string                   { return item.title }
-func (item ItemToSave) GetChildren() []ItemToSave          { return item.children }
-func (item *ItemToSave) SetChildren(children []ItemToSave) { item.children = children }

@@ -8,7 +8,7 @@ import (
 
 	"goTool/domain"
 	"goTool/infrastructure/configuration"
-	"goTool/infrastructure/item"
+	"goTool/infrastructure/itemBdd"
 )
 
 const SELECT_ALL string = "SELECT id, title, text, state, parent_id, next_id FROM item"
@@ -24,11 +24,11 @@ func (repo *itemQryRepository) FindAll(ctx context.Context) ([]*domain.ItemFound
 }
 
 func selectAllItems(connection connection.Connection, notUsed string) ([]*domain.ItemFound, error) {
-	var itemsModel []item.ItemModel
+	var itemsModel []itemBdd.ItemModel
 	err := requestSQL.Select(connection, &itemsModel, SELECT_ALL)
 	if err != nil {
 		return nil, err
 	}
-	itemsFound := treeConverter.ConvertFlatToTree[item.ItemModel, *domain.ItemFound]("-1", itemsModel)
+	itemsFound := treeConverter.ConvertFlatToTree[itemBdd.ItemModel, *domain.ItemFound](domain.ROOT_ID, itemsModel)
 	return itemsFound, nil
 }

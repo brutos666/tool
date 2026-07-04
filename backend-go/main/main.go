@@ -22,12 +22,13 @@ func main() {
 
 	// Faire le lien entre l'infrastructure à utiliser pour répondre à une action métier
 	itemQueryService := application.ItemQueryService(bdd.ItemQueryRepository())
+	itemCommandService := application.ItemCommandService(bdd.ItemCommandRepository())
 
 	http.HandleFunc("/", func(response http.ResponseWriter, request *http.Request) {
 		log.Println(response, "Le service est bien démarré")
 	})
 	handler.HandleQueryRoute("/api/item/findAllItems", itemQueryService.FindAll, itemWebResult.ConvertItemsFoundToWebResult)
-	handler.HandlePost("/api/item/save", controller.SaveTreeItem)
+	handler.HandleCommandRoute("/api/item/save", itemCommandService.Save)
 
 	handler.HandlePost("/api/user/signup", controller.Signup)
 	handler.HandleGet("/api/user/findAllUsers", controller.FindAllUsers)

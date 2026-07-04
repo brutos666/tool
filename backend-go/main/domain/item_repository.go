@@ -1,9 +1,12 @@
 package domain
 
-import "context"
+import (
+	"context"
+)
 
 type ItemCommandRepository interface {
-	Save(ctx context.Context, item *ItemToSave) error
+	SaveCurrentSpace(ctx context.Context, nodeSpace *NodeSpace) error
+	SaveSpaces(ctx context.Context, spaces *Spaces) error
 }
 
 type ItemQueryRepository interface {
