@@ -20,14 +20,14 @@ func main() {
 	go httpServer.StopServerOnSignal()
 
 	// Faire le lien entre l'infrastructure à utiliser pour répondre à une action métier
-	itemQueryService := application.SpaceQueryService(bdd.SpaceQueryRepository())
-	itemCommandService := application.SpaceCommandService(bdd.SpaceCommandRepository())
+	spaceQueryService := application.SpaceQueryService(bdd.SpaceQueryRepository())
+	spaceCommandService := application.SpaceCommandService(bdd.SpaceCommandRepository())
 
 	http.HandleFunc("/", func(response http.ResponseWriter, request *http.Request) {
 		log.Println(response, "Le service est bien démarré")
 	})
-	handler.HandleQueryRoute("/api/item/findAllItems", itemQueryService.FindAll)
-	handler.HandleCommandRoute("/api/item/save", itemCommandService.Save)
+	handler.HandleQueryRoute("/api/item/findAllItems", spaceQueryService.FindAll)
+	handler.HandleCommandRoute("/api/item/save", spaceCommandService.Save)
 
 	handler.HandlePost("/api/user/signup", controller.Signup)
 	handler.HandleGet("/api/user/findAllUsers", controller.FindAllUsers)

@@ -41,8 +41,6 @@ Dans le but de rendre le projet le plus limpide possible, je dois revoir la logi
 
 ## Les utilisateurs :
 
-### Entités :
-
 - l'utilisateur connecté
 - l'utilisateur ADMIN
 - tous les utilisateurs (accessible uniquement par l'ADMIN qui aura tous les droits dessus)
@@ -57,29 +55,28 @@ Dans le but de rendre le projet le plus limpide possible, je dois revoir la logi
 - suppression du compte
 - modification du compte
 
-## Les tâches ou items
+## Les espaces
 
-Un espace de navigation affiche une liste d'arbre d'items.
-Chaque arbre peut être visualiser de différentes manières : sample mapping, todo list (futur: epic/feature/PBI/tache)
-
-### Entités
-
-- tous les items sous forme d'arbre
+Une zone de navigation affiche la liste d'espaces.
+Chaque espace est un arbre de sous-espace qui peuvent être visualisé (zone de gauche) de différentes manières (vue) : sample mapping, todo list (futur: epic/feature/PBI/tache).
+Un espace se définit par son titre, son état d'avancement (fait/à faire), une définition détaillée et ses sous-espaces
+Un espace peut être créé, modifié ou supprimé
+Un espace avec une arborescence incohérente apparaît en erreur quand il apparaît !! L'algo ne retourne pas (encore) les branches non rattachées à un espace racine (idem java)
 
 ### Actions
 
-- Alimenter l'espace de navigation avec la liste des arbres d'items
-- Sauvegarder tout ou la vue courante
+- Alimenter l'espace de navigation avec la liste des espaces
+- Sauvegarder tous les espaces ou l'espace courant (qui est également celui visualisé dans la zone de droite)
 
 ### A faire :
 
 - import/export (fait en Java)
 - associer un espace à un utilisateur
 - gestion intelligente de la case à cocher TODO
-- associer une vue à un item "racine" (todo list/sample mapping)
-- pouvoir attribuer une fonction à un item
+- associer une vue à un espace "racine" (todo list/sample mapping)
+- pouvoir attribuer une fonction à un espace
   - valeurs possibles : epic|feature|pbi|task, todo, story|rule|sample|question
-  - Ne doit pas empêcher une visualisation qui n'est pas liée
+  - Ne doit pas empêcher une visualisation qui ne serait pas liée
   - NOTE : dans le cas du sample mapping, on peut avoir 2 fonctions pour le même niveau (sample|question)
 - pouvoir définir des fonctions personnalisées
 - pouvoir planifier tout ça (futur)
@@ -90,44 +87,21 @@ Un utilisateur peut :
 
 - s’enregistrer
 - se connecter
-- gérer des items (ajout, modification, suppression)
+- gérer des espaces ou sous-espaces (ajout, modification, suppression)
 
-Un item (et son arborescence) peut :
+Un espace (et son arborescence) peut :
 
 - être sauvegardé
 - être exporté
-- être importé dans un espace
+- être importé à la suite des espaces
 - être qualifiée (fonction)
 - avoir une vue par défaut
 
-Un espace peut :
+Les espaces racines peuvent :
 
-- être chargé
-- être sauvegardé
-- être exporter
-- être importer (ou plutôt on va importer dans un espace)
+- être chargés
+- être sauvegardés
+- être exportés
 
-Aujourd'hui, dans la base de données, il n'y a pas de distinction entre ce qui est espace et arbre d'item : tout est arbre d'item et ce qui apparaît dans l'espace sont les arbres d'item dont le parent vaut -1.
-Cela risque de changer.
-Il faut donc clairement faire la distinction dans le code.
-
-## 1ere étape : espace
-
-- liste des items
-- fonctions
-  - chargement
-  - export
-  - sauvegarde
-
-## 2eme étape : item
-
-- id
-- titre
-- detail
-- état (A faire, fait)
-- statut : note les incohérences d'arborescence (Orphelin, boucle, suivant non trouvé, ...)
-- enfants
-- CRUD mode (inséré, modifié, supprimé, basé)
-- fonctions
-  - sauvegarde
+On peut importer une liste d'espace dans la zone de navigation
 

@@ -41,7 +41,7 @@ func (spaces *Spaces) RemoveToDelete() {
 	})
 }
 
-// Space : arbre d'items. Selon le niveau où il se trouve, il peut s'agir d'une catégorie, d'une check list, d'une idée générale, d'une feature, ...
+// Space : espace. Selon le niveau où il se trouve, il peut s'agir d'une catégorie, d'une check list, d'une idée générale, d'une feature, ... il se compose de sous-espaces.
 type Space struct {
 	id       string
 	title    string
