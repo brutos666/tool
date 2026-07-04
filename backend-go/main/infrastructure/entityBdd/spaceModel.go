@@ -1,5 +1,5 @@
-// Package itemBdd se charge de la gestion des données dans une base de données
-package itemBdd
+// Package entityBdd se charge de la gestion des données dans une base de données
+package entityBdd
 
 import (
 	"database/sql"
@@ -11,7 +11,7 @@ import (
 
 const NULL_VALUE_ID = 0
 
-type ItemModel struct {
+type SpaceModel struct {
 	Id       int64          `db:"id"`
 	Title    string         `db:"title"`
 	Text     sql.NullString `db:"text"`
@@ -20,77 +20,77 @@ type ItemModel struct {
 	NextId   sql.NullInt64  `db:"next_id"`
 }
 
-func (itemModel ItemModel) GetId() string { return strconv.FormatInt(itemModel.Id, 10) }
+func (spaceBdd SpaceModel) GetId() string { return strconv.FormatInt(spaceBdd.Id, 10) }
 
 // SetId retourne une erreur lorsque l'identifiant ne peut pas être convertit en entier
-func (itemModel *ItemModel) SetId(id string) error {
+func (spaceBdd *SpaceModel) SetId(id string) error {
 	intId, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		return err
 	}
-	itemModel.Id = intId
+	spaceBdd.Id = intId
 	return nil
 }
-func (itemModel *ItemModel) SetTitle(title string) { itemModel.Title = title }
-func (itemModel *ItemModel) SetState(state string) { itemModel.State = state }
-func (itemModel *ItemModel) SetText(text string) {
+func (spaceBdd *SpaceModel) SetTitle(title string) { spaceBdd.Title = title }
+func (spaceBdd *SpaceModel) SetState(state string) { spaceBdd.State = state }
+func (spaceBdd *SpaceModel) SetText(text string) {
 	if text == "" {
-		itemModel.Text.Valid = false
+		spaceBdd.Text.Valid = false
 	} else {
-		itemModel.Text.Valid = true
-		itemModel.Text.String = text
+		spaceBdd.Text.Valid = true
+		spaceBdd.Text.String = text
 	}
 }
-func (itemModel ItemModel) GetParentId() string { return strconv.FormatInt(itemModel.ParentId, 10) }
+func (spaceBdd SpaceModel) GetParentId() string { return strconv.FormatInt(spaceBdd.ParentId, 10) }
 
 // SetParentId retourne une erreur lorsque l'identifiant ne peut pas être convertit en entier
-func (itemModel *ItemModel) SetParentId(parentId string) error {
+func (spaceBdd *SpaceModel) SetParentId(parentId string) error {
 	intId, err := strconv.ParseInt(parentId, 10, 64)
 	if err != nil {
 		return err
 	}
-	itemModel.ParentId = intId
+	spaceBdd.ParentId = intId
 	return nil
 }
 
-func (itemModel ItemModel) GetNextId() string {
-	if itemModel.NextId.Valid {
-		return strconv.FormatInt(itemModel.NextId.Int64, 10)
+func (spaceBdd SpaceModel) GetNextId() string {
+	if spaceBdd.NextId.Valid {
+		return strconv.FormatInt(spaceBdd.NextId.Int64, 10)
 	}
 	return ""
 }
 
 // SetNextId retourne une erreur lorsque l'identifiant ne peut pas être convertit en entier
-func (itemModel *ItemModel) SetNextId(nextId string) error {
+func (spaceBdd *SpaceModel) SetNextId(nextId string) error {
 	if len(nextId) == 0 {
-		itemModel.NextId.Valid = false
+		spaceBdd.NextId.Valid = false
 		return nil
 	}
 	intId, err := strconv.ParseInt(nextId, 10, 64)
 	if err != nil {
 		return err
 	}
-	itemModel.NextId.Int64 = intId
+	spaceBdd.NextId.Int64 = intId
 	return nil
 }
 
-func (itemModel ItemModel) ConvertToTree() treeConverter.TreeEntity {
-	item := new(domain.ItemFound)
-	item.SetId(itemModel.GetId())
-	item.SetChildren([]treeConverter.TreeEntity{})
-	item.SetStatus(treeConverter.OK)
-	item.SetTitle(itemModel.Title)
-	if itemModel.Text.Valid {
-		item.SetText(itemModel.Text.String)
+func (spaceBdd SpaceModel) ConvertToTree() treeConverter.TreeEntity {
+	space := new(domain.Space)
+	space.SetId(spaceBdd.GetId())
+	space.SetChildrenSpaces(new(domain.Spaces))
+	space.SetStatus(treeConverter.OK)
+	space.SetTitle(spaceBdd.Title)
+	if spaceBdd.Text.Valid {
+		space.SetText(spaceBdd.Text.String)
 	} else {
-		item.SetText("")
+		space.SetText("")
 	}
-	item.SetState(itemModel.State)
-	return item
+	space.SetState(spaceBdd.State)
+	return space
 }
 
-func ConvertSpaceToItemModel(space domain.Space, parentId, nextId string) *ItemModel {
-	itemModel := new(ItemModel)
+func ConvertSpaceToModel(space domain.Space, parentId, nextId string) *SpaceModel {
+	itemModel := new(SpaceModel)
 	if !space.IsToCreate() {
 		err := itemModel.SetId(space.GetCurrentId())
 		if err != nil {

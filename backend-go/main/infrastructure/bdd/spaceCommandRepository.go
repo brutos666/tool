@@ -1,4 +1,5 @@
-// Package bdd interface avec la base de données. Ce package connaît tout ce qui vient de "domain"
+// Package bdd s'occupe de la recherche et la mise à jour des données en base.
+// Ce package connaît le package "domain"
 package bdd
 
 import (
@@ -9,10 +10,10 @@ import (
 
 	"goTool/domain"
 	"goTool/infrastructure/configuration"
-	"goTool/infrastructure/itemBdd"
+	"goTool/infrastructure/entityBdd"
 )
 
-type itemCmdRepository struct{}
+type spaceCmdRepository struct{}
 
 const (
 	INSERT_SQL           string = "INSERT INTO item (title, text, state, parent_id, next_id) values(:title, :text, :state, :parent_id, :next_id) RETURNING *"
@@ -22,15 +23,15 @@ const (
 	DELETE_SQL           string = "DELETE FROM item WHERE id IN (?)"
 )
 
-func ItemCommandRepository() domain.ItemCommandRepository {
-	return &itemCmdRepository{}
+func SpaceCommandRepository() domain.SpaceCommandRepository {
+	return &spaceCmdRepository{}
 }
 
-func (repo *itemCmdRepository) SaveCurrentSpace(ctx context.Context, nodeSpace *domain.NodeSpace) error {
+func (repo *spaceCmdRepository) SaveCurrentSpace(ctx context.Context, nodeSpace *domain.NodeSpace) error {
 	return connection.LaunchTransactionnel(ctx, configuration.BaseConnection, saveSpace, nodeSpace)
 }
 
-func (repo *itemCmdRepository) SaveSpaces(ctx context.Context, spaces *domain.Spaces) error {
+func (repo *spaceCmdRepository) SaveSpaces(ctx context.Context, spaces *domain.Spaces) error {
 	return connection.LaunchTransactionnel(ctx, configuration.BaseConnection, saveSpaces, spaces)
 }
 
@@ -195,7 +196,7 @@ func deleteSpaces(connection connection.Connection, itemsIdToDelete []string) (i
 }
 
 func createSpace(connection connection.Connection, space *domain.Space, parentId, nextId string) error {
-	itemModel := *itemBdd.ConvertSpaceToItemModel(*space, parentId, nextId)
+	itemModel := *entityBdd.ConvertSpaceToModel(*space, parentId, nextId)
 	err := requestSQL.ExecWithReturn(connection, itemModel, &itemModel, INSERT_SQL)
 	if err != nil {
 		return err
@@ -207,7 +208,7 @@ func createSpace(connection connection.Connection, space *domain.Space, parentId
 // updateSpace : modification d'un espace. Retourne une erreur si la requête échoue. Retourne true si la requête a modifié
 // l'espace
 func updateSpace(connection connection.Connection, space *domain.Space, parentId, nextId string) (bool, error) {
-	itemModel := itemBdd.ConvertSpaceToItemModel(*space, parentId, nextId)
+	itemModel := entityBdd.ConvertSpaceToModel(*space, parentId, nextId)
 	nbUpdates, err := requestSQL.Exec(connection, UPDATE_SQL, itemModel)
 	if err != nil {
 		return false, err
@@ -224,8 +225,8 @@ func updatePreviousNextId(connection connection.Connection, space *domain.Space,
 	if len(previousId) == 0 {
 		return false, nil
 	}
-	id := itemBdd.ConvertIdToBdd(previousId)
-	nextIdBdd := itemBdd.GetCurrentBddId(space)
+	id := entityBdd.ConvertIdToBdd(previousId)
+	nextIdBdd := entityBdd.GetCurrentBddId(space)
 	nbNextIdUpdates, err := requestSQL.ExecArgs(connection, UPDATE_NEXT_SQL, nextIdBdd, id, nextIdBdd)
 	if err != nil {
 		return false, err
@@ -240,11 +241,11 @@ func updatePreviousNextId(connection connection.Connection, space *domain.Space,
 func updateNextId(connection connection.Connection, space *domain.Space, nextId string) (bool, error) {
 	var nbNextIdUpdated int
 	var err error
-	idBdd := itemBdd.GetCurrentBddId(space)
+	idBdd := entityBdd.GetCurrentBddId(space)
 	if len(nextId) == 0 {
 		nbNextIdUpdated, err = requestSQL.ExecArgs(connection, UPDATE_NEXT_NULL_SQL, idBdd)
 	} else {
-		nextBddId := itemBdd.ConvertIdToBdd(nextId)
+		nextBddId := entityBdd.ConvertIdToBdd(nextId)
 		nbNextIdUpdated, err = requestSQL.ExecArgs(connection, UPDATE_NEXT_SQL, nextBddId, idBdd, nextBddId)
 	}
 	if err != nil {

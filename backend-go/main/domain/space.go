@@ -1,6 +1,10 @@
+// Package domain donne les règles métiers. On va définir ici les entités (utilisateur, espaces, ...) et ce que l'on peut de ces données (recherche, modification) via des interfaces repository. Le package domain ne connaît que lui même
 package domain
 
-import "slices"
+import (
+	"slices"
+	"treeConverter"
+)
 
 const (
 	CREATE = "CREATE"
@@ -8,34 +12,6 @@ const (
 	DELETE = "DELETE"
 	READ   = "READ"
 )
-
-const ROOT_ID = "-1"
-
-// NodeSpace : espace située par rapport aux autres espaces.
-type NodeSpace struct {
-	space      *Space
-	parentId   string
-	previousId string
-	nextId     string
-}
-
-func (nodeSpace NodeSpace) GetSpace() *Space                 { return nodeSpace.space }
-func (nodeSpace *NodeSpace) SetSpace(space *Space)           { nodeSpace.space = space }
-func (nodeSpace NodeSpace) GetParentId() string              { return nodeSpace.parentId }
-func (nodeSpace *NodeSpace) SetParentId(parentId string)     { nodeSpace.parentId = parentId }
-func (nodeSpace NodeSpace) GetPreviousId() string            { return nodeSpace.previousId }
-func (nodeSpace *NodeSpace) SetPreviousId(previousId string) { nodeSpace.previousId = previousId }
-func (nodeSpace NodeSpace) GetNextId() string                { return nodeSpace.nextId }
-func (nodeSpace *NodeSpace) SetNextId(nextId string)         { nodeSpace.nextId = nextId }
-
-func CreateNodeSpace(space *Space, parentId, previousId, nextId string) *NodeSpace {
-	nodeSpace := new(NodeSpace)
-	nodeSpace.space = space
-	nodeSpace.parentId = parentId
-	nodeSpace.previousId = previousId
-	nodeSpace.nextId = nextId
-	return nodeSpace
-}
 
 // Spaces : ensemble des espaces racines
 type Spaces struct {
@@ -65,16 +41,6 @@ func (spaces *Spaces) RemoveToDelete() {
 	})
 }
 
-type Item interface {
-	GetId() string
-	GetTitle() string
-	GetText() string
-	GetState() string
-	GetStatus() string
-	GetCRUDMode() string
-	GetChildren() []Item
-}
-
 // Space : arbre d'items. Selon le niveau où il se trouve, il peut s'agir d'une catégorie, d'une check list, d'une idée générale, d'une feature, ...
 type Space struct {
 	id       string
@@ -89,13 +55,13 @@ type Space struct {
 
 func CreateRootSpace(id string, children *Spaces) *Space {
 	rootSpace := new(Space)
-	rootSpace.SetID(id)
+	rootSpace.SetId(id)
 	rootSpace.SetChildrenSpaces(children)
 	return rootSpace
 }
 
 func (space Space) GetId() string                     { return space.id }
-func (space *Space) SetID(id string)                  { space.id = id }
+func (space *Space) SetId(id string)                  { space.id = id }
 func (space Space) GetTitle() string                  { return space.title }
 func (space *Space) SetTitle(title string)            { space.title = title }
 func (space Space) GetText() string                   { return space.text }
@@ -111,22 +77,24 @@ func (space Space) IsToUpdate() bool                  { return space.crudMode ==
 func (space Space) IsToDelete() bool                  { return space.crudMode == DELETE }
 func (space *Space) GetChildrenSpaces() *Spaces       { return space.children }
 func (space *Space) SetChildrenSpaces(spaces *Spaces) { space.children = spaces }
-func (space *Space) GetChildren() []Item {
+func (space *Space) GetChildren() []treeConverter.TreeEntity {
 	list := space.children.GetList()
-	children := make([]Item, len(list))
+	children := make([]treeConverter.TreeEntity, len(list))
 	for index := range list {
 		children[index] = list[index]
 	}
 	return children
 }
 
-func (space *Space) SetChildren(children []Item) {
+func (space *Space) SetChildren(children []treeConverter.TreeEntity) {
 	list := make([]*Space, len(children))
 	for index := range children {
 		child := children[index]
 		list[index] = child.(*Space)
 	}
-	space.children.SetList(list)
+	spaces := new(Spaces)
+	spaces.SetList(list)
+	space.SetChildrenSpaces(spaces)
 }
 func (space Space) GetContext() string { return "Identifiant=" + space.id + ", Titre=" + space.title }
 func (space Space) GetDeleteIds() []string {
@@ -152,7 +120,6 @@ func (space *Space) Save(id string) {
 func (space *Space) ApplyModification() {
 	space.id = space.GetCurrentId()
 	space.crudMode = READ
-	// Application sur les enfants
 	space.children.ApplyModification()
 }
 

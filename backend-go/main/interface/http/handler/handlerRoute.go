@@ -6,16 +6,14 @@ import (
 	"log"
 	"net/http"
 
-	"goTool/domain"
 	"goTool/errorHelper"
 	"goTool/interface/http/httpServer"
-	"goTool/interface/itemWebResult"
+	"goTool/interface/webResult"
 )
 
 type (
-	get[R any]                   func(context.Context) (R, error)
-	post[P, R any]               func(context.Context, P) (R, error)
-	convertToWebResult[R, W any] func(R) W
+	get[R any]     func(context.Context) (R, error)
+	post[P, R any] func(context.Context, P) (R, error)
 )
 
 type commandRoute[P, R any] struct {
@@ -37,12 +35,11 @@ func (route *commandRoute[P, R]) WrapHandler() func(response http.ResponseWriter
 	}
 }
 
-type queryRoute[R, W any] struct {
-	queryFunc   get[R]
-	convertFunc convertToWebResult[R, W]
+type queryRoute[R any] struct {
+	queryFunc get[R]
 }
 
-func (callbacks *queryRoute[R, W]) WrapHandler() func(response http.ResponseWriter, request *http.Request) {
+func (callbacks *queryRoute[R]) WrapHandler() func(response http.ResponseWriter, request *http.Request) {
 	return func(response http.ResponseWriter, request *http.Request) {
 		log.Println("Traitement de la requête", request.Method, request.URL.Path, "en cours...")
 		if request.Method == http.MethodGet {
@@ -54,12 +51,12 @@ func (callbacks *queryRoute[R, W]) WrapHandler() func(response http.ResponseWrit
 	}
 }
 
-func HandleQueryRoute[R, W any](requestPath string, launchFunc get[R], convertFunc convertToWebResult[R, W]) {
+func HandleQueryRoute[R any](requestPath string, launchFunc get[R]) {
 	if httpServer.ServerIsStop() {
 		HandleError(requestPath, errorHelper.New("Serveur en cours d'arrêt : la requête ne peut pas être exécutée"))
 		return
 	}
-	route := &queryRoute[R, W]{queryFunc: launchFunc, convertFunc: convertFunc}
+	route := &queryRoute[R]{queryFunc: launchFunc}
 	http.HandleFunc(requestPath, route.WrapHandler())
 }
 
@@ -72,7 +69,7 @@ func HandleCommandRoute[P, R any](requestPath string, launchFunc post[P, R]) {
 	http.HandleFunc(requestPath, route.WrapHandler())
 }
 
-func processQueryRoute[R, W any](response http.ResponseWriter, request *http.Request, route *queryRoute[R, W]) {
+func processQueryRoute[R any](response http.ResponseWriter, request *http.Request, route *queryRoute[R]) {
 	ctx, cancel := context.WithTimeout(request.Context(), REQUEST_TIMEOUT)
 	defer cancel()
 	defer stopServerIfPanic()
@@ -81,7 +78,7 @@ func processQueryRoute[R, W any](response http.ResponseWriter, request *http.Req
 	if err != nil {
 		sendErrorInResponse(response, request, errorHelper.GetHttpStatusError(err), err)
 	} else {
-		webResultValues := route.convertFunc(values)
+		webResultValues := webResult.Convert(values)
 		sendValues(response, request, &webResultValues)
 	}
 }
@@ -92,7 +89,7 @@ func processCommandRoute[P, R any](response http.ResponseWriter, request *http.R
 	defer stopServerIfPanic()
 
 	var parameter P
-	webParameter := GetWebResultInstance(parameter)
+	webParameter := webResult.GetInstance(parameter)
 	err := json.NewDecoder(request.Body).Decode(&webParameter)
 	if err != nil {
 		sendErrorInResponse(response, request, http.StatusBadRequest, err)
@@ -108,26 +105,6 @@ func processCommandRoute[P, R any](response http.ResponseWriter, request *http.R
 		sendErrorInResponse(response, request, errorHelper.GetHttpStatusError(err), err)
 		return
 	}
-	webResultValues := ConvertToWebResult(values)
+	webResultValues := webResult.Convert(values)
 	sendValues(response, request, &webResultValues)
-}
-
-type WebResult interface {
-	ConvertToParam() any
-}
-
-func GetWebResultInstance(entity any) WebResult {
-	switch entity.(type) {
-	case *domain.NodeSpace:
-		return new(itemWebResult.NodeSpaceWebResult)
-	}
-	return nil
-}
-
-func ConvertToWebResult(entity interface{}) any {
-	switch v := entity.(type) {
-	case *domain.NodeSpace:
-		return itemWebResult.ConvertNodeSpaceToWebResult(v)
-	}
-	return nil
 }

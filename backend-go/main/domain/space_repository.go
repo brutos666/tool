@@ -4,11 +4,11 @@ import (
 	"context"
 )
 
-type ItemCommandRepository interface {
+type SpaceCommandRepository interface {
 	SaveCurrentSpace(ctx context.Context, nodeSpace *NodeSpace) error
 	SaveSpaces(ctx context.Context, spaces *Spaces) error
 }
 
-type ItemQueryRepository interface {
-	FindAll(ctx context.Context) ([]*ItemFound, error)
+type SpaceQueryRepository interface {
+	FindAll(ctx context.Context) ([]*Space, error)
 }
