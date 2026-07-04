@@ -23,6 +23,7 @@ func main() {
 	spaceQueryService := application.SpaceQueryService(bdd.SpaceQueryRepository())
 	spaceCommandService := application.SpaceCommandService(bdd.SpaceCommandRepository())
 	userCommandService := application.UserCommandService(bdd.UserCommandRepository())
+	userQueryService := application.UserQueryService(bdd.UserQueryRepository())
 
 	http.HandleFunc("/", func(response http.ResponseWriter, request *http.Request) {
 		log.Println(response, "Le service est bien démarré")
@@ -31,7 +32,7 @@ func main() {
 	handler.HandleCommandRoute("/api/item/save", spaceCommandService.Save)
 
 	handler.HandleCommandRoute("/api/user/signup", userCommandService.Signup)
-	handler.HandleGet("/api/user/findAllUsers", controller.FindAllUsers)
+	handler.HandleQueryRoute("/api/user/findAllUsers", userQueryService.FindAll)
 
 	handler.Stop("/stop")
 

@@ -29,6 +29,12 @@ func Convert(entity interface{}) any {
 		return spaceList
 	case *domain.User:
 		return ConvertUserToWebResult(typedEntity)
+	case []*domain.User:
+		userList := make([]*UserWebResult, len(typedEntity))
+		for index := range typedEntity {
+			userList[index] = ConvertUserToWebResult(typedEntity[index])
+		}
+		return userList
 	case *RegisterUserWebResult:
 		return typedEntity.ConvertToUser()
 	case *NodeSpaceWebResult:

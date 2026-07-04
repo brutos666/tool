@@ -12,7 +12,6 @@ import (
 )
 
 const (
-	SELECT_ALL_USERS  string = "SELECT id, first_name, last_name, password, email, role FROM users"
 	SELECT_WITH_EMAIL string = "SELECT id, first_name, last_name, password, email, role FROM users WHERE email = ?"
 	INSERT_USER       string = "INSERT INTO users (first_name, last_name, password, email, token, role, refresh_token, created_at, updated_at) values(:first_name, :last_name, :password, :email, :token, :role, :refresh_token, :created_at, :updated_at) RETURNING *"
 )
