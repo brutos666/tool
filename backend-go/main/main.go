@@ -22,6 +22,7 @@ func main() {
 	// Faire le lien entre l'infrastructure à utiliser pour répondre à une action métier
 	spaceQueryService := application.SpaceQueryService(bdd.SpaceQueryRepository())
 	spaceCommandService := application.SpaceCommandService(bdd.SpaceCommandRepository())
+	userCommandService := application.UserCommandService(bdd.UserCommandRepository())
 
 	http.HandleFunc("/", func(response http.ResponseWriter, request *http.Request) {
 		log.Println(response, "Le service est bien démarré")
@@ -29,7 +30,7 @@ func main() {
 	handler.HandleQueryRoute("/api/item/findAllItems", spaceQueryService.FindAll)
 	handler.HandleCommandRoute("/api/item/save", spaceCommandService.Save)
 
-	handler.HandlePost("/api/user/signup", controller.Signup)
+	handler.HandleCommandRoute("/api/user/signup", userCommandService.Signup)
 	handler.HandleGet("/api/user/findAllUsers", controller.FindAllUsers)
 
 	handler.Stop("/stop")

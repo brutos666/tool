@@ -30,14 +30,3 @@ func (user User) ConvertToUserWebResult() *UserWebResult {
 	userWebResult.Role = user.role
 	return userWebResult
 }
-
-func (user User) ConvertToUserModel() *UserModel {
-	return &UserModel{
-		ID:        user.id,
-		FirstName: &user.firstName,
-		LastName:  &user.lastName,
-		Password:  &user.password,
-		Email:     &user.email,
-		Role:      &user.role,
-	}
-}

@@ -9,6 +9,8 @@ func GetInstance(entity any) any {
 	switch entity.(type) {
 	case *domain.NodeSpace:
 		return new(NodeSpaceWebResult)
+	case *domain.User:
+		return new(RegisterUserWebResult)
 	}
 	return nil
 }
@@ -25,6 +27,10 @@ func Convert(entity interface{}) any {
 			spaceList[index] = ConvertSpaceToWebResult(typedEntity[index])
 		}
 		return spaceList
+	case *domain.User:
+		return ConvertUserToWebResult(typedEntity)
+	case *RegisterUserWebResult:
+		return typedEntity.ConvertToUser()
 	case *NodeSpaceWebResult:
 		return typedEntity.ConvertToNodeSpace()
 		// NOTE : si on choisit de ne pas transformer la réponse (vocabulaire et forme identique à la partie cliente)
