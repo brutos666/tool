@@ -14,7 +14,7 @@ type SpaceWebResult struct {
 	CRUDMode string            `json:"CRUDMode"`
 }
 
-func (spaceWebResult SpaceWebResult) ConvertToParam() *domain.Space {
+func (spaceWebResult SpaceWebResult) ConvertToSpace() *domain.Space {
 	space := new(domain.Space)
 	space.SetId(spaceWebResult.ID)
 	space.SetTitle(spaceWebResult.Title)
@@ -23,9 +23,9 @@ func (spaceWebResult SpaceWebResult) ConvertToParam() *domain.Space {
 	space.SetStatus(spaceWebResult.Status)
 	space.SetCRUDMode(spaceWebResult.CRUDMode)
 	spaces := new(domain.Spaces)
-	itemChildren := spaceWebResult.Children
-	for _, itemChild := range itemChildren {
-		spaces.AddSpace(itemChild.ConvertToParam())
+	childrenSpace := spaceWebResult.Children
+	for _, childSpace := range childrenSpace {
+		spaces.AddSpace(childSpace.ConvertToSpace())
 	}
 	space.SetChildrenSpaces(spaces)
 	return space

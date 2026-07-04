@@ -5,11 +5,7 @@ import (
 	"goTool/domain"
 )
 
-type WebResult interface {
-	ConvertToParam() any
-}
-
-func GetInstance(entity any) WebResult {
+func GetInstance(entity any) any {
 	switch entity.(type) {
 	case *domain.NodeSpace:
 		return new(NodeSpaceWebResult)
@@ -29,6 +25,14 @@ func Convert(entity interface{}) any {
 			spaceList[index] = ConvertSpaceToWebResult(typedEntity[index])
 		}
 		return spaceList
+	case *NodeSpaceWebResult:
+		return typedEntity.ConvertToNodeSpace()
+		// NOTE : si on choisit de ne pas transformer la réponse (vocabulaire et forme identique à la partie cliente)
+		// le formaliser ici
+		// case *PerfectUser:
+		//  // La réponse est exactement la même aujourd'hui : pas de transformation
+		//	return entity
 	}
-	return nil
+	// Pour les tests, on ne convertit pas le résultat
+	return entity
 }

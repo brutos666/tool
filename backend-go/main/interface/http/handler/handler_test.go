@@ -36,7 +36,7 @@ func call[OBJ any](path string, method string, callback func(http.ResponseWriter
 	request := httptest.NewRequest(method, path, nil)
 	callback(responseWriter, request)
 	response = responseWriter.Result()
-	json.NewDecoder(response.Body).Decode(&actual)
+	_ = json.NewDecoder(response.Body).Decode(&actual)
 	return
 }
 
@@ -48,14 +48,14 @@ func call[OBJ any](path string, method string, callback func(http.ResponseWriter
  *   AND : j'appelle cette fonction qui doit mettre à jour la réponse
  *  THEN : la réponse doit contenir l'utilisateur retourné par la fonction getUser()
  */
-func TestFunctionToLaunch_response_should_be_user_when_function_return_person(t *testing.T) {
+func TestWrapQueryHandler_response_should_be_user_when_function_return_person(t *testing.T) {
 	// Given
 	jules := createPerson("Jules", 34)
 	getUser := func(ctx context.Context) (*Person, error) {
 		return jules, nil
 	}
 	// When
-	functionToLaunch := getFunctionToLaunch(getUser)
+	functionToLaunch := wrapQueryHandler(getUser)
 	actual, response := call[Person](fIND_USER_PATH, "GET", functionToLaunch)
 	// Then
 	assert.Equal(t, http.StatusOK, response.StatusCode)
@@ -70,14 +70,14 @@ func TestFunctionToLaunch_response_should_be_user_when_function_return_person(t 
  *   AND : j'exécute cette fonction qui doit mettre à jour la réponse
  *  THEN : la réponse doit contenir l'erreur
  */
-func TestFunctionToLaunch_response_should_be_error_when_function_return_error(t *testing.T) {
+func TestWrapQueryHandler_response_should_be_error_when_function_return_error(t *testing.T) {
 	// Given
 	err := errorHelper.New("Utilisateur introuvable")
 	getUserWithError := func(ctx context.Context) (*Person, error) {
 		return nil, err
 	}
 	// When
-	functionToLaunch := getFunctionToLaunch(getUserWithError)
+	functionToLaunch := wrapQueryHandler(getUserWithError)
 	actual, response := call[errorHelper.MessageWebResult](fIND_USER_PATH, "GET", functionToLaunch)
 	// Then
 	assert.Equal(t, http.StatusInternalServerError, response.StatusCode)
@@ -94,7 +94,7 @@ func TestFunctionToLaunch_response_should_be_error_when_function_return_error(t 
  *   AND : j'exécute cette fonction qui doit mettre à jour la réponse
  *  THEN : la réponse doit contenir l'erreur détaillée
  */
-func TestFunctionToLaunch_response_should_be_error_when_function_return_pq_error(t *testing.T) {
+func TestWrapQueryHandler_response_should_be_error_when_function_return_pq_error(t *testing.T) {
 	// Given
 	pqErr := new(pq.Error)
 	pqErr.Detail = "Détail sur l'erreur"
@@ -104,7 +104,7 @@ func TestFunctionToLaunch_response_should_be_error_when_function_return_pq_error
 		return nil, pqErr
 	}
 	// When
-	functionToLaunch := getFunctionToLaunch(getUserWithError)
+	functionToLaunch := wrapQueryHandler(getUserWithError)
 	actual, response := call[errorHelper.MessageWebResult](fIND_USER_PATH, "GET", functionToLaunch)
 	// Then
 	assert.Equal(t, http.StatusInternalServerError, response.StatusCode)
@@ -122,7 +122,7 @@ func TestFunctionToLaunch_response_should_be_error_when_function_return_pq_error
  *   AND : j'exécute cette fonction qui doit mettre à jour la réponse
  *  THEN : la réponse doit contenir les erreurs
  */
-func TestFunctionToLaunch_response_should_be_error_when_function_return_join_error(t *testing.T) {
+func TestWrapQueryHandler_response_should_be_error_when_function_return_join_error(t *testing.T) {
 	// Given
 
 	getUserWithError := func(ctx context.Context) (person *Person, err error) {
@@ -137,7 +137,7 @@ func TestFunctionToLaunch_response_should_be_error_when_function_return_join_err
 		return nil, err
 	}
 	// When
-	functionToLaunch := getFunctionToLaunch(getUserWithError)
+	functionToLaunch := wrapQueryHandler(getUserWithError)
 	actual, response := call[errorHelper.MessageWebResult](fIND_USER_PATH, "GET", functionToLaunch)
 	// Then
 	assert.Equal(t, http.StatusInternalServerError, response.StatusCode)
@@ -157,7 +157,7 @@ func TestFunctionToLaunch_response_should_be_error_when_function_return_join_err
  *   AND : j'appelle cette fonction pour la requête POST
  *  THEN : la réponse doit contenir une erreur
  */
-func TestFunctionToLaunch_response_should_be_error_when_request_method_post(t *testing.T) {
+func TestWrapQueryHandler_response_should_be_error_when_request_method_post(t *testing.T) {
 	// Given
 	jules := createPerson("Jules", 34)
 	getUser := func(ctx context.Context) (*Person, error) {
@@ -165,7 +165,7 @@ func TestFunctionToLaunch_response_should_be_error_when_request_method_post(t *t
 	}
 
 	// When : quand je récupère la fonction à lancer en lui passant la fonction getUser() et que je l'exécute
-	functionToLaunch := getFunctionToLaunch(getUser)
+	functionToLaunch := wrapQueryHandler(getUser)
 	actual, response := call[errorHelper.MessageWebResult](fIND_USER_PATH, "POST", functionToLaunch)
 
 	// Then : il faut que le corps de la réponse contienne l'utilisateur jules

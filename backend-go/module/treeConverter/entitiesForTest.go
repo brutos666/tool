@@ -25,7 +25,12 @@ type ItemFlatBdd struct {
 
 func (itemFlatBdd ItemFlatBdd) GetId() string       { return strconv.Itoa(itemFlatBdd.id) }
 func (itemFlatBdd ItemFlatBdd) GetParentId() string { return strconv.Itoa(itemFlatBdd.parentId) }
-func (itemFlatBdd ItemFlatBdd) GetNextId() string   { return strconv.Itoa(itemFlatBdd.nextId) }
+func (itemFlatBdd ItemFlatBdd) GetNextId() string {
+	if itemFlatBdd.nextIdIsNull {
+		return ""
+	}
+	return strconv.Itoa(itemFlatBdd.nextId)
+}
 
 func (itemFlatBdd ItemFlatBdd) ConvertToTree() TreeEntity {
 	item := new(ItemTreeEntity)

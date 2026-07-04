@@ -11,9 +11,9 @@ type NodeSpaceWebResult struct {
 	NextItemId     string         `json:"nextItemId,omitempty"`
 }
 
-func (node NodeSpaceWebResult) ConvertToParam() any {
+func (node NodeSpaceWebResult) ConvertToNodeSpace() *domain.NodeSpace {
 	nodeSpaceParam := new(domain.NodeSpace)
-	nodeSpaceParam.SetSpace(node.Space.ConvertToParam())
+	nodeSpaceParam.SetSpace(node.Space.ConvertToSpace())
 	nodeSpaceParam.SetPreviousId(node.PreviousItemId)
 	nodeSpaceParam.SetParentId(node.ParentItemId)
 	nodeSpaceParam.SetNextId(node.NextItemId)

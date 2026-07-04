@@ -43,7 +43,7 @@ func HandleError(requestPath string, err error) {
 	errorFunc := func(ctx context.Context) (any, error) {
 		return nil, err
 	}
-	http.HandleFunc(requestPath, getFunctionToLaunch(errorFunc))
+	http.HandleFunc(requestPath, wrapQueryHandler(errorFunc))
 }
 
 func HandleGet[R any](requestPath string, callback getFunction[R]) {
