@@ -9,13 +9,17 @@ import (
 	"goTool/errorHelper"
 	"goTool/interface/http/httpServer"
 	"goTool/interface/webResult"
+
+	"github.com/go-playground/validator/v10"
 )
+
+var validate = validator.New()
 
 type post[P, R any] func(context.Context, P) (R, error)
 
 func HandleCommandRoute[P, R any](requestPath string, launchFunc post[P, R]) {
 	if httpServer.ServerIsStop() {
-		HandleError(requestPath, errorHelper.New("Serveur en cours d'arrêt : la requête ne peut pas être exécutée"))
+		handleError(requestPath, errorHelper.New("Serveur en cours d'arrêt : la requête ne peut pas être exécutée"))
 		return
 	}
 	http.HandleFunc(requestPath, wrapCommandHandler(launchFunc))

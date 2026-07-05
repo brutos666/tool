@@ -7,7 +7,7 @@ import (
 
 	"goTool/domain"
 	"goTool/errorHelper/specificError"
-	"goTool/infrastructure/configuration"
+	"goTool/infrastructure/bdd/configuration"
 	"goTool/infrastructure/entityBdd"
 )
 

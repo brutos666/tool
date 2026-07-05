@@ -10,8 +10,6 @@ import (
 
 	"goTool/errorHelper"
 	"goTool/interface/http/httpServer"
-
-	"github.com/go-playground/validator/v10"
 )
 
 const (
@@ -19,74 +17,34 @@ const (
 	REQUEST_TIMEOUT     = 10 * time.Second
 )
 
-var validate = validator.New()
-
-// Type de fonction permettant de récupérer n'importe quel type d'objet
-type (
-	getFunction[R any]     func(context.Context) (R, error)
-	postFunction[R, P any] func(context.Context, P) (R, error)
-)
-
-func Stop(requestPath string) {
-	stopApp := func(ctx context.Context) (any, error) {
-		message := errorHelper.CreateMessageWebResult("/stop", http.StatusOK, "Le serveur va être arrêté dès que toutes les requêtes en cours seront terminées")
+func Test(requestPath string) {
+	startApp := func(ctx context.Context) (any, error) {
+		message := errorHelper.CreateMessageWebResult(requestPath, http.StatusOK, "Le serveur est bien démarré")
 		return message, nil
 	}
 	functionToLaunch := func(response http.ResponseWriter, request *http.Request) {
-		process(response, request, stopApp)
+		processQueryRoute(response, request, startApp)
+	}
+	http.HandleFunc(requestPath, functionToLaunch)
+}
+
+func Stop(requestPath string) {
+	stopApp := func(ctx context.Context) (any, error) {
+		message := errorHelper.CreateMessageWebResult(requestPath, http.StatusOK, "Le serveur va être arrêté dès que toutes les requêtes en cours seront terminées")
+		return message, nil
+	}
+	functionToLaunch := func(response http.ResponseWriter, request *http.Request) {
+		processQueryRoute(response, request, stopApp)
 		httpServer.ServerStop()
 	}
 	http.HandleFunc(requestPath, functionToLaunch)
 }
 
-func HandleError(requestPath string, err error) {
+func handleError(requestPath string, err error) {
 	errorFunc := func(ctx context.Context) (any, error) {
 		return nil, err
 	}
 	http.HandleFunc(requestPath, wrapQueryHandler(errorFunc))
-}
-
-func HandleGet[R any](requestPath string, callback getFunction[R]) {
-	if httpServer.ServerIsStop() {
-		HandleError(requestPath, errorHelper.New("Serveur en cours d'arrêt : la requête ne peut pas être exécutée"))
-		return
-	}
-	http.HandleFunc(requestPath, getFunctionToLaunch(callback))
-}
-
-func HandlePost[R, P any](requestPath string, callback postFunction[R, P]) {
-	if httpServer.ServerIsStop() {
-		HandleError(requestPath, errorHelper.New("Serveur en cours d'arrêt : la requête ne peut pas être exécutée"))
-		return
-	}
-	http.HandleFunc(requestPath, getPostFunctionToLaunch(callback))
-}
-
-func getFunctionToLaunch[R any](callback getFunction[R]) func(response http.ResponseWriter, request *http.Request) {
-	return func(response http.ResponseWriter, request *http.Request) {
-		log.Println("Traitement de la requête", request.Method, request.URL.Path, "en cours...")
-		if request.Method == http.MethodGet {
-			process(response, request, callback)
-		} else {
-			sendErrorInResponse(response, request, http.StatusMethodNotAllowed, errorHelper.New(NOT_ALLOWED_MESSAGE))
-		}
-		log.Println("Traitement de la requête", request.Method, request.URL.Path, "terminée")
-	}
-}
-
-func getPostFunctionToLaunch[R, P any](callback postFunction[R, P]) func(response http.ResponseWriter, request *http.Request) {
-	return func(response http.ResponseWriter, request *http.Request) {
-		switch request.Method {
-		case http.MethodPost:
-			log.Println("Traitement de la requête", request.Method, request.URL.Path, "en cours...")
-			processPost(response, request, callback)
-			log.Println("Traitement de la requête", request.Method, request.URL.Path, "terminée")
-		case http.MethodOptions:
-			writeResponse(response, nil, http.StatusOK)
-		default:
-			sendErrorInResponse(response, request, http.StatusMethodNotAllowed, errorHelper.New(NOT_ALLOWED_MESSAGE))
-		}
-	}
 }
 
 func stopServerIfPanic() {
@@ -95,43 +53,6 @@ func stopServerIfPanic() {
 		log.Println(panicMessage)
 		httpServer.ServerStop()
 	}
-}
-
-func process[R any](response http.ResponseWriter, request *http.Request, callback getFunction[R]) {
-	ctx, cancel := context.WithTimeout(request.Context(), REQUEST_TIMEOUT)
-	defer cancel()
-	defer stopServerIfPanic()
-
-	values, err := callback(ctx)
-	if err != nil {
-		sendErrorInResponse(response, request, errorHelper.GetHttpStatusError(err), err)
-	} else {
-		sendValues(response, request, &values)
-	}
-}
-
-func processPost[R, P any](response http.ResponseWriter, request *http.Request, callback postFunction[R, P]) {
-	ctx, cancel := context.WithTimeout(request.Context(), REQUEST_TIMEOUT)
-	defer cancel()
-	defer stopServerIfPanic()
-
-	var parameter P
-	err := json.NewDecoder(request.Body).Decode(&parameter)
-	if err != nil {
-		sendErrorInResponse(response, request, http.StatusBadRequest, err)
-		return
-	}
-	if validationErr := validate.Struct(parameter); validationErr != nil {
-		sendErrorInResponse(response, request, http.StatusBadRequest, validationErr)
-		return
-	}
-	values, err := callback(ctx, parameter)
-	if err != nil {
-		sendErrorInResponse(response, request, errorHelper.GetHttpStatusError(err), err)
-		return
-	}
-
-	sendValues(response, request, &values)
 }
 
 func sendValues(response http.ResponseWriter, request *http.Request, values any) {

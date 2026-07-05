@@ -9,7 +9,7 @@ import (
 	"log"
 
 	"goTool/domain"
-	"goTool/infrastructure/configuration"
+	"goTool/infrastructure/bdd/configuration"
 	"goTool/infrastructure/entityBdd"
 )
 

@@ -14,7 +14,7 @@ type get[R any] func(context.Context) (R, error)
 
 func HandleQueryRoute[R any](requestPath string, launchFunc get[R]) {
 	if httpServer.ServerIsStop() {
-		HandleError(requestPath, errorHelper.New("Serveur en cours d'arrêt : la requête ne peut pas être exécutée"))
+		handleError(requestPath, errorHelper.New("Serveur en cours d'arrêt : la requête ne peut pas être exécutée"))
 		return
 	}
 	http.HandleFunc(requestPath, wrapQueryHandler(launchFunc))

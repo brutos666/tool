@@ -6,7 +6,7 @@ import (
 	"database/server/requestSQL"
 
 	"goTool/domain"
-	"goTool/infrastructure/configuration"
+	"goTool/infrastructure/bdd/configuration"
 	"goTool/infrastructure/entityBdd"
 )
 

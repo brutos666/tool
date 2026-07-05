@@ -8,8 +8,9 @@
 package treeConverter
 
 import (
-	"goTool/utilities"
 	"slices"
+
+	"treeConverter/utilities"
 )
 
 const (
