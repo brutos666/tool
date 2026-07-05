@@ -31,7 +31,7 @@ func createPerson(name string, age uint) *Person {
 /** Cette fonction effectue l'appel d'un handler en retournant la réponse et le contenu du body
  * OBJ est le type de structure retourné dans le body
  */
-func call[OBJ any](path string, method string, callback func(http.ResponseWriter, *http.Request)) (actual *OBJ, response *http.Response) {
+func callT[OBJ any](path string, method string, callback func(http.ResponseWriter, *http.Request)) (actual *OBJ, response *http.Response) {
 	responseWriter := httptest.NewRecorder()
 	request := httptest.NewRequest(method, path, nil)
 	callback(responseWriter, request)
@@ -55,8 +55,8 @@ func TestWrapQueryHandler_response_should_be_user_when_function_return_person(t 
 		return jules, nil
 	}
 	// When
-	functionToLaunch := wrapQueryHandler(getUser)
-	actual, response := call[Person](fIND_USER_PATH, "GET", functionToLaunch)
+	functionToLaunch := wrapGetHandler(getUser)
+	actual, response := callT[Person](fIND_USER_PATH, "GET", functionToLaunch)
 	// Then
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 	assert.Equal(t, jules, actual)
@@ -77,8 +77,8 @@ func TestWrapQueryHandler_response_should_be_error_when_function_return_error(t 
 		return nil, err
 	}
 	// When
-	functionToLaunch := wrapQueryHandler(getUserWithError)
-	actual, response := call[errorHelper.MessageWebResult](fIND_USER_PATH, "GET", functionToLaunch)
+	functionToLaunch := wrapGetHandler(getUserWithError)
+	actual, response := callT[errorHelper.MessageWebResult](fIND_USER_PATH, "GET", functionToLaunch)
 	// Then
 	assert.Equal(t, http.StatusInternalServerError, response.StatusCode)
 	assert.Equal(t, "Utilisateur introuvable", actual.Error)
@@ -104,8 +104,8 @@ func TestWrapQueryHandler_response_should_be_error_when_function_return_pq_error
 		return nil, pqErr
 	}
 	// When
-	functionToLaunch := wrapQueryHandler(getUserWithError)
-	actual, response := call[errorHelper.MessageWebResult](fIND_USER_PATH, "GET", functionToLaunch)
+	functionToLaunch := wrapGetHandler(getUserWithError)
+	actual, response := callT[errorHelper.MessageWebResult](fIND_USER_PATH, "GET", functionToLaunch)
 	// Then
 	assert.Equal(t, http.StatusInternalServerError, response.StatusCode)
 	assert.Contains(t, actual.Error, "Détail sur l'erreur")
@@ -137,8 +137,8 @@ func TestWrapQueryHandler_response_should_be_error_when_function_return_join_err
 		return nil, err
 	}
 	// When
-	functionToLaunch := wrapQueryHandler(getUserWithError)
-	actual, response := call[errorHelper.MessageWebResult](fIND_USER_PATH, "GET", functionToLaunch)
+	functionToLaunch := wrapGetHandler(getUserWithError)
+	actual, response := callT[errorHelper.MessageWebResult](fIND_USER_PATH, "GET", functionToLaunch)
 	// Then
 	assert.Equal(t, http.StatusInternalServerError, response.StatusCode)
 	assert.Contains(t, actual.Error, "Détail sur l'erreur")
@@ -165,8 +165,8 @@ func TestWrapQueryHandler_response_should_be_error_when_request_method_post(t *t
 	}
 
 	// When : quand je récupère la fonction à lancer en lui passant la fonction getUser() et que je l'exécute
-	functionToLaunch := wrapQueryHandler(getUser)
-	actual, response := call[errorHelper.MessageWebResult](fIND_USER_PATH, "POST", functionToLaunch)
+	functionToLaunch := wrapGetHandler(getUser)
+	actual, response := callT[errorHelper.MessageWebResult](fIND_USER_PATH, "POST", functionToLaunch)
 
 	// Then : il faut que le corps de la réponse contienne l'utilisateur jules
 	assert.Equal(t, http.StatusMethodNotAllowed, response.StatusCode)

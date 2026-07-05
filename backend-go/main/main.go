@@ -27,11 +27,11 @@ func main() {
 	userQueryService := application.UserQueryService(bdd.UserQueryRepository())
 
 	// Routes : les transformations des paramètres des requêtes et du retour sont faites dans le package
-	handler.HandleQueryRoute("/api/item/findAllItems", spaceQueryService.FindAll)
-	handler.HandleCommandRoute("/api/item/save", spaceCommandService.Save)
-	handler.HandleCommandRoute("/api/user/signup", userCommandService.Signup)
-	handler.HandleQueryRoute("/api/user/findAllUsers", userQueryService.FindAll)
-	handler.Test("/")
+	handler.HandleGetRoute("/api/item/findAllItems", spaceQueryService.FindAll)
+	handler.HandlePostRoute("/api/item/save", spaceCommandService.Save)
+	handler.HandlePostRoute("/api/user/signup", userCommandService.Signup)
+	handler.HandleGetRoute("/api/user/findAllUsers", userQueryService.FindAll)
+	handler.Verify("/")
 	handler.Stop("/stop")
 
 	httpServer.ServerWait()
