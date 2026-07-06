@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	"goTool/errorHelper"
+	"goTool/interface/http/httpMessage"
 	"goTool/interface/http/httpServer"
 	"goTool/interface/webResult"
 
@@ -22,18 +22,10 @@ type (
 var validate = validator.New()
 
 func HandlePostRoute[P, R any](requestPath string, callback callWithParam[P, R]) {
-	if httpServer.ServerIsStop() {
-		handleError(requestPath, errorHelper.New("Serveur en cours d'arrêt : la requête ne peut pas être exécutée"))
-		return
-	}
 	http.HandleFunc(requestPath, wrapPostHandler[P](callback))
 }
 
 func HandleGetRoute[R any](requestPath string, callback returnOnlyCall[R]) {
-	if httpServer.ServerIsStop() {
-		handleError(requestPath, errorHelper.New("Serveur en cours d'arrêt : la requête ne peut pas être exécutée"))
-		return
-	}
 	http.HandleFunc(requestPath, wrapGetHandler(callback))
 }
 
@@ -42,6 +34,12 @@ func wrapPostHandler[P, R any](callback callWithParam[P, R]) func(response http.
 
 	return func(response http.ResponseWriter, request *http.Request) {
 		requestPath := request.URL.Path
+		httpError := checkServerRunning(requestPath)
+		if httpError != nil {
+			sendHttpError(response, requestPath, *httpError)
+			return
+		}
+
 		log.Println("Traitement de la requête", requestPath, "en cours...")
 
 		switch request.Method {
@@ -50,7 +48,8 @@ func wrapPostHandler[P, R any](callback callWithParam[P, R]) func(response http.
 		case http.MethodOptions:
 			writeResponse(response, requestPath, nil, http.StatusOK)
 		default:
-			sendErrorInResponse(response, requestPath, http.StatusMethodNotAllowed, errorHelper.New(NOT_ALLOWED_MESSAGE))
+			httpError := httpMessage.NewError(METHOD_IS_NOT_ALLOWED, requestPath, http.StatusMethodNotAllowed)
+			sendHttpError(response, requestPath, *httpError)
 		}
 		log.Println("Traitement de la requête", requestPath, "terminée")
 	}
@@ -61,13 +60,20 @@ func wrapGetHandler[R any](callback returnOnlyCall[R]) func(response http.Respon
 
 	return func(response http.ResponseWriter, request *http.Request) {
 		requestPath := request.URL.Path
+		httpError := checkServerRunning(requestPath)
+		if httpError != nil {
+			sendHttpError(response, requestPath, *httpError)
+			return
+		}
+
 		log.Println("Traitement de la requête", requestPath, "en cours...")
 
 		switch request.Method {
 		case http.MethodGet:
 			callSendResponse(response, request, toCall)
 		default:
-			sendErrorInResponse(response, requestPath, http.StatusMethodNotAllowed, errorHelper.New(NOT_ALLOWED_MESSAGE))
+			httpError := httpMessage.NewError(METHOD_IS_NOT_ALLOWED, requestPath, http.StatusMethodNotAllowed)
+			sendHttpError(response, requestPath, *httpError)
 		}
 		log.Println("Traitement de la requête", requestPath, "terminée")
 	}
@@ -111,7 +117,7 @@ func callSendResponse[R any](response http.ResponseWriter, request *http.Request
 
 	values, err := toCall(ctx, request)
 	if err != nil {
-		sendErrorInResponse(response, requestPath, errorHelper.GetHttpStatusError(err), err)
+		sendError(response, requestPath, err)
 		return
 	}
 	webResultValues := webResult.Convert(values)
@@ -122,20 +128,11 @@ func sendValues(response http.ResponseWriter, requestPath string, values any) {
 	// On renvoie la réponse au format JSON
 	jsonData, err := json.Marshal(values)
 	if err != nil {
-		sendErrorInResponse(response, requestPath, http.StatusInternalServerError, err)
+		httpError := httpMessage.NewError(err.Error(), requestPath, http.StatusInternalServerError)
+		sendHttpError(response, requestPath, *httpError)
+		return
 	}
 	writeResponse(response, requestPath, jsonData, http.StatusOK)
-}
-
-func sendErrorInResponse(response http.ResponseWriter, requestPath string, statusCode int, err error) {
-	message := errorHelper.GetDetailError(err)
-	errorWebResult := errorHelper.CreateMessageWebResult(requestPath, statusCode, message)
-	jsonData, responseErr := json.Marshal(errorWebResult)
-	if responseErr != nil {
-		panic("Impossible de renvoyer l'erreur '" + message + "' dans la réponse à la requête '" + requestPath + "'")
-	}
-	writeResponse(response, requestPath, jsonData, statusCode)
-	log.Println("Erreur requête", requestPath, ":", message)
 }
 
 func writeResponse(response http.ResponseWriter, requestPath string, jsonData []byte, statusCode int) {

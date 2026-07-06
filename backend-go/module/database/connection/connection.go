@@ -31,13 +31,13 @@ type (
 	CallbackWithoutResult[A any]     func(Connection, A) error
 )
 
-// LaunchTransactionnel permet l'appel d'une fonction de mise à jour de la base de données en mode transactionnel
+// LaunchTransactionnelWay permet l'appel d'une fonction de mise à jour de la base de données en mode transactionnel
 //
 // Ouvre une connection à la base de données en mode transaction.
 // Appel la fonction qui doit mettre à jour la base de données.
 // Rollback et ferme la connection si une erreur survient.
 // Commit et ferme la connection si tout se passe bien.
-func LaunchTransactionnel[A any](ctx context.Context, base DatabaseConnection, callback CallbackWithoutResult[A], arguments A) (err error) {
+func LaunchTransactionnelWay[A any](ctx context.Context, base DatabaseConnection, callback CallbackWithoutResult[A], arguments A) (err error) {
 	var connection *Connection
 	connection, err = openTransactionnelConnection(ctx, base)
 	if err != nil {
@@ -56,28 +56,6 @@ func LaunchTransactionnel[A any](ctx context.Context, base DatabaseConnection, c
 	}
 
 	return commit(connection)
-}
-
-func LaunchTransactionnelWay[R any, A any](ctx context.Context, base DatabaseConnection, callback CallbackWithResult[R, A], arguments A) (result []R, err error) {
-	var connection *Connection
-	connection, err = openTransactionnelConnection(ctx, base)
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		err = errors.Join(err, close(connection))
-	}()
-	defer func() {
-		err = errors.Join(err, rollback(connection))
-	}()
-
-	result, err = callback(*connection, arguments)
-	if err != nil {
-		return nil, err
-	}
-
-	err = commit(connection)
-	return result, nil
 }
 
 func LaunchNormalWay[R any, A any](ctx context.Context, base DatabaseConnection, callback CallbackWithResult[R, A], arguments A) (result []R, err error) {

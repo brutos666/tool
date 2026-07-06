@@ -26,7 +26,7 @@ func (repo *dataInitRepository) Init(ctx context.Context) error {
 		defer server.StopServer(repository.BaseConnection)
 	*/
 	log.Printf("Lancement du script de création des tables et index")
-	err := connection.LaunchTransactionnel(ctx, configuration.BaseConnection, doLaunchScript, configuration.SCHEMA_PATH)
+	err := connection.LaunchTransactionnelWay(ctx, configuration.BaseConnection, doLaunchScript, configuration.SCHEMA_PATH)
 	if err != nil {
 		log.Fatalf("Impossible de créer les tables : %s", err)
 	}

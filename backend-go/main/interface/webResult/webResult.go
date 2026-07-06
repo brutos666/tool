@@ -3,6 +3,7 @@ package webResult
 
 import (
 	"goTool/domain"
+	"goTool/interface/http/httpMessage"
 )
 
 func GetInstance(entity any) any {
@@ -35,6 +36,8 @@ func Convert(entity interface{}) any {
 			userList[index] = ConvertUserToWebResult(typedEntity[index])
 		}
 		return userList
+	case *httpMessage.Message:
+		return ConvertMessageToWebResult(typedEntity)
 	case *RegisterUserWebResult:
 		return typedEntity.ConvertToUser()
 	case *NodeSpaceWebResult:

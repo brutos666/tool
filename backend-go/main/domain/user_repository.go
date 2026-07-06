@@ -3,7 +3,7 @@ package domain
 import "context"
 
 type UserCommandRepository interface {
-	Signup(ctx context.Context, user *User, hashPassword, accessToken, refreshToken string) error
+	CreateUserIfNotExists(ctx context.Context, user *User, hashPassword, accessToken, refreshToken string) (alreadyExists bool, err error)
 }
 
 type UserQueryRepository interface {

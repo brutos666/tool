@@ -6,18 +6,24 @@ import (
 	"net/http"
 	"time"
 
-	"goTool/errorHelper"
+	"goTool/interface/http/httpMessage"
 	"goTool/interface/http/httpServer"
 )
 
 const (
-	NOT_ALLOWED_MESSAGE = "Méthode non autorisée"
-	REQUEST_TIMEOUT     = 10 * time.Second
+	METHOD_IS_NOT_ALLOWED = "Méthode non autorisée"
+	REQUEST_TIMEOUT       = 10 * time.Second
+)
+
+const (
+	SERVER_STARTED       = "Le serveur est bien démarré"
+	SERVER_ABOUT_TO_STOP = "Le serveur va être arrêté dès que toutes les requêtes en cours seront terminées"
+	SERVER_IS_STOPPING   = "Serveur en cours d'arrêt : la requête ne peut pas être exécutée"
 )
 
 func Verify(requestPath string) {
 	startApp := func(ctx context.Context) (any, error) {
-		message := errorHelper.CreateMessageWebResult(requestPath, http.StatusOK, "Le serveur est bien démarré")
+		message := httpMessage.NewMessage(SERVER_STARTED, http.StatusOK)
 		return message, nil
 	}
 	http.HandleFunc(requestPath, wrapGetHandler(startApp))
@@ -25,16 +31,16 @@ func Verify(requestPath string) {
 
 func Stop(requestPath string) {
 	stopApp := func(ctx context.Context) (any, error) {
-		message := errorHelper.CreateMessageWebResult(requestPath, http.StatusOK, "Le serveur va être arrêté dès que toutes les requêtes en cours seront terminées")
+		message := httpMessage.NewMessage(SERVER_ABOUT_TO_STOP, http.StatusOK)
 		httpServer.ServerStop()
 		return message, nil
 	}
 	http.HandleFunc(requestPath, wrapGetHandler(stopApp))
 }
 
-func handleError(requestPath string, err error) {
-	errorFunc := func(ctx context.Context) (any, error) {
-		return nil, err
+func checkServerRunning(requestPath string) *httpMessage.Message {
+	if httpServer.ServerIsStop() {
+		return httpMessage.NewError(SERVER_IS_STOPPING, requestPath, http.StatusServiceUnavailable)
 	}
-	http.HandleFunc(requestPath, wrapGetHandler(errorFunc))
+	return nil
 }

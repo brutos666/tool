@@ -6,7 +6,6 @@ import (
 	"database/server/requestSQL"
 
 	"goTool/domain"
-	"goTool/errorHelper/specificError"
 	"goTool/infrastructure/bdd/configuration"
 	"goTool/infrastructure/entityBdd"
 )
@@ -25,14 +24,18 @@ func UserCommandRepository() domain.UserCommandRepository {
 type userInfosArgs struct {
 	user                                    *domain.User
 	hashPassword, accessToken, refreshToken string
+	alreadyExists                           *bool
 }
+
+func (infos *userInfosArgs) setAlreadyExists() { *infos.alreadyExists = true }
 
 // Signup implements [domain.UserCommandRepository].
-func (repository *userCmdRepository) Signup(ctx context.Context, user *domain.User, hashPassword string, accessToken string, refreshToken string) error {
-	return connection.LaunchTransactionnel(ctx, configuration.BaseConnection, doSignUp, userInfosArgs{user, hashPassword, accessToken, refreshToken})
+func (repository *userCmdRepository) CreateUserIfNotExists(ctx context.Context, user *domain.User, hashPassword string, accessToken string, refreshToken string) (alreadyExists bool, err error) {
+	err = connection.LaunchTransactionnelWay(ctx, configuration.BaseConnection, doCreateUserIfNotExists, userInfosArgs{user, hashPassword, accessToken, refreshToken, &alreadyExists})
+	return alreadyExists, err
 }
 
-func doSignUp(connection connection.Connection, userInfos userInfosArgs) error {
+func doCreateUserIfNotExists(connection connection.Connection, userInfos userInfosArgs) error {
 	// Vérification si l'utilisateur existe déjà
 	var existingUsers []entityBdd.UserModel
 	err := requestSQL.Select(connection, &existingUsers, SELECT_WITH_EMAIL, userInfos.user.GetEmail())
@@ -40,17 +43,20 @@ func doSignUp(connection connection.Connection, userInfos userInfosArgs) error {
 		return err
 	}
 	if len(existingUsers) > 0 {
-		functionalErr := specificError.Errorf("L'utilisateur avec l'email %s existe déjà", userInfos.user.GetEmail())
-		functionalErr.AddContext("email", userInfos.user.GetEmail())
-		return functionalErr
+		userInfos.setAlreadyExists()
+		return nil
 	}
 
-	userModel := *entityBdd.CreateUserToRegister(*userInfos.user, userInfos.hashPassword, userInfos.accessToken, userInfos.refreshToken)
+	return insertUser(connection, userInfos.user, userInfos.hashPassword, userInfos.accessToken, userInfos.refreshToken)
+}
 
-	err = requestSQL.ExecWithReturn(connection, userModel, &userModel, INSERT_USER)
+func insertUser(connection connection.Connection, user *domain.User, hashPassword, accessToken, refreshToken string) error {
+	userModel := *entityBdd.CreateUserToRegister(*user, hashPassword, accessToken, refreshToken)
+
+	err := requestSQL.ExecWithReturn(connection, userModel, &userModel, INSERT_USER)
 	if err != nil {
 		return err
 	}
-	userInfos.user.SetId(userModel.GetId())
+	user.SetId(userModel.GetId())
 	return nil
 }

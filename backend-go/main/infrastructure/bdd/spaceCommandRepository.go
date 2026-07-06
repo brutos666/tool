@@ -28,11 +28,11 @@ func SpaceCommandRepository() domain.SpaceCommandRepository {
 }
 
 func (repo *spaceCmdRepository) SaveCurrentSpace(ctx context.Context, nodeSpace *domain.NodeSpace) error {
-	return connection.LaunchTransactionnel(ctx, configuration.BaseConnection, saveSpace, nodeSpace)
+	return connection.LaunchTransactionnelWay(ctx, configuration.BaseConnection, saveSpace, nodeSpace)
 }
 
 func (repo *spaceCmdRepository) SaveSpaces(ctx context.Context, spaces *domain.Spaces) error {
-	return connection.LaunchTransactionnel(ctx, configuration.BaseConnection, saveSpaces, spaces)
+	return connection.LaunchTransactionnelWay(ctx, configuration.BaseConnection, saveSpaces, spaces)
 }
 
 func saveSpace(connection connection.Connection, nodeSpace *domain.NodeSpace) error {
