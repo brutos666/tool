@@ -1,8 +1,10 @@
 package webResult
 
 import (
+	"net/http"
 	"time"
 
+	"goTool/domain/domainMessage"
 	"goTool/interface/http/httpMessage"
 )
 
@@ -27,12 +29,22 @@ func CreateMessageWebResult(path string, statusCode int, error string) *MessageW
 	return messageWebResult
 }
 
-func ConvertMessageToWebResult(message *httpMessage.Message) *MessageWebResult {
+func ConvertHttpMessageToWebResult(message *httpMessage.Message) *MessageWebResult {
 	messageWebResult := new(MessageWebResult)
 	// TODO : côté front, distinguer les messages des erreurs par rapport au statusCode
 	messageWebResult.StatusCode = message.GetHttpStatusCode()
 	messageWebResult.Error = message.GetMessage()
 	messageWebResult.Path = message.GetPath()
+	messageWebResult.Timestamp = time.Now()
+	return messageWebResult
+}
+
+func ConvertDomainMessageToWebResult(message *domainMessage.Message) *MessageWebResult {
+	messageWebResult := new(MessageWebResult)
+	// TODO : côté front, distinguer les messages des erreurs par rapport au statusCode
+	messageWebResult.StatusCode = http.StatusOK
+	messageWebResult.Error = message.ToString()
+	messageWebResult.Path = ""
 	messageWebResult.Timestamp = time.Now()
 	return messageWebResult
 }

@@ -22,7 +22,7 @@ type (
 var validate = validator.New()
 
 func HandlePostRoute[P, R any](requestPath string, callback callWithParam[P, R]) {
-	http.HandleFunc(requestPath, wrapPostHandler[P](callback))
+	http.HandleFunc(requestPath, wrapPostHandler(callback))
 }
 
 func HandleGetRoute[R any](requestPath string, callback returnOnlyCall[R]) {
@@ -104,7 +104,7 @@ func readRequestParameter[P any](request *http.Request) (P, error) {
 		return parameter, err
 	}
 	if validationErr := validate.Struct(webParameter); validationErr != nil {
-		return parameter, err
+		return parameter, validationErr
 	}
 	return webResult.Convert(webParameter).(P), nil
 }

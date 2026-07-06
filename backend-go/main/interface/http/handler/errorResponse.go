@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings"
 
-	"goTool/domain/specificError"
+	"goTool/domain/domainMessage"
 	"goTool/interface/http/httpMessage"
 	"goTool/interface/webResult"
 
@@ -22,7 +22,7 @@ func sendError(response http.ResponseWriter, requestPath string, err error) {
 }
 
 func sendHttpError(response http.ResponseWriter, requestPath string, httpError httpMessage.Message) {
-	messageWebResult := webResult.ConvertMessageToWebResult(&httpError)
+	messageWebResult := webResult.ConvertHttpMessageToWebResult(&httpError)
 	sendMessageInResponse(response, *messageWebResult)
 	log.Println("Erreur requête", requestPath, ":", httpError.GetMessage())
 }
@@ -36,7 +36,7 @@ func sendMessageInResponse(response http.ResponseWriter, mess webResult.MessageW
 }
 
 func GetHttpStatusError(err error) int {
-	_, ok := errors.AsType[specificError.FunctionalError](err)
+	_, ok := errors.AsType[domainMessage.Error](err)
 	if ok {
 		return http.StatusBadRequest
 	}
