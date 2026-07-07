@@ -1,4 +1,4 @@
-package token
+package tokens
 
 import (
 	"log"
@@ -25,7 +25,7 @@ func GetJWTKey() []byte {
 	return []byte(jwtKey)
 }
 
-func GenerateTokens(email, userID, userType string) (string, string) {
+func Generate(email, userID, userType string) (string, string) {
 	log.Printf("JWT Key %v Type: %T", jwtKey, jwtKey)
 
 	// Positionnement de la durée de validité des jetons

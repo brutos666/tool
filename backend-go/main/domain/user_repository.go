@@ -4,6 +4,8 @@ import "context"
 
 type UserCommandRepository interface {
 	CreateUserIfNotExists(ctx context.Context, user *User, hashPassword, accessToken, refreshToken string) (alreadyExists bool, err error)
+	GetUsersWithEmail(ctx context.Context, email string) ([]User, error)
+	UpdateToken(ctx context.Context, userId string, accessToken, refreshToken string) error
 }
 
 type UserQueryRepository interface {

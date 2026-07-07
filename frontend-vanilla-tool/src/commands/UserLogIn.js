@@ -1,23 +1,31 @@
 import UserCallsRequest from '../requests/UserCallsRequest.js';
 import Command from './Command.js';
-/** @import {UserInfos} from '../data/User.js' */
+/** @import {LoginInfos} from '../components/LoginSpace.js' */
 
-class UserLogIn extends Command {
+class UserLogin extends Command {
 
-  name = 'LogUserIn';
+  name = 'UserLogin';
 
   /**
    * @constructor
    * @param {CommandDecorator} commandDecorator
-   * @param {UserInfos} userInfos
+   * @param {LoginInfos} logInfos
    */
-  constructor(commandDecorator, userInfos) {
+  constructor(commandDecorator, logInfos) {
     super(commandDecorator);
 
     this.setSuccessMessage('Connexion effectuée avec succès');
     this.setErrorMessage('La tentative de connexion a échoué');
-    this.setExecuteCallback(new UserCallsRequest().logUserIn.bind(null, userInfos));
+    this.setExecuteCallback(new UserCallsRequest().logUserIn.bind(null, logInfos));
+  }
+
+  /**
+   * @override
+   */
+  commandDone() {
+    super.commandDone();
+    window.location.href = 'index.html';
   }
 
 }
-export default UserLogIn;
+export default UserLogin;

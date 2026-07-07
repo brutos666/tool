@@ -24,3 +24,31 @@ func (user *User) SetRole(role string)           { user.role = role }
 func (user User) GetContext() string {
 	return "Identifiant=" + user.id + ", Nom=" + user.firstName + ", Prénom=" + user.lastName
 }
+
+type LoginUser struct {
+	email    string
+	password string
+}
+
+func (user LoginUser) GetEmail() string             { return user.email }
+func (user *LoginUser) SetEmail(email string)       { user.email = email }
+func (user LoginUser) GetPassword() string          { return user.password }
+func (user *LoginUser) SetPassword(password string) { user.password = password }
+
+type LoggedUser struct {
+	user         User
+	token        string
+	refreshToken string
+}
+
+func (loggedUser LoggedUser) GetUser() User           { return loggedUser.user }
+func (loggedUser LoggedUser) GetToken() string        { return loggedUser.token }
+func (loggedUser LoggedUser) GetRefreshToken() string { return loggedUser.refreshToken }
+
+func CreateLoggedUser(user User, token string, refreshToken string) *LoggedUser {
+	loggedUser := new(LoggedUser)
+	loggedUser.user = user
+	loggedUser.token = token
+	loggedUser.refreshToken = refreshToken
+	return loggedUser
+}

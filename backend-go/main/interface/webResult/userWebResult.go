@@ -36,3 +36,15 @@ func (userWebResult RegisterUserWebResult) ConvertToUser() *domain.User {
 	user.SetRole("USER")
 	return user
 }
+
+type LoginUserWebResult struct {
+	Email    string `json:"email" validate:"email,required"`
+	Password string `json:"password" validate:"required,min=8"`
+}
+
+func (userWebResult LoginUserWebResult) ConvertToLoginUser() *domain.LoginUser {
+	user := new(domain.LoginUser)
+	user.SetPassword(userWebResult.Password)
+	user.SetEmail(userWebResult.Email)
+	return user
+}

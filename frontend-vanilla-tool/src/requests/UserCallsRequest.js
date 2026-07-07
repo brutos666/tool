@@ -1,5 +1,6 @@
 import CallRequest from './CallRequest.js';
-/** @import {UserInfos} from '../data/User.js'; */
+/** @import {RegisterUserInfos} from '../components/LoginSpace.js'; */
+/** @import {LoginInfos} from '../components/LoginSpace.js'; */
 
 class UserCallsRequest {
 
@@ -17,11 +18,11 @@ class UserCallsRequest {
 
   /**
    * Connecte l'utilisateur à sa session
-   * @param {UserInfos} userInfos
+   * @param {LoginInfos} loginInfos
    */
-  async logUserIn(userInfos) {
+  async logUserIn(loginInfos) {
     return new CallRequest()
-      .execute('user/login', 'POST', userInfos);
+      .execute('user/login', 'POST', loginInfos);
   }
 
   /**

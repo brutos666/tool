@@ -2,7 +2,7 @@
 package domainMessage
 
 type Error struct {
-	message Message
+	message *Message
 }
 
 func (error Error) AddContext(name, value string) {
@@ -16,11 +16,11 @@ func (error Error) Error() string {
 func NewError(text string) *Error {
 	message := New(text)
 	err := new(Error)
-	err.message = *message
+	err.message = message
 	return err
 }
 
 func Errorf(error string, args ...any) Error {
 	message := Messagef(error, args...)
-	return Error{message: message}
+	return Error{message: &message}
 }

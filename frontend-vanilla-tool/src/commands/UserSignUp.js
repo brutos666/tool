@@ -18,6 +18,13 @@ class UserSignUp extends Command {
     this.setErrorMessage('Une erreur est survenue lors de l\'inscription de l\'utilisateur');
     this.setExecuteCallback(new UserCallsRequest().signUp.bind(null, registerUserInfos));
   }
+  /**
+   * @override
+   */
+  commandDone() {
+    super.commandDone();
+    window.location.href = 'index.html';
+  }
 
 }
 export default UserSignUp;

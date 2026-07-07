@@ -12,6 +12,11 @@ import LoginSpaceView from './views/LoginSpaceView.js';
  * @property {string} lastName - Nom
  * @property {string} password - Mot de passe
  */
+/**
+ * @typedef {Object} LoginInfos - Informations sur l'utilisateur qui veut se connecter
+ * @property {string} email - Email
+ * @property {string} password - Mot de passe
+ */
 class LoginSpace extends Component {
 
   #emailInput;
@@ -87,12 +92,22 @@ class LoginSpace extends Component {
     };
   }
 
+  /**
+   * Retourne les informations saisies pour inscrire l'utilisateur
+   * @returns {LoginInfos}
+   */
+  getLoginInfos() {
+    return {
+      email: this.#emailInput.getValue(),
+      password: this.#passwordInput.getValue()
+    };
+  }
   doLogin(event) {
     event.preventDefault();
     if (!this.#emailInput.checkValidity() || !this.#passwordInput.checkValidity()) {
       return;
     }
-    this.#loginDecorator.logIn(this.#emailInput.getValue(), this.#passwordInput.getValue());
+    this.#loginDecorator.logIn(this.getLoginInfos());
   }
 
   doSignup(event) {

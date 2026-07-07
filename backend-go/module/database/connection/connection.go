@@ -27,8 +27,9 @@ func (connection Connection) GetContext() context.Context { return connection.ct
 func (connection Connection) IsModeTrans() bool           { return connection.modeTrans }
 
 type (
-	CallbackWithResult[R any, A any] func(Connection, A) ([]R, error)
-	CallbackWithoutResult[A any]     func(Connection, A) error
+	CallbackWithResult[R, A any]  func(Connection, A) (*R, error)
+	CallbackWithResults[R, A any] func(Connection, A) ([]R, error)
+	CallbackWithoutResult[A any]  func(Connection, A) error
 )
 
 // LaunchTransactionnelWay permet l'appel d'une fonction de mise à jour de la base de données en mode transactionnel
@@ -58,7 +59,7 @@ func LaunchTransactionnelWay[A any](ctx context.Context, base DatabaseConnection
 	return commit(connection)
 }
 
-func LaunchNormalWay[R any, A any](ctx context.Context, base DatabaseConnection, callback CallbackWithResult[R, A], arguments A) (result []R, err error) {
+func LaunchNormalWay[R, A any](ctx context.Context, base DatabaseConnection, callback CallbackWithResults[R, A], arguments A) (result []R, err error) {
 	var connection *Connection
 	connection, err = openAutoCommitConnection(ctx, base)
 	if err != nil {

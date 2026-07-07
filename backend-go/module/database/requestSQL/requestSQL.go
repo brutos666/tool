@@ -20,11 +20,11 @@ func LaunchSQLScript(connection connection.Connection, filePath string) (int, er
 }
 
 func Select(connection connection.Connection, dest interface{}, query string, args ...interface{}) error {
-	tx := connection.GetTx()
+	db := connection.GetDb()
 	if strings.Contains(query, "?") {
-		query = tx.Rebind(query)
+		query = db.Rebind(query)
 	}
-	return connection.GetDb().SelectContext(connection.GetContext(), dest, query, args...)
+	return db.SelectContext(connection.GetContext(), dest, query, args...)
 }
 
 func ExecIn(connection connection.Connection, query string, inValues any) (int, error) {

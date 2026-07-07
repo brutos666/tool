@@ -30,6 +30,7 @@ func main() {
 	handler.HandleGetRoute("/api/item/findAllItems", spaceQueryService.FindAll)
 	handler.HandlePostRoute("/api/item/save", spaceCommandService.Save)
 	handler.HandlePostRoute("/api/user/signup", userCommandService.Signup)
+	handler.HandlePostRoute("/api/user/login", userCommandService.Login)
 	handler.HandleGetRoute("/api/user/findAllUsers", userQueryService.FindAll)
 	handler.Verify("/")
 	handler.Stop("/stop")
