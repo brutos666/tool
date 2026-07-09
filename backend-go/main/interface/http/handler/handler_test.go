@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"goTool/interface/http/handler/call"
 	"goTool/interface/webResult"
 
 	"github.com/lib/pq"
@@ -55,7 +56,7 @@ func TestWrapQueryHandler_response_should_be_user_when_function_return_person(t 
 		return jules, nil
 	}
 	// When
-	functionToLaunch := wrapGetHandler(getUser)
+	functionToLaunch := wrapHandler(http.MethodGet, call.Get(getUser))
 	actual, response := callT[Person](fIND_USER_PATH, "GET", functionToLaunch)
 	// Then
 	assert.Equal(t, http.StatusOK, response.StatusCode)
@@ -77,7 +78,7 @@ func TestWrapQueryHandler_response_should_be_error_when_function_return_error(t 
 		return nil, err
 	}
 	// When
-	functionToLaunch := wrapGetHandler(getUserWithError)
+	functionToLaunch := wrapHandler(http.MethodGet, call.Get(getUserWithError))
 	actual, response := callT[webResult.MessageWebResult](fIND_USER_PATH, "GET", functionToLaunch)
 	// Then
 	assert.Equal(t, http.StatusInternalServerError, response.StatusCode)
@@ -104,7 +105,7 @@ func TestWrapQueryHandler_response_should_be_error_when_function_return_pq_error
 		return nil, pqErr
 	}
 	// When
-	functionToLaunch := wrapGetHandler(getUserWithError)
+	functionToLaunch := wrapHandler(http.MethodGet, call.Get(getUserWithError))
 	actual, response := callT[webResult.MessageWebResult](fIND_USER_PATH, "GET", functionToLaunch)
 	// Then
 	assert.Equal(t, http.StatusInternalServerError, response.StatusCode)
@@ -137,7 +138,7 @@ func TestWrapQueryHandler_response_should_be_error_when_function_return_join_err
 		return nil, err
 	}
 	// When
-	functionToLaunch := wrapGetHandler(getUserWithError)
+	functionToLaunch := wrapHandler(http.MethodGet, call.Get(getUserWithError))
 	actual, response := callT[webResult.MessageWebResult](fIND_USER_PATH, "GET", functionToLaunch)
 	// Then
 	assert.Equal(t, http.StatusInternalServerError, response.StatusCode)
@@ -165,7 +166,7 @@ func TestWrapQueryHandler_response_should_be_error_when_request_method_post(t *t
 	}
 
 	// When : quand je récupère la fonction à lancer en lui passant la fonction getUser() et que je l'exécute
-	functionToLaunch := wrapGetHandler(getUser)
+	functionToLaunch := wrapHandler(http.MethodGet, call.Get(getUser))
 	actual, response := callT[webResult.MessageWebResult](fIND_USER_PATH, "POST", functionToLaunch)
 
 	// Then : il faut que le corps de la réponse contienne l'utilisateur jules

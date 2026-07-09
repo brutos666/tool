@@ -52,3 +52,22 @@ func CreateLoggedUser(user User, token string, refreshToken string) *LoggedUser 
 	loggedUser.refreshToken = refreshToken
 	return loggedUser
 }
+
+// ConnectedUser : informations minimums sur l'utilisateur connecté
+type ConnectedUser struct {
+	UserId string `json:"user_id"`
+	Email  string `json:"email"`
+	Role   string `json:"role"`
+}
+
+func (user ConnectedUser) GetId() string    { return user.UserId }
+func (user ConnectedUser) GetEmail() string { return user.Email }
+func (user ConnectedUser) GetRole() string  { return user.Role }
+
+func CreateConnectedUser(user User) *ConnectedUser {
+	connectedUser := new(ConnectedUser)
+	connectedUser.UserId = user.GetId()
+	connectedUser.Email = user.GetEmail()
+	connectedUser.Role = user.GetRole()
+	return connectedUser
+}

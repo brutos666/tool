@@ -1,28 +1,26 @@
 /**
- * @typedef {Object} UserInfos - Informations sur l'utilisateur
- * @property {number} id - Identifiant unique
- * @property {string} email - Email
+ * @typedef {Object} LoggedUser
  * @property {string} firstName - Prénom
  * @property {string} lastName - Nom
- * @property {'ADMIN'|'USER'} role - Mot de passe
+ * @property {string} token - Jeton d'authentification
  */
 
 class User {
 
   name = 'User';
 
-  /** @type {UserInfos} */
+  /** @type {LoggedUser} */
   #userInfos;
 
   constructor(userInfos) {
     this.#userInfos = userInfos;
   }
-  getEmail() {
-    return this.#userInfos.email;
+  getToken() {
+    return this.#userInfos.token;
   }
   /**
    * Retourne les informations sur l'utilisateur
-   * @returns {UserInfos}
+   * @returns {LoggedUser}
    */
   getUserInfos() {
     return this.#userInfos;

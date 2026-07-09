@@ -3,125 +3,80 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
+	"goTool/interface/http/handler/call"
+	"goTool/interface/http/handler/middleware"
 	"goTool/interface/http/httpMessage"
 	"goTool/interface/http/httpServer"
 	"goTool/interface/webResult"
-
-	"github.com/go-playground/validator/v10"
 )
 
-type (
-	wrapCall[R any]         func(context.Context, *http.Request) (R, error)
-	callWithParam[P, R any] func(context.Context, P) (R, error)
-	returnOnlyCall[R any]   func(context.Context) (R, error)
-)
+const SEVEN_DAYS_IN_SECONDS = 604800
 
-var validate = validator.New()
-
-func HandlePostRoute[P, R any](requestPath string, callback callWithParam[P, R]) {
-	http.HandleFunc(requestPath, wrapPostHandler(callback))
+func HandleRoute(requestPath, method string, callback call.Callback) {
+	http.HandleFunc(requestPath, wrapHandler(method, callback))
 }
 
-func HandleGetRoute[R any](requestPath string, callback returnOnlyCall[R]) {
-	http.HandleFunc(requestPath, wrapGetHandler(callback))
-}
-
-func wrapPostHandler[P, R any](callback callWithParam[P, R]) func(response http.ResponseWriter, request *http.Request) {
-	toCall := wrapCallbackWithParam(callback)
+func wrapHandler(method string, callback call.Callback) func(response http.ResponseWriter, request *http.Request) {
+	toCall := call.WrapCallback(callback)
 
 	return func(response http.ResponseWriter, request *http.Request) {
 		requestPath := request.URL.Path
-		httpError := checkServerRunning(requestPath)
-		if httpError != nil {
+		requestMethod := request.Method
+
+		log.Println("Traitement de la requête", requestPath, "en cours...")
+
+		if method != requestMethod && requestMethod != http.MethodOptions {
+			httpError := httpMessage.NewError(METHOD_IS_NOT_ALLOWED, requestPath, http.StatusMethodNotAllowed)
 			sendHttpError(response, requestPath, *httpError)
 			return
 		}
 
-		log.Println("Traitement de la requête", requestPath, "en cours...")
-
-		switch request.Method {
+		switch requestMethod {
 		case http.MethodPost:
-			callSendResponse(response, request, toCall)
+			processRequest(response, request, toCall)
+		case http.MethodGet:
+			processRequest(response, request, toCall)
 		case http.MethodOptions:
 			writeResponse(response, requestPath, nil, http.StatusOK)
 		default:
 			httpError := httpMessage.NewError(METHOD_IS_NOT_ALLOWED, requestPath, http.StatusMethodNotAllowed)
 			sendHttpError(response, requestPath, *httpError)
 		}
+
 		log.Println("Traitement de la requête", requestPath, "terminée")
 	}
 }
 
-func wrapGetHandler[R any](callback returnOnlyCall[R]) func(response http.ResponseWriter, request *http.Request) {
-	toCall := wrapCallback(callback)
-
-	return func(response http.ResponseWriter, request *http.Request) {
-		requestPath := request.URL.Path
-		httpError := checkServerRunning(requestPath)
-		if httpError != nil {
-			sendHttpError(response, requestPath, *httpError)
-			return
-		}
-
-		log.Println("Traitement de la requête", requestPath, "en cours...")
-
-		switch request.Method {
-		case http.MethodGet:
-			callSendResponse(response, request, toCall)
-		default:
-			httpError := httpMessage.NewError(METHOD_IS_NOT_ALLOWED, requestPath, http.StatusMethodNotAllowed)
-			sendHttpError(response, requestPath, *httpError)
-		}
-		log.Println("Traitement de la requête", requestPath, "terminée")
-	}
-}
-
-func wrapCallback[R any](callback returnOnlyCall[R]) wrapCall[R] {
-	return func(ctx context.Context, request *http.Request) (R, error) {
-		return callback(ctx)
-	}
-}
-
-// wrapCallbackWithParam ajoute le passage du paramètre de la requête s'il est attendu en entrée de la fonction callback
-func wrapCallbackWithParam[P, R any](callback callWithParam[P, R]) wrapCall[R] {
-	return func(ctx context.Context, request *http.Request) (R, error) {
-		parameter, err := readRequestParameter[P](request)
-		if err != nil {
-			return *new(R), err
-		}
-		return callback(ctx, parameter)
-	}
-}
-
-func readRequestParameter[P any](request *http.Request) (P, error) {
-	var parameter P
-	webParameter := webResult.GetInstance(parameter)
-	err := json.NewDecoder(request.Body).Decode(&webParameter)
-	if err != nil {
-		return parameter, err
-	}
-	if validationErr := validate.Struct(webParameter); validationErr != nil {
-		return parameter, validationErr
-	}
-	return webResult.Convert(webParameter).(P), nil
-}
-
-func callSendResponse[R any](response http.ResponseWriter, request *http.Request, toCall wrapCall[R]) {
+// appel Middleware pour vérifier si le serveur est en cours d'arrêt et si l'utilisateur est authentifié
+// appel de la méthode liée à la route
+// renvoi de la réponse
+func processRequest(response http.ResponseWriter, request *http.Request, toCall call.WrappedCall) {
 	requestPath := request.URL.Path
 	ctx, cancel := context.WithTimeout(request.Context(), REQUEST_TIMEOUT)
 	defer cancel()
 	defer stopServerIfPanic()
 
-	values, err := toCall(ctx, request)
+	connectedUser, httpError := middleware.CallMiddlewares(response, request)
+	if httpError != nil {
+		sendHttpError(response, requestPath, *httpError)
+		return
+	}
+	values, err := toCall(ctx, connectedUser, request)
 	if err != nil {
 		sendError(response, requestPath, err)
 		return
 	}
-	webResultValues := webResult.Convert(values)
+	webResultValues := webResult.ConvertToWebResult(values)
 	sendValues(response, requestPath, &webResultValues)
+	// Cas particulier de la connection : ajout du cookie
+	refreshToken, ok := webResult.GetRefreshToken(values)
+	if ok {
+		sendRefreshTokenCookie(response, refreshToken)
+	}
 }
 
 func sendValues(response http.ResponseWriter, requestPath string, values any) {
@@ -135,10 +90,24 @@ func sendValues(response http.ResponseWriter, requestPath string, values any) {
 	writeResponse(response, requestPath, jsonData, http.StatusOK)
 }
 
+func sendRefreshTokenCookie(response http.ResponseWriter, value string) {
+	cookie := http.Cookie{
+		Name:     "refreshToken",
+		Value:    value,
+		Path:     "/",
+		MaxAge:   SEVEN_DAYS_IN_SECONDS,
+		HttpOnly: true,
+		Secure:   true,                    // HTTPS uniquement
+		SameSite: http.SameSiteStrictMode, // Protection CSRF
+	}
+	http.SetCookie(response, &cookie)
+}
+
 func writeResponse(response http.ResponseWriter, requestPath string, jsonData []byte, statusCode int) {
 	response.Header().Set("Access-Control-Allow-Origin", "*")
 	response.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 	response.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+	response.Header().Set("Access-Control-Expose-Headers", "WWW-Authenticate")
 	response.Header().Set("Content-Type", "application/json")
 	response.WriteHeader(statusCode)
 	if jsonData == nil {
@@ -148,6 +117,7 @@ func writeResponse(response http.ResponseWriter, requestPath string, jsonData []
 	if err != nil {
 		panic("Impossible d'écrire l'erreur dans la réponse à la requête ' '" + requestPath + "' :\n" + err.Error() + "\n" + string(jsonData))
 	}
+	fmt.Println("Headers envoyés :", response.Header())
 }
 
 func stopServerIfPanic() {

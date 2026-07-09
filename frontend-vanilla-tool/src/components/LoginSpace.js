@@ -17,6 +17,7 @@ import LoginSpaceView from './views/LoginSpaceView.js';
  * @property {string} email - Email
  * @property {string} password - Mot de passe
  */
+
 class LoginSpace extends Component {
 
   #emailInput;

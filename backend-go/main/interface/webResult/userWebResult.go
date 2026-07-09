@@ -48,3 +48,17 @@ func (userWebResult LoginUserWebResult) ConvertToLoginUser() *domain.LoginUser {
 	user.SetEmail(userWebResult.Email)
 	return user
 }
+
+type LoggedUserWebResult struct {
+	FirstName string `json:"firstName" validate:"required,min=2,max=100"`
+	LastName  string `json:"lastName" validate:"required,min=2,max=100"`
+	Token     string `json:"token"`
+}
+
+func ConvertLoggedUserToWebResult(loggedUser *domain.LoggedUser) *LoggedUserWebResult {
+	userWebResult := new(LoggedUserWebResult)
+	userWebResult.FirstName = loggedUser.GetUser().GetFirstName()
+	userWebResult.LastName = loggedUser.GetUser().GetLastName()
+	userWebResult.Token = loggedUser.GetToken()
+	return userWebResult
+}

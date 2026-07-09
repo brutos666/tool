@@ -1,47 +1,68 @@
 import DragDropCenter from '../components/DragDropCenter.js';
 import NotificationCenter from '../components/NotificationCenter.js';
+import UserCallsRequest from '../requests/UserCallsRequest.js';
 import { ROOT_ID } from '../tools/Constants.js';
 import TreeItem from './TreeItem.js';
 import User from './User.js';
 /** @import {ItemInfos} from './TreeItem.js'; */
+/** @import {LoggedUser} from './User.js'; */
 /** @import {SpaceView} from '../components/views/SpaceView.js'; */
 
 class StoreData {
 
+  static state = {
+    user: null,
+    treeItem: null,
+    treeItemLastId: 0,
+    currentSpace: null,
+    notificationCenter: null,
+    dragDropCenter: null
+  };
+
   static init() {
-    window._treeItem = new TreeItem({ id: ROOT_ID, title: 'Racine', state: 'TODO', children: [] });
-    window._currentSpace = null;
-    window._notification_center = new NotificationCenter();
-    window._drag_drop_center = new DragDropCenter();
-    document.body.appendChild(window._notification_center.getElementView());
-    document.body.appendChild(window._drag_drop_center.getElementView());
+    this.state.treeItem = new TreeItem({ id: ROOT_ID, title: 'Racine', state: 'TODO', children: [] });
+    this.state.currentSpace = null;
+    this.state.notification_center = new NotificationCenter();
+    this.state.drag_drop_center = new DragDropCenter();
+    document.body.appendChild(this.state.notification_center.getElementView());
+    document.body.appendChild(this.state.drag_drop_center.getElementView());
+    // Appeler le service /refresh pour récupérer les informations sur l'utilisateur connecté dont le jeton d'authentification après redirection
+    new UserCallsRequest().refreshToken.call();
+    //      .then(loggedUser => this.storeUser(loggedUser), StoreData.logout());
+  }
+
+  static logout() {
+    window.location.href = 'login.html';
   }
 
   static logPageInit() {
-    window._notification_center = new NotificationCenter();
-    document.body.appendChild(window._notification_center.getElementView());
+    this.state.notification_center = new NotificationCenter();
+    document.body.appendChild(this.state.notification_center.getElementView());
+  }
+
+  /** @returns {LoggedUser} */
+  static getUser() {
+    return this.state.user;
   }
 
   /** @returns {TreeItem} */
   static getTreeItem() {
-    return window._treeItem;
+    return this.state.treeItem;
   }
 
   static giveTreeItemNewId() {
-    if (window._treeItemLastId === undefined) {
-      window._treeItemLastId = 0;
-    }
-    return String(window._treeItemLastId++);
+    this.state.treeItemLastId = 0;
+    return String(this.state.treeItemLastId++);
   }
 
   /** @returns {NotificationCenter} */
   static getNotificationCenter() {
-    return window._notification_center;
+    return this.state.notification_center;
   }
 
   /** @returns {DragDropCenter} */
   static getDragDropCenter() {
-    return window._drag_drop_center;
+    return this.state.drag_drop_center;
   }
   /**
    * @param {Array<ItemInfos>} itemInfosList
@@ -58,8 +79,8 @@ class StoreData {
       .addItem(treeItem, new TreeItem(itemInfos));
   }
 
-  static storeUser(userInfos) {
-    window._user = new User(userInfos);
+  static storeUser(loggedUser) {
+    this.state.user = new User(loggedUser);
   }
 
   /**
@@ -67,7 +88,7 @@ class StoreData {
    * @param {SpaceView} space : vue de l'espace
    */
   static setCurrentSpace(space) {
-    window._currentSpace = space;
+    this.state.currentSpace = space;
   }
 
   /**
@@ -75,7 +96,7 @@ class StoreData {
    * @returns {SpaceView}
    */
   static getCurrentSpace() {
-    return window._currentSpace;
+    return this.state.currentSpace;
   }
 
 }

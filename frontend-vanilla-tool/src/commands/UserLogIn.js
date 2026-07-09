@@ -1,6 +1,8 @@
+import StoreData from '../data/StoreData.js';
 import UserCallsRequest from '../requests/UserCallsRequest.js';
 import Command from './Command.js';
 /** @import {LoginInfos} from '../components/LoginSpace.js' */
+/** @import {LoggedUser} from '../data/User.js'; */
 
 class UserLogin extends Command {
 
@@ -21,9 +23,11 @@ class UserLogin extends Command {
 
   /**
    * @override
+   * @param {LoggedUser} loggedUser - utilisateur connecté
    */
-  commandDone() {
+  commandDone(loggedUser) {
     super.commandDone();
+    StoreData.storeUser(loggedUser);
     window.location.href = 'index.html';
   }
 

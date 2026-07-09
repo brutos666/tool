@@ -19,7 +19,15 @@ func GetInstance(entity any) any {
 	return nil
 }
 
-func Convert(entity interface{}) any {
+func GetRefreshToken(entity any) (string, bool) {
+	loggedUser, ok := entity.(*domain.LoggedUser)
+	if ok {
+		return loggedUser.GetRefreshToken(), true
+	}
+	return "", false
+}
+
+func ConvertToWebResult(entity any) any {
 	switch typedEntity := entity.(type) {
 	case *domain.NodeSpace:
 		return ConvertNodeSpaceToWebResult(typedEntity)
@@ -39,10 +47,24 @@ func Convert(entity interface{}) any {
 			userList[index] = ConvertUserToWebResult(typedEntity[index])
 		}
 		return userList
+	case *domain.LoggedUser:
+		return ConvertLoggedUserToWebResult(typedEntity)
 	case *httpMessage.Message:
 		return ConvertHttpMessageToWebResult(typedEntity)
 	case *domainMessage.Message:
 		return ConvertDomainMessageToWebResult(typedEntity)
+		// NOTE : si on choisit de ne pas transformer la réponse (vocabulaire et forme identique à la partie cliente)
+		// le formaliser ici
+		// case *PerfectUser:
+		//  // La réponse est exactement la même aujourd'hui : pas de transformation
+		//	return entity
+	}
+	// Pour les tests, on ne convertit pas le résultat
+	return entity
+}
+
+func ConvertToEntity(entityWebResult interface{}) any {
+	switch typedEntity := entityWebResult.(type) {
 	case *RegisterUserWebResult:
 		return typedEntity.ConvertToUser()
 	case *LoginUserWebResult:
@@ -56,5 +78,5 @@ func Convert(entity interface{}) any {
 		//	return entity
 	}
 	// Pour les tests, on ne convertit pas le résultat
-	return entity
+	return entityWebResult
 }

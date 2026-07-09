@@ -25,9 +25,10 @@ func UserCommandService(repository domain.UserCommandRepository) UserCmdService 
 	return UserCmdService{repository: repository}
 }
 
-func (commandService UserCmdService) Signup(ctx context.Context, user *domain.User) (*domainMessage.Message, error) {
+func (commandService UserCmdService) Signup(ctx context.Context, user *domain.User) (*domain.LoggedUser, error) {
 	password := password.Hash(user.GetPassword())
-	accessToken, refreshToken := tokens.Generate(user.GetEmail(), user.GetId(), user.GetRole())
+	connectedUser := domain.CreateConnectedUser(*user)
+	accessToken, refreshToken := tokens.Generate(connectedUser)
 
 	alreadyExists, err := commandService.repository.CreateUserIfNotExists(ctx, user, password, accessToken, refreshToken)
 	if err != nil {
@@ -38,7 +39,8 @@ func (commandService UserCmdService) Signup(ctx context.Context, user *domain.Us
 		error.AddContext("email", user.GetEmail())
 		return nil, error
 	}
-	return domainMessage.New(USER_CREATED), nil
+	loggedUser := domain.CreateLoggedUser(*user, accessToken, refreshToken)
+	return loggedUser, nil
 }
 
 func (commandService UserCmdService) Login(ctx context.Context, logUser *domain.LoginUser) (*domain.LoggedUser, error) {
@@ -64,7 +66,8 @@ func (commandService UserCmdService) Login(ctx context.Context, logUser *domain.
 		err.AddContext("email", logUser.GetEmail())
 		return nil, err
 	}
-	accessToken, refreshToken := tokens.Generate(user.GetEmail(), user.GetId(), user.GetRole())
+	connectedUser := domain.CreateConnectedUser(user)
+	accessToken, refreshToken := tokens.Generate(connectedUser)
 	err = commandService.repository.UpdateToken(ctx, user.GetId(), accessToken, refreshToken)
 	if err != nil {
 		return nil, err
@@ -72,4 +75,8 @@ func (commandService UserCmdService) Login(ctx context.Context, logUser *domain.
 
 	loggedUser := domain.CreateLoggedUser(user, accessToken, refreshToken)
 	return loggedUser, nil
+}
+
+func (commandService UserCmdService) Refresh(ctx context.Context) (*domain.LoggedUser, error) {
+	return nil, nil
 }
