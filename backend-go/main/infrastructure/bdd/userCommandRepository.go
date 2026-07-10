@@ -6,8 +6,8 @@ import (
 	"database/server/requestSQL"
 	"time"
 
+	"goTool/config"
 	"goTool/domain"
-	"goTool/infrastructure/bdd/configuration"
 	"goTool/infrastructure/entityBdd"
 )
 
@@ -36,16 +36,16 @@ func (infos *userInfosArgs) setAlreadyExists() { *infos.alreadyExists = true }
 
 // Signup implements [domain.UserCommandRepository].
 func (repository *userCmdRepository) CreateUserIfNotExists(ctx context.Context, user *domain.User, hashPassword string, accessToken string, refreshToken string) (alreadyExists bool, err error) {
-	err = connection.LaunchTransactionnelWay(ctx, configuration.BaseConnection, doCreateUserIfNotExists, userInfosArgs{user, hashPassword, accessToken, refreshToken, &alreadyExists})
+	err = connection.LaunchTransactionnelWay(ctx, config.GetBaseConnection(), doCreateUserIfNotExists, userInfosArgs{user, hashPassword, accessToken, refreshToken, &alreadyExists})
 	return alreadyExists, err
 }
 
 func (repository *userCmdRepository) GetUsersWithEmail(ctx context.Context, email string) ([]domain.User, error) {
-	return connection.LaunchNormalWay(ctx, configuration.BaseConnection, getUsersWithMail, email)
+	return connection.LaunchNormalWay(ctx, config.GetBaseConnection(), getUsersWithMail, email)
 }
 
 func (repository *userCmdRepository) UpdateToken(ctx context.Context, userId string, accessToken, refreshToken string) error {
-	return connection.LaunchTransactionnelWay(ctx, configuration.BaseConnection, doUpdateUser, updateTokenArgs{userId, accessToken, refreshToken})
+	return connection.LaunchTransactionnelWay(ctx, config.GetBaseConnection(), doUpdateUser, updateTokenArgs{userId, accessToken, refreshToken})
 }
 
 func doCreateUserIfNotExists(connection connection.Connection, userInfos userInfosArgs) error {

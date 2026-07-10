@@ -5,8 +5,8 @@ import (
 	"database/server/connection"
 	"database/server/requestSQL"
 
+	"goTool/config"
 	"goTool/domain"
-	"goTool/infrastructure/bdd/configuration"
 	"goTool/infrastructure/entityBdd"
 )
 
@@ -19,7 +19,7 @@ func UserQueryRepository() domain.UserQueryRepository {
 }
 
 func (repo *userQryRepository) FindAll(ctx context.Context) ([]*domain.User, error) {
-	return connection.LaunchNormalWay(ctx, configuration.BaseConnection, selectAllUsers, "")
+	return connection.LaunchNormalWay(ctx, config.GetBaseConnection(), selectAllUsers, "")
 }
 
 func selectAllUsers(connection connection.Connection, notUsed string) ([]*domain.User, error) {

@@ -6,8 +6,8 @@ import (
 	"database/server/requestSQL"
 	"log"
 
+	"goTool/config"
 	"goTool/domain"
-	"goTool/infrastructure/bdd/configuration"
 )
 
 type dataInitRepository struct{}
@@ -19,14 +19,14 @@ func DataInitRepository() domain.DataInitRepository {
 func (repo *dataInitRepository) Init(ctx context.Context) error {
 	/*
 		// Si la base de données n'est pas démarrée, on la démarre
-		err := server.StartServer(repository.BaseConnection)
+		err := server.StartServer(config.GetBaseConnection())
 		if err != nil {
 				log.Fatalf("Impossible de démarrer H2 : %s", err)
 		}
-		defer server.StopServer(repository.BaseConnection)
+		defer server.StopServer(config.GetBaseConnection())
 	*/
 	log.Printf("Lancement du script de création des tables et index")
-	err := connection.LaunchTransactionnelWay(ctx, configuration.BaseConnection, doLaunchScript, configuration.SCHEMA_PATH)
+	err := connection.LaunchTransactionnelWay(ctx, config.GetBaseConnection(), doLaunchScript, config.GetSchemaPath())
 	if err != nil {
 		log.Fatalf("Impossible de créer les tables : %s", err)
 	}

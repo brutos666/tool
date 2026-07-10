@@ -6,8 +6,8 @@ import (
 	"database/server/requestSQL"
 	"treeConverter"
 
+	"goTool/config"
 	"goTool/domain"
-	"goTool/infrastructure/bdd/configuration"
 	"goTool/infrastructure/entityBdd"
 )
 
@@ -20,7 +20,7 @@ func SpaceQueryRepository() domain.SpaceQueryRepository {
 }
 
 func (repo *spaceQryRepository) FindAll(ctx context.Context) ([]*domain.Space, error) {
-	return connection.LaunchNormalWay(ctx, configuration.BaseConnection, selectAllSpaces, "")
+	return connection.LaunchNormalWay(ctx, config.GetBaseConnection(), selectAllSpaces, "")
 }
 
 func selectAllSpaces(connection connection.Connection, notUsed string) ([]*domain.Space, error) {
