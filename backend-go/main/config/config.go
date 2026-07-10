@@ -1,7 +1,9 @@
 package config
 
 import (
+	"authentication/tokens"
 	"database/server/connection"
+	"fmt"
 
 	"github.com/magiconair/properties"
 )
@@ -14,7 +16,7 @@ const (
 var (
 	props          *properties.Properties
 	baseConnection baseDescription
-	dataSourceName string
+	secretKey      []byte
 )
 
 type baseDescription struct{}
@@ -27,16 +29,46 @@ func (base baseDescription) GetDataSourceName() string {
 
 func init() {
 	props = properties.MustLoadFile(propertiesFile, properties.UTF8)
+	secretKey = tokens.GenerateJWTRandomKey()
+}
+
+func IsDev() bool {
+	return props.GetBool("config.dev", false)
 }
 
 func GetSchemaPath() string {
 	return schemaPath
 }
 
+func GetFrontEndPath() string {
+	return props.MustGetString("http.server.frontend.path")
+}
+
+func GetServerUrl() string {
+	if props.GetBool("http.server.secure", false) {
+		return "https://" + GetServer()
+	}
+	return "http://" + GetServer()
+}
+
 func GetServer() string {
-	return props.GetString("http.server.url", "http://localhost:8080")
+	host := GetServerHost()
+	port := GetServerPort()
+	return fmt.Sprintf("%s:%s", host, port)
+}
+
+func GetServerHost() string {
+	return props.MustGetString("http.server.host")
+}
+
+func GetServerPort() string {
+	return props.MustGetString("http.server.port")
 }
 
 func GetBaseConnection() connection.DatabaseConnection {
 	return baseConnection
+}
+
+func GetSecretKey() []byte {
+	return secretKey
 }

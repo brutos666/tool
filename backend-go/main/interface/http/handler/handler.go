@@ -37,3 +37,6 @@ func Stop(requestPath string) {
 	}
 	http.HandleFunc(requestPath, wrapHandler(http.MethodGet, call.Get(stopApp)))
 }
+
+func HandleFiles() {
+}

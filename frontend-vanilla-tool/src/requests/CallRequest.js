@@ -72,7 +72,6 @@ class CallRequest {
     if (!response.ok) {
       return Promise.reject(`Erreur HTTP ${ response.status } : ${ responseData.error } (${ responseData.path })`);
     }
-    StoreData.StoreData(responseData);
     return Promise.resolve(responseData);
   }
 
@@ -86,10 +85,11 @@ class CallRequest {
  * @returns {Promise<Response>}
  */
 function callFetch(requestName, method, data = {}) {
-  const token = StoreData.getUser()?.token;
+  const token = StoreData.getUser()
+    ?.getToken();
   const headers = { 'Content-Type': 'application/json' };
   if (token) {
-    headers.Authorization = token;
+    headers.Authorization = `Bearer ${ token }`;
   }
   if (method === 'GET') {
     return fetch(URL_ROOT_API + requestName, { headers });

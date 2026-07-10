@@ -60,9 +60,12 @@ type ConnectedUser struct {
 	Role   string `json:"role"`
 }
 
-func (user ConnectedUser) GetId() string    { return user.UserId }
-func (user ConnectedUser) GetEmail() string { return user.Email }
-func (user ConnectedUser) GetRole() string  { return user.Role }
+func (user ConnectedUser) GetId() string          { return user.UserId }
+func (user *ConnectedUser) SetId(userId string)   { user.UserId = userId }
+func (user ConnectedUser) GetEmail() string       { return user.Email }
+func (user *ConnectedUser) SetEmail(email string) { user.Email = email }
+func (user ConnectedUser) GetRole() string        { return user.Role }
+func (user *ConnectedUser) SetRole(role string)   { user.Role = role }
 
 func CreateConnectedUser(user User) *ConnectedUser {
 	connectedUser := new(ConnectedUser)

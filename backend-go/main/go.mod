@@ -5,6 +5,7 @@ go 1.26.3
 require (
 	github.com/go-playground/validator/v10 v10.30.3
 	github.com/lib/pq v1.12.3
+	github.com/magiconair/properties v1.8.10
 	github.com/stretchr/testify v1.8.4
 )
 

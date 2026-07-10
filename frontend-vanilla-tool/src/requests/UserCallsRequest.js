@@ -1,4 +1,3 @@
-import StoreData from '../data/StoreData.js';
 import CallRequest from './CallRequest.js';
 /** @import {RegisterUserInfos} from '../components/LoginSpace.js'; */
 /** @import {LoginInfos} from '../components/LoginSpace.js'; */
@@ -35,8 +34,7 @@ class UserCallsRequest {
    */
   async refreshToken() {
     return new CallRequest()
-      .executeRefreshToken()
-      .catch(() => StoreData.logout());
+      .executeRefreshToken();
   }
 
 }

@@ -1,6 +1,7 @@
 package tokens
 
 import (
+	"crypto/rand"
 	"errors"
 	"log"
 	"time"
@@ -15,35 +16,40 @@ const (
 )
 
 type (
-	UserInfos interface{}
-	Claims    struct {
-		userInfos UserInfos
-		/*
-			UserID string `json:"user_id"`
-			Email  string `json:"email"`
-			Role   string `json:"role"`
-		*/
+	UserInfos interface {
+		GetId() string
+		GetEmail() string
+		GetRole() string
+		SetId(string)
+		SetEmail(string)
+		SetRole(string)
+	}
 
+	Claims struct {
+		UserID string
+		Email  string
+		Role   string
 		jwt.RegisteredClaims
 	}
 )
 
-var jwtKey []byte
-
-func SetJWTKey(key string) {
-	jwtKey = []byte(key)
-}
-
-func GetJWTKey() []byte {
-	return []byte(jwtKey)
+func GenerateJWTRandomKey() []byte {
+	bytes := make([]byte, 32)
+	_, err := rand.Read(bytes)
+	if err != nil {
+		log.Fatal("Failed to generate key", err)
+	}
+	return bytes
 }
 
 // Generate : à partir des informations sur l'utilisateur, on va générer 2 jetons d'authentification, un avec une durée de validité courte, et un autre avec une durée de validation plus longue
-func Generate(userInfos UserInfos) (string, string) {
-	log.Printf("JWT Key %v Type: %T", jwtKey, jwtKey)
+func Generate(userInfos UserInfos, secretKey []byte) (string, string) {
+	log.Printf("JWT Key %v Type: %T", secretKey, secretKey)
 
 	claims := &Claims{
-		userInfos: userInfos,
+		UserID: userInfos.GetId(),
+		Email:  userInfos.GetEmail(),
+		Role:   userInfos.GetRole(),
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(TOKEN_DURATION)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -53,6 +59,9 @@ func Generate(userInfos UserInfos) (string, string) {
 	}
 
 	refreshClaims := &Claims{
+		UserID: userInfos.GetId(),
+		Email:  userInfos.GetEmail(),
+		Role:   userInfos.GetRole(),
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(REFRESH_TOKEN_DURATION)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -63,39 +72,37 @@ func Generate(userInfos UserInfos) (string, string) {
 
 	// Génération des jetons
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	signedAccessToken, err := accessToken.SignedString(jwtKey)
+	signedAccessToken, err := accessToken.SignedString(secretKey)
 	if err != nil {
 		panic(err)
 	}
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims)
-	signedRefreshToken, err := refreshToken.SignedString(jwtKey)
+	signedRefreshToken, err := refreshToken.SignedString(secretKey)
 	if err != nil {
 		panic(err)
 	}
-
 	return signedAccessToken, signedRefreshToken
 }
 
-// Validate : valide que le jeton est correct et restitue Claims permettant de retrouver l'utilisateur concerné ainsi que ses droits (role). Retourne une erreur de type jwt si le jeton est expiré : Tester "errors.Is(err, jwt.ErrTokenExpired)"
-func Validate[U UserInfos](tokenString string) (*U, error) {
-	var userInfos U
-	secretKey := GetJWTKey()
-
+// Validate : valide que le jeton est correct et restitue Claims permettant de retrouver l'utilisateur concerné ainsi que ses droits (role). Retourne une erreur de type jwt si le jeton est expiré (bien Tester "errors.Is(err, jwt.ErrTokenExpired)".
+func Validate[U UserInfos](tokenString string, secretKey []byte, user U) (U, error) {
 	claims := new(Claims)
-	claims.userInfos = new(U)
 
 	accessToken, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (any, error) {
 		return secretKey, nil
 	})
 	if err != nil {
-		return nil, err
+		return user, err
 	}
 	claims, ok := accessToken.Claims.(*Claims)
-	userInfos = claims.userInfos.(U)
+
 	if accessToken.Valid && ok {
-		return &userInfos, nil
+		user.SetId(claims.UserID)
+		user.SetEmail(claims.Email)
+		user.SetRole(claims.Role)
+		return user, nil
 	}
-	return nil, errors.New(CLAIMS_STRUCT_KO)
+	return user, errors.New(CLAIMS_STRUCT_KO)
 }
 
 func ErrorIsTokenExpired(err error) bool {

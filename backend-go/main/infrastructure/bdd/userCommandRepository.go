@@ -23,20 +23,20 @@ func UserCommandRepository() domain.UserCommandRepository {
 	return &userCmdRepository{}
 }
 
-type userInfosArgs struct {
-	user                                    *domain.User
-	hashPassword, accessToken, refreshToken string
-	alreadyExists                           *bool
+type createArgs struct {
+	user          *domain.User
+	hashPassword  string
+	alreadyExists *bool
 }
 type updateTokenArgs struct {
 	userId, accessToken, refreshToken string
 }
 
-func (infos *userInfosArgs) setAlreadyExists() { *infos.alreadyExists = true }
+func (infos *createArgs) setAlreadyExists() { *infos.alreadyExists = true }
 
 // Signup implements [domain.UserCommandRepository].
-func (repository *userCmdRepository) CreateUserIfNotExists(ctx context.Context, user *domain.User, hashPassword string, accessToken string, refreshToken string) (alreadyExists bool, err error) {
-	err = connection.LaunchTransactionnelWay(ctx, config.GetBaseConnection(), doCreateUserIfNotExists, userInfosArgs{user, hashPassword, accessToken, refreshToken, &alreadyExists})
+func (repository *userCmdRepository) CreateUserIfNotExists(ctx context.Context, user *domain.User, hashPassword string) (alreadyExists bool, err error) {
+	err = connection.LaunchTransactionnelWay(ctx, config.GetBaseConnection(), doCreateUserIfNotExists, createArgs{user, hashPassword, &alreadyExists})
 	return alreadyExists, err
 }
 
@@ -48,7 +48,7 @@ func (repository *userCmdRepository) UpdateToken(ctx context.Context, userId str
 	return connection.LaunchTransactionnelWay(ctx, config.GetBaseConnection(), doUpdateUser, updateTokenArgs{userId, accessToken, refreshToken})
 }
 
-func doCreateUserIfNotExists(connection connection.Connection, userInfos userInfosArgs) error {
+func doCreateUserIfNotExists(connection connection.Connection, userInfos createArgs) error {
 	// Vérification si l'utilisateur existe déjà
 	userModels, err := selectUsers(connection, userInfos.user.GetEmail())
 	if err != nil {
@@ -59,7 +59,7 @@ func doCreateUserIfNotExists(connection connection.Connection, userInfos userInf
 		return nil
 	}
 
-	return insertUser(connection, userInfos.user, userInfos.hashPassword, userInfos.accessToken, userInfos.refreshToken)
+	return insertUser(connection, userInfos.user, userInfos.hashPassword)
 }
 
 func doUpdateUser(connection connection.Connection, args updateTokenArgs) error {
@@ -90,8 +90,8 @@ func selectUsers(connection connection.Connection, email string) ([]entityBdd.Us
 	return existingUsers, nil
 }
 
-func insertUser(connection connection.Connection, user *domain.User, hashPassword, accessToken, refreshToken string) error {
-	userModel := *entityBdd.CreateUserToRegister(*user, hashPassword, accessToken, refreshToken)
+func insertUser(connection connection.Connection, user *domain.User, hashPassword string) error {
+	userModel := *entityBdd.CreateUserToRegister(*user, hashPassword)
 
 	err := requestSQL.ExecWithReturn(connection, userModel, &userModel, INSERT_USER)
 	if err != nil {

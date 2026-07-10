@@ -19,7 +19,7 @@ class StoreData {
     dragDropCenter: null
   };
 
-  static init() {
+  static async init() {
     this.state.treeItem = new TreeItem({ id: ROOT_ID, title: 'Racine', state: 'TODO', children: [] });
     this.state.currentSpace = null;
     this.state.notification_center = new NotificationCenter();
@@ -27,8 +27,13 @@ class StoreData {
     document.body.appendChild(this.state.notification_center.getElementView());
     document.body.appendChild(this.state.drag_drop_center.getElementView());
     // Appeler le service /refresh pour récupérer les informations sur l'utilisateur connecté dont le jeton d'authentification après redirection
-    new UserCallsRequest().refreshToken.call();
-    //      .then(loggedUser => this.storeUser(loggedUser), StoreData.logout());
+    return new UserCallsRequest().refreshToken.call()
+      .then(loggedUser => this.state.user = new User(loggedUser), () => this.logout());
+  }
+
+  static login(loggedUser) {
+    this.state.user = new User(loggedUser);
+    window.location.href = 'index.html';
   }
 
   static logout() {
@@ -77,10 +82,6 @@ class StoreData {
     const treeItem = StoreData.getTreeItem();
     treeItem.getTreeItemList()
       .addItem(treeItem, new TreeItem(itemInfos));
-  }
-
-  static storeUser(loggedUser) {
-    this.state.user = new User(loggedUser);
   }
 
   /**

@@ -10,6 +10,8 @@ import (
 	"sync"
 	"syscall"
 	"time"
+
+	"goTool/config"
 )
 
 type httpServer struct {
@@ -61,7 +63,7 @@ func (webServer *httpServer) waitEndOfServer() {
 func createServer() *httpServer {
 	webServer := new(httpServer)
 	webServer.stopped = false
-	webServer.server = &http.Server{Addr: ":8080", Handler: nil}
+	webServer.server = &http.Server{Addr: config.GetServer(), Handler: nil}
 	return webServer
 }
 
@@ -91,7 +93,8 @@ func StopServerOnSignal() {
 	sigChan := make(chan os.Signal, 1)
 
 	// Notify the channel for specific signals
-	signal.Notify(sigChan,
+	signal.Notify(
+		sigChan,
 		syscall.SIGINT,  // Ctrl+C
 		syscall.SIGTERM, // Termination signal
 	)
@@ -100,4 +103,14 @@ func StopServerOnSignal() {
 	sig := <-sigChan
 	log.Printf("Réception du signal d'interruption '%v'", sig)
 	ServerStop()
+}
+
+func ServeLocalFrontEnd() {
+	frontEndToServe := config.GetFrontEndPath()
+	if frontEndToServe == "" {
+		// Le serveur de fichier n'est pas configuré (production), il faut le démarrer via un reverse proxy (Nginx, Apache, Caddy, Traefik, etc.),
+		return
+	}
+	frontEnd := http.FileServer(http.Dir(config.GetFrontEndPath()))
+	http.Handle("/", frontEnd)
 }

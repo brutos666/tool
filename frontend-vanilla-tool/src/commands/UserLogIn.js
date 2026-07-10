@@ -27,8 +27,7 @@ class UserLogin extends Command {
    */
   commandDone(loggedUser) {
     super.commandDone();
-    StoreData.storeUser(loggedUser);
-    window.location.href = 'index.html';
+    StoreData.login(loggedUser);
   }
 
 }

@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"goTool/application"
+	"goTool/config"
 	"goTool/infrastructure/bdd"
 	"goTool/interface/http/handler"
 	"goTool/interface/http/handler/call"
@@ -18,7 +19,9 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
+	if config.IsDev() {
+		httpServer.ServeLocalFrontEnd()
+	}
 	httpServer.ServerStart()
 	go httpServer.StopServerOnSignal()
 
@@ -29,11 +32,11 @@ func main() {
 	userQueryService := application.UserQueryService(bdd.UserQueryRepository())
 
 	// Routes : les transformations des paramètres des requêtes et du retour sont faites dans le package
-	handler.Verify("/")
+	handler.Verify("/start")
 	handler.Stop("/stop")
 	handler.HandleRoute("/api/item/findAllItems", http.MethodGet, call.Get(spaceQueryService.FindAll))
 	handler.HandleRoute("/api/item/save", http.MethodPost, call.WithParam(spaceCommandService.Save))
-	handler.HandleRoute("/api/authenticate/refresh", http.MethodPost, call.Get(userCommandService.Refresh))
+	handler.HandleRoute("/api/authenticate/refresh", http.MethodPost, call.WithUser(userCommandService.Refresh))
 	handler.HandleRoute("/api/authenticate/signup", http.MethodPost, call.WithParam(userCommandService.Signup))
 	handler.HandleRoute("/api/authenticate/login", http.MethodPost, call.WithParam(userCommandService.Login))
 	handler.HandleRoute("/api/user/findAllUsers", http.MethodGet, call.Get(userQueryService.FindAll))

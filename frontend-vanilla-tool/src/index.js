@@ -9,9 +9,10 @@ import StoreData from './data/StoreData.js';
 function loadApp() {
   const appRoot = document.getElementById('app-root');
 
-  StoreData.init();
-
-  const homePage = new WorkingSpace();
-  appRoot.appendChild(homePage.getElementView());
+  StoreData.init()
+    .then(() => {
+      const homePage = new WorkingSpace();
+      appRoot.appendChild(homePage.getElementView());
+    });
 }
 window.addEventListener('load', loadApp);

@@ -102,7 +102,7 @@ func WrapCallback(callback Callback) WrappedCall {
 		}
 	case WITH_USER:
 		return func(ctx context.Context, user *domain.ConnectedUser, request *http.Request) (any, error) {
-			return callback.call(ctx, user)
+			return callback.call(ctx, *user)
 		}
 	case WITH_PARAM:
 		return func(ctx context.Context, user *domain.ConnectedUser, request *http.Request) (any, error) {
@@ -120,7 +120,7 @@ func WrapCallback(callback Callback) WrappedCall {
 			if err != nil {
 				return nil, err
 			}
-			return callback.call(ctx, user, parameter)
+			return callback.call(ctx, *user, parameter)
 		}
 	default:
 		panic(INCORRECT_FUNCTION)

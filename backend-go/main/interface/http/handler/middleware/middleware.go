@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 
+	"goTool/config"
 	"goTool/domain"
 	"goTool/interface/http/httpMessage"
 	"goTool/interface/http/httpServer"
@@ -30,8 +31,11 @@ func CallMiddlewares(response http.ResponseWriter, request *http.Request) (*doma
 
 func authenticate(response http.ResponseWriter, request *http.Request) (*domain.ConnectedUser, *httpMessage.Message) {
 	requestPath := request.URL.Path
+	if requestPath == "/api/authenticate/refresh" {
+		return authenticateWithRefreshToken(response, request)
+	}
 	if requestPath == "/Stop" ||
-		requestPath == "/Verify" ||
+		requestPath == "/" ||
 		strings.HasPrefix(requestPath, "/api/authenticate/") {
 		return nil, nil
 	}
@@ -47,7 +51,21 @@ func authenticate(response http.ResponseWriter, request *http.Request) (*domain.
 		return nil, httpMessage.NewError(NOT_AUTHORIZED, requestPath, http.StatusUnauthorized)
 	}
 	auth = strings.Trim(auth, " ")
-	connectedUser, err := tokens.Validate[domain.ConnectedUser](auth)
+	return validateAuth(auth, requestPath, response)
+}
+
+func authenticateWithRefreshToken(response http.ResponseWriter, request *http.Request) (*domain.ConnectedUser, *httpMessage.Message) {
+	requestPath := request.URL.Path
+	cookie, err := request.Cookie("refreshToken")
+	if err != nil {
+		response.Header().Set("WWW-Authenticate", "Bearer  error=\"no_token\"")
+		return nil, httpMessage.NewError(NOT_AUTHORIZED, requestPath, http.StatusUnauthorized)
+	}
+	return validateAuth(cookie.Value, requestPath, response)
+}
+
+func validateAuth(auth, requestPath string, response http.ResponseWriter) (*domain.ConnectedUser, *httpMessage.Message) {
+	connectedUser, err := tokens.Validate(auth, config.GetSecretKey(), &domain.ConnectedUser{})
 	if err != nil {
 		if tokens.ErrorIsTokenExpired(err) {
 			response.Header().Set("WWW-Authenticate", "Bearer error=\"token_expired\"")
