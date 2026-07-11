@@ -19,14 +19,6 @@ func GetInstance(entity any) any {
 	return nil
 }
 
-func GetRefreshToken(entity any) (string, bool) {
-	loggedUser, ok := entity.(*domain.LoggedUser)
-	if ok {
-		return loggedUser.GetRefreshToken(), true
-	}
-	return "", false
-}
-
 func ConvertToWebResult(entity any) any {
 	switch typedEntity := entity.(type) {
 	case *domain.NodeSpace:
@@ -47,8 +39,6 @@ func ConvertToWebResult(entity any) any {
 			userList[index] = ConvertUserToWebResult(typedEntity[index])
 		}
 		return userList
-	case *domain.LoggedUser:
-		return ConvertLoggedUserToWebResult(typedEntity)
 	case *httpMessage.Message:
 		return ConvertHttpMessageToWebResult(typedEntity)
 	case *domainMessage.Message:

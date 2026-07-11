@@ -4,6 +4,7 @@ import (
 	"authentication/tokens"
 	"database/server/connection"
 	"fmt"
+	"time"
 
 	"github.com/magiconair/properties"
 )
@@ -63,6 +64,16 @@ func GetServerHost() string {
 
 func GetServerPort() string {
 	return props.MustGetString("http.server.port")
+}
+
+func GetTokenDuration() time.Duration {
+	minuteDuration := props.MustGetInt64("authenticate.token.minutes")
+	return time.Duration(minuteDuration) * time.Minute
+}
+
+func GetRefreshTokenDuration() time.Duration {
+	dayDuration := props.MustGetInt64("authenticate.refresh.token.days")
+	return time.Duration(dayDuration*24) * time.Hour
 }
 
 func GetBaseConnection() connection.DatabaseConnection {

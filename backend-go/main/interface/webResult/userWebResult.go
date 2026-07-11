@@ -55,10 +55,10 @@ type LoggedUserWebResult struct {
 	Token     string `json:"token"`
 }
 
-func ConvertLoggedUserToWebResult(loggedUser *domain.LoggedUser) *LoggedUserWebResult {
+func ConvertLoggedUserToWebResult(loggedUser *domain.LoggedUser, accessToken string) *LoggedUserWebResult {
 	userWebResult := new(LoggedUserWebResult)
 	userWebResult.FirstName = loggedUser.GetUser().GetFirstName()
 	userWebResult.LastName = loggedUser.GetUser().GetLastName()
-	userWebResult.Token = loggedUser.GetToken()
+	userWebResult.Token = accessToken
 	return userWebResult
 }

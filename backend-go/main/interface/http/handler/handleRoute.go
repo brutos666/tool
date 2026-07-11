@@ -7,19 +7,21 @@ import (
 	"log"
 	"net/http"
 
+	"goTool/domain"
+	"goTool/interface/http/handler/authentication"
 	"goTool/interface/http/handler/call"
 	"goTool/interface/http/handler/middleware"
+	"goTool/interface/http/handler/route"
 	"goTool/interface/http/httpMessage"
 	"goTool/interface/http/httpServer"
 	"goTool/interface/webResult"
 )
 
-const SEVEN_DAYS_IN_SECONDS = 604800
-
 func HandleRoute(requestPath, method string, callback call.Callback) {
 	http.HandleFunc(requestPath, wrapHandler(method, callback))
 }
 
+// wrapHandler construit la fonction contenant les appels aux middlewares, ainsi que l'appel du service
 func wrapHandler(method string, callback call.Callback) func(response http.ResponseWriter, request *http.Request) {
 	toCall := call.WrapCallback(callback)
 
@@ -52,8 +54,8 @@ func wrapHandler(method string, callback call.Callback) func(response http.Respo
 }
 
 // appel Middleware pour vérifier si le serveur est en cours d'arrêt et si l'utilisateur est authentifié
-// appel de la méthode liée à la route
-// renvoi de la réponse
+// appel de la méthode liée à la route (service)
+// envoi de la réponse
 func processRequest(response http.ResponseWriter, request *http.Request, toCall call.WrappedCall) {
 	requestPath := request.URL.Path
 	ctx, cancel := context.WithTimeout(request.Context(), REQUEST_TIMEOUT)
@@ -70,13 +72,69 @@ func processRequest(response http.ResponseWriter, request *http.Request, toCall 
 		sendError(response, requestPath, err)
 		return
 	}
-	// Cas particulier de la connection : ajout du cookie
-	refreshToken, ok := webResult.GetRefreshToken(values)
-	if ok {
-		sendRefreshTokenCookie(response, refreshToken)
-	}
 	webResultValues := webResult.ConvertToWebResult(values)
 	sendValues(response, requestPath, &webResultValues)
+}
+
+// HandleLoginRoute Traitement particulier lorsque l'on doit s'authentifier
+func HandleLoginRoute[P any](requestPath string, callback call.CallUserToLog[P]) {
+	http.HandleFunc(requestPath, wrapLoginHandler(callback))
+}
+
+func wrapLoginHandler[P any](callback call.CallUserToLog[P]) func(response http.ResponseWriter, request *http.Request) {
+	return func(response http.ResponseWriter, request *http.Request) {
+		requestPath := request.URL.Path
+		requestMethod := request.Method
+
+		log.Println("Traitement de la requête", requestPath, "en cours...")
+
+		switch requestMethod {
+		case http.MethodPost:
+			processLoginRequest(response, request, callback)
+		case http.MethodOptions:
+			writeResponse(response, requestPath, nil, http.StatusOK)
+		default:
+			httpError := httpMessage.NewError(METHOD_IS_NOT_ALLOWED, requestPath, http.StatusMethodNotAllowed)
+			sendHttpError(response, requestPath, *httpError)
+		}
+
+		log.Println("Traitement de la requête", requestPath, "terminée")
+	}
+}
+
+func processLoginRequest[P any](response http.ResponseWriter, request *http.Request, callback call.CallUserToLog[P]) {
+	var err error
+	var loggedUser *domain.LoggedUser
+	requestPath := request.URL.Path
+	tokenGenerator := new(authentication.TokensGenerator)
+	ctx, cancel := context.WithTimeout(request.Context(), REQUEST_TIMEOUT)
+	defer cancel()
+	defer stopServerIfPanic()
+
+	httpError := middleware.CheckServerRunning(requestPath)
+	if httpError != nil {
+		sendHttpError(response, requestPath, *httpError)
+		return
+	}
+
+	if requestPath == route.REFRESH {
+		connectedUser, httpError := middleware.AuthenticateWithRefreshToken(response, request)
+		if httpError != nil {
+			sendHttpError(response, requestPath, *httpError)
+			return
+		}
+		loggedUser, err = call.CallRefreshCallback(ctx, tokenGenerator, *connectedUser, callback)
+	} else {
+		loggedUser, err = call.CallLoginCallback(ctx, tokenGenerator, request, callback)
+	}
+	if err != nil {
+		sendError(response, requestPath, err)
+		return
+	}
+
+	authentication.SendRefreshTokenCookie(response, tokenGenerator.GetRefreshToken())
+	webResultLoggedUser := webResult.ConvertLoggedUserToWebResult(loggedUser, tokenGenerator.GetAccessToken())
+	sendValues(response, requestPath, &webResultLoggedUser)
 }
 
 func sendValues(response http.ResponseWriter, requestPath string, values any) {
@@ -88,19 +146,6 @@ func sendValues(response http.ResponseWriter, requestPath string, values any) {
 		return
 	}
 	writeResponse(response, requestPath, jsonData, http.StatusOK)
-}
-
-func sendRefreshTokenCookie(response http.ResponseWriter, value string) {
-	cookie := http.Cookie{
-		Name:     "refreshToken",
-		Value:    value,
-		Path:     "/",
-		MaxAge:   SEVEN_DAYS_IN_SECONDS,
-		HttpOnly: true,
-		Secure:   true, // HTTPS uniquement
-		SameSite: http.SameSiteStrictMode,
-	}
-	http.SetCookie(response, &cookie)
 }
 
 func writeResponse(response http.ResponseWriter, requestPath string, jsonData []byte, statusCode int) {

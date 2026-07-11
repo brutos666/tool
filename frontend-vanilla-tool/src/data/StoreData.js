@@ -28,7 +28,11 @@ class StoreData {
     document.body.appendChild(this.state.drag_drop_center.getElementView());
     // Appeler le service /refresh pour récupérer les informations sur l'utilisateur connecté dont le jeton d'authentification après redirection
     return new UserCallsRequest().refreshToken.call()
-      .then(loggedUser => this.state.user = new User(loggedUser), () => this.logout());
+      .then(loggedUser => this.refreshUser(loggedUser), () => this.logout());
+  }
+
+  static refreshUser(loggedUser) {
+    this.state.user = new User(loggedUser);
   }
 
   static login(loggedUser) {

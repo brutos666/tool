@@ -10,9 +10,7 @@ import (
 )
 
 const (
-	TOKEN_DURATION         time.Duration = 24 * time.Hour
-	REFRESH_TOKEN_DURATION time.Duration = 7 * 24 * time.Hour
-	CLAIMS_STRUCT_KO       string        = "la structure permettant de restituer les informations sur l'utilisateur connecté est incorrecte"
+	CLAIMS_STRUCT_KO string = "la structure permettant de restituer les informations sur l'utilisateur connecté est incorrecte"
 )
 
 type (
@@ -43,7 +41,7 @@ func GenerateJWTRandomKey() []byte {
 }
 
 // Generate : à partir des informations sur l'utilisateur, on va générer 2 jetons d'authentification, un avec une durée de validité courte, et un autre avec une durée de validation plus longue
-func Generate(userInfos UserInfos, secretKey []byte) (string, string) {
+func Generate(userInfos UserInfos, secretKey []byte, tokenExpiry time.Duration, refreshTokenExpiry time.Duration) (string, string) {
 	log.Printf("JWT Key %v Type: %T", secretKey, secretKey)
 
 	claims := &Claims{
@@ -51,7 +49,7 @@ func Generate(userInfos UserInfos, secretKey []byte) (string, string) {
 		Email:  userInfos.GetEmail(),
 		Role:   userInfos.GetRole(),
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(TOKEN_DURATION)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(tokenExpiry)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			NotBefore: jwt.NewNumericDate(time.Now()),
 			Issuer:    "Server",
@@ -63,7 +61,7 @@ func Generate(userInfos UserInfos, secretKey []byte) (string, string) {
 		Email:  userInfos.GetEmail(),
 		Role:   userInfos.GetRole(),
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(REFRESH_TOKEN_DURATION)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(refreshTokenExpiry)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			NotBefore: jwt.NewNumericDate(time.Now()),
 			Issuer:    "Server",

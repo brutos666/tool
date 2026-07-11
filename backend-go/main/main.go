@@ -10,6 +10,7 @@ import (
 	"goTool/infrastructure/bdd"
 	"goTool/interface/http/handler"
 	"goTool/interface/http/handler/call"
+	"goTool/interface/http/handler/route"
 	"goTool/interface/http/httpServer"
 )
 
@@ -32,14 +33,14 @@ func main() {
 	userQueryService := application.UserQueryService(bdd.UserQueryRepository())
 
 	// Routes : les transformations des paramètres des requêtes et du retour sont faites dans le package
-	handler.Verify("/start")
-	handler.Stop("/stop")
-	handler.HandleRoute("/api/item/findAllItems", http.MethodGet, call.Get(spaceQueryService.FindAll))
-	handler.HandleRoute("/api/item/save", http.MethodPost, call.WithParam(spaceCommandService.Save))
-	handler.HandleRoute("/api/authenticate/refresh", http.MethodPost, call.WithUser(userCommandService.Refresh))
-	handler.HandleRoute("/api/authenticate/signup", http.MethodPost, call.WithParam(userCommandService.Signup))
-	handler.HandleRoute("/api/authenticate/login", http.MethodPost, call.WithParam(userCommandService.Login))
-	handler.HandleRoute("/api/user/findAllUsers", http.MethodGet, call.Get(userQueryService.FindAll))
+	handler.Verify(route.START)
+	handler.Stop(route.STOP)
+	handler.HandleRoute(route.ITEM_FIND_ALL, http.MethodGet, call.Get(spaceQueryService.FindAll))
+	handler.HandleRoute(route.ITEM_SAVE, http.MethodPost, call.WithParam(spaceCommandService.Save))
+	handler.HandleLoginRoute(route.REFRESH, call.WithUserToLog(userCommandService.Refresh))
+	handler.HandleLoginRoute(route.SIGNUP, call.WithUserToLog(userCommandService.Signup))
+	handler.HandleLoginRoute(route.LOGIN, call.WithUserToLog(userCommandService.Login))
+	handler.HandleRoute(route.USER_FIND_ALL, http.MethodGet, call.Get(userQueryService.FindAll))
 
 	httpServer.ServerWait()
 	log.Println("Le programme s'est arrêté")

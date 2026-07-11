@@ -1,85 +1,35 @@
 package middleware
 
 import (
-	"authentication/tokens"
 	"net/http"
-	"strings"
 
-	"goTool/config"
 	"goTool/domain"
+	"goTool/interface/http/handler/authentication"
 	"goTool/interface/http/httpMessage"
 	"goTool/interface/http/httpServer"
 )
 
-const (
-	SERVER_IS_STOPPING string = "Serveur en cours d'arrêt : la requête ne peut pas être exécutée"
-	NOT_LOGGED         string = "Vous n'êtes pas connecté"
-	NOT_AUTHORIZED     string = "Accès non autorisé"
-)
+const SERVER_IS_STOPPING string = "Serveur en cours d'arrêt : la requête ne peut pas être exécutée"
 
 func CallMiddlewares(response http.ResponseWriter, request *http.Request) (*domain.ConnectedUser, *httpMessage.Message) {
-	message := checkServerRunning(request.URL.Path)
+	message := CheckServerRunning(request.URL.Path)
 	if message != nil {
 		return nil, message
 	}
-	connectedUser, message := authenticate(response, request)
+	connectedUser, message := authentication.Authenticate(response, request)
 	if message != nil {
 		return nil, message
 	}
 	return connectedUser, nil
 }
 
-func authenticate(response http.ResponseWriter, request *http.Request) (*domain.ConnectedUser, *httpMessage.Message) {
-	requestPath := request.URL.Path
-	if requestPath == "/api/authenticate/refresh" {
-		return authenticateWithRefreshToken(response, request)
-	}
-	if requestPath == "/Stop" ||
-		requestPath == "/" ||
-		strings.HasPrefix(requestPath, "/api/authenticate/") {
-		return nil, nil
-	}
-	authHeader := request.Header.Get("Authorization")
-	if authHeader == "" {
-		response.Header().Set("WWW-Authenticate", "Bearer error=\"no_token\"")
-		return nil, httpMessage.NewError(NOT_LOGGED, requestPath, http.StatusUnauthorized)
-	}
-	// Enlever le mot clé Bearer que l'on retrouve dans le header
-	auth, ok := strings.CutPrefix(authHeader, "Bearer")
-	if !ok {
-		response.Header().Set("WWW-Authenticate", "Bearer  error=\"invalid_token\"")
-		return nil, httpMessage.NewError(NOT_AUTHORIZED, requestPath, http.StatusUnauthorized)
-	}
-	auth = strings.Trim(auth, " ")
-	return validateAuth(auth, requestPath, response)
-}
-
-func authenticateWithRefreshToken(response http.ResponseWriter, request *http.Request) (*domain.ConnectedUser, *httpMessage.Message) {
-	requestPath := request.URL.Path
-	cookie, err := request.Cookie("refreshToken")
-	if err != nil {
-		response.Header().Set("WWW-Authenticate", "Bearer  error=\"no_token\"")
-		return nil, httpMessage.NewError(NOT_AUTHORIZED, requestPath, http.StatusUnauthorized)
-	}
-	return validateAuth(cookie.Value, requestPath, response)
-}
-
-func validateAuth(auth, requestPath string, response http.ResponseWriter) (*domain.ConnectedUser, *httpMessage.Message) {
-	connectedUser, err := tokens.Validate(auth, config.GetSecretKey(), &domain.ConnectedUser{})
-	if err != nil {
-		if tokens.ErrorIsTokenExpired(err) {
-			response.Header().Set("WWW-Authenticate", "Bearer error=\"token_expired\"")
-		} else {
-			response.Header().Set("WWW-Authenticate", "Bearer error\"invalid_token\"")
-		}
-		return nil, httpMessage.NewError(err.Error(), requestPath, http.StatusUnauthorized)
-	}
-	return connectedUser, nil
-}
-
-func checkServerRunning(requestPath string) *httpMessage.Message {
+func CheckServerRunning(requestPath string) *httpMessage.Message {
 	if httpServer.ServerIsStop() {
 		return httpMessage.NewError(SERVER_IS_STOPPING, requestPath, http.StatusServiceUnavailable)
 	}
 	return nil
+}
+
+func AuthenticateWithRefreshToken(response http.ResponseWriter, request *http.Request) (*domain.ConnectedUser, *httpMessage.Message) {
+	return authentication.AuthenticateWithRefreshToken(response, request)
 }

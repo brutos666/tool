@@ -2,10 +2,8 @@ package application
 
 import (
 	"authentication/password"
-	"authentication/tokens"
 	"context"
 
-	"goTool/config"
 	"goTool/domain"
 	"goTool/domain/domainMessage"
 )
@@ -19,15 +17,20 @@ const (
 	EMAIL_NOT_EXISTS_ANYMORE string = "Il n'existe plus de compte utilisateur pour cet email"
 )
 
-type UserCmdService struct {
-	repository domain.UserCommandRepository
-}
+type (
+	UserCmdService struct {
+		repository domain.UserCommandRepository
+	}
+)
 
 func UserCommandService(repository domain.UserCommandRepository) UserCmdService {
 	return UserCmdService{repository: repository}
 }
 
-func (commandService UserCmdService) Signup(ctx context.Context, user *domain.User) (*domain.LoggedUser, error) {
+// Signup doit créer le compte et connecter l'utilisateur
+// Le service met à jour les jetons d'authentification dans les données (infrastructure)
+// Les jetons sont générés par l'interface via TokenGenerator : il faut lui fournir l'utilisateur créé
+func (commandService UserCmdService) Signup(ctx context.Context, tokenGenerator domain.Tokens, user *domain.User) (*domain.LoggedUser, error) {
 	password := password.Hash(user.GetPassword())
 
 	alreadyExists, err := commandService.repository.CreateUserIfNotExists(ctx, user, password)
@@ -35,26 +38,24 @@ func (commandService UserCmdService) Signup(ctx context.Context, user *domain.Us
 		return nil, err
 	}
 	if alreadyExists {
-		/////////////////////
-		connectedUser := domain.CreateConnectedUser(*user)
-		tokens.Generate(connectedUser, config.GetSecretKey())
-		//////////////////////////
 		error := domainMessage.Errorf("L'utilisateur avec l'email %s existe déjà", user.GetEmail())
 		error.AddContext("email", user.GetEmail())
 		return nil, error
 	}
-	connectedUser := domain.CreateConnectedUser(*user)
-	accessToken, refreshToken := tokens.Generate(connectedUser, config.GetSecretKey())
-	err = commandService.repository.UpdateToken(ctx, user.GetId(), accessToken, refreshToken)
+
+	tokenGenerator.SetUser(*user)
+	err = commandService.repository.UpdateToken(ctx, user.GetId(), tokenGenerator)
 	if err != nil {
 		return nil, err
 	}
-
-	loggedUser := domain.CreateLoggedUser(*user, accessToken, refreshToken)
-	return loggedUser, nil
+	return domain.CreateLoggedUser(*user), nil
 }
 
-func (commandService UserCmdService) Login(ctx context.Context, logUser *domain.LoginUser) (*domain.LoggedUser, error) {
+// Login doit connecté l'utilisateur en vérifiant si son mot de passe est valide
+// Le service doit vérifier si le mot de passe correspond à celui conservé dans les données (infrastructure)
+// Il met à jour les jetons d'authentification dans les données (infrastructure)
+// Les jetons sont générés par l'interface via TokenGenerator : il faut lui fournir l'utilisateur connecté
+func (commandService UserCmdService) Login(ctx context.Context, tokenGenerator domain.Tokens, logUser *domain.LoginUser) (*domain.LoggedUser, error) {
 	users, err := commandService.repository.GetUsersWithEmail(ctx, logUser.GetEmail())
 	if err != nil {
 		return nil, err
@@ -77,34 +78,40 @@ func (commandService UserCmdService) Login(ctx context.Context, logUser *domain.
 		err.AddContext("email", logUser.GetEmail())
 		return nil, err
 	}
-	connectedUser := domain.CreateConnectedUser(user)
-	accessToken, refreshToken := tokens.Generate(connectedUser, config.GetSecretKey())
-	err = commandService.repository.UpdateToken(ctx, user.GetId(), accessToken, refreshToken)
+	tokenGenerator.SetUser(user)
+	err = commandService.repository.UpdateToken(ctx, user.GetId(), tokenGenerator)
 	if err != nil {
 		return nil, err
 	}
-
-	loggedUser := domain.CreateLoggedUser(user, accessToken, refreshToken)
-	return loggedUser, nil
+	return domain.CreateLoggedUser(user), nil
 }
 
-func (commandService UserCmdService) Refresh(ctx context.Context, connectedUser domain.ConnectedUser) (*domain.LoggedUser, error) {
-	users, err := commandService.repository.GetUsersWithEmail(ctx, connectedUser.GetEmail())
+// Refresh doit reconnecté l'utilisateur sans lui redemander son mot de passe
+// (jeton expiré ou perdu suite à un rechargement de la page, une redirection)
+// L'interface fournit un utilisateur connecté déduit par son système d'authentification.
+// Le service va juste vérifier si le compte utilisateur fourni existe toujours.
+// Il met à jour les jetons d'authentification dans les données (infrastructure)
+// Les jetons sont générés par l'interface via TokenGenerator : il faut donc lui fournir l'utilisateur
+func (commandService UserCmdService) Refresh(ctx context.Context, tokenGenerator domain.Tokens, connectedUser domain.ConnectedUser) (*domain.LoggedUser, error) {
+	email := connectedUser.GetEmail()
+	// On vérifie si le compte utilisateur existe toujours
+	users, err := commandService.repository.GetUsersWithEmail(ctx, email)
 	if err != nil {
 		return nil, err
 	}
 	if len(users) == 0 {
 		err := domainMessage.NewError(EMAIL_NOT_EXISTS_ANYMORE)
-		err.AddContext("email", connectedUser.GetEmail())
+		err.AddContext("email", email)
 		return nil, err
 	}
-	// L'utilisateur a été retrouvé par la magie de "interface". Il faut rafraîchir ses jetons
-	accessToken, refreshToken := tokens.Generate(&connectedUser, config.GetSecretKey())
-	err = commandService.repository.UpdateToken(ctx, connectedUser.GetId(), accessToken, refreshToken)
+	user := users[0]
+	// Si l'utilisateur retrouvé par l'interface est valide, il faut rafraîchir ses jetons
+	tokenGenerator.SetUser(user)
+	err = commandService.repository.UpdateToken(ctx, user.GetId(), tokenGenerator)
 	if err != nil {
 		return nil, err
 	}
 
-	loggedUser := domain.CreateLoggedUser(users[0], accessToken, refreshToken)
+	loggedUser := domain.CreateLoggedUser(users[0])
 	return loggedUser, nil
 }

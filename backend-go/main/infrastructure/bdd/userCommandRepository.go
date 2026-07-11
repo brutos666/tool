@@ -44,7 +44,8 @@ func (repository *userCmdRepository) GetUsersWithEmail(ctx context.Context, emai
 	return connection.LaunchNormalWay(ctx, config.GetBaseConnection(), getUsersWithMail, email)
 }
 
-func (repository *userCmdRepository) UpdateToken(ctx context.Context, userId string, accessToken, refreshToken string) error {
+func (repository *userCmdRepository) UpdateToken(ctx context.Context, userId string, tokenGenerator domain.Tokens) error {
+	accessToken, refreshToken := tokenGenerator.Generate()
 	return connection.LaunchTransactionnelWay(ctx, config.GetBaseConnection(), doUpdateUser, updateTokenArgs{userId, accessToken, refreshToken})
 }
 

@@ -1,5 +1,11 @@
 package domain
 
+type Tokens interface {
+	SetUser(User)
+	Generate() (string, string)
+	GetAccessToken() string
+}
+
 type User struct {
 	id        string
 	firstName string
@@ -36,20 +42,14 @@ func (user LoginUser) GetPassword() string          { return user.password }
 func (user *LoginUser) SetPassword(password string) { user.password = password }
 
 type LoggedUser struct {
-	user         User
-	token        string
-	refreshToken string
+	user User
 }
 
-func (loggedUser LoggedUser) GetUser() User           { return loggedUser.user }
-func (loggedUser LoggedUser) GetToken() string        { return loggedUser.token }
-func (loggedUser LoggedUser) GetRefreshToken() string { return loggedUser.refreshToken }
+func (loggedUser LoggedUser) GetUser() User { return loggedUser.user }
 
-func CreateLoggedUser(user User, token string, refreshToken string) *LoggedUser {
+func CreateLoggedUser(user User) *LoggedUser {
 	loggedUser := new(LoggedUser)
 	loggedUser.user = user
-	loggedUser.token = token
-	loggedUser.refreshToken = refreshToken
 	return loggedUser
 }
 

@@ -19,19 +19,8 @@ class CallRequest {
   async execute(requestName, method = 'POST', data) {
     let response = await callFetch(requestName, method, data);
     if (response.status === 401) {
-      // Si le jeton a expiré : on le recharge, sinon, on redirige vers la page de connection
-      const authenticationReason = response.headers.get('WWW-Authenticate');
-      if (authenticationReason === 'Bearer error="token_expired"' || authenticationReason === 'Bearer error="no_token"') {
-        response = this.executeRefreshToken()
-          .then(
-            () => callFetch(requestName, method, data),
-            () => StoreData.logout()
-          );
-      } else {
-        StoreData.logout();
-      }
+      response = await logoutIfRefreshFail.call(this, response, requestName, method, data);
     }
-
     const responseData = await response.json();
     if (!response.ok) {
       return Promise.reject(`Erreur HTTP ${ response.status } : ${ responseData.error } (${ responseData.path })`);
@@ -39,7 +28,10 @@ class CallRequest {
     return Promise.resolve(responseData);
   }
   async executeDownloadFile(requestName, method = 'POST', data) {
-    const response = await callFetch(requestName, method, data);
+    let response = await callFetch(requestName, method, data);
+    if (response.status === 401) {
+      response = await logoutIfRefreshFail.call(this, response, requestName, method, data);
+    }
     if (!response.ok) {
       const responseData = await response.json();
       return Promise.reject(`Erreur HTTP ${ response.status } : ${ responseData.error } (${ responseData.path })`);
@@ -99,5 +91,25 @@ function callFetch(requestName, method, data = {}) {
     headers,
     body: JSON.stringify(data),
   });
+}
+/**
+ * Reconnecte l'utilisateur si son jeton d'authentification a expiré ou n'existe plus puis retente la requête.
+ * Déconnecte l'utilisateur s'il ne peut pas être authentifié
+ * @param {Response} response - réponse de l'appel d'une requête
+ * @param {string} requestName - Nom de la requête ("item/xxx")
+ * @param {string} method - Type de requête ("GET", "POST", "PUT", "DELETE")
+ * @param {Object} data - Données de la requête
+ * @returns {Promise<Response>} réponse à la requête si l'authentification a finalement réussie
+ */
+function logoutIfRefreshFail(response, requestName, method, data) {
+  // Si le jeton a expiré : on le recharge, sinon, on redirige vers la page de connection
+  const authenticationReason = response.headers.get('WWW-Authenticate');
+  if (authenticationReason === 'Bearer error="token_expired"' || authenticationReason === 'Bearer error="no_token"') {
+    return this.executeRefreshToken()
+      .then(loggedUser => StoreData.refreshUser(loggedUser), () => StoreData.logout())
+      .then(() => callFetch(requestName, method, data));
+  }
+  StoreData.logout();
+  return Promise.resolve();
 }
 export default CallRequest;

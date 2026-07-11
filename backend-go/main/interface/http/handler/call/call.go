@@ -19,6 +19,7 @@ const (
 	WITH_USER            int    = 1
 	WITH_PARAM           int    = 2
 	WITH_USER_WITH_PARAM int    = 3
+	WITH_USER_TO_LOG     int    = 4
 )
 
 type Callback interface {
@@ -58,7 +59,7 @@ func (call CallUserParam[P, R]) call(args ...any) (any, error) {
 func (call CallUserParam[P, R]) getType() int              { return WITH_USER_WITH_PARAM }
 func (call CallUserParam[P, R]) getParameterInstance() any { return call.parameterInstance }
 
-// CallParam Pour les requêtes http fournissant un paramètre en entrée, don le traitement n'a pas besoin de connaître l'utilisateur connecté
+// CallParam Pour les requêtes http fournissant un paramètre en entrée, dont le traitement n'a pas besoin de connaître l'utilisateur connecté
 type CallParam[P, R any] struct {
 	Callback          func(context.Context, P) (R, error)
 	parameterInstance any
@@ -69,6 +70,17 @@ func (call CallParam[P, R]) call(args ...any) (any, error) {
 }
 func (call CallParam[P, R]) getType() int              { return WITH_PARAM }
 func (call CallParam[P, R]) getParameterInstance() any { return call.parameterInstance }
+
+// CallUserToLog Pour les requêtes http fournissant un paramètre en entrée, dont le traitement doit connecté l'utilisateur
+type CallUserToLog[P any] struct {
+	Callback          func(context.Context, domain.Tokens, P) (*domain.LoggedUser, error)
+	parameterInstance any
+}
+
+func (call CallUserToLog[P]) call(args ...any) (*domain.LoggedUser, error) {
+	return call.Callback(args[0].(context.Context), args[1].(domain.Tokens), args[2].(P))
+}
+func (call CallUserToLog[P]) getParameterInstance() any { return call.parameterInstance }
 
 // Get - Appel qui retourne un résultat et une erreur
 func Get[R any](callback func(context.Context) (R, error)) Call[R] {
@@ -88,6 +100,10 @@ func WithUserWithParam[P, R any](callback func(context.Context, domain.Connected
 // WithParam - Appel avec un paramètre en entrée qui retourne un résultat et une erreur
 func WithParam[P, R any](callback func(context.Context, P) (R, error)) CallParam[P, R] {
 	return CallParam[P, R]{Callback: callback, parameterInstance: *new(P)}
+}
+
+func WithUserToLog[P any](callback func(context.Context, domain.Tokens, P) (*domain.LoggedUser, error)) CallUserToLog[P] {
+	return CallUserToLog[P]{Callback: callback, parameterInstance: *new(P)}
 }
 
 type (
@@ -125,6 +141,19 @@ func WrapCallback(callback Callback) WrappedCall {
 	default:
 		panic(INCORRECT_FUNCTION)
 	}
+}
+
+func CallLoginCallback[P any](ctx context.Context, tokenGenerator domain.Tokens, request *http.Request, callback CallUserToLog[P]) (*domain.LoggedUser, error) {
+	parameterType := callback.getParameterInstance()
+	parameter, err := readRequestParameter(request, parameterType)
+	if err != nil {
+		return nil, err
+	}
+	return callback.call(ctx, tokenGenerator, parameter)
+}
+
+func CallRefreshCallback[P any](ctx context.Context, tokenGenerator domain.Tokens, connectedUser domain.ConnectedUser, callback CallUserToLog[P]) (*domain.LoggedUser, error) {
+	return callback.call(ctx, tokenGenerator, connectedUser)
 }
 
 func readRequestParameter(request *http.Request, parameter any) (any, error) {
