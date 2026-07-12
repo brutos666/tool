@@ -5,8 +5,8 @@ import (
 	"database/server/connection"
 	"database/server/requestSQL"
 
-	"goTool/config"
 	"goTool/domain"
+	"goTool/infrastructure/bddAccess"
 	"goTool/infrastructure/entityBdd"
 )
 
@@ -18,11 +18,11 @@ func UserQueryRepository() domain.UserQueryRepository {
 	return &userQryRepository{}
 }
 
-func (repo *userQryRepository) FindAll(ctx context.Context) ([]*domain.User, error) {
-	return connection.LaunchNormalWay(ctx, config.GetBaseConnection(), selectAllUsers, "")
+func (repo *userQryRepository) FindAll(ctx context.Context, dataAccess domain.DataAccess) ([]*domain.User, error) {
+	return selectAllUsers(dataAccess.(bddAccess.Access).GetConnection())
 }
 
-func selectAllUsers(connection connection.Connection, notUsed string) ([]*domain.User, error) {
+func selectAllUsers(connection connection.Connection) ([]*domain.User, error) {
 	var usersModel []entityBdd.UserModel
 	err := requestSQL.Select(connection, &usersModel, SELECT_ALL_USERS)
 	if err != nil {

@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -17,13 +18,14 @@ import (
 	"goTool/interface/webResult"
 )
 
-func HandleRoute(requestPath, method string, callback call.Callback) {
-	http.HandleFunc(requestPath, wrapHandler(method, callback))
+func HandleRoute(requestPath, method string, callback call.Callback, dataAccess domain.DataAccess) {
+	http.HandleFunc(requestPath, wrapHandler(method, callback, dataAccess))
 }
 
 // wrapHandler construit la fonction contenant les appels aux middlewares, ainsi que l'appel du service
-func wrapHandler(method string, callback call.Callback) func(response http.ResponseWriter, request *http.Request) {
+func wrapHandler(method string, callback call.Callback, dataAccess domain.DataAccess) func(response http.ResponseWriter, request *http.Request) {
 	toCall := call.WrapCallback(callback)
+	toCall = wrapWithDataAccess(toCall)
 
 	return func(response http.ResponseWriter, request *http.Request) {
 		requestPath := request.URL.Path
@@ -39,9 +41,9 @@ func wrapHandler(method string, callback call.Callback) func(response http.Respo
 
 		switch requestMethod {
 		case http.MethodPost:
-			processRequest(response, request, toCall)
+			processRequest(response, request, toCall, dataAccess)
 		case http.MethodGet:
-			processRequest(response, request, toCall)
+			processRequest(response, request, toCall, dataAccess)
 		case http.MethodOptions:
 			writeResponse(response, requestPath, nil, http.StatusOK)
 		default:
@@ -56,7 +58,7 @@ func wrapHandler(method string, callback call.Callback) func(response http.Respo
 // appel Middleware pour vérifier si le serveur est en cours d'arrêt et si l'utilisateur est authentifié
 // appel de la méthode liée à la route (service)
 // envoi de la réponse
-func processRequest(response http.ResponseWriter, request *http.Request, toCall call.WrappedCall) {
+func processRequest(response http.ResponseWriter, request *http.Request, toCall call.WrappedCall, dataAccess domain.DataAccess) {
 	requestPath := request.URL.Path
 	ctx, cancel := context.WithTimeout(request.Context(), REQUEST_TIMEOUT)
 	defer cancel()
@@ -67,21 +69,41 @@ func processRequest(response http.ResponseWriter, request *http.Request, toCall 
 		sendHttpError(response, requestPath, *httpError)
 		return
 	}
-	values, err := toCall(ctx, connectedUser, request)
+
+	values, err := toCall(ctx, dataAccess, connectedUser, request)
 	if err != nil {
 		sendError(response, requestPath, err)
 		return
 	}
+
 	webResultValues := webResult.ConvertToWebResult(values)
 	sendValues(response, requestPath, &webResultValues)
 }
 
-// HandleLoginRoute Traitement particulier lorsque l'on doit s'authentifier
-func HandleLoginRoute[P any](requestPath string, callback call.CallUserToLog[P]) {
-	http.HandleFunc(requestPath, wrapLoginHandler(callback))
+func wrapWithDataAccess(wrappedCall call.WrappedCall) call.WrappedCall {
+	return func(ctx context.Context, dataAccess domain.DataAccess, user *domain.ConnectedUser, request *http.Request) (values any, err error) {
+		err = dataAccess.Start(ctx)
+		if err != nil {
+			return nil, err
+		}
+		defer func() {
+			if err != nil {
+				err = errors.Join(err, dataAccess.Cancel(ctx))
+			}
+		}()
+		defer func() {
+			err = errors.Join(err, dataAccess.Stop(ctx))
+		}()
+		return wrappedCall(ctx, dataAccess, user, request)
+	}
 }
 
-func wrapLoginHandler[P any](callback call.CallUserToLog[P]) func(response http.ResponseWriter, request *http.Request) {
+// HandleLoginRoute Traitement particulier lorsque l'on doit s'authentifier
+func HandleLoginRoute[P any](requestPath string, callback call.CallUserToLog[P], dataAccess domain.DataAccess) {
+	http.HandleFunc(requestPath, wrapLoginHandler(callback, dataAccess))
+}
+
+func wrapLoginHandler[P any](callback call.CallUserToLog[P], dataAccess domain.DataAccess) func(response http.ResponseWriter, request *http.Request) {
 	return func(response http.ResponseWriter, request *http.Request) {
 		requestPath := request.URL.Path
 		requestMethod := request.Method
@@ -90,7 +112,7 @@ func wrapLoginHandler[P any](callback call.CallUserToLog[P]) func(response http.
 
 		switch requestMethod {
 		case http.MethodPost:
-			processLoginRequest(response, request, callback)
+			processLoginRequest(response, request, callback, dataAccess)
 		case http.MethodOptions:
 			writeResponse(response, requestPath, nil, http.StatusOK)
 		default:
@@ -102,7 +124,7 @@ func wrapLoginHandler[P any](callback call.CallUserToLog[P]) func(response http.
 	}
 }
 
-func processLoginRequest[P any](response http.ResponseWriter, request *http.Request, callback call.CallUserToLog[P]) {
+func processLoginRequest[P any](response http.ResponseWriter, request *http.Request, callback call.CallUserToLog[P], dataAccess domain.DataAccess) {
 	var err error
 	var loggedUser *domain.LoggedUser
 	requestPath := request.URL.Path
@@ -116,6 +138,19 @@ func processLoginRequest[P any](response http.ResponseWriter, request *http.Requ
 		sendHttpError(response, requestPath, *httpError)
 		return
 	}
+	err = dataAccess.Start(ctx)
+	if err != nil {
+		sendError(response, requestPath, err)
+		return
+	}
+	defer func() {
+		if err != nil {
+			err = errors.Join(err, dataAccess.Cancel(ctx))
+		}
+	}()
+	defer func() {
+		err = errors.Join(err, dataAccess.Stop(ctx))
+	}()
 
 	if requestPath == route.REFRESH {
 		connectedUser, httpError := middleware.AuthenticateWithRefreshToken(response, request)
@@ -123,9 +158,9 @@ func processLoginRequest[P any](response http.ResponseWriter, request *http.Requ
 			sendHttpError(response, requestPath, *httpError)
 			return
 		}
-		loggedUser, err = call.CallRefreshCallback(ctx, tokenGenerator, *connectedUser, callback)
+		loggedUser, err = call.CallRefreshCallback(ctx, dataAccess, tokenGenerator, *connectedUser, callback)
 	} else {
-		loggedUser, err = call.CallLoginCallback(ctx, tokenGenerator, request, callback)
+		loggedUser, err = call.CallLoginCallback(ctx, dataAccess, tokenGenerator, request, callback)
 	}
 	if err != nil {
 		sendError(response, requestPath, err)

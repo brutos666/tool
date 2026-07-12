@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"goTool/domain"
 	"goTool/interface/http/handler/call"
 	"goTool/interface/webResult"
 
@@ -52,11 +53,11 @@ func callT[OBJ any](path string, method string, callback func(http.ResponseWrite
 func TestWrapQueryHandler_response_should_be_user_when_function_return_person(t *testing.T) {
 	// Given
 	jules := createPerson("Jules", 34)
-	getUser := func(ctx context.Context) (*Person, error) {
+	getUser := func(ctx context.Context, notUsed domain.DataAccess) (*Person, error) {
 		return jules, nil
 	}
 	// When
-	functionToLaunch := wrapHandler(http.MethodGet, call.Get(getUser))
+	functionToLaunch := wrapHandler(http.MethodGet, call.Get(getUser), nil)
 	actual, response := callT[Person](fIND_USER_PATH, "GET", functionToLaunch)
 	// Then
 	assert.Equal(t, http.StatusOK, response.StatusCode)
@@ -74,11 +75,11 @@ func TestWrapQueryHandler_response_should_be_user_when_function_return_person(t 
 func TestWrapQueryHandler_response_should_be_error_when_function_return_error(t *testing.T) {
 	// Given
 	err := errors.New("Utilisateur introuvable")
-	getUserWithError := func(ctx context.Context) (*Person, error) {
+	getUserWithError := func(ctx context.Context, notUsed domain.DataAccess) (*Person, error) {
 		return nil, err
 	}
 	// When
-	functionToLaunch := wrapHandler(http.MethodGet, call.Get(getUserWithError))
+	functionToLaunch := wrapHandler(http.MethodGet, call.Get(getUserWithError), nil)
 	actual, response := callT[webResult.MessageWebResult](fIND_USER_PATH, "GET", functionToLaunch)
 	// Then
 	assert.Equal(t, http.StatusInternalServerError, response.StatusCode)
@@ -101,11 +102,11 @@ func TestWrapQueryHandler_response_should_be_error_when_function_return_pq_error
 	pqErr.Detail = "Détail sur l'erreur"
 	pqErr.Message = "Erreur SQL"
 
-	getUserWithError := func(ctx context.Context) (*Person, error) {
+	getUserWithError := func(ctx context.Context, notUsed domain.DataAccess) (*Person, error) {
 		return nil, pqErr
 	}
 	// When
-	functionToLaunch := wrapHandler(http.MethodGet, call.Get(getUserWithError))
+	functionToLaunch := wrapHandler(http.MethodGet, call.Get(getUserWithError), nil)
 	actual, response := callT[webResult.MessageWebResult](fIND_USER_PATH, "GET", functionToLaunch)
 	// Then
 	assert.Equal(t, http.StatusInternalServerError, response.StatusCode)
@@ -126,7 +127,7 @@ func TestWrapQueryHandler_response_should_be_error_when_function_return_pq_error
 func TestWrapQueryHandler_response_should_be_error_when_function_return_join_error(t *testing.T) {
 	// Given
 
-	getUserWithError := func(ctx context.Context) (person *Person, err error) {
+	getUserWithError := func(ctx context.Context, notUsed domain.DataAccess) (person *Person, err error) {
 		defer func() {
 			deferErr := errors.New("Problème lors du defer")
 			err = errors.Join(err, deferErr)
@@ -138,7 +139,7 @@ func TestWrapQueryHandler_response_should_be_error_when_function_return_join_err
 		return nil, err
 	}
 	// When
-	functionToLaunch := wrapHandler(http.MethodGet, call.Get(getUserWithError))
+	functionToLaunch := wrapHandler(http.MethodGet, call.Get(getUserWithError), nil)
 	actual, response := callT[webResult.MessageWebResult](fIND_USER_PATH, "GET", functionToLaunch)
 	// Then
 	assert.Equal(t, http.StatusInternalServerError, response.StatusCode)
@@ -161,12 +162,12 @@ func TestWrapQueryHandler_response_should_be_error_when_function_return_join_err
 func TestWrapQueryHandler_response_should_be_error_when_request_method_post(t *testing.T) {
 	// Given
 	jules := createPerson("Jules", 34)
-	getUser := func(ctx context.Context) (*Person, error) {
+	getUser := func(ctx context.Context, notUsed domain.DataAccess) (*Person, error) {
 		return jules, nil
 	}
 
 	// When : quand je récupère la fonction à lancer en lui passant la fonction getUser() et que je l'exécute
-	functionToLaunch := wrapHandler(http.MethodGet, call.Get(getUser))
+	functionToLaunch := wrapHandler(http.MethodGet, call.Get(getUser), nil)
 	actual, response := callT[webResult.MessageWebResult](fIND_USER_PATH, "POST", functionToLaunch)
 
 	// Then : il faut que le corps de la réponse contienne l'utilisateur jules

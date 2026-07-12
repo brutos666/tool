@@ -2,7 +2,6 @@ package connection
 
 import (
 	"context"
-	"errors"
 	"log"
 	"time"
 
@@ -26,58 +25,7 @@ func (connection Connection) GetTx() *sqlx.Tx             { return connection.tx
 func (connection Connection) GetContext() context.Context { return connection.ctx }
 func (connection Connection) IsModeTrans() bool           { return connection.modeTrans }
 
-type (
-	CallbackWithResult[R, A any]  func(Connection, A) (*R, error)
-	CallbackWithResults[R, A any] func(Connection, A) ([]R, error)
-	CallbackWithoutResult[A any]  func(Connection, A) error
-)
-
-// LaunchTransactionnelWay permet l'appel d'une fonction de mise à jour de la base de données en mode transactionnel
-//
-// Ouvre une connection à la base de données en mode transaction.
-// Appel la fonction qui doit mettre à jour la base de données.
-// Rollback et ferme la connection si une erreur survient.
-// Commit et ferme la connection si tout se passe bien.
-func LaunchTransactionnelWay[A any](ctx context.Context, base DatabaseConnection, callback CallbackWithoutResult[A], arguments A) (err error) {
-	var connection *Connection
-	connection, err = openTransactionnelConnection(ctx, base)
-	if err != nil {
-		return err
-	}
-	defer func() {
-		err = errors.Join(err, close(connection))
-	}()
-	defer func() {
-		err = errors.Join(err, rollback(connection))
-	}()
-
-	err = callback(*connection, arguments)
-	if err != nil {
-		return err
-	}
-
-	return commit(connection)
-}
-
-func LaunchNormalWay[R, A any](ctx context.Context, base DatabaseConnection, callback CallbackWithResults[R, A], arguments A) (result []R, err error) {
-	var connection *Connection
-	connection, err = openAutoCommitConnection(ctx, base)
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		err = errors.Join(err, close(connection))
-	}()
-
-	result, err = callback(*connection, arguments)
-	if err != nil {
-		return nil, err
-	}
-
-	return result, nil
-}
-
-func openTransactionnelConnection(ctx context.Context, base DatabaseConnection) (*Connection, error) {
+func OpenTransactionnelConnection(ctx context.Context, base DatabaseConnection) (*Connection, error) {
 	db := OpenConnection(base)
 	tx, err := db.Beginx()
 	if err != nil {
@@ -91,7 +39,7 @@ func openTransactionnelConnection(ctx context.Context, base DatabaseConnection) 
 	return connection, nil
 }
 
-func openAutoCommitConnection(ctx context.Context, base DatabaseConnection) (*Connection, error) {
+func OpenAutoCommitConnection(ctx context.Context, base DatabaseConnection) (*Connection, error) {
 	db := OpenConnection(base)
 	connection := new(Connection)
 	connection.ctx = ctx
@@ -101,11 +49,11 @@ func openAutoCommitConnection(ctx context.Context, base DatabaseConnection) (*Co
 	return connection, nil
 }
 
-func close(connection *Connection) error {
+func Close(connection *Connection) error {
 	return connection.db.Close()
 }
 
-func rollback(connection *Connection) error {
+func Rollback(connection *Connection) error {
 	if connection.modeTrans {
 		connection.modeTrans = false
 		return connection.tx.Rollback()
@@ -113,7 +61,7 @@ func rollback(connection *Connection) error {
 	return nil
 }
 
-func commit(connection *Connection) error {
+func Commit(connection *Connection) error {
 	if connection.modeTrans {
 		connection.modeTrans = false
 		return connection.tx.Commit()

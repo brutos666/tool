@@ -6,8 +6,8 @@ import (
 	"database/server/requestSQL"
 	"treeConverter"
 
-	"goTool/config"
 	"goTool/domain"
+	"goTool/infrastructure/bddAccess"
 	"goTool/infrastructure/entityBdd"
 )
 
@@ -19,11 +19,11 @@ func SpaceQueryRepository() domain.SpaceQueryRepository {
 	return &spaceQryRepository{}
 }
 
-func (repo *spaceQryRepository) FindAll(ctx context.Context) ([]*domain.Space, error) {
-	return connection.LaunchNormalWay(ctx, config.GetBaseConnection(), selectAllSpaces, "")
+func (repo *spaceQryRepository) FindAll(ctx context.Context, dataAccess domain.DataAccess) ([]*domain.Space, error) {
+	return selectAllSpaces(dataAccess.(bddAccess.Access).GetConnection())
 }
 
-func selectAllSpaces(connection connection.Connection, notUsed string) ([]*domain.Space, error) {
+func selectAllSpaces(connection connection.Connection) ([]*domain.Space, error) {
 	var spaceModels []entityBdd.SpaceModel
 	err := requestSQL.Select(connection, &spaceModels, SELECT_ALL)
 	if err != nil {

@@ -8,8 +8,8 @@ import (
 	"database/server/requestSQL"
 	"log"
 
-	"goTool/config"
 	"goTool/domain"
+	"goTool/infrastructure/bddAccess"
 	"goTool/infrastructure/entityBdd"
 )
 
@@ -27,12 +27,12 @@ func SpaceCommandRepository() domain.SpaceCommandRepository {
 	return &spaceCmdRepository{}
 }
 
-func (repo *spaceCmdRepository) SaveCurrentSpace(ctx context.Context, nodeSpace *domain.NodeSpace) error {
-	return connection.LaunchTransactionnelWay(ctx, config.GetBaseConnection(), saveSpace, nodeSpace)
+func (repo *spaceCmdRepository) SaveCurrentSpace(ctx context.Context, dataAccess domain.DataAccess, nodeSpace *domain.NodeSpace) error {
+	return saveSpace(dataAccess.(bddAccess.Access).GetConnection(), nodeSpace)
 }
 
-func (repo *spaceCmdRepository) SaveSpaces(ctx context.Context, spaces *domain.Spaces) error {
-	return connection.LaunchTransactionnelWay(ctx, config.GetBaseConnection(), saveSpaces, spaces)
+func (repo *spaceCmdRepository) SaveSpaces(ctx context.Context, dataAccess domain.DataAccess, spaces *domain.Spaces) error {
+	return saveSpaces(dataAccess.(bddAccess.Access).GetConnection(), spaces)
 }
 
 func saveSpace(connection connection.Connection, nodeSpace *domain.NodeSpace) error {

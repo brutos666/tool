@@ -29,131 +29,131 @@ type Callback interface {
 }
 
 type Call[R any] struct {
-	Callback func(context.Context) (R, error)
+	Callback func(context.Context, domain.DataAccess) (R, error)
 }
 
 func (call Call[R]) call(args ...any) (any, error) {
-	return call.Callback(args[0].(context.Context))
+	return call.Callback(args[0].(context.Context), args[1].(domain.DataAccess))
 }
 func (call Call[R]) getType() int              { return WITH_ONLY_RESULT }
 func (call Call[R]) getParameterInstance() any { return nil }
 
 type CallUser[R any] struct {
-	Callback func(context.Context, domain.ConnectedUser) (R, error)
+	Callback func(context.Context, domain.DataAccess, domain.ConnectedUser) (R, error)
 }
 
 func (call CallUser[R]) call(args ...any) (any, error) {
-	return call.Callback(args[0].(context.Context), args[1].(domain.ConnectedUser))
+	return call.Callback(args[0].(context.Context), args[1].(domain.DataAccess), args[2].(domain.ConnectedUser))
 }
 func (call CallUser[R]) getType() int              { return WITH_USER }
 func (call CallUser[R]) getParameterInstance() any { return nil }
 
 type CallUserParam[P, R any] struct {
-	Callback          func(context.Context, domain.ConnectedUser, P) (R, error)
+	Callback          func(context.Context, domain.DataAccess, domain.ConnectedUser, P) (R, error)
 	parameterInstance any
 }
 
 func (call CallUserParam[P, R]) call(args ...any) (any, error) {
-	return call.Callback(args[0].(context.Context), args[1].(domain.ConnectedUser), args[2].(P))
+	return call.Callback(args[0].(context.Context), args[1].(domain.DataAccess), args[2].(domain.ConnectedUser), args[3].(P))
 }
 func (call CallUserParam[P, R]) getType() int              { return WITH_USER_WITH_PARAM }
 func (call CallUserParam[P, R]) getParameterInstance() any { return call.parameterInstance }
 
 // CallParam Pour les requêtes http fournissant un paramètre en entrée, dont le traitement n'a pas besoin de connaître l'utilisateur connecté
 type CallParam[P, R any] struct {
-	Callback          func(context.Context, P) (R, error)
+	Callback          func(context.Context, domain.DataAccess, P) (R, error)
 	parameterInstance any
 }
 
 func (call CallParam[P, R]) call(args ...any) (any, error) {
-	return call.Callback(args[0].(context.Context), args[1].(P))
+	return call.Callback(args[0].(context.Context), args[1].(domain.DataAccess), args[2].(P))
 }
 func (call CallParam[P, R]) getType() int              { return WITH_PARAM }
 func (call CallParam[P, R]) getParameterInstance() any { return call.parameterInstance }
 
 // CallUserToLog Pour les requêtes http fournissant un paramètre en entrée, dont le traitement doit connecté l'utilisateur
 type CallUserToLog[P any] struct {
-	Callback          func(context.Context, domain.Tokens, P) (*domain.LoggedUser, error)
+	Callback          func(context.Context, domain.DataAccess, domain.Tokens, P) (*domain.LoggedUser, error)
 	parameterInstance any
 }
 
 func (call CallUserToLog[P]) call(args ...any) (*domain.LoggedUser, error) {
-	return call.Callback(args[0].(context.Context), args[1].(domain.Tokens), args[2].(P))
+	return call.Callback(args[0].(context.Context), args[1].(domain.DataAccess), args[2].(domain.Tokens), args[3].(P))
 }
 func (call CallUserToLog[P]) getParameterInstance() any { return call.parameterInstance }
 
 // Get - Appel qui retourne un résultat et une erreur
-func Get[R any](callback func(context.Context) (R, error)) Call[R] {
+func Get[R any](callback func(context.Context, domain.DataAccess) (R, error)) Call[R] {
 	return Call[R]{Callback: callback}
 }
 
 // WithUser - Appel avec l'utilisateur connecté qui retourne un résultat et une erreur
-func WithUser[R any](callback func(context.Context, domain.ConnectedUser) (R, error)) CallUser[R] {
+func WithUser[R any](callback func(context.Context, domain.DataAccess, domain.ConnectedUser) (R, error)) CallUser[R] {
 	return CallUser[R]{Callback: callback}
 }
 
 // WithUserWithParam - Appel avec un paramètre en entrée et l'utilisateur connecté qui retourne un résultat et une erreur
-func WithUserWithParam[P, R any](callback func(context.Context, domain.ConnectedUser, P) (R, error)) CallUserParam[P, R] {
+func WithUserWithParam[P, R any](callback func(context.Context, domain.DataAccess, domain.ConnectedUser, P) (R, error)) CallUserParam[P, R] {
 	return CallUserParam[P, R]{Callback: callback, parameterInstance: *new(P)}
 }
 
 // WithParam - Appel avec un paramètre en entrée qui retourne un résultat et une erreur
-func WithParam[P, R any](callback func(context.Context, P) (R, error)) CallParam[P, R] {
+func WithParam[P, R any](callback func(context.Context, domain.DataAccess, P) (R, error)) CallParam[P, R] {
 	return CallParam[P, R]{Callback: callback, parameterInstance: *new(P)}
 }
 
-func WithUserToLog[P any](callback func(context.Context, domain.Tokens, P) (*domain.LoggedUser, error)) CallUserToLog[P] {
+func WithUserToLog[P any](callback func(context.Context, domain.DataAccess, domain.Tokens, P) (*domain.LoggedUser, error)) CallUserToLog[P] {
 	return CallUserToLog[P]{Callback: callback, parameterInstance: *new(P)}
 }
 
 type (
-	WrappedCall func(ctx context.Context, user *domain.ConnectedUser, request *http.Request) (any, error)
+	WrappedCall func(ctx context.Context, dataAccess domain.DataAccess, user *domain.ConnectedUser, request *http.Request) (any, error)
 )
 
 func WrapCallback(callback Callback) WrappedCall {
 	switch callback.getType() {
 	case WITH_ONLY_RESULT:
-		return func(ctx context.Context, user *domain.ConnectedUser, request *http.Request) (any, error) {
-			return callback.call(ctx)
+		return func(ctx context.Context, dataAccess domain.DataAccess, user *domain.ConnectedUser, request *http.Request) (any, error) {
+			return callback.call(ctx, dataAccess)
 		}
 	case WITH_USER:
-		return func(ctx context.Context, user *domain.ConnectedUser, request *http.Request) (any, error) {
-			return callback.call(ctx, *user)
+		return func(ctx context.Context, dataAccess domain.DataAccess, user *domain.ConnectedUser, request *http.Request) (any, error) {
+			return callback.call(ctx, dataAccess, *user)
 		}
 	case WITH_PARAM:
-		return func(ctx context.Context, user *domain.ConnectedUser, request *http.Request) (any, error) {
+		return func(ctx context.Context, dataAccess domain.DataAccess, user *domain.ConnectedUser, request *http.Request) (any, error) {
 			parameterType := callback.getParameterInstance()
 			parameter, err := readRequestParameter(request, parameterType)
 			if err != nil {
 				return nil, err
 			}
-			return callback.call(ctx, parameter)
+			return callback.call(ctx, dataAccess, parameter)
 		}
 	case WITH_USER_WITH_PARAM:
-		return func(ctx context.Context, user *domain.ConnectedUser, request *http.Request) (any, error) {
+		return func(ctx context.Context, dataAccess domain.DataAccess, user *domain.ConnectedUser, request *http.Request) (any, error) {
 			parameterType := callback.getParameterInstance()
 			parameter, err := readRequestParameter(request, parameterType)
 			if err != nil {
 				return nil, err
 			}
-			return callback.call(ctx, *user, parameter)
+			return callback.call(ctx, dataAccess, *user, parameter)
 		}
 	default:
 		panic(INCORRECT_FUNCTION)
 	}
 }
 
-func CallLoginCallback[P any](ctx context.Context, tokenGenerator domain.Tokens, request *http.Request, callback CallUserToLog[P]) (*domain.LoggedUser, error) {
+func CallLoginCallback[P any](ctx context.Context, dataAccess domain.DataAccess, tokenGenerator domain.Tokens, request *http.Request, callback CallUserToLog[P]) (*domain.LoggedUser, error) {
 	parameterType := callback.getParameterInstance()
 	parameter, err := readRequestParameter(request, parameterType)
 	if err != nil {
 		return nil, err
 	}
-	return callback.call(ctx, tokenGenerator, parameter)
+	return callback.call(ctx, dataAccess, tokenGenerator, parameter)
 }
 
-func CallRefreshCallback[P any](ctx context.Context, tokenGenerator domain.Tokens, connectedUser domain.ConnectedUser, callback CallUserToLog[P]) (*domain.LoggedUser, error) {
-	return callback.call(ctx, tokenGenerator, connectedUser)
+func CallRefreshCallback[P any](ctx context.Context, dataAccess domain.DataAccess, tokenGenerator domain.Tokens, connectedUser domain.ConnectedUser, callback CallUserToLog[P]) (*domain.LoggedUser, error) {
+	return callback.call(ctx, dataAccess, tokenGenerator, connectedUser)
 }
 
 func readRequestParameter(request *http.Request, parameter any) (any, error) {

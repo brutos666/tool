@@ -6,8 +6,8 @@ import (
 	"database/server/requestSQL"
 	"time"
 
-	"goTool/config"
 	"goTool/domain"
+	"goTool/infrastructure/bddAccess"
 	"goTool/infrastructure/entityBdd"
 )
 
@@ -23,48 +23,35 @@ func UserCommandRepository() domain.UserCommandRepository {
 	return &userCmdRepository{}
 }
 
-type createArgs struct {
-	user          *domain.User
-	hashPassword  string
-	alreadyExists *bool
-}
-type updateTokenArgs struct {
-	userId, accessToken, refreshToken string
-}
-
-func (infos *createArgs) setAlreadyExists() { *infos.alreadyExists = true }
-
 // Signup implements [domain.UserCommandRepository].
-func (repository *userCmdRepository) CreateUserIfNotExists(ctx context.Context, user *domain.User, hashPassword string) (alreadyExists bool, err error) {
-	err = connection.LaunchTransactionnelWay(ctx, config.GetBaseConnection(), doCreateUserIfNotExists, createArgs{user, hashPassword, &alreadyExists})
-	return alreadyExists, err
+func (repository *userCmdRepository) CreateUserIfNotExists(ctx context.Context, dataAccess domain.DataAccess, user *domain.User, hashPassword string) (alreadyExists bool, err error) {
+	return doCreateUserIfNotExists(dataAccess.(bddAccess.Access).GetConnection(), user, hashPassword)
 }
 
-func (repository *userCmdRepository) GetUsersWithEmail(ctx context.Context, email string) ([]domain.User, error) {
-	return connection.LaunchNormalWay(ctx, config.GetBaseConnection(), getUsersWithMail, email)
+func (repository *userCmdRepository) GetUsersWithEmail(ctx context.Context, dataAccess domain.DataAccess, email string) ([]domain.User, error) {
+	return getUsersWithMail(dataAccess.(bddAccess.Access).GetConnection(), email)
 }
 
-func (repository *userCmdRepository) UpdateToken(ctx context.Context, userId string, tokenGenerator domain.Tokens) error {
+func (repository *userCmdRepository) UpdateToken(ctx context.Context, dataAccess domain.DataAccess, userId string, tokenGenerator domain.Tokens) error {
 	accessToken, refreshToken := tokenGenerator.Generate()
-	return connection.LaunchTransactionnelWay(ctx, config.GetBaseConnection(), doUpdateUser, updateTokenArgs{userId, accessToken, refreshToken})
+	return doUpdateUser(dataAccess.(bddAccess.Access).GetConnection(), userId, accessToken, refreshToken)
 }
 
-func doCreateUserIfNotExists(connection connection.Connection, userInfos createArgs) error {
+func doCreateUserIfNotExists(connection connection.Connection, user *domain.User, hashPassword string) (alreadyExist bool, err error) {
 	// Vérification si l'utilisateur existe déjà
-	userModels, err := selectUsers(connection, userInfos.user.GetEmail())
+	userModels, err := selectUsers(connection, user.GetEmail())
 	if err != nil {
-		return err
+		return false, err
 	}
 	if len(userModels) > 0 {
-		userInfos.setAlreadyExists()
-		return nil
+		return true, nil
 	}
 
-	return insertUser(connection, userInfos.user, userInfos.hashPassword)
+	return false, insertUser(connection, user, hashPassword)
 }
 
-func doUpdateUser(connection connection.Connection, args updateTokenArgs) error {
-	return updateUserToken(connection, args.userId, args.accessToken, args.refreshToken)
+func doUpdateUser(connection connection.Connection, userId, accessToken, refreshToken string) error {
+	return updateUserToken(connection, userId, accessToken, refreshToken)
 }
 
 func getUsersWithMail(connection connection.Connection, email string) ([]domain.User, error) {

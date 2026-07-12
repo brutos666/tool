@@ -5,10 +5,10 @@ import (
 )
 
 type SpaceCommandRepository interface {
-	SaveCurrentSpace(ctx context.Context, nodeSpace *NodeSpace) error
-	SaveSpaces(ctx context.Context, spaces *Spaces) error
+	SaveCurrentSpace(ctx context.Context, dataAccess DataAccess, nodeSpace *NodeSpace) error
+	SaveSpaces(ctx context.Context, dataAccess DataAccess, spaces *Spaces) error
 }
 
 type SpaceQueryRepository interface {
-	FindAll(ctx context.Context) ([]*Space, error)
+	FindAll(ctx context.Context, dataAccess DataAccess) ([]*Space, error)
 }

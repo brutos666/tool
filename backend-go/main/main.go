@@ -8,6 +8,7 @@ import (
 	"goTool/application"
 	"goTool/config"
 	"goTool/infrastructure/bdd"
+	"goTool/infrastructure/bddAccess"
 	"goTool/interface/http/handler"
 	"goTool/interface/http/handler/call"
 	"goTool/interface/http/handler/route"
@@ -15,8 +16,9 @@ import (
 )
 
 func main() {
+	config.InitConfig()
 	initDataService := application.DataInitService(bdd.DataInitRepository())
-	err := initDataService.Init(context.Background())
+	err := initDataService.Init(context.Background(), new(bddAccess.Writer))
 	if err != nil {
 		panic(err)
 	}
@@ -35,12 +37,12 @@ func main() {
 	// Routes : les transformations des paramètres des requêtes et du retour sont faites dans le package
 	handler.Verify(route.START)
 	handler.Stop(route.STOP)
-	handler.HandleRoute(route.ITEM_FIND_ALL, http.MethodGet, call.Get(spaceQueryService.FindAll))
-	handler.HandleRoute(route.ITEM_SAVE, http.MethodPost, call.WithParam(spaceCommandService.Save))
-	handler.HandleLoginRoute(route.REFRESH, call.WithUserToLog(userCommandService.Refresh))
-	handler.HandleLoginRoute(route.SIGNUP, call.WithUserToLog(userCommandService.Signup))
-	handler.HandleLoginRoute(route.LOGIN, call.WithUserToLog(userCommandService.Login))
-	handler.HandleRoute(route.USER_FIND_ALL, http.MethodGet, call.Get(userQueryService.FindAll))
+	handler.HandleRoute(route.ITEM_FIND_ALL, http.MethodGet, call.Get(spaceQueryService.FindAll), new(bddAccess.Reader))
+	handler.HandleRoute(route.ITEM_SAVE, http.MethodPost, call.WithParam(spaceCommandService.Save), new(bddAccess.Writer))
+	handler.HandleLoginRoute(route.REFRESH, call.WithUserToLog(userCommandService.Refresh), new(bddAccess.Writer))
+	handler.HandleLoginRoute(route.SIGNUP, call.WithUserToLog(userCommandService.Signup), new(bddAccess.Writer))
+	handler.HandleLoginRoute(route.LOGIN, call.WithUserToLog(userCommandService.Login), new(bddAccess.Writer))
+	handler.HandleRoute(route.USER_FIND_ALL, http.MethodGet, call.Get(userQueryService.FindAll), new(bddAccess.Reader))
 
 	httpServer.ServerWait()
 	log.Println("Le programme s'est arrêté")

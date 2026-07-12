@@ -28,7 +28,7 @@ func (base baseDescription) GetDataSourceName() string {
 	return props.GetString("database.datasource.url", "No_database_found")
 }
 
-func init() {
+func InitConfig() {
 	props = properties.MustLoadFile(propertiesFile, properties.UTF8)
 	secretKey = tokens.GenerateJWTRandomKey()
 }
