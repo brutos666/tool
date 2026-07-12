@@ -20,12 +20,12 @@ func SpaceQueryRepository() domain.SpaceQueryRepository {
 }
 
 func (repo *spaceQryRepository) FindAll(ctx context.Context, dataAccess domain.DataAccess) ([]*domain.Space, error) {
-	return selectAllSpaces(dataAccess.(bddAccess.Access).GetConnection())
+	return selectAllSpaces(ctx, dataAccess.(bddAccess.Access).GetConnection())
 }
 
-func selectAllSpaces(connection connection.Connection) ([]*domain.Space, error) {
+func selectAllSpaces(ctx context.Context, connection connection.Connection) ([]*domain.Space, error) {
 	var spaceModels []entityBdd.SpaceModel
-	err := requestSQL.Select(connection, &spaceModels, SELECT_ALL)
+	err := requestSQL.Select(ctx, connection, &spaceModels, SELECT_ALL)
 	if err != nil {
 		return nil, err
 	}

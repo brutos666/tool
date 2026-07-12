@@ -1,7 +1,6 @@
 package connection
 
 import (
-	"context"
 	"log"
 	"time"
 
@@ -14,35 +13,31 @@ type DatabaseConnection interface {
 }
 
 type Connection struct {
-	ctx       context.Context
 	db        *sqlx.DB
 	tx        *sqlx.Tx
 	modeTrans bool
 }
 
-func (connection Connection) GetDb() *sqlx.DB             { return connection.db }
-func (connection Connection) GetTx() *sqlx.Tx             { return connection.tx }
-func (connection Connection) GetContext() context.Context { return connection.ctx }
-func (connection Connection) IsModeTrans() bool           { return connection.modeTrans }
+func (connection Connection) GetDb() *sqlx.DB   { return connection.db }
+func (connection Connection) GetTx() *sqlx.Tx   { return connection.tx }
+func (connection Connection) IsModeTrans() bool { return connection.modeTrans }
 
-func OpenTransactionnelConnection(ctx context.Context, base DatabaseConnection) (*Connection, error) {
+func OpenTransactionnelConnection(base DatabaseConnection) (*Connection, error) {
 	db := OpenConnection(base)
 	tx, err := db.Beginx()
 	if err != nil {
 		return nil, err
 	}
 	connection := new(Connection)
-	connection.ctx = ctx
 	connection.db = db
 	connection.tx = tx
 	connection.modeTrans = true
 	return connection, nil
 }
 
-func OpenAutoCommitConnection(ctx context.Context, base DatabaseConnection) (*Connection, error) {
+func OpenAutoCommitConnection(base DatabaseConnection) (*Connection, error) {
 	db := OpenConnection(base)
 	connection := new(Connection)
-	connection.ctx = ctx
 	connection.db = db
 	connection.tx = nil
 	connection.modeTrans = false

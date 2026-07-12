@@ -7,7 +7,7 @@ type DataInitRepository interface {
 }
 
 type DataAccess interface {
-	Start(ctx context.Context) error
-	Stop(ctx context.Context) error
-	Cancel(ctx context.Context) error
+	Start() error
+	Stop() error
+	Cancel() error
 }

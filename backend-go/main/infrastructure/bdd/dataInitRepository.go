@@ -27,20 +27,20 @@ func (repo *dataInitRepository) Init(ctx context.Context, dataAccess domain.Data
 		}
 		defer server.StopServer(config.GetBaseConnection())
 	*/
-	err = dataAccess.Start(ctx)
+	err = dataAccess.Start()
 	if err != nil {
 		return err
 	}
 	defer func() {
 		if err != nil {
-			err = errors.Join(err, dataAccess.Cancel(ctx))
+			err = errors.Join(err, dataAccess.Cancel())
 		}
 	}()
 	defer func() {
-		err = errors.Join(err, dataAccess.Stop(ctx))
+		err = errors.Join(err, dataAccess.Stop())
 	}()
 
-	err = doLaunchScript(dataAccess.(bddAccess.Access).GetConnection(), config.GetSchemaPath())
+	err = doLaunchScript(ctx, dataAccess.(bddAccess.Access).GetConnection(), config.GetSchemaPath())
 	if err != nil {
 		log.Fatalf("Impossible de créer les tables : %s", err)
 	}
@@ -48,8 +48,8 @@ func (repo *dataInitRepository) Init(ctx context.Context, dataAccess domain.Data
 	return nil
 }
 
-func doLaunchScript(connection connection.Connection, filepath string) error {
-	nbRows, err := requestSQL.LaunchSQLScript(connection, filepath)
+func doLaunchScript(ctx context.Context, connection connection.Connection, filepath string) error {
+	nbRows, err := requestSQL.LaunchSQLScript(ctx, connection, filepath)
 	if err != nil {
 		return err
 	}

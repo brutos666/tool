@@ -82,17 +82,17 @@ func processRequest(response http.ResponseWriter, request *http.Request, toCall 
 
 func wrapWithDataAccess(wrappedCall call.WrappedCall) call.WrappedCall {
 	return func(ctx context.Context, dataAccess domain.DataAccess, user *domain.ConnectedUser, request *http.Request) (values any, err error) {
-		err = dataAccess.Start(ctx)
+		err = dataAccess.Start()
 		if err != nil {
 			return nil, err
 		}
 		defer func() {
 			if err != nil {
-				err = errors.Join(err, dataAccess.Cancel(ctx))
+				err = errors.Join(err, dataAccess.Cancel())
 			}
 		}()
 		defer func() {
-			err = errors.Join(err, dataAccess.Stop(ctx))
+			err = errors.Join(err, dataAccess.Stop())
 		}()
 		return wrappedCall(ctx, dataAccess, user, request)
 	}
@@ -138,18 +138,18 @@ func processLoginRequest[P any](response http.ResponseWriter, request *http.Requ
 		sendHttpError(response, requestPath, *httpError)
 		return
 	}
-	err = dataAccess.Start(ctx)
+	err = dataAccess.Start()
 	if err != nil {
 		sendError(response, requestPath, err)
 		return
 	}
 	defer func() {
 		if err != nil {
-			err = errors.Join(err, dataAccess.Cancel(ctx))
+			err = errors.Join(err, dataAccess.Cancel())
 		}
 	}()
 	defer func() {
-		err = errors.Join(err, dataAccess.Stop(ctx))
+		err = errors.Join(err, dataAccess.Stop())
 	}()
 
 	if requestPath == route.REFRESH {

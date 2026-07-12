@@ -25,21 +25,21 @@ func UserCommandRepository() domain.UserCommandRepository {
 
 // Signup implements [domain.UserCommandRepository].
 func (repository *userCmdRepository) CreateUserIfNotExists(ctx context.Context, dataAccess domain.DataAccess, user *domain.User, hashPassword string) (alreadyExists bool, err error) {
-	return doCreateUserIfNotExists(dataAccess.(bddAccess.Access).GetConnection(), user, hashPassword)
+	return doCreateUserIfNotExists(ctx, dataAccess.(bddAccess.Access).GetConnection(), user, hashPassword)
 }
 
 func (repository *userCmdRepository) GetUsersWithEmail(ctx context.Context, dataAccess domain.DataAccess, email string) ([]domain.User, error) {
-	return getUsersWithMail(dataAccess.(bddAccess.Access).GetConnection(), email)
+	return getUsersWithMail(ctx, dataAccess.(bddAccess.Access).GetConnection(), email)
 }
 
 func (repository *userCmdRepository) UpdateToken(ctx context.Context, dataAccess domain.DataAccess, userId string, tokenGenerator domain.Tokens) error {
 	accessToken, refreshToken := tokenGenerator.Generate()
-	return doUpdateUser(dataAccess.(bddAccess.Access).GetConnection(), userId, accessToken, refreshToken)
+	return doUpdateUser(ctx, dataAccess.(bddAccess.Access).GetConnection(), userId, accessToken, refreshToken)
 }
 
-func doCreateUserIfNotExists(connection connection.Connection, user *domain.User, hashPassword string) (alreadyExist bool, err error) {
+func doCreateUserIfNotExists(ctx context.Context, connection connection.Connection, user *domain.User, hashPassword string) (alreadyExist bool, err error) {
 	// Vérification si l'utilisateur existe déjà
-	userModels, err := selectUsers(connection, user.GetEmail())
+	userModels, err := selectUsers(ctx, connection, user.GetEmail())
 	if err != nil {
 		return false, err
 	}
@@ -47,15 +47,15 @@ func doCreateUserIfNotExists(connection connection.Connection, user *domain.User
 		return true, nil
 	}
 
-	return false, insertUser(connection, user, hashPassword)
+	return false, insertUser(ctx, connection, user, hashPassword)
 }
 
-func doUpdateUser(connection connection.Connection, userId, accessToken, refreshToken string) error {
-	return updateUserToken(connection, userId, accessToken, refreshToken)
+func doUpdateUser(ctx context.Context, connection connection.Connection, userId, accessToken, refreshToken string) error {
+	return updateUserToken(ctx, connection, userId, accessToken, refreshToken)
 }
 
-func getUsersWithMail(connection connection.Connection, email string) ([]domain.User, error) {
-	userModels, err := selectUsers(connection, email)
+func getUsersWithMail(ctx context.Context, connection connection.Connection, email string) ([]domain.User, error) {
+	userModels, err := selectUsers(ctx, connection, email)
 	if err != nil {
 		return nil, err
 	}
@@ -69,19 +69,19 @@ func getUsersWithMail(connection connection.Connection, email string) ([]domain.
 	return []domain.User{}, nil
 }
 
-func selectUsers(connection connection.Connection, email string) ([]entityBdd.UserModel, error) {
+func selectUsers(ctx context.Context, connection connection.Connection, email string) ([]entityBdd.UserModel, error) {
 	var existingUsers []entityBdd.UserModel
-	err := requestSQL.Select(connection, &existingUsers, SELECT_WITH_EMAIL, email)
+	err := requestSQL.Select(ctx, connection, &existingUsers, SELECT_WITH_EMAIL, email)
 	if err != nil {
 		return nil, err
 	}
 	return existingUsers, nil
 }
 
-func insertUser(connection connection.Connection, user *domain.User, hashPassword string) error {
+func insertUser(ctx context.Context, connection connection.Connection, user *domain.User, hashPassword string) error {
 	userModel := *entityBdd.CreateUserToRegister(*user, hashPassword)
 
-	err := requestSQL.ExecWithReturn(connection, userModel, &userModel, INSERT_USER)
+	err := requestSQL.ExecWithReturn(ctx, connection, userModel, &userModel, INSERT_USER)
 	if err != nil {
 		return err
 	}
@@ -89,7 +89,7 @@ func insertUser(connection connection.Connection, user *domain.User, hashPasswor
 	return nil
 }
 
-func updateUserToken(connection connection.Connection, userId, accessToken, refreshToken string) error {
-	_, err := requestSQL.ExecArgs(connection, UPDATE_USER_TOKEN, accessToken, refreshToken, time.Now(), userId)
+func updateUserToken(ctx context.Context, connection connection.Connection, userId, accessToken, refreshToken string) error {
+	_, err := requestSQL.ExecArgs(ctx, connection, UPDATE_USER_TOKEN, accessToken, refreshToken, time.Now(), userId)
 	return err
 }
