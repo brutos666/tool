@@ -54,7 +54,7 @@ func getDetailError(err error) string {
 		var b strings.Builder
 		errorList := x.Unwrap()
 		for index, unwrapErr := range errorList {
-			_, _ = b.WriteString(getError(unwrapErr))
+			_, _ = b.WriteString(getDetailError(unwrapErr))
 			if index < len(errorList)-1 {
 				_, _ = b.WriteRune('\n')
 			}

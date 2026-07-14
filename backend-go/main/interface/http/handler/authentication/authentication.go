@@ -45,6 +45,7 @@ const (
 
 var noAuthentication = []string{
 	route.STOP,
+	route.TEST,
 	"/",
 }
 

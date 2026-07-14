@@ -9,4 +9,5 @@ const (
 	ITEM_SAVE     string = "/api/item/save"
 	STOP          string = "/stop"
 	START         string = "/start"
+	TEST          string = "/test"
 )

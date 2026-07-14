@@ -10,13 +10,12 @@ import (
 
 	"goTool/domain"
 	"goTool/interface/http/handler/call"
+	"goTool/interface/http/handler/route"
 	"goTool/interface/webResult"
 
 	"github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
 )
-
-const fIND_USER_PATH = "/findUser"
 
 type Person struct {
 	Name string `json:"name"`
@@ -57,8 +56,8 @@ func TestWrapQueryHandler_response_should_be_user_when_function_return_person(t 
 		return jules, nil
 	}
 	// When
-	functionToLaunch := wrapHandler(http.MethodGet, call.Get(getUser), nil)
-	actual, response := callT[Person](fIND_USER_PATH, "GET", functionToLaunch)
+	functionToLaunch := getHandler(http.MethodGet, call.AsBasicCall(getUser), &domain.NilDataAccess{})
+	actual, response := callT[Person](route.TEST, "GET", functionToLaunch)
 	// Then
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 	assert.Equal(t, jules, actual)
@@ -79,12 +78,12 @@ func TestWrapQueryHandler_response_should_be_error_when_function_return_error(t 
 		return nil, err
 	}
 	// When
-	functionToLaunch := wrapHandler(http.MethodGet, call.Get(getUserWithError), nil)
-	actual, response := callT[webResult.MessageWebResult](fIND_USER_PATH, "GET", functionToLaunch)
+	functionToLaunch := getHandler(http.MethodGet, call.AsBasicCall(getUserWithError), &domain.NilDataAccess{})
+	actual, response := callT[webResult.MessageWebResult](route.TEST, "GET", functionToLaunch)
 	// Then
 	assert.Equal(t, http.StatusInternalServerError, response.StatusCode)
 	assert.Equal(t, "Utilisateur introuvable", actual.Error)
-	assert.Equal(t, fIND_USER_PATH, actual.Path)
+	assert.Equal(t, route.TEST, actual.Path)
 	assert.Equal(t, http.StatusInternalServerError, actual.StatusCode)
 }
 
@@ -106,13 +105,13 @@ func TestWrapQueryHandler_response_should_be_error_when_function_return_pq_error
 		return nil, pqErr
 	}
 	// When
-	functionToLaunch := wrapHandler(http.MethodGet, call.Get(getUserWithError), nil)
-	actual, response := callT[webResult.MessageWebResult](fIND_USER_PATH, "GET", functionToLaunch)
+	functionToLaunch := getHandler(http.MethodGet, call.AsBasicCall(getUserWithError), &domain.NilDataAccess{})
+	actual, response := callT[webResult.MessageWebResult](route.TEST, "GET", functionToLaunch)
 	// Then
 	assert.Equal(t, http.StatusInternalServerError, response.StatusCode)
 	assert.Contains(t, actual.Error, "Détail sur l'erreur")
 	assert.Contains(t, actual.Error, "Erreur SQL")
-	assert.Equal(t, fIND_USER_PATH, actual.Path)
+	assert.Equal(t, route.TEST, actual.Path)
 	assert.Equal(t, http.StatusInternalServerError, actual.StatusCode)
 }
 
@@ -139,14 +138,14 @@ func TestWrapQueryHandler_response_should_be_error_when_function_return_join_err
 		return nil, err
 	}
 	// When
-	functionToLaunch := wrapHandler(http.MethodGet, call.Get(getUserWithError), nil)
-	actual, response := callT[webResult.MessageWebResult](fIND_USER_PATH, "GET", functionToLaunch)
+	functionToLaunch := getHandler(http.MethodGet, call.AsBasicCall(getUserWithError), &domain.NilDataAccess{})
+	actual, response := callT[webResult.MessageWebResult](route.TEST, "GET", functionToLaunch)
 	// Then
 	assert.Equal(t, http.StatusInternalServerError, response.StatusCode)
 	assert.Contains(t, actual.Error, "Détail sur l'erreur")
 	assert.Contains(t, actual.Error, "Erreur SQL")
 	assert.Contains(t, actual.Error, "Problème lors du defer")
-	assert.Equal(t, fIND_USER_PATH, actual.Path)
+	assert.Equal(t, route.TEST, actual.Path)
 	assert.Equal(t, http.StatusInternalServerError, actual.StatusCode)
 }
 
@@ -167,12 +166,12 @@ func TestWrapQueryHandler_response_should_be_error_when_request_method_post(t *t
 	}
 
 	// When : quand je récupère la fonction à lancer en lui passant la fonction getUser() et que je l'exécute
-	functionToLaunch := wrapHandler(http.MethodGet, call.Get(getUser), nil)
-	actual, response := callT[webResult.MessageWebResult](fIND_USER_PATH, "POST", functionToLaunch)
+	functionToLaunch := getHandler(http.MethodGet, call.AsBasicCall(getUser), &domain.NilDataAccess{})
+	actual, response := callT[webResult.MessageWebResult](route.TEST, "POST", functionToLaunch)
 
 	// Then : il faut que le corps de la réponse contienne l'utilisateur jules
 	assert.Equal(t, http.StatusMethodNotAllowed, response.StatusCode)
 	assert.Equal(t, METHOD_IS_NOT_ALLOWED, actual.Error)
-	assert.Equal(t, fIND_USER_PATH, actual.Path)
+	assert.Equal(t, route.TEST, actual.Path)
 	assert.Equal(t, http.StatusMethodNotAllowed, actual.StatusCode)
 }
