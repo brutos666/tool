@@ -16,14 +16,17 @@ import (
 
 func main() {
 	config.InitConfig()
+
 	initDataService := application.DataInitService(bdd.DataInitRepository())
-	err := initDataService.Init(context.Background(), new(bddAccess.Writer))
+	err := initDataService.Init(context.Background(), bddAccess.AsWrite().GetInstance())
 	if err != nil {
 		panic(err)
 	}
+
 	if config.IsDev() {
 		httpServer.ServeLocalFrontEnd()
 	}
+
 	httpServer.ServerStart()
 	go httpServer.StopServerOnSignal()
 
@@ -36,14 +39,14 @@ func main() {
 	// Routes : les transformations des paramètres des requêtes et du retour sont faites dans la partie interface
 	handler.Verify(route.START)
 	handler.Stop(route.STOP)
-	handler.HandlePostRoute(route.ITEM_SAVE, call.AsCallWithParam(spaceCommandService.Save), &bddAccess.Writer{})
-	handler.HandleGetRoute(route.ITEM_FIND_ALL, call.AsBasicCall(spaceQueryService.FindAll), &bddAccess.Reader{})
+	handler.HandlePostRoute(route.ITEM_SAVE, call.AsCallWithParam(spaceCommandService.Save), bddAccess.AsWrite())
+	handler.HandleGetRoute(route.ITEM_FIND_ALL, call.AsBasicCall(spaceQueryService.FindAll), bddAccess.AsRead())
 
-	handler.HandlePostRoute(route.REFRESH, call.AsRefreshCall(userCommandService.Refresh), &bddAccess.Writer{})
-	handler.HandlePostRoute(route.SIGNUP, call.AsLoginCall(userCommandService.Signup), &bddAccess.Writer{})
-	handler.HandlePostRoute(route.LOGIN, call.AsLoginCall(userCommandService.Login), &bddAccess.Writer{})
+	handler.HandlePostRoute(route.REFRESH, call.AsRefreshCall(userCommandService.Refresh), bddAccess.AsWrite())
+	handler.HandlePostRoute(route.SIGNUP, call.AsLoginCall(userCommandService.Signup), bddAccess.AsWrite())
+	handler.HandlePostRoute(route.LOGIN, call.AsLoginCall(userCommandService.Login), bddAccess.AsWrite())
 
-	handler.HandleGetRoute(route.USER_FIND_ALL, call.AsBasicCall(userQueryService.FindAll), &bddAccess.Reader{})
+	handler.HandleGetRoute(route.USER_FIND_ALL, call.AsBasicCall(userQueryService.FindAll), bddAccess.AsRead())
 
 	httpServer.ServerWait()
 	log.Println("Le programme s'est arrêté")

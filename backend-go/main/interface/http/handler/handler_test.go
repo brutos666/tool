@@ -6,7 +6,9 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"sync"
 	"testing"
+	"time"
 
 	"goTool/domain"
 	"goTool/interface/http/handler/call"
@@ -18,22 +20,47 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const DATA_ACCESS_ERROR = "La connection ne devrait pas être déjà ouverte"
+
 type Person struct {
 	Name string `json:"name"`
 	Age  uint   `json:"age"`
 }
 
-func createPerson(name string, age uint) *Person {
-	person := new(Person)
-	person.Name = name
-	person.Age = age
-	return person
+func createPerson(name string, age uint) *Person { return &Person{Name: name, Age: age} }
+
+type fakeDataAccessProvider struct{}
+
+func (access *fakeDataAccessProvider) GetInstance() domain.DataAccess { return new(fakeDataBase) }
+
+type fakeDataBase struct {
+	connectionOpened bool
+	commit           bool
+	rollback         bool
 }
 
-/** Cette fonction effectue l'appel d'un handler en retournant la réponse et le contenu du body
- * OBJ est le type de structure retourné dans le body
- */
-func callT[OBJ any](path string, method string, callback func(http.ResponseWriter, *http.Request)) (actual *OBJ, response *http.Response) {
+func (f *fakeDataBase) Start() error {
+	// Faire planter le test si l'accès à la base de données est déjà utilisé
+	if f.connectionOpened {
+		return errors.New(DATA_ACCESS_ERROR)
+	}
+	f.connectionOpened = true
+	return nil
+}
+
+func (f *fakeDataBase) Stop() error {
+	f.connectionOpened = false
+	f.commit = true
+	return nil
+}
+
+func (f *fakeDataBase) Cancel() error {
+	f.rollback = true
+	return nil
+}
+
+// callHandler : appel d'une fonction type handler puis retourne le contenu du body de la réponse, R est le type de l'objet retourné dans la réponse
+func callHandler[R any](path string, method string, callback func(http.ResponseWriter, *http.Request)) (actual *R, response *http.Response) {
 	responseWriter := httptest.NewRecorder()
 	request := httptest.NewRequest(method, path, nil)
 	callback(responseWriter, request)
@@ -50,15 +77,15 @@ func callT[OBJ any](path string, method string, callback func(http.ResponseWrite
  *   AND : j'appelle cette fonction qui doit mettre à jour la réponse
  *  THEN : la réponse doit contenir l'utilisateur retourné par la fonction getUser()
  */
-func TestWrapQueryHandler_response_should_be_user_when_function_return_person(t *testing.T) {
+func TestGetHandler_response_should_be_user_when_function_return_person(t *testing.T) {
 	// Given
 	jules := createPerson("Jules", 34)
-	getUser := func(ctx context.Context, notUsed domain.DataAccess) (*Person, error) {
+	getUser := func(ctx context.Context) (*Person, error) {
 		return jules, nil
 	}
 	// When
-	functionToLaunch := getHandler(http.MethodGet, call.AsBasicCall(getUser), &domain.NilDataAccess{})
-	actual, response := callT[Person](route.TEST, "GET", functionToLaunch)
+	functionToLaunch := getHandler(http.MethodGet, call.AsContextCall(getUser), &domain.NilDataAccessProvider{})
+	actual, response := callHandler[Person](route.TEST, http.MethodGet, functionToLaunch)
 	// Then
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 	assert.Equal(t, jules, actual)
@@ -72,15 +99,15 @@ func TestWrapQueryHandler_response_should_be_user_when_function_return_person(t 
  *   AND : j'exécute cette fonction qui doit mettre à jour la réponse
  *  THEN : la réponse doit contenir l'erreur
  */
-func TestWrapQueryHandler_response_should_be_error_when_function_return_error(t *testing.T) {
+func TestGetHandler_response_should_be_error_when_function_return_error(t *testing.T) {
 	// Given
 	err := errors.New("Utilisateur introuvable")
-	getUserWithError := func(ctx context.Context, notUsed domain.DataAccess) (*Person, error) {
+	getUserWithError := func(ctx context.Context) (*Person, error) {
 		return nil, err
 	}
 	// When
-	functionToLaunch := getHandler(http.MethodGet, call.AsBasicCall(getUserWithError), &domain.NilDataAccess{})
-	actual, response := callT[webResult.MessageWebResult](route.TEST, "GET", functionToLaunch)
+	functionToLaunch := getHandler(http.MethodGet, call.AsContextCall(getUserWithError), &domain.NilDataAccessProvider{})
+	actual, response := callHandler[webResult.MessageWebResult](route.TEST, http.MethodGet, functionToLaunch)
 	// Then
 	assert.Equal(t, http.StatusInternalServerError, response.StatusCode)
 	assert.Equal(t, "Utilisateur introuvable", actual.Error)
@@ -96,18 +123,18 @@ func TestWrapQueryHandler_response_should_be_error_when_function_return_error(t 
  *   AND : j'exécute cette fonction qui doit mettre à jour la réponse
  *  THEN : la réponse doit contenir l'erreur détaillée
  */
-func TestWrapQueryHandler_response_should_be_error_when_function_return_pq_error(t *testing.T) {
+func TestGetHandler_response_should_be_error_when_function_return_pq_error(t *testing.T) {
 	// Given
 	pqErr := new(pq.Error)
 	pqErr.Detail = "Détail sur l'erreur"
 	pqErr.Message = "Erreur SQL"
 
-	getUserWithError := func(ctx context.Context, notUsed domain.DataAccess) (*Person, error) {
+	getUserWithError := func(ctx context.Context) (*Person, error) {
 		return nil, pqErr
 	}
 	// When
-	functionToLaunch := getHandler(http.MethodGet, call.AsBasicCall(getUserWithError), &domain.NilDataAccess{})
-	actual, response := callT[webResult.MessageWebResult](route.TEST, "GET", functionToLaunch)
+	functionToLaunch := getHandler(http.MethodGet, call.AsContextCall(getUserWithError), &domain.NilDataAccessProvider{})
+	actual, response := callHandler[webResult.MessageWebResult](route.TEST, http.MethodGet, functionToLaunch)
 	// Then
 	assert.Equal(t, http.StatusInternalServerError, response.StatusCode)
 	assert.Contains(t, actual.Error, "Détail sur l'erreur")
@@ -124,10 +151,10 @@ func TestWrapQueryHandler_response_should_be_error_when_function_return_pq_error
  *   AND : j'exécute cette fonction qui doit mettre à jour la réponse
  *  THEN : la réponse doit contenir les erreurs
  */
-func TestWrapQueryHandler_response_should_be_error_when_function_return_join_error(t *testing.T) {
+func TestGetHandler_response_should_be_error_when_function_return_join_error(t *testing.T) {
 	// Given
 
-	getUserWithError := func(ctx context.Context, notUsed domain.DataAccess) (person *Person, err error) {
+	getUserWithError := func(ctx context.Context) (person *Person, err error) {
 		defer func() {
 			deferErr := errors.New("Problème lors du defer")
 			err = utilities.JoinErrors(err, deferErr)
@@ -139,8 +166,8 @@ func TestWrapQueryHandler_response_should_be_error_when_function_return_join_err
 		return nil, err
 	}
 	// When
-	functionToLaunch := getHandler(http.MethodGet, call.AsBasicCall(getUserWithError), &domain.NilDataAccess{})
-	actual, response := callT[webResult.MessageWebResult](route.TEST, "GET", functionToLaunch)
+	functionToLaunch := getHandler(http.MethodGet, call.AsContextCall(getUserWithError), &domain.NilDataAccessProvider{})
+	actual, response := callHandler[webResult.MessageWebResult](route.TEST, http.MethodGet, functionToLaunch)
 	// Then
 	assert.Equal(t, http.StatusInternalServerError, response.StatusCode)
 	assert.Contains(t, actual.Error, "Détail sur l'erreur")
@@ -159,16 +186,16 @@ func TestWrapQueryHandler_response_should_be_error_when_function_return_join_err
  *   AND : j'appelle cette fonction pour la requête POST
  *  THEN : la réponse doit contenir une erreur
  */
-func TestWrapQueryHandler_response_should_be_error_when_request_method_post(t *testing.T) {
+func TestGetHandler_response_should_be_error_when_request_method_post(t *testing.T) {
 	// Given
 	jules := createPerson("Jules", 34)
-	getUser := func(ctx context.Context, notUsed domain.DataAccess) (*Person, error) {
+	getUser := func(ctx context.Context) (*Person, error) {
 		return jules, nil
 	}
 
 	// When : quand je récupère la fonction à lancer en lui passant la fonction getUser() et que je l'exécute
-	functionToLaunch := getHandler(http.MethodGet, call.AsBasicCall(getUser), &domain.NilDataAccess{})
-	actual, response := callT[webResult.MessageWebResult](route.TEST, "POST", functionToLaunch)
+	functionToLaunch := getHandler(http.MethodGet, call.AsContextCall(getUser), &domain.NilDataAccessProvider{})
+	actual, response := callHandler[webResult.MessageWebResult](route.TEST, http.MethodPost, functionToLaunch)
 
 	// Then : il faut que le corps de la réponse contienne l'utilisateur jules
 	assert.Equal(t, http.StatusMethodNotAllowed, response.StatusCode)
@@ -176,3 +203,32 @@ func TestWrapQueryHandler_response_should_be_error_when_request_method_post(t *t
 	assert.Equal(t, route.TEST, actual.Path)
 	assert.Equal(t, http.StatusMethodNotAllowed, actual.StatusCode)
 }
+
+func TestGetHandler_no_error_when_two_request_at_same_time(t *testing.T) {
+	// Given
+	jules := createPerson("Jules", 34)
+	getUser := func(ctx context.Context, notUsed domain.DataAccess) (*Person, error) {
+		time.Sleep(time.Duration(200) * time.Millisecond)
+		return jules, nil
+	}
+	functionToLaunch := getHandler(http.MethodGet, call.AsBasicCall(getUser), &fakeDataAccessProvider{})
+	// When
+	var err1, err2 string
+	var group sync.WaitGroup
+	group.Add(2)
+	go func() {
+		defer group.Done()
+		actual, _ := callHandler[webResult.MessageWebResult](route.TEST, http.MethodGet, functionToLaunch)
+		err1 = actual.Error
+	}()
+	go func() {
+		defer group.Done()
+		actual, _ := callHandler[webResult.MessageWebResult](route.TEST, http.MethodGet, functionToLaunch)
+		err2 = actual.Error
+	}()
+	group.Wait()
+	assert.Empty(t, err1)
+	assert.Empty(t, err2)
+}
+
+// TODO : Tests avec authentification + utiliser le package gotest

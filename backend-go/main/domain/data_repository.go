@@ -5,15 +5,15 @@ import "context"
 type DataInitRepository interface {
 	Init(ctx context.Context, dataAccess DataAccess) error
 }
-
+type DataAccessProvider interface {
+	GetInstance() DataAccess
+}
 type DataAccess interface {
 	Start() error
 	Stop() error
 	Cancel() error
 }
 
-type NilDataAccess struct{}
+type NilDataAccessProvider struct{}
 
-func (access *NilDataAccess) Start() error  { return nil }
-func (access *NilDataAccess) Stop() error   { return nil }
-func (access *NilDataAccess) Cancel() error { return nil }
+func (access *NilDataAccessProvider) GetInstance() DataAccess { return nil }

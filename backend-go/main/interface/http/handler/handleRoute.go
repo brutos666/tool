@@ -17,16 +17,16 @@ import (
 	"goTool/interface/webResult"
 )
 
-func HandleGetRoute(requestPath string, toCall call.WrappedCall, dataAccess domain.DataAccess) {
-	http.HandleFunc(requestPath, getHandler(http.MethodGet, toCall, dataAccess))
+func HandleGetRoute(requestPath string, toCall call.WrappedCall, dataAccessProvider domain.DataAccessProvider) {
+	http.HandleFunc(requestPath, getHandler(http.MethodGet, toCall, dataAccessProvider))
 }
 
-func HandlePostRoute(requestPath string, toCall call.WrappedCall, dataAccess domain.DataAccess) {
-	http.HandleFunc(requestPath, getHandler(http.MethodPost, toCall, dataAccess))
+func HandlePostRoute(requestPath string, toCall call.WrappedCall, dataAccessProvider domain.DataAccessProvider) {
+	http.HandleFunc(requestPath, getHandler(http.MethodPost, toCall, dataAccessProvider))
 }
 
 // getHandler construit la fonction contenant les appels aux middlewares, ainsi que l'appel du service
-func getHandler(method string, toCall call.WrappedCall, dataAccess domain.DataAccess) func(response http.ResponseWriter, request *http.Request) {
+func getHandler(method string, toCall call.WrappedCall, dataAccessProvider domain.DataAccessProvider) func(response http.ResponseWriter, request *http.Request) {
 	return func(response http.ResponseWriter, request *http.Request) {
 		requestPath := request.URL.Path
 		requestMethod := request.Method
@@ -38,8 +38,8 @@ func getHandler(method string, toCall call.WrappedCall, dataAccess domain.DataAc
 			sendHttpError(response, requestPath, *httpError)
 			return
 		}
-		// FIXME l'instance d'accès à la base de données est la même quelque pour toutes les requêtes.
-		// TODO : faire des tests unitaire pour faire planter puis corriger
+
+		dataAccess := dataAccessProvider.GetInstance()
 
 		switch requestMethod {
 		case http.MethodPost:

@@ -4,7 +4,27 @@ import (
 	"database/server/connection"
 
 	"goTool/config"
+	"goTool/domain"
 )
+
+type Service struct {
+	accessForRead bool
+}
+
+func (service Service) GetInstance() domain.DataAccess {
+	if service.accessForRead {
+		return new(Reader)
+	}
+	return new(Writer)
+}
+
+func AsRead() Service {
+	return Service{accessForRead: true}
+}
+
+func AsWrite() Service {
+	return Service{accessForRead: false}
+}
 
 type Access interface {
 	GetConnection() connection.Connection

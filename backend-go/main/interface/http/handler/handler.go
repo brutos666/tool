@@ -23,18 +23,18 @@ const (
 )
 
 func Verify(requestPath string) {
-	startApp := func(ctx context.Context, notUsed domain.DataAccess) (*httpMessage.Message, error) {
+	startApp := func(ctx context.Context) (*httpMessage.Message, error) {
 		message := httpMessage.NewMessage(SERVER_STARTED, http.StatusOK)
 		return message, nil
 	}
-	http.HandleFunc(requestPath, getHandler(http.MethodGet, call.AsBasicCall(startApp), &domain.NilDataAccess{}))
+	http.HandleFunc(requestPath, getHandler(http.MethodGet, call.AsContextCall(startApp), &domain.NilDataAccessProvider{}))
 }
 
 func Stop(requestPath string) {
-	stopApp := func(ctx context.Context, notUsed domain.DataAccess) (*httpMessage.Message, error) {
+	stopApp := func(ctx context.Context) (*httpMessage.Message, error) {
 		message := httpMessage.NewMessage(SERVER_ABOUT_TO_STOP, http.StatusOK)
 		httpServer.ServerStop()
 		return message, nil
 	}
-	http.HandleFunc(requestPath, getHandler(http.MethodGet, call.AsBasicCall(stopApp), &domain.NilDataAccess{}))
+	http.HandleFunc(requestPath, getHandler(http.MethodGet, call.AsContextCall(stopApp), &domain.NilDataAccessProvider{}))
 }

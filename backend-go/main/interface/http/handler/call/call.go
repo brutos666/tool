@@ -16,12 +16,21 @@ import (
 var validate = validator.New()
 
 type (
+	OnlyContextCall[R any]  func(context context.Context) (R, error)
 	BasicCall[R any]        func(context context.Context, dataAccess domain.DataAccess) (R, error)
 	CallWithParam[P, R any] func(context context.Context, dataAccess domain.DataAccess, parameter P) (R, error)
 	LoginCall[P, R any]     func(context context.Context, dataAccess domain.DataAccess, tokenGeneration domain.Tokens, parameter P) (R, error)
 	RefreshCall             func(context context.Context, dataAccess domain.DataAccess, tokenGeneration domain.Tokens, user domain.ConnectedUser) (*domain.LoggedUser, error)
 	WrappedCall             func(context context.Context, callContext CallContext, request *http.Request) (values any, err error)
 )
+
+// AsContextCall englobe l'appel à la fonction dans un appel plus générique
+func AsContextCall[R any](callback OnlyContextCall[R]) WrappedCall {
+	wrappedCall := func(ctx context.Context, callContext CallContext, request *http.Request) (any, error) {
+		return callback(ctx)
+	}
+	return wrappedCall
+}
 
 // AsBasicCall englobe dans des fonctions imbriqués l'appel à la fonction ainsi que le démarrage et l'arrêt de l'accès aux données
 func AsBasicCall[R any](callback BasicCall[R]) WrappedCall {
