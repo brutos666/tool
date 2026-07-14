@@ -4,11 +4,11 @@ package call
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"net/http"
 
 	"goTool/domain"
 	"goTool/interface/webResult"
+	"goTool/utilities"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -72,11 +72,11 @@ func wrapWithDataAccess(wrappedCall WrappedCall) WrappedCall {
 		}
 		defer func() {
 			if err != nil {
-				err = errors.Join(err, dataAccess.Cancel())
+				err = utilities.JoinErrors(err, dataAccess.Cancel())
 			}
 		}()
 		defer func() {
-			err = errors.Join(err, dataAccess.Stop())
+			err = utilities.JoinErrors(err, dataAccess.Stop())
 		}()
 		values, err = wrappedCall(ctx, callContext, request)
 		return

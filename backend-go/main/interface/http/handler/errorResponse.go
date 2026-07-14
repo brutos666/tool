@@ -5,17 +5,15 @@ import (
 	"errors"
 	"log"
 	"net/http"
-	"strings"
 
 	"goTool/domain/domainMessage"
 	"goTool/interface/http/httpMessage"
 	"goTool/interface/webResult"
-
-	"github.com/lib/pq"
+	"goTool/utilities"
 )
 
 func sendError(response http.ResponseWriter, requestPath string, err error) {
-	message := getDetailError(err)
+	message := utilities.GetError(err)
 	messageWebResult := webResult.CreateMessageWebResult(requestPath, GetHttpStatusError(err), message)
 	sendMessageInResponse(response, *messageWebResult)
 	log.Println("Erreur requête", requestPath, ":", message)
@@ -45,30 +43,4 @@ func GetHttpStatusError(err error) int {
 		return message.GetHttpStatusCode()
 	}
 	return http.StatusInternalServerError
-}
-
-func getDetailError(err error) string {
-	// Le projet utilise la fonction errors.Join. Il faut donc traiter chaque erreur pour afficher le détail
-	switch x := err.(type) {
-	case interface{ Unwrap() []error }:
-		var b strings.Builder
-		errorList := x.Unwrap()
-		for index, unwrapErr := range errorList {
-			_, _ = b.WriteString(getDetailError(unwrapErr))
-			if index < len(errorList)-1 {
-				_, _ = b.WriteRune('\n')
-			}
-		}
-		return b.String()
-	}
-
-	return getError(err)
-}
-
-func getError(err error) string {
-	pqErr, ok := errors.AsType[*pq.Error](err)
-	if ok {
-		return pqErr.ErrorWithDetail()
-	}
-	return err.Error()
 }

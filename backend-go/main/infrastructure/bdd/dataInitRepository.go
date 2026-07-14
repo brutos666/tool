@@ -4,12 +4,12 @@ import (
 	"context"
 	"database/server/connection"
 	"database/server/requestSQL"
-	"errors"
 	"log"
 
 	"goTool/config"
 	"goTool/domain"
 	"goTool/infrastructure/bddAccess"
+	"goTool/utilities"
 )
 
 type dataInitRepository struct{}
@@ -33,11 +33,11 @@ func (repo *dataInitRepository) Init(ctx context.Context, dataAccess domain.Data
 	}
 	defer func() {
 		if err != nil {
-			err = errors.Join(err, dataAccess.Cancel())
+			err = utilities.JoinErrors(err, dataAccess.Cancel())
 		}
 	}()
 	defer func() {
-		err = errors.Join(err, dataAccess.Stop())
+		err = utilities.JoinErrors(err, dataAccess.Stop())
 	}()
 
 	err = doLaunchScript(ctx, dataAccess.(bddAccess.Access).GetConnection(), config.GetSchemaPath())

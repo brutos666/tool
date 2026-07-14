@@ -12,6 +12,7 @@ import (
 	"goTool/interface/http/handler/call"
 	"goTool/interface/http/handler/route"
 	"goTool/interface/webResult"
+	"goTool/utilities"
 
 	"github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
@@ -129,7 +130,7 @@ func TestWrapQueryHandler_response_should_be_error_when_function_return_join_err
 	getUserWithError := func(ctx context.Context, notUsed domain.DataAccess) (person *Person, err error) {
 		defer func() {
 			deferErr := errors.New("Problème lors du defer")
-			err = errors.Join(err, deferErr)
+			err = utilities.JoinErrors(err, deferErr)
 		}()
 		pqErr := new(pq.Error)
 		pqErr.Detail = "Détail sur l'erreur"
