@@ -1,8 +1,10 @@
+// Package call construit une fonction qui s'occupe de l'appel à une fonction en lui passant les paramètres dont elle a besoin selon son type, du démarrage et de l'arrêt du système d'accès aux données
 package call
 
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"goTool/domain"
@@ -13,147 +15,72 @@ import (
 
 var validate = validator.New()
 
-const (
-	INCORRECT_FUNCTION   string = "La méthode est incorrecte. Elle doit avec le contexte en 1er paramètre suivi éventuellement de l'utilisateur connecté et/ou d'un paramètre"
-	WITH_ONLY_RESULT     int    = 0
-	WITH_USER            int    = 1
-	WITH_PARAM           int    = 2
-	WITH_USER_WITH_PARAM int    = 3
-	WITH_USER_TO_LOG     int    = 4
-)
-
-type Callback interface {
-	call(args ...any) (any, error)
-	getType() int
-	getParameterInstance() any
-}
-
-type Call[R any] struct {
-	Callback func(context.Context, domain.DataAccess) (R, error)
-}
-
-func (call Call[R]) call(args ...any) (any, error) {
-	return call.Callback(args[0].(context.Context), args[1].(domain.DataAccess))
-}
-func (call Call[R]) getType() int              { return WITH_ONLY_RESULT }
-func (call Call[R]) getParameterInstance() any { return nil }
-
-type CallUser[R any] struct {
-	Callback func(context.Context, domain.DataAccess, domain.ConnectedUser) (R, error)
-}
-
-func (call CallUser[R]) call(args ...any) (any, error) {
-	return call.Callback(args[0].(context.Context), args[1].(domain.DataAccess), args[2].(domain.ConnectedUser))
-}
-func (call CallUser[R]) getType() int              { return WITH_USER }
-func (call CallUser[R]) getParameterInstance() any { return nil }
-
-type CallUserParam[P, R any] struct {
-	Callback          func(context.Context, domain.DataAccess, domain.ConnectedUser, P) (R, error)
-	parameterInstance any
-}
-
-func (call CallUserParam[P, R]) call(args ...any) (any, error) {
-	return call.Callback(args[0].(context.Context), args[1].(domain.DataAccess), args[2].(domain.ConnectedUser), args[3].(P))
-}
-func (call CallUserParam[P, R]) getType() int              { return WITH_USER_WITH_PARAM }
-func (call CallUserParam[P, R]) getParameterInstance() any { return call.parameterInstance }
-
-// CallParam Pour les requêtes http fournissant un paramètre en entrée, dont le traitement n'a pas besoin de connaître l'utilisateur connecté
-type CallParam[P, R any] struct {
-	Callback          func(context.Context, domain.DataAccess, P) (R, error)
-	parameterInstance any
-}
-
-func (call CallParam[P, R]) call(args ...any) (any, error) {
-	return call.Callback(args[0].(context.Context), args[1].(domain.DataAccess), args[2].(P))
-}
-func (call CallParam[P, R]) getType() int              { return WITH_PARAM }
-func (call CallParam[P, R]) getParameterInstance() any { return call.parameterInstance }
-
-// CallUserToLog Pour les requêtes http fournissant un paramètre en entrée, dont le traitement doit connecté l'utilisateur
-type CallUserToLog[P any] struct {
-	Callback          func(context.Context, domain.DataAccess, domain.Tokens, P) (*domain.LoggedUser, error)
-	parameterInstance any
-}
-
-func (call CallUserToLog[P]) call(args ...any) (*domain.LoggedUser, error) {
-	return call.Callback(args[0].(context.Context), args[1].(domain.DataAccess), args[2].(domain.Tokens), args[3].(P))
-}
-func (call CallUserToLog[P]) getParameterInstance() any { return call.parameterInstance }
-
-// Get - Appel qui retourne un résultat et une erreur
-func Get[R any](callback func(context.Context, domain.DataAccess) (R, error)) Call[R] {
-	return Call[R]{Callback: callback}
-}
-
-// WithUser - Appel avec l'utilisateur connecté qui retourne un résultat et une erreur
-func WithUser[R any](callback func(context.Context, domain.DataAccess, domain.ConnectedUser) (R, error)) CallUser[R] {
-	return CallUser[R]{Callback: callback}
-}
-
-// WithUserWithParam - Appel avec un paramètre en entrée et l'utilisateur connecté qui retourne un résultat et une erreur
-func WithUserWithParam[P, R any](callback func(context.Context, domain.DataAccess, domain.ConnectedUser, P) (R, error)) CallUserParam[P, R] {
-	return CallUserParam[P, R]{Callback: callback, parameterInstance: *new(P)}
-}
-
-// WithParam - Appel avec un paramètre en entrée qui retourne un résultat et une erreur
-func WithParam[P, R any](callback func(context.Context, domain.DataAccess, P) (R, error)) CallParam[P, R] {
-	return CallParam[P, R]{Callback: callback, parameterInstance: *new(P)}
-}
-
-func WithUserToLog[P any](callback func(context.Context, domain.DataAccess, domain.Tokens, P) (*domain.LoggedUser, error)) CallUserToLog[P] {
-	return CallUserToLog[P]{Callback: callback, parameterInstance: *new(P)}
-}
-
 type (
-	WrappedCall func(ctx context.Context, dataAccess domain.DataAccess, user *domain.ConnectedUser, request *http.Request) (any, error)
+	BasicCall[R any]        func(context context.Context, dataAccess domain.DataAccess) (R, error)
+	CallWithParam[P, R any] func(context context.Context, dataAccess domain.DataAccess, parameter P) (R, error)
+	LoginCall[P, R any]     func(context context.Context, dataAccess domain.DataAccess, tokenGeneration domain.Tokens, parameter P) (R, error)
+	RefreshCall             func(context context.Context, dataAccess domain.DataAccess, tokenGeneration domain.Tokens, user domain.ConnectedUser) (*domain.LoggedUser, error)
+	WrappedCall             func(context context.Context, callContext CallContext, request *http.Request) (values any, err error)
 )
 
-func WrapCallback(callback Callback) WrappedCall {
-	switch callback.getType() {
-	case WITH_ONLY_RESULT:
-		return func(ctx context.Context, dataAccess domain.DataAccess, user *domain.ConnectedUser, request *http.Request) (any, error) {
-			return callback.call(ctx, dataAccess)
-		}
-	case WITH_USER:
-		return func(ctx context.Context, dataAccess domain.DataAccess, user *domain.ConnectedUser, request *http.Request) (any, error) {
-			return callback.call(ctx, dataAccess, *user)
-		}
-	case WITH_PARAM:
-		return func(ctx context.Context, dataAccess domain.DataAccess, user *domain.ConnectedUser, request *http.Request) (any, error) {
-			parameterType := callback.getParameterInstance()
-			parameter, err := readRequestParameter(request, parameterType)
-			if err != nil {
-				return nil, err
-			}
-			return callback.call(ctx, dataAccess, parameter)
-		}
-	case WITH_USER_WITH_PARAM:
-		return func(ctx context.Context, dataAccess domain.DataAccess, user *domain.ConnectedUser, request *http.Request) (any, error) {
-			parameterType := callback.getParameterInstance()
-			parameter, err := readRequestParameter(request, parameterType)
-			if err != nil {
-				return nil, err
-			}
-			return callback.call(ctx, dataAccess, *user, parameter)
-		}
-	default:
-		panic(INCORRECT_FUNCTION)
+// AsBasicCall englobe dans des fonctions imbriqués l'appel à la fonction ainsi que le démarrage et l'arrêt de l'accès aux données
+func AsBasicCall[R any](callback BasicCall[R]) WrappedCall {
+	wrappedCall := func(ctx context.Context, callContext CallContext, request *http.Request) (any, error) {
+		return callback(ctx, callContext.dataAccess)
 	}
+	return wrapWithDataAccess(wrappedCall)
 }
 
-func CallLoginCallback[P any](ctx context.Context, dataAccess domain.DataAccess, tokenGenerator domain.Tokens, request *http.Request, callback CallUserToLog[P]) (*domain.LoggedUser, error) {
-	parameterType := callback.getParameterInstance()
-	parameter, err := readRequestParameter(request, parameterType)
-	if err != nil {
-		return nil, err
+// AsCallWithParam englobe dans des fonctions imbriqués l'appel à la fonction avec passage du paramètre de la requête ainsi que le démarrage et l'arrêt de l'accès aux données
+func AsCallWithParam[P, R any](callback CallWithParam[P, R]) WrappedCall {
+	wrappedCall := func(ctx context.Context, callContext CallContext, request *http.Request) (any, error) {
+		parameterType := *new(P)
+		parameter, err := readRequestParameter(request, parameterType)
+		if err != nil {
+			return nil, err
+		}
+		return callback(ctx, callContext.dataAccess, parameter.(P))
 	}
-	return callback.call(ctx, dataAccess, tokenGenerator, parameter)
+	return wrapWithDataAccess(wrappedCall)
 }
 
-func CallRefreshCallback[P any](ctx context.Context, dataAccess domain.DataAccess, tokenGenerator domain.Tokens, connectedUser domain.ConnectedUser, callback CallUserToLog[P]) (*domain.LoggedUser, error) {
-	return callback.call(ctx, dataAccess, tokenGenerator, connectedUser)
+func AsLoginCall[P, R any](callback LoginCall[P, R]) WrappedCall {
+	wrappedCall := func(ctx context.Context, callContext CallContext, request *http.Request) (any, error) {
+		parameterType := *new(P)
+		parameter, err := readRequestParameter(request, parameterType)
+		if err != nil {
+			return nil, err
+		}
+		return callback(ctx, callContext.dataAccess, callContext.tokenGeneration, parameter.(P))
+	}
+	return wrapWithDataAccess(wrappedCall)
+}
+
+func AsRefreshCall(callback RefreshCall) WrappedCall {
+	wrappedCall := func(ctx context.Context, callContext CallContext, request *http.Request) (any, error) {
+		return callback(ctx, callContext.dataAccess, callContext.tokenGeneration, *callContext.user)
+	}
+	return wrapWithDataAccess(wrappedCall)
+}
+
+func wrapWithDataAccess(wrappedCall WrappedCall) WrappedCall {
+	return func(ctx context.Context, callContext CallContext, request *http.Request) (values any, err error) {
+		dataAccess := callContext.dataAccess
+		err = dataAccess.Start()
+		if err != nil {
+			return nil, err
+		}
+		defer func() {
+			if err != nil {
+				err = errors.Join(err, dataAccess.Cancel())
+			}
+		}()
+		defer func() {
+			err = errors.Join(err, dataAccess.Stop())
+		}()
+		values, err = wrappedCall(ctx, callContext, request)
+		return
+	}
 }
 
 func readRequestParameter(request *http.Request, parameter any) (any, error) {

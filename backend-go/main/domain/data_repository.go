@@ -11,3 +11,9 @@ type DataAccess interface {
 	Stop() error
 	Cancel() error
 }
+
+type NilDataAccess struct{}
+
+func (access *NilDataAccess) Start() error  { return nil }
+func (access *NilDataAccess) Stop() error   { return nil }
+func (access *NilDataAccess) Cancel() error { return nil }

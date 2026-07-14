@@ -3,7 +3,6 @@ package domain
 type Tokens interface {
 	SetUser(User)
 	Generate() (string, string)
-	GetAccessToken() string
 }
 
 type User struct {

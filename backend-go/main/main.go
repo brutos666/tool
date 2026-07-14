@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"log"
-	"net/http"
 
 	"goTool/application"
 	"goTool/config"
@@ -34,15 +33,17 @@ func main() {
 	userCommandService := application.UserCommandService(bdd.UserCommandRepository())
 	userQueryService := application.UserQueryService(bdd.UserQueryRepository())
 
-	// Routes : les transformations des paramètres des requêtes et du retour sont faites dans le package
+	// Routes : les transformations des paramètres des requêtes et du retour sont faites dans la partie interface
 	handler.Verify(route.START)
 	handler.Stop(route.STOP)
-	handler.HandleRoute(route.ITEM_FIND_ALL, http.MethodGet, call.Get(spaceQueryService.FindAll), new(bddAccess.Reader))
-	handler.HandleRoute(route.ITEM_SAVE, http.MethodPost, call.WithParam(spaceCommandService.Save), new(bddAccess.Writer))
-	handler.HandleLoginRoute(route.REFRESH, call.WithUserToLog(userCommandService.Refresh), new(bddAccess.Writer))
-	handler.HandleLoginRoute(route.SIGNUP, call.WithUserToLog(userCommandService.Signup), new(bddAccess.Writer))
-	handler.HandleLoginRoute(route.LOGIN, call.WithUserToLog(userCommandService.Login), new(bddAccess.Writer))
-	handler.HandleRoute(route.USER_FIND_ALL, http.MethodGet, call.Get(userQueryService.FindAll), new(bddAccess.Reader))
+	handler.HandlePostRoute(route.ITEM_SAVE, call.AsCallWithParam(spaceCommandService.Save), &bddAccess.Writer{})
+	handler.HandleGetRoute(route.ITEM_FIND_ALL, call.AsBasicCall(spaceQueryService.FindAll), &bddAccess.Reader{})
+
+	handler.HandlePostRoute(route.REFRESH, call.AsRefreshCall(userCommandService.Refresh), &bddAccess.Writer{})
+	handler.HandlePostRoute(route.SIGNUP, call.AsLoginCall(userCommandService.Signup), &bddAccess.Writer{})
+	handler.HandlePostRoute(route.LOGIN, call.AsLoginCall(userCommandService.Login), &bddAccess.Writer{})
+
+	handler.HandleGetRoute(route.USER_FIND_ALL, call.AsBasicCall(userQueryService.FindAll), &bddAccess.Reader{})
 
 	httpServer.ServerWait()
 	log.Println("Le programme s'est arrêté")

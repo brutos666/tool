@@ -27,7 +27,7 @@ func Verify(requestPath string) {
 		message := httpMessage.NewMessage(SERVER_STARTED, http.StatusOK)
 		return message, nil
 	}
-	http.HandleFunc(requestPath, wrapHandler(http.MethodGet, call.Get(startApp), nil))
+	http.HandleFunc(requestPath, getHandler(http.MethodGet, call.AsBasicCall(startApp), &domain.NilDataAccess{}))
 }
 
 func Stop(requestPath string) {
@@ -36,8 +36,5 @@ func Stop(requestPath string) {
 		httpServer.ServerStop()
 		return message, nil
 	}
-	http.HandleFunc(requestPath, wrapHandler(http.MethodGet, call.Get(stopApp), nil))
-}
-
-func HandleFiles() {
+	http.HandleFunc(requestPath, getHandler(http.MethodGet, call.AsBasicCall(stopApp), &domain.NilDataAccess{}))
 }
