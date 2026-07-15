@@ -33,6 +33,14 @@ func (user User) GetContext() string {
 	return "Identifiant=" + user.id + ", Nom=" + user.firstName + ", Prénom=" + user.lastName
 }
 
+func (user User) ConvertToConnectedUSer() *ConnectedUser {
+	connectedUser := new(ConnectedUser)
+	connectedUser.UserId = user.GetId()
+	connectedUser.Email = user.GetEmail()
+	connectedUser.Role = user.GetRole()
+	return connectedUser
+}
+
 type LoginUser struct {
 	email    string
 	password string
@@ -69,10 +77,10 @@ func (user *ConnectedUser) SetEmail(email string) { user.Email = email }
 func (user ConnectedUser) GetRole() string        { return user.Role }
 func (user *ConnectedUser) SetRole(role string)   { user.Role = role }
 
-func CreateConnectedUser(user User) *ConnectedUser {
+func CreateConnectedUser(id, email, role string) *ConnectedUser {
 	connectedUser := new(ConnectedUser)
-	connectedUser.UserId = user.GetId()
-	connectedUser.Email = user.GetEmail()
-	connectedUser.Role = user.GetRole()
+	connectedUser.UserId = id
+	connectedUser.Email = email
+	connectedUser.Role = role
 	return connectedUser
 }

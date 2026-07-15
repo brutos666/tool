@@ -20,7 +20,7 @@ type TokensGenerator struct {
 
 func (t *TokensGenerator) SetUser(user domain.User) { t.user = user }
 func (t *TokensGenerator) Generate() (accessToken string, refreshToken string) {
-	connectedUser := domain.CreateConnectedUser(t.user)
+	connectedUser := t.user.ConvertToConnectedUSer()
 	accessToken, refreshToken = tokens.Generate(connectedUser, config.GetSecretKey(), config.GetTokenDuration(), config.GetRefreshTokenDuration())
 	t.accessToken = accessToken
 	t.refreshToken = refreshToken
