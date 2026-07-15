@@ -30,7 +30,7 @@ func UserCommandService(repository domain.UserCommandRepository) UserCmdService 
 // Signup doit créer le compte et connecter l'utilisateur
 // Le service met à jour les jetons d'authentification dans les données (infrastructure)
 // Les jetons sont générés par l'interface via TokenGenerator : il faut lui fournir l'utilisateur créé
-func (commandService UserCmdService) Signup(ctx context.Context, dataAccess domain.DataAccess, tokenGenerator domain.Tokens, user *domain.User) (*domain.LoggedUser, error) {
+func (commandService UserCmdService) Signup(ctx context.Context, dataAccess domain.DataAccess, tokenGenerator domain.TokensProduct, user *domain.User) (*domain.LoggedUser, error) {
 	password := password.Hash(user.GetPassword())
 
 	alreadyExists, err := commandService.repository.CreateUserIfNotExists(ctx, dataAccess, user, password)
@@ -55,7 +55,7 @@ func (commandService UserCmdService) Signup(ctx context.Context, dataAccess doma
 // Le service doit vérifier si le mot de passe correspond à celui conservé dans les données (infrastructure)
 // Il met à jour les jetons d'authentification dans les données (infrastructure)
 // Les jetons sont générés par l'interface via TokenGenerator : il faut lui fournir l'utilisateur connecté
-func (commandService UserCmdService) Login(ctx context.Context, dataAccess domain.DataAccess, tokenGenerator domain.Tokens, logUser *domain.LoginUser) (*domain.LoggedUser, error) {
+func (commandService UserCmdService) Login(ctx context.Context, dataAccess domain.DataAccess, tokenGenerator domain.TokensProduct, logUser *domain.LoginUser) (*domain.LoggedUser, error) {
 	users, err := commandService.repository.GetUsersWithEmail(ctx, dataAccess, logUser.GetEmail())
 	if err != nil {
 		return nil, err
@@ -92,7 +92,7 @@ func (commandService UserCmdService) Login(ctx context.Context, dataAccess domai
 // Le service va juste vérifier si le compte utilisateur fourni existe toujours.
 // Il met à jour les jetons d'authentification dans les données (infrastructure)
 // Les jetons sont générés par l'interface via TokenGenerator : il faut donc lui fournir l'utilisateur
-func (commandService UserCmdService) Refresh(ctx context.Context, dataAccess domain.DataAccess, tokenGenerator domain.Tokens, connectedUser domain.ConnectedUser) (*domain.LoggedUser, error) {
+func (commandService UserCmdService) Refresh(ctx context.Context, dataAccess domain.DataAccess, tokenGenerator domain.TokensProduct, connectedUser domain.ConnectedUser) (*domain.LoggedUser, error) {
 	email := connectedUser.GetEmail()
 	// On vérifie si le compte utilisateur existe toujours
 	users, err := commandService.repository.GetUsersWithEmail(ctx, dataAccess, email)

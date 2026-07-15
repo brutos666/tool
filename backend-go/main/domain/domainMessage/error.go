@@ -5,9 +5,9 @@ type Error struct {
 	message *Message
 }
 
-func (error Error) AddContext(name, value string) {
-	error.message.AddContext(name, value)
-}
+func (error Error) AddContext(name, value string) { error.message.AddContext(name, value) }
+
+func (error Error) GetContext(value string) string { return error.message.GetContext(value) }
 
 func (error Error) Error() string {
 	return error.message.ToString()
@@ -21,6 +21,6 @@ func NewError(text string) *Error {
 }
 
 func Errorf(error string, args ...any) Error {
-	message := Messagef(error, args...)
+	message := MessagePrintf(error, args...)
 	return Error{message: &message}
 }

@@ -1,8 +1,11 @@
 package domain
 
-type Tokens interface {
+type TokensProduct interface {
 	SetUser(User)
 	Generate() (string, string)
+}
+type TokensCheck interface {
+	Validate(token string) (connectedUser *ConnectedUser, valid bool, expired bool)
 }
 
 type User struct {

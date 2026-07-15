@@ -32,7 +32,7 @@ func (repository *userCmdRepository) GetUsersWithEmail(ctx context.Context, data
 	return getUsersWithMail(ctx, dataAccess.(bddAccess.Access).GetConnection(), email)
 }
 
-func (repository *userCmdRepository) UpdateToken(ctx context.Context, dataAccess domain.DataAccess, userId string, tokenGenerator domain.Tokens) error {
+func (repository *userCmdRepository) UpdateToken(ctx context.Context, dataAccess domain.DataAccess, userId string, tokenGenerator domain.TokensProduct) error {
 	accessToken, refreshToken := tokenGenerator.Generate()
 	return doUpdateUser(ctx, dataAccess.(bddAccess.Access).GetConnection(), userId, accessToken, refreshToken)
 }

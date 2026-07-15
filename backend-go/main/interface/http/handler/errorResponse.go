@@ -7,36 +7,36 @@ import (
 	"net/http"
 
 	"goTool/domain/domainMessage"
+	"goTool/interface/http/handler/authentication"
 	"goTool/interface/http/httpMessage"
 	"goTool/interface/webResult"
 	"goTool/utilities"
 )
 
 func sendError(response http.ResponseWriter, requestPath string, err error) {
-	message := utilities.GetError(err)
-	messageWebResult := webResult.CreateMessageWebResult(requestPath, GetHttpStatusError(err), message)
-	sendMessageInResponse(response, *messageWebResult)
-	log.Println("Erreur requête", requestPath, ":", message)
-}
+	statusCode := getHttpStatusError(err)
+	errorMess := utilities.GetError(err)
 
-func sendHttpError(response http.ResponseWriter, requestPath string, httpError httpMessage.Message) {
-	messageWebResult := webResult.ConvertHttpMessageToWebResult(&httpError)
-	sendMessageInResponse(response, *messageWebResult)
-	log.Println("Erreur requête", requestPath, ":", httpError.GetMessage())
-}
-
-func sendMessageInResponse(response http.ResponseWriter, mess webResult.MessageWebResult) {
-	jsonData, responseErr := json.Marshal(mess)
+	jsonData, responseErr := json.Marshal(webResult.CreateMessageWebResult(requestPath, statusCode, errorMess))
 	if responseErr != nil {
-		panic("Impossible de renvoyer l'erreur '" + mess.GetMessage() + "' dans la réponse à la requête '" + mess.GetPath() + "'")
+		panic("Impossible de renvoyer l'erreur '" + errorMess + "' dans la réponse à la requête '" + requestPath + "'")
 	}
-	writeResponse(response, mess.GetPath(), jsonData, mess.GetHttpStatusCode())
+	if statusCode == http.StatusUnauthorized {
+		authentication.SendInvalidToken(response, err.(domainMessage.TokenError).GetCause())
+	}
+	writeResponse(response, requestPath, jsonData, statusCode)
+
+	log.Println("Erreur requête", requestPath, ":", errorMess)
 }
 
-func GetHttpStatusError(err error) int {
+func getHttpStatusError(err error) int {
 	_, ok := errors.AsType[domainMessage.Error](err)
 	if ok {
 		return http.StatusBadRequest
+	}
+	_, ok = errors.AsType[domainMessage.TokenError](err)
+	if ok {
+		return http.StatusUnauthorized
 	}
 	message, ok := errors.AsType[httpMessage.Message](err)
 	if ok {

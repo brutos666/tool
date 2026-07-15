@@ -7,7 +7,7 @@ import (
 type UserCommandRepository interface {
 	CreateUserIfNotExists(ctx context.Context, dataAccess DataAccess, user *User, hashPassword string) (alreadyExists bool, err error)
 	GetUsersWithEmail(ctx context.Context, dataAccess DataAccess, email string) ([]User, error)
-	UpdateToken(ctx context.Context, dataAccess DataAccess, userId string, tokenGenerator Tokens) error
+	UpdateToken(ctx context.Context, dataAccess DataAccess, userId string, tokenGenerator TokensProduct) error
 }
 
 type UserQueryRepository interface {

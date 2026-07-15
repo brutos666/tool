@@ -42,8 +42,6 @@ func GenerateJWTRandomKey() []byte {
 
 // Generate : à partir des informations sur l'utilisateur, on va générer 2 jetons d'authentification, un avec une durée de validité courte, et un autre avec une durée de validation plus longue
 func Generate(userInfos UserInfos, secretKey []byte, tokenExpiry time.Duration, refreshTokenExpiry time.Duration) (string, string) {
-	log.Printf("JWT Key %v Type: %T", secretKey, secretKey)
-
 	claims := &Claims{
 		UserID: userInfos.GetId(),
 		Email:  userInfos.GetEmail(),

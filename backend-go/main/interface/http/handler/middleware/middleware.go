@@ -11,25 +11,21 @@ import (
 
 const SERVER_IS_STOPPING string = "Serveur en cours d'arrêt : la requête ne peut pas être exécutée"
 
-func CallMiddlewares(response http.ResponseWriter, request *http.Request) (*domain.ConnectedUser, *httpMessage.Message) {
-	message := CheckServerRunning(request.URL.Path)
-	if message != nil {
-		return nil, message
+func CallMiddlewares(response http.ResponseWriter, request *http.Request) (*domain.ConnectedUser, error) {
+	err := CheckServerRunning(request.URL.Path)
+	if err != nil {
+		return nil, err
 	}
-	connectedUser, message := authentication.Authenticate(response, request)
-	if message != nil {
-		return nil, message
-	}
-	return connectedUser, nil
+	return authentication.Authenticate(response, request)
 }
 
-func CheckServerRunning(requestPath string) *httpMessage.Message {
+func CheckServerRunning(requestPath string) error {
 	if httpServer.ServerIsStop() {
 		return httpMessage.NewError(SERVER_IS_STOPPING, requestPath, http.StatusServiceUnavailable)
 	}
 	return nil
 }
 
-func AuthenticateWithRefreshToken(response http.ResponseWriter, request *http.Request) (*domain.ConnectedUser, *httpMessage.Message) {
+func AuthenticateWithRefreshToken(response http.ResponseWriter, request *http.Request) (*domain.ConnectedUser, error) {
 	return authentication.AuthenticateWithRefreshToken(response, request)
 }

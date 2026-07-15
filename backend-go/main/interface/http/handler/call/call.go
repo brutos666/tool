@@ -19,8 +19,8 @@ type (
 	OnlyContextCall[R any]  func(context context.Context) (R, error)
 	BasicCall[R any]        func(context context.Context, dataAccess domain.DataAccess) (R, error)
 	CallWithParam[P, R any] func(context context.Context, dataAccess domain.DataAccess, parameter P) (R, error)
-	LoginCall[P, R any]     func(context context.Context, dataAccess domain.DataAccess, tokenGeneration domain.Tokens, parameter P) (R, error)
-	RefreshCall             func(context context.Context, dataAccess domain.DataAccess, tokenGeneration domain.Tokens, user domain.ConnectedUser) (*domain.LoggedUser, error)
+	LoginCall[P, R any]     func(context context.Context, dataAccess domain.DataAccess, tokenGeneration domain.TokensProduct, parameter P) (R, error)
+	RefreshCall             func(context context.Context, dataAccess domain.DataAccess, tokenGeneration domain.TokensProduct, user domain.ConnectedUser) (*domain.LoggedUser, error)
 	WrappedCall             func(context context.Context, callContext CallContext, request *http.Request) (values any, err error)
 )
 
@@ -60,14 +60,14 @@ func AsLoginCall[P, R any](callback LoginCall[P, R]) WrappedCall {
 		if err != nil {
 			return nil, err
 		}
-		return callback(ctx, callContext.dataAccess, callContext.tokenGeneration, parameter.(P))
+		return callback(ctx, callContext.dataAccess, callContext.tokenGenerator, parameter.(P))
 	}
 	return wrapWithDataAccess(wrappedCall)
 }
 
 func AsRefreshCall(callback RefreshCall) WrappedCall {
 	wrappedCall := func(ctx context.Context, callContext CallContext, request *http.Request) (any, error) {
-		return callback(ctx, callContext.dataAccess, callContext.tokenGeneration, *callContext.user)
+		return callback(ctx, callContext.dataAccess, callContext.tokenGenerator, *callContext.user)
 	}
 	return wrapWithDataAccess(wrappedCall)
 }

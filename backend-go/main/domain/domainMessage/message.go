@@ -2,6 +2,7 @@ package domainMessage
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 )
 
@@ -20,6 +21,14 @@ type Message struct {
 
 func (message *Message) AddContext(name, value string) {
 	message.contextFields = append(message.contextFields, Field{name: name, value: value})
+}
+
+func (message *Message) GetContext(name string) string {
+	foundIndex := slices.IndexFunc(message.contextFields, func(field Field) bool { return field.name == name })
+	if foundIndex == -1 {
+		return ""
+	}
+	return message.contextFields[foundIndex].value
 }
 
 func (message Message) getStringContext() string {
@@ -45,6 +54,6 @@ func New(text string) *Message {
 	return message
 }
 
-func Messagef(text string, args ...any) Message {
+func MessagePrintf(text string, args ...any) Message {
 	return Message{text: text, args: args}
 }

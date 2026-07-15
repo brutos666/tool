@@ -2,8 +2,6 @@ package handler
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -14,7 +12,6 @@ import (
 	"goTool/interface/http/handler/route"
 	"goTool/interface/http/httpMessage"
 	"goTool/interface/http/httpServer"
-	"goTool/interface/webResult"
 )
 
 func HandleGetRoute(requestPath string, toCall call.WrappedCall, dataAccessProvider domain.DataAccessProvider) {
@@ -34,8 +31,8 @@ func getHandler(method string, toCall call.WrappedCall, dataAccessProvider domai
 		log.Println("Traitement de la requête", requestPath, "en cours...")
 
 		if method != requestMethod && requestMethod != http.MethodOptions {
-			httpError := httpMessage.NewError(METHOD_IS_NOT_ALLOWED, requestPath, http.StatusMethodNotAllowed)
-			sendHttpError(response, requestPath, *httpError)
+			err := httpMessage.NewError(METHOD_IS_NOT_ALLOWED, requestPath, http.StatusMethodNotAllowed)
+			sendError(response, requestPath, err)
 			return
 		}
 
@@ -53,8 +50,8 @@ func getHandler(method string, toCall call.WrappedCall, dataAccessProvider domai
 		case http.MethodOptions:
 			writeResponse(response, requestPath, nil, http.StatusOK)
 		default:
-			httpError := httpMessage.NewError(METHOD_IS_NOT_ALLOWED, requestPath, http.StatusMethodNotAllowed)
-			sendHttpError(response, requestPath, *httpError)
+			err := httpMessage.NewError(METHOD_IS_NOT_ALLOWED, requestPath, http.StatusMethodNotAllowed)
+			sendError(response, requestPath, err)
 		}
 
 		log.Println("Traitement de la requête", requestPath, "terminée")
@@ -71,9 +68,9 @@ func processRequest(response http.ResponseWriter, request *http.Request, toCall 
 	defer cancel()
 	defer stopServerIfPanic()
 
-	connectedUser, httpError := middleware.CallMiddlewares(response, request)
-	if httpError != nil {
-		sendHttpError(response, requestPath, *httpError)
+	connectedUser, err := middleware.CallMiddlewares(response, request)
+	if err != nil {
+		sendError(response, requestPath, err)
 		return
 	}
 	values, err := toCall(ctx, call.WithContext(dataAccess, connectedUser), request)
@@ -82,8 +79,7 @@ func processRequest(response http.ResponseWriter, request *http.Request, toCall 
 		return
 	}
 
-	webResultValues := webResult.ConvertToWebResult(values)
-	sendValues(response, requestPath, &webResultValues)
+	sendValues(response, requestPath, values)
 }
 
 func processLoginRequest(response http.ResponseWriter, request *http.Request, toCall call.WrappedCall, dataAccess domain.DataAccess) {
@@ -93,9 +89,9 @@ func processLoginRequest(response http.ResponseWriter, request *http.Request, to
 	defer cancel()
 	defer stopServerIfPanic()
 
-	httpError := middleware.CheckServerRunning(requestPath)
-	if httpError != nil {
-		sendHttpError(response, requestPath, *httpError)
+	err := middleware.CheckServerRunning(requestPath)
+	if err != nil {
+		sendError(response, requestPath, err)
 		return
 	}
 
@@ -103,9 +99,9 @@ func processLoginRequest(response http.ResponseWriter, request *http.Request, to
 	callContext := call.WithLoginContext(dataAccess, tokenGenerator)
 
 	if requestPath == route.REFRESH {
-		connectedUser, httpError := middleware.AuthenticateWithRefreshToken(response, request)
-		if httpError != nil {
-			sendHttpError(response, requestPath, *httpError)
+		connectedUser, err := middleware.AuthenticateWithRefreshToken(response, request)
+		if err != nil {
+			sendError(response, requestPath, err)
 			return
 		}
 		callContext.AddConnectedUser(connectedUser)
@@ -119,39 +115,7 @@ func processLoginRequest(response http.ResponseWriter, request *http.Request, to
 
 	authentication.SendRefreshTokenCookie(response, tokenGenerator.GetRefreshToken())
 
-	webResultLoggedUser := webResult.ConvertLoggedUserToWebResult(loggedUser.(*domain.LoggedUser), tokenGenerator.GetAccessToken())
-	sendValues(response, requestPath, &webResultLoggedUser)
-}
-
-func sendValues(response http.ResponseWriter, requestPath string, values any) {
-	// On renvoie la réponse au format JSON
-	jsonData, err := json.Marshal(values)
-	if err != nil {
-		httpError := httpMessage.NewError(err.Error(), requestPath, http.StatusInternalServerError)
-		sendHttpError(response, requestPath, *httpError)
-		return
-	}
-	writeResponse(response, requestPath, jsonData, http.StatusOK)
-}
-
-func writeResponse(response http.ResponseWriter, requestPath string, jsonData []byte, statusCode int) {
-	/*
-		// Dans le cas où le serveur de fichier du front est différent du serveur des requêtes api
-		response.Header().Set("Access-Control-Allow-Origin", config.GetServerUrl())
-		response.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		response.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-		response.Header().Set("Access-Control-Expose-Headers", "WWW-Authenticate")
-	*/
-	response.Header().Set("Content-Type", "application/json")
-	response.WriteHeader(statusCode)
-	fmt.Println("Headers envoyés :", response.Header())
-	if jsonData == nil {
-		return
-	}
-	_, err := response.Write(jsonData)
-	if err != nil {
-		panic("Impossible d'écrire l'erreur dans la réponse à la requête ' '" + requestPath + "' :\n" + err.Error() + "\n" + string(jsonData))
-	}
+	sendLoginValues(response, requestPath, loggedUser.(*domain.LoggedUser), tokenGenerator.GetAccessToken())
 }
 
 func stopServerIfPanic() {

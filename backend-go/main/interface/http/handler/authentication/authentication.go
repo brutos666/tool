@@ -10,7 +10,6 @@ import (
 	"goTool/config"
 	"goTool/domain"
 	"goTool/interface/http/handler/route"
-	"goTool/interface/http/httpMessage"
 )
 
 type TokensGenerator struct {
@@ -36,11 +35,25 @@ func (t TokensGenerator) GetRefreshToken() string {
 	return t.refreshToken
 }
 
+type TokensChecker struct{}
+
+func (t *TokensChecker) Validate(token string) (connectedUser *domain.ConnectedUser, valid bool, expired bool) {
+	connectedUser, err := tokens.Validate(token, config.GetSecretKey(), &domain.ConnectedUser{})
+	if err != nil {
+		return nil, false, tokens.ErrorIsTokenExpired(err)
+	}
+	return connectedUser, true, false
+}
+
+type AuthentificationService interface {
+	Verify(authHeader string, tokenCheck domain.TokensCheck) (*domain.ConnectedUser, error)
+}
+
+func InitAuthService(service AuthentificationService) { authService = service }
+
 const (
 	SEVEN_DAYS_IN_SECONDS int    = 604800
 	REFRESH_TOKEN_COOKIE  string = "refreshToken"
-	NOT_LOGGED            string = "Vous n'êtes pas connecté"
-	NOT_AUTHORIZED        string = "Accès non autorisé"
 )
 
 var noAuthentication = []string{
@@ -48,36 +61,34 @@ var noAuthentication = []string{
 	route.TEST,
 	"/",
 }
+var authService AuthentificationService
 
-func Authenticate(response http.ResponseWriter, request *http.Request) (*domain.ConnectedUser, *httpMessage.Message) {
+func Authenticate(response http.ResponseWriter, request *http.Request) (*domain.ConnectedUser, error) {
 	requestPath := request.URL.Path
 	if slices.Contains(noAuthentication, requestPath) {
 		return nil, nil
 	}
-
 	authHeader := request.Header.Get("Authorization")
-	if authHeader == "" {
-		sendErrorTokenHeader(response, "no_token")
-		return nil, httpMessage.NewError(NOT_LOGGED, requestPath, http.StatusUnauthorized)
-	}
-	// Enlever le mot clé Bearer que l'on retrouve dans le header
-	auth, ok := strings.CutPrefix(authHeader, "Bearer")
-	if !ok {
-		sendErrorTokenHeader(response, "invalid_token")
-		return nil, httpMessage.NewError(NOT_AUTHORIZED, requestPath, http.StatusUnauthorized)
-	}
-	auth = strings.Trim(auth, " ")
-	return validateAuth(auth, requestPath, response)
+	token := removeBearerPrefix(authHeader)
+	return authService.Verify(token, new(TokensChecker))
 }
 
-func AuthenticateWithRefreshToken(response http.ResponseWriter, request *http.Request) (*domain.ConnectedUser, *httpMessage.Message) {
-	requestPath := request.URL.Path
-	cookie, err := request.Cookie(REFRESH_TOKEN_COOKIE)
-	if err != nil {
-		sendErrorTokenHeader(response, "no_token")
-		return nil, httpMessage.NewError(NOT_AUTHORIZED, requestPath, http.StatusUnauthorized)
+func removeBearerPrefix(value string) string {
+	// Enlever le mot clé Bearer que l'on retrouve dans le header
+	token, ok := strings.CutPrefix(value, "Bearer")
+	if ok {
+		return strings.Trim(token, " ")
 	}
-	return validateAuth(cookie.Value, requestPath, response)
+	return ""
+}
+
+func AuthenticateWithRefreshToken(response http.ResponseWriter, request *http.Request) (*domain.ConnectedUser, error) {
+	token := ""
+	cookie, errNoCookie := request.Cookie(REFRESH_TOKEN_COOKIE)
+	if errNoCookie == nil {
+		token = cookie.Value
+	}
+	return authService.Verify(token, new(TokensChecker))
 }
 
 func SendRefreshTokenCookie(response http.ResponseWriter, value string) {
@@ -93,19 +104,6 @@ func SendRefreshTokenCookie(response http.ResponseWriter, value string) {
 	http.SetCookie(response, &cookie)
 }
 
-func validateAuth(auth, requestPath string, response http.ResponseWriter) (*domain.ConnectedUser, *httpMessage.Message) {
-	connectedUser, err := tokens.Validate(auth, config.GetSecretKey(), &domain.ConnectedUser{})
-	if err != nil {
-		if tokens.ErrorIsTokenExpired(err) {
-			sendErrorTokenHeader(response, "token_expired")
-		} else {
-			sendErrorTokenHeader(response, "invalid_token")
-		}
-		return nil, httpMessage.NewError(err.Error(), requestPath, http.StatusUnauthorized)
-	}
-	return connectedUser, nil
-}
-
-func sendErrorTokenHeader(response http.ResponseWriter, value string) {
+func SendInvalidToken(response http.ResponseWriter, value string) {
 	response.Header().Set("WWW-Authenticate", "Bearer error=\""+value+"\"")
 }

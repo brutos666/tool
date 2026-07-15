@@ -9,6 +9,7 @@ import (
 	"goTool/infrastructure/bdd"
 	"goTool/infrastructure/bddAccess"
 	"goTool/interface/http/handler"
+	"goTool/interface/http/handler/authentication"
 	"goTool/interface/http/handler/call"
 	"goTool/interface/http/handler/route"
 	"goTool/interface/http/httpServer"
@@ -30,6 +31,7 @@ func main() {
 	httpServer.ServerStart()
 	go httpServer.StopServerOnSignal()
 
+	authentication.InitAuthService(application.AuthentificationService())
 	// Services : lien entre le métier et les données. Ici les données sont en base et la base de données est configurable
 	spaceQueryService := application.SpaceQueryService(bdd.SpaceQueryRepository())
 	spaceCommandService := application.SpaceCommandService(bdd.SpaceCommandRepository())
