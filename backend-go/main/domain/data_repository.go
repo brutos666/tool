@@ -9,8 +9,8 @@ type DataAccessProvider interface {
 	GetInstance() DataAccess
 }
 type DataAccess interface {
-	Start() error
-	Stop() error
+	Open() error
+	Close() error
 	Cancel() error
 }
 

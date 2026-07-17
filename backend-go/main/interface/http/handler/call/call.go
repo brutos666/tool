@@ -75,7 +75,7 @@ func AsRefreshCall(callback RefreshCall) WrappedCall {
 func wrapWithDataAccess(wrappedCall WrappedCall) WrappedCall {
 	return func(ctx context.Context, callContext CallContext, request *http.Request) (values any, err error) {
 		dataAccess := callContext.dataAccess
-		err = dataAccess.Start()
+		err = dataAccess.Open()
 		if err != nil {
 			return nil, err
 		}
@@ -85,7 +85,7 @@ func wrapWithDataAccess(wrappedCall WrappedCall) WrappedCall {
 			}
 		}()
 		defer func() {
-			err = utilities.JoinErrors(err, dataAccess.Stop())
+			err = utilities.JoinErrors(err, dataAccess.Close())
 		}()
 		values, err = wrappedCall(ctx, callContext, request)
 		return

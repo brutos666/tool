@@ -1,0 +1,8 @@
+tags: integration
+setup-timeout: 2m
+min-coverage: 80
+parallel: 12
+debounce: 500ms
+lint:
+  skip:
+    - testify

@@ -28,8 +28,8 @@ func AsWrite() Service {
 
 type Access interface {
 	GetConnection() connection.Connection
-	Start() error
-	Stop() error
+	Open() error
+	Close() error
 	Cancel() error
 }
 
@@ -39,7 +39,7 @@ type Reader struct {
 
 func (bddAccess Reader) GetConnection() connection.Connection { return *bddAccess.connection }
 
-func (bddAccess *Reader) Start() error {
+func (bddAccess *Reader) Open() error {
 	connection, err := connection.OpenAutoCommitConnection(config.GetBaseConnection())
 	if err != nil {
 		return err
@@ -48,7 +48,7 @@ func (bddAccess *Reader) Start() error {
 	return nil
 }
 
-func (bddAccess *Reader) Stop() error {
+func (bddAccess *Reader) Close() error {
 	return connection.Close(bddAccess.connection)
 }
 
@@ -60,7 +60,7 @@ type Writer struct {
 
 func (bddAccess Writer) GetConnection() connection.Connection { return *bddAccess.connection }
 
-func (bddAccess *Writer) Start() error {
+func (bddAccess *Writer) Open() error {
 	connection, err := connection.OpenTransactionnelConnection(config.GetBaseConnection())
 	if err != nil {
 		return err
@@ -69,7 +69,7 @@ func (bddAccess *Writer) Start() error {
 	return nil
 }
 
-func (bddAccess *Writer) Stop() error {
+func (bddAccess *Writer) Close() error {
 	err := connection.Commit(bddAccess.connection)
 	if err != nil {
 		return err

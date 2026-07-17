@@ -1,9 +1,0 @@
-go 1.26.3
-
-use ./main
-
-use ./module/database
-
-use ./module/authentication
-
-use ./module/treeConverter

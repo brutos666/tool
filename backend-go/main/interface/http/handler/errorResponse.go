@@ -38,7 +38,7 @@ func getHttpStatusError(err error) int {
 	if ok {
 		return http.StatusUnauthorized
 	}
-	message, ok := errors.AsType[httpMessage.Message](err)
+	message, ok := errors.AsType[*httpMessage.Message](err)
 	if ok {
 		return message.GetHttpStatusCode()
 	}

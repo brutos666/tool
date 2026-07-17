@@ -18,7 +18,7 @@ func (message Message) GetMessage() string     { return message.message }
 func (message Message) IsError() bool { return message.httpStatus != http.StatusOK }
 
 func (message Message) Error() string {
-	return fmt.Sprintln(message.message, ", httpStatus:", message.httpStatus)
+	return fmt.Sprint(message.message)
 }
 
 func NewError(error string, path string, httpStatus int) *Message {

@@ -27,7 +27,7 @@ func (repo *dataInitRepository) Init(ctx context.Context, dataAccess domain.Data
 		}
 		defer server.StopServer(config.GetBaseConnection())
 	*/
-	err = dataAccess.Start()
+	err = dataAccess.Open()
 	if err != nil {
 		return err
 	}
@@ -37,7 +37,7 @@ func (repo *dataInitRepository) Init(ctx context.Context, dataAccess domain.Data
 		}
 	}()
 	defer func() {
-		err = utilities.JoinErrors(err, dataAccess.Stop())
+		err = utilities.JoinErrors(err, dataAccess.Close())
 	}()
 
 	err = doLaunchScript(ctx, dataAccess.(bddAccess.Access).GetConnection(), config.GetSchemaPath())
