@@ -7,6 +7,10 @@ import (
 	"goTool/interface/http/httpMessage"
 )
 
+type JsonParameter struct {
+	Value string `json:"value"`
+}
+
 func GetInstance(entity any) any {
 	switch entity.(type) {
 	case *domain.NodeSpace:
@@ -15,8 +19,10 @@ func GetInstance(entity any) any {
 		return new(RegisterUserWebResult)
 	case *domain.LoginUser:
 		return new(LoginUserWebResult)
+	default:
+		// La forme de l'objet envoyé par le navigateur et l'objet utilisé par le serveur est la même et on ne souhaite pas faire de transformation (coûteuse et inutile)
+		return entity
 	}
-	return nil
 }
 
 func ConvertToWebResult(entity any) any {

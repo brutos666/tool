@@ -13,6 +13,8 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
+const DATA_ACCESS_ERROR = "L'appel exige un accès à des données"
+
 var validate = validator.New()
 
 type (
@@ -43,24 +45,22 @@ func AsBasicCall[R any](callback BasicCall[R]) WrappedCall {
 // AsCallWithParam englobe dans des fonctions imbriqués l'appel à la fonction avec passage du paramètre de la requête ainsi que le démarrage et l'arrêt de l'accès aux données
 func AsCallWithParam[P, R any](callback CallWithParam[P, R]) WrappedCall {
 	wrappedCall := func(ctx context.Context, callContext CallContext, request *http.Request) (any, error) {
-		parameterType := *new(P)
-		parameter, err := readRequestParameter(request, parameterType)
+		parameter, err := readRequestParameter[P](request)
 		if err != nil {
 			return nil, err
 		}
-		return callback(ctx, callContext.dataAccess, parameter.(P))
+		return callback(ctx, callContext.dataAccess, *parameter)
 	}
 	return wrapWithDataAccess(wrappedCall)
 }
 
 func AsLoginCall[P, R any](callback LoginCall[P, R]) WrappedCall {
 	wrappedCall := func(ctx context.Context, callContext CallContext, request *http.Request) (any, error) {
-		parameterType := *new(P)
-		parameter, err := readRequestParameter(request, parameterType)
+		parameter, err := readRequestParameter[P](request)
 		if err != nil {
 			return nil, err
 		}
-		return callback(ctx, callContext.dataAccess, callContext.tokenGenerator, parameter.(P))
+		return callback(ctx, callContext.dataAccess, callContext.tokenGenerator, *parameter)
 	}
 	return wrapWithDataAccess(wrappedCall)
 }
@@ -75,6 +75,9 @@ func AsRefreshCall(callback RefreshCall) WrappedCall {
 func wrapWithDataAccess(wrappedCall WrappedCall) WrappedCall {
 	return func(ctx context.Context, callContext CallContext, request *http.Request) (values any, err error) {
 		dataAccess := callContext.dataAccess
+		if dataAccess == nil {
+			panic(DATA_ACCESS_ERROR)
+		}
 		err = dataAccess.Open()
 		if err != nil {
 			return nil, err
@@ -92,14 +95,32 @@ func wrapWithDataAccess(wrappedCall WrappedCall) WrappedCall {
 	}
 }
 
-func readRequestParameter(request *http.Request, parameter any) (any, error) {
-	webParameter := webResult.GetInstance(parameter)
+func readRequestParam(request *http.Request, parameterP any) (any, error) {
+	webParameter := webResult.GetInstance(parameterP)
 	err := json.NewDecoder(request.Body).Decode(&webParameter)
 	if err != nil {
-		return parameter, err
+		return nil, err
 	}
 	if validationErr := validate.Struct(webParameter); validationErr != nil {
-		return parameter, validationErr
+		return nil, validationErr
 	}
 	return webResult.ConvertToEntity(webParameter), nil
+}
+
+func readRequestParameter[P any](request *http.Request) (*P, error) {
+	parameter := new(P)
+	requestParameter := webResult.GetInstance(parameter)
+	err := json.NewDecoder(request.Body).Decode(requestParameter)
+	if err != nil {
+		return nil, err
+	}
+	if validationErr := validate.Struct(requestParameter); validationErr != nil {
+		return nil, validationErr
+	}
+	entity := webResult.ConvertToEntity(requestParameter)
+	parameter, ok := entity.(*P)
+	if !ok {
+		panic("Conversion incorrect du paramètre de la requête")
+	}
+	return parameter, nil
 }

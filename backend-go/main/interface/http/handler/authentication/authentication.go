@@ -65,7 +65,7 @@ var noAuthentication = []string{
 }
 var authService AuthentificationService
 
-func Authenticate(response http.ResponseWriter, request *http.Request) (*domain.ConnectedUser, error) {
+func Authenticate(request *http.Request) (*domain.ConnectedUser, error) {
 	requestPath := request.URL.Path
 	if slices.Contains(noAuthentication, requestPath) {
 		return nil, nil
@@ -84,7 +84,7 @@ func removeBearerPrefix(value string) string {
 	return ""
 }
 
-func AuthenticateWithRefreshToken(response http.ResponseWriter, request *http.Request) (*domain.ConnectedUser, error) {
+func AuthenticateWithRefreshToken(request *http.Request) (*domain.ConnectedUser, error) {
 	token := ""
 	cookie, errNoCookie := request.Cookie(REFRESH_TOKEN_COOKIE)
 	if errNoCookie == nil {

@@ -8,11 +8,11 @@ import (
 	"goTool/domain"
 	"goTool/interface/http/handler/authentication"
 	"goTool/interface/http/handler/call"
-	"goTool/interface/http/handler/middleware"
 	"goTool/interface/http/handler/route"
 	"goTool/interface/http/httpMessage"
-	"goTool/interface/http/httpServer"
 )
+
+const SERVER_IS_STOPPING string = "Serveur en cours d'arrêt : la requête ne peut pas être exécutée"
 
 func HandleGetRoute(requestPath string, toCall call.WrappedCall, dataAccessProvider domain.DataAccessProvider) {
 	http.HandleFunc(requestPath, getHandler(http.MethodGet, toCall, dataAccessProvider))
@@ -36,8 +36,13 @@ func getHandler(method string, toCall call.WrappedCall, dataAccessProvider domai
 			return
 		}
 
-		dataAccess := dataAccessProvider.GetInstance()
+		err := checkServerRunning(requestPath)
+		if err != nil {
+			sendError(response, requestPath, err)
+			return
+		}
 
+		dataAccess := dataAccessProvider.GetInstance()
 		switch requestMethod {
 		case http.MethodPost:
 			if requestPath == route.REFRESH || requestPath == route.SIGNUP || requestPath == route.LOGIN {
@@ -68,7 +73,7 @@ func processRequest(response http.ResponseWriter, request *http.Request, toCall 
 	defer cancel()
 	defer stopServerIfPanic()
 
-	connectedUser, err := middleware.CallMiddlewares(response, request)
+	connectedUser, err := authentication.Authenticate(request)
 	if err != nil {
 		sendError(response, requestPath, err)
 		return
@@ -78,7 +83,6 @@ func processRequest(response http.ResponseWriter, request *http.Request, toCall 
 		sendError(response, requestPath, err)
 		return
 	}
-
 	sendValues(response, requestPath, values)
 }
 
@@ -89,17 +93,11 @@ func processLoginRequest(response http.ResponseWriter, request *http.Request, to
 	defer cancel()
 	defer stopServerIfPanic()
 
-	err := middleware.CheckServerRunning(requestPath)
-	if err != nil {
-		sendError(response, requestPath, err)
-		return
-	}
-
 	tokenGenerator := new(authentication.TokensGenerator)
 	callContext := call.WithLoginContext(dataAccess, tokenGenerator)
 
 	if requestPath == route.REFRESH {
-		connectedUser, err := middleware.AuthenticateWithRefreshToken(response, request)
+		connectedUser, err := authentication.AuthenticateWithRefreshToken(request)
 		if err != nil {
 			sendError(response, requestPath, err)
 			return
@@ -121,7 +119,14 @@ func processLoginRequest(response http.ResponseWriter, request *http.Request, to
 func stopServerIfPanic() {
 	panicMessage := recover()
 	if panicMessage != nil {
-		log.Println(panicMessage)
-		httpServer.ServerStop()
+		srvService.ServerStop()
+		panic(panicMessage)
 	}
+}
+
+func checkServerRunning(requestPath string) error {
+	if srvService.ServerIsStop() {
+		return httpMessage.NewError(SERVER_IS_STOPPING, requestPath, http.StatusServiceUnavailable)
+	}
+	return nil
 }

@@ -30,10 +30,10 @@ func UserCommandService(repository domain.UserCommandRepository) UserCmdService 
 // Signup doit créer le compte et connecter l'utilisateur
 // Le service met à jour les jetons d'authentification dans les données (infrastructure)
 // Les jetons sont générés par l'interface via TokenGenerator : il faut lui fournir l'utilisateur créé
-func (commandService UserCmdService) Signup(ctx context.Context, dataAccess domain.DataAccess, tokenGenerator domain.TokensProduct, user *domain.User) (*domain.LoggedUser, error) {
+func (commandService UserCmdService) Signup(ctx context.Context, dataAccess domain.DataAccess, tokenGenerator domain.TokensProduct, user domain.User) (*domain.LoggedUser, error) {
 	password := password.Hash(user.GetPassword())
 
-	alreadyExists, err := commandService.repository.CreateUserIfNotExists(ctx, dataAccess, user, password)
+	alreadyExists, err := commandService.repository.CreateUserIfNotExists(ctx, dataAccess, &user, password)
 	if err != nil {
 		return nil, err
 	}
@@ -43,19 +43,19 @@ func (commandService UserCmdService) Signup(ctx context.Context, dataAccess doma
 		return nil, error
 	}
 
-	tokenGenerator.SetUser(*user)
+	tokenGenerator.SetUser(user)
 	err = commandService.repository.UpdateToken(ctx, dataAccess, user.GetId(), tokenGenerator)
 	if err != nil {
 		return nil, err
 	}
-	return domain.CreateLoggedUser(*user), nil
+	return domain.CreateLoggedUser(user), nil
 }
 
 // Login doit connecté l'utilisateur en vérifiant si son mot de passe est valide
 // Le service doit vérifier si le mot de passe correspond à celui conservé dans les données (infrastructure)
 // Il met à jour les jetons d'authentification dans les données (infrastructure)
 // Les jetons sont générés par l'interface via TokenGenerator : il faut lui fournir l'utilisateur connecté
-func (commandService UserCmdService) Login(ctx context.Context, dataAccess domain.DataAccess, tokenGenerator domain.TokensProduct, logUser *domain.LoginUser) (*domain.LoggedUser, error) {
+func (commandService UserCmdService) Login(ctx context.Context, dataAccess domain.DataAccess, tokenGenerator domain.TokensProduct, logUser domain.LoginUser) (*domain.LoggedUser, error) {
 	users, err := commandService.repository.GetUsersWithEmail(ctx, dataAccess, logUser.GetEmail())
 	if err != nil {
 		return nil, err

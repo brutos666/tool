@@ -27,10 +27,6 @@ func main() {
 	if config.IsDev() {
 		httpServer.ServeLocalFrontEnd()
 	}
-
-	httpServer.ServerStart()
-	go httpServer.StopServerOnSignal()
-
 	authentication.InitAuthService(application.AuthentificationService())
 	// Services : lien entre le métier et les données. Ici les données sont en base et la base de données est configurable
 	spaceQueryService := application.SpaceQueryService(bdd.SpaceQueryRepository())
@@ -38,6 +34,8 @@ func main() {
 	userCommandService := application.UserCommandService(bdd.UserCommandRepository())
 	userQueryService := application.UserQueryService(bdd.UserQueryRepository())
 
+	httpServerService := httpServer.HttpServerService()
+	handler.InitServerService(&httpServerService)
 	// Routes : les transformations des paramètres des requêtes et du retour sont faites dans la partie interface
 	handler.Verify(route.START)
 	handler.Stop(route.STOP)
@@ -50,6 +48,7 @@ func main() {
 
 	handler.HandleGetRoute(route.USER_FIND_ALL, call.AsBasicCall(userQueryService.FindAll), bddAccess.AsRead())
 
-	httpServer.ServerWait()
+	httpServerService.ServerWait()
+
 	log.Println("Le programme s'est arrêté")
 }

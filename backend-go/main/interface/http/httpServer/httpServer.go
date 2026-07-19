@@ -5,10 +5,7 @@ import (
 	"context"
 	"log"
 	"net/http"
-	"os"
-	"os/signal"
 	"sync"
-	"syscall"
 	"time"
 
 	"goTool/config"
@@ -19,8 +16,6 @@ type httpServer struct {
 	stopped     bool
 	server      *http.Server
 }
-
-var webServer httpServer
 
 func (webServer *httpServer) start() {
 	defer webServer.alertServerIsEnd()
@@ -65,44 +60,6 @@ func createServer() *httpServer {
 	webServer.stopped = false
 	webServer.server = &http.Server{Addr: config.GetServer(), Handler: nil}
 	return webServer
-}
-
-func ServerStart() {
-	webServer = *createServer()
-	webServer.mustWaitEndOfServer()
-	go webServer.start()
-}
-
-func ServerWait() {
-	// Attend l'arrêt du serveur
-	webServer.waitEndOfServer()
-}
-
-func ServerStop() {
-	webServer.setStop()
-	webServer.mustWaitEndOfServer()
-	go webServer.stop()
-}
-
-func ServerIsStop() bool {
-	return webServer.isStop()
-}
-
-func StopServerOnSignal() {
-	// Create a channel to receive signals
-	sigChan := make(chan os.Signal, 1)
-
-	// Notify the channel for specific signals
-	signal.Notify(
-		sigChan,
-		syscall.SIGINT,  // Ctrl+C
-		syscall.SIGTERM, // Termination signal
-	)
-
-	// Wait for signal
-	sig := <-sigChan
-	log.Printf("Réception du signal d'interruption '%v'", sig)
-	ServerStop()
 }
 
 func ServeLocalFrontEnd() {

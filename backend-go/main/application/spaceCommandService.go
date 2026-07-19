@@ -14,7 +14,7 @@ func SpaceCommandService(repository domain.SpaceCommandRepository) SpaceCmdServi
 	return SpaceCmdService{repository: repository}
 }
 
-func (commandService SpaceCmdService) Save(ctx context.Context, dataAccess domain.DataAccess, nodeSpace *domain.NodeSpace) (*domain.NodeSpace, error) {
+func (commandService SpaceCmdService) Save(ctx context.Context, dataAccess domain.DataAccess, nodeSpace domain.NodeSpace) (*domain.NodeSpace, error) {
 	// Le navigateur ne distingue pas encore espaces qui est la liste des espaces (Navigation) de l'espace courant qui est visualisé à droite. On va faire la distinction ici
 	if len(nodeSpace.GetParentId()) == 0 {
 		spaces, err := commandService.SaveSpaces(ctx, dataAccess, nodeSpace.GetSpace().GetChildrenSpaces())
@@ -37,14 +37,14 @@ func (commandService SpaceCmdService) SaveSpaces(ctx context.Context, dataAccess
 	return spaces, nil
 }
 
-func (commandService SpaceCmdService) SaveCurrentSpace(ctx context.Context, dataAccess domain.DataAccess, nodeSpace *domain.NodeSpace) (*domain.NodeSpace, error) {
-	err := commandService.repository.SaveCurrentSpace(ctx, dataAccess, nodeSpace)
+func (commandService SpaceCmdService) SaveCurrentSpace(ctx context.Context, dataAccess domain.DataAccess, nodeSpace domain.NodeSpace) (*domain.NodeSpace, error) {
+	err := commandService.repository.SaveCurrentSpace(ctx, dataAccess, &nodeSpace)
 	if err != nil {
-		return nodeSpace, err
+		return &nodeSpace, err
 	}
 	// Si tout s'est bien passé, on met à jour les références
 	space := nodeSpace.GetSpace()
 	space.RemoveToDelete()
 	space.ApplyModification()
-	return nodeSpace, nil
+	return &nodeSpace, nil
 }
