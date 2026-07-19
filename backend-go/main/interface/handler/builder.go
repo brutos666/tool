@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 
-	"goTool/interface/http/handler/authentication"
+	"goTool/interface/handler/authentication"
 	"goTool/interface/webResult"
 )
 

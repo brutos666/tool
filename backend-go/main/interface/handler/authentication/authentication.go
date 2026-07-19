@@ -2,54 +2,13 @@
 package authentication
 
 import (
-	"authentication/tokens"
 	"net/http"
 	"slices"
 	"strings"
 
-	"goTool/config"
 	"goTool/domain"
-	"goTool/interface/http/handler/route"
+	"goTool/interface/handler/route"
 )
-
-type TokensGenerator struct {
-	accessToken  string
-	refreshToken string
-	user         domain.User
-}
-
-func (t *TokensGenerator) SetUser(user domain.User) { t.user = user }
-func (t *TokensGenerator) Generate() (accessToken string, refreshToken string) {
-	connectedUser := t.user.ConvertToConnectedUSer()
-	accessToken, refreshToken = tokens.Generate(connectedUser, config.GetSecretKey(), config.GetTokenDuration(), config.GetRefreshTokenDuration())
-	t.accessToken = accessToken
-	t.refreshToken = refreshToken
-	return
-}
-
-func (t TokensGenerator) GetAccessToken() string {
-	return t.accessToken
-}
-
-func (t TokensGenerator) GetRefreshToken() string {
-	return t.refreshToken
-}
-
-type TokensChecker struct{}
-
-func (t *TokensChecker) Validate(token string) (connectedUser *domain.ConnectedUser, valid bool, expired bool) {
-	connectedUser, err := tokens.Validate(token, config.GetSecretKey(), &domain.ConnectedUser{})
-	if err != nil {
-		return nil, false, tokens.ErrorIsTokenExpired(err)
-	}
-	return connectedUser, true, false
-}
-
-type AuthentificationService interface {
-	Verify(authHeader string, tokenCheck domain.TokensCheck) (*domain.ConnectedUser, error)
-}
-
-func InitAuthService(service AuthentificationService) { authService = service }
 
 const (
 	SEVEN_DAYS_IN_SECONDS int    = 604800
@@ -58,12 +17,19 @@ const (
 	AUTH_TOKEN_PREFIX            = "Bearer "
 )
 
+type AuthentificationService interface {
+	Verify(authHeader string, tokenCheck domain.TokensCheck) (*domain.ConnectedUser, error)
+}
+
+var authService AuthentificationService
+
+func InitAuthService(service AuthentificationService) { authService = service }
+
 var noAuthentication = []string{
 	route.STOP,
 	route.TEST,
 	"/",
 }
-var authService AuthentificationService
 
 func Authenticate(request *http.Request) (*domain.ConnectedUser, error) {
 	requestPath := request.URL.Path

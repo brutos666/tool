@@ -2,10 +2,16 @@ package handler
 
 import (
 	"encoding/json"
+	"errors"
+	"log"
 	"net/http"
 
 	"goTool/domain"
+	"goTool/domain/domainMessage"
+	"goTool/interface/handler/authentication"
+	"goTool/interface/handler/responseMessage"
 	"goTool/interface/webResult"
+	"goTool/utilities"
 )
 
 func sendValues(response http.ResponseWriter, requestPath string, values any) {
@@ -27,6 +33,22 @@ func sendOkResponse(response http.ResponseWriter, requestPath string, webResultV
 	writeResponse(response, requestPath, jsonData, http.StatusOK)
 }
 
+func sendError(response http.ResponseWriter, requestPath string, err error) {
+	statusCode := getHttpStatusError(err)
+	errorMess := utilities.GetError(err)
+
+	jsonData, responseErr := json.Marshal(webResult.CreateMessageWebResult(requestPath, statusCode, errorMess))
+	if responseErr != nil {
+		panic("Impossible de renvoyer l'erreur '" + errorMess + "' dans la réponse à la requête '" + requestPath + "'")
+	}
+	if statusCode == http.StatusUnauthorized {
+		authentication.SendInvalidToken(response, err.(domainMessage.TokenError).GetCause())
+	}
+	writeResponse(response, requestPath, jsonData, statusCode)
+
+	log.Println("Erreur requête", requestPath, ":", errorMess)
+}
+
 func writeResponse(response http.ResponseWriter, requestPath string, jsonData []byte, statusCode int) {
 	/*
 		// Dans le cas où le serveur de fichier du front est différent du serveur des requêtes api
@@ -44,4 +66,20 @@ func writeResponse(response http.ResponseWriter, requestPath string, jsonData []
 	if err != nil {
 		panic("Impossible de renvoyer le résultat de la requête ' '" + requestPath + "' :\n" + err.Error() + "\n" + string(jsonData))
 	}
+}
+
+func getHttpStatusError(err error) int {
+	_, ok := errors.AsType[domainMessage.Error](err)
+	if ok {
+		return http.StatusBadRequest
+	}
+	_, ok = errors.AsType[domainMessage.TokenError](err)
+	if ok {
+		return http.StatusUnauthorized
+	}
+	message, ok := errors.AsType[*responseMessage.Message](err)
+	if ok {
+		return message.GetHttpStatusCode()
+	}
+	return http.StatusInternalServerError
 }

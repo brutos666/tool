@@ -8,11 +8,11 @@ import (
 	"goTool/config"
 	"goTool/infrastructure/bdd"
 	"goTool/infrastructure/bddAccess"
-	"goTool/interface/http/handler"
-	"goTool/interface/http/handler/authentication"
-	"goTool/interface/http/handler/call"
-	"goTool/interface/http/handler/route"
-	"goTool/interface/http/httpServer"
+	"goTool/interface/handler"
+	"goTool/interface/handler/authentication"
+	"goTool/interface/handler/call"
+	"goTool/interface/handler/route"
+	"goTool/interface/httpServer"
 )
 
 func main() {

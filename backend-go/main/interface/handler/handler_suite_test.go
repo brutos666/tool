@@ -9,8 +9,7 @@ import (
 
 	"goTool/domain"
 	"goTool/domain/domainMessage"
-	"goTool/interface/http/handler/authentication"
-	"goTool/interface/http/handler/call"
+	"goTool/interface/handler/call"
 	"goTool/interface/webResult"
 	"goTool/utilities"
 
@@ -90,7 +89,7 @@ type HandlerTestSuite struct{}
 
 // BeforeEach : pour chaque fonction TestXxx(t *gotest.T), PAS pour chaque t.It
 func (s *HandlerTestSuite) BeforeEach(t *gotest.T) {
-	authentication.InitAuthService(authServiceMock{})
+	InitAuthService(authServiceMock{})
 	InitServerService(&httpServiceMock{})
 	srvService.ServerStart()
 }

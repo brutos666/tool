@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"goTool/domain/domainMessage"
-	"goTool/interface/http/httpMessage"
+	"goTool/interface/handler/responseMessage"
 )
 
 type MessageWebResult struct {
@@ -29,7 +29,7 @@ func CreateMessageWebResult(path string, statusCode int, error string) *MessageW
 	return messageWebResult
 }
 
-func ConvertHttpMessageToWebResult(message *httpMessage.Message) *MessageWebResult {
+func ConvertHttpMessageToWebResult(message *responseMessage.Message) *MessageWebResult {
 	messageWebResult := new(MessageWebResult)
 	// TODO : côté front, distinguer les messages des erreurs par rapport au statusCode
 	messageWebResult.StatusCode = message.GetHttpStatusCode()

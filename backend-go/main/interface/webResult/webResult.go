@@ -4,7 +4,7 @@ package webResult
 import (
 	"goTool/domain"
 	"goTool/domain/domainMessage"
-	"goTool/interface/http/httpMessage"
+	"goTool/interface/handler/responseMessage"
 )
 
 type JsonParameter struct {
@@ -45,7 +45,7 @@ func ConvertToWebResult(entity any) any {
 			userList[index] = ConvertUserToWebResult(typedEntity[index])
 		}
 		return userList
-	case *httpMessage.Message:
+	case *responseMessage.Message:
 		return ConvertHttpMessageToWebResult(typedEntity)
 	case *domainMessage.Message:
 		return ConvertDomainMessageToWebResult(typedEntity)

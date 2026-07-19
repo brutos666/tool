@@ -4,15 +4,19 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"time"
 
 	"goTool/domain"
-	"goTool/interface/http/handler/authentication"
-	"goTool/interface/http/handler/call"
-	"goTool/interface/http/handler/route"
-	"goTool/interface/http/httpMessage"
+	"goTool/interface/handler/authentication"
+	"goTool/interface/handler/call"
+	"goTool/interface/handler/responseMessage"
+	"goTool/interface/handler/route"
 )
 
-const SERVER_IS_STOPPING string = "Serveur en cours d'arrêt : la requête ne peut pas être exécutée"
+const (
+	METHOD_IS_NOT_ALLOWED = "Méthode non autorisée"
+	REQUEST_TIMEOUT       = 100 * time.Second
+)
 
 func HandleGetRoute(requestPath string, toCall call.WrappedCall, dataAccessProvider domain.DataAccessProvider) {
 	http.HandleFunc(requestPath, getHandler(http.MethodGet, toCall, dataAccessProvider))
@@ -31,7 +35,7 @@ func getHandler(method string, toCall call.WrappedCall, dataAccessProvider domai
 		log.Println("Traitement de la requête", requestPath, "en cours...")
 
 		if method != requestMethod && requestMethod != http.MethodOptions {
-			err := httpMessage.NewError(METHOD_IS_NOT_ALLOWED, requestPath, http.StatusMethodNotAllowed)
+			err := responseMessage.NewError(METHOD_IS_NOT_ALLOWED, requestPath, http.StatusMethodNotAllowed)
 			sendError(response, requestPath, err)
 			return
 		}
@@ -55,7 +59,7 @@ func getHandler(method string, toCall call.WrappedCall, dataAccessProvider domai
 		case http.MethodOptions:
 			writeResponse(response, requestPath, nil, http.StatusOK)
 		default:
-			err := httpMessage.NewError(METHOD_IS_NOT_ALLOWED, requestPath, http.StatusMethodNotAllowed)
+			err := responseMessage.NewError(METHOD_IS_NOT_ALLOWED, requestPath, http.StatusMethodNotAllowed)
 			sendError(response, requestPath, err)
 		}
 
@@ -114,19 +118,4 @@ func processLoginRequest(response http.ResponseWriter, request *http.Request, to
 	authentication.SendRefreshTokenCookie(response, tokenGenerator.GetRefreshToken())
 
 	sendLoginValues(response, requestPath, loggedUser.(*domain.LoggedUser), tokenGenerator.GetAccessToken())
-}
-
-func stopServerIfPanic() {
-	panicMessage := recover()
-	if panicMessage != nil {
-		srvService.ServerStop()
-		panic(panicMessage)
-	}
-}
-
-func checkServerRunning(requestPath string) error {
-	if srvService.ServerIsStop() {
-		return httpMessage.NewError(SERVER_IS_STOPPING, requestPath, http.StatusServiceUnavailable)
-	}
-	return nil
 }

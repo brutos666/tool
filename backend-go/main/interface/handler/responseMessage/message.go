@@ -1,4 +1,5 @@
-package httpMessage
+// Package responseMessage offre une structure permettant de renvoyer un message ou une erreur avec le code http correspondant
+package responseMessage
 
 import (
 	"fmt"
