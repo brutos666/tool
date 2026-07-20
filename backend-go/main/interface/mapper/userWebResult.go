@@ -1,4 +1,4 @@
-package webResult
+package mapper
 
 import "goTool/domain"
 
@@ -27,7 +27,7 @@ type RegisterUserWebResult struct {
 	Email     string `json:"email" validate:"email,required"`
 }
 
-func (userWebResult RegisterUserWebResult) ConvertToUser() *domain.User {
+func (userWebResult RegisterUserWebResult) ConvertToDomain() *domain.User {
 	user := new(domain.User)
 	user.SetFirstName(userWebResult.FirstName)
 	user.SetLastName(userWebResult.LastName)
@@ -42,7 +42,7 @@ type LoginUserWebResult struct {
 	Password string `json:"password" validate:"required,min=8"`
 }
 
-func (userWebResult LoginUserWebResult) ConvertToLoginUser() *domain.LoginUser {
+func (userWebResult LoginUserWebResult) ConvertToDomain() *domain.LoginUser {
 	user := new(domain.LoginUser)
 	user.SetPassword(userWebResult.Password)
 	user.SetEmail(userWebResult.Email)
@@ -55,10 +55,11 @@ type LoggedUserWebResult struct {
 	Token     string `json:"token"`
 }
 
-func ConvertLoggedUserToWebResult(loggedUser *domain.LoggedUser, accessToken string) *LoggedUserWebResult {
+func (loggedUser *LoggedUserWebResult) SetToken(token string) { loggedUser.Token = token }
+
+func ConvertLoggedUserToWebResult(loggedUser *domain.LoggedUser) *LoggedUserWebResult {
 	userWebResult := new(LoggedUserWebResult)
 	userWebResult.FirstName = loggedUser.GetUser().GetFirstName()
 	userWebResult.LastName = loggedUser.GetUser().GetLastName()
-	userWebResult.Token = accessToken
 	return userWebResult
 }

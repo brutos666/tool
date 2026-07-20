@@ -6,23 +6,12 @@ import (
 	"log"
 	"net/http"
 
-	"goTool/domain"
 	"goTool/domain/domainMessage"
 	"goTool/interface/handler/authentication"
 	"goTool/interface/handler/responseMessage"
-	"goTool/interface/webResult"
+	"goTool/interface/mapper"
 	"goTool/utilities"
 )
-
-func sendValues(response http.ResponseWriter, requestPath string, values any) {
-	webResultValues := webResult.ConvertToWebResult(values)
-	sendOkResponse(response, requestPath, webResultValues)
-}
-
-func sendLoginValues(response http.ResponseWriter, requestPath string, loggedUser *domain.LoggedUser, accessToken string) {
-	webResultValues := webResult.ConvertLoggedUserToWebResult(loggedUser, accessToken)
-	sendOkResponse(response, requestPath, webResultValues)
-}
 
 func sendOkResponse(response http.ResponseWriter, requestPath string, webResultValues any) {
 	jsonData, err := json.Marshal(webResultValues)
@@ -37,7 +26,7 @@ func sendError(response http.ResponseWriter, requestPath string, err error) {
 	statusCode := getHttpStatusError(err)
 	errorMess := utilities.GetError(err)
 
-	jsonData, responseErr := json.Marshal(webResult.CreateMessageWebResult(requestPath, statusCode, errorMess))
+	jsonData, responseErr := json.Marshal(mapper.CreateMessageWebResult(requestPath, statusCode, errorMess))
 	if responseErr != nil {
 		panic("Impossible de renvoyer l'erreur '" + errorMess + "' dans la réponse à la requête '" + requestPath + "'")
 	}

@@ -11,6 +11,7 @@ import (
 	"goTool/interface/handler/call"
 	"goTool/interface/handler/responseMessage"
 	"goTool/interface/handler/route"
+	"goTool/interface/mapper"
 )
 
 const (
@@ -87,7 +88,7 @@ func processRequest(response http.ResponseWriter, request *http.Request, toCall 
 		sendError(response, requestPath, err)
 		return
 	}
-	sendValues(response, requestPath, values)
+	sendOkResponse(response, requestPath, values)
 }
 
 func processLoginRequest(response http.ResponseWriter, request *http.Request, toCall call.WrappedCall, dataAccess domain.DataAccess) {
@@ -116,6 +117,7 @@ func processLoginRequest(response http.ResponseWriter, request *http.Request, to
 	}
 
 	authentication.SendRefreshTokenCookie(response, tokenGenerator.GetRefreshToken())
+	loggedUser.(*mapper.LoggedUserWebResult).SetToken(tokenGenerator.GetAccessToken())
 
-	sendLoginValues(response, requestPath, loggedUser.(*domain.LoggedUser), tokenGenerator.GetAccessToken())
+	sendOkResponse(response, requestPath, loggedUser)
 }

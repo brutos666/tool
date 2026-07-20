@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	"goTool/domain"
-	"goTool/interface/webResult"
+	"goTool/interface/mapper"
 	"goTool/utilities"
 
 	"github.com/go-playground/validator/v10"
@@ -28,46 +28,78 @@ type (
 
 // AsContextCall englobe l'appel à la fonction dans un appel plus générique
 func AsContextCall[R any](callback OnlyContextCall[R]) WrappedCall {
+	var result R
+	mapper := mapper.GetMapper[int](0, result)
 	wrappedCall := func(ctx context.Context, callContext CallContext, request *http.Request) (any, error) {
-		return callback(ctx)
+		domainResult, err := callback(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return mapper.ConvertToWebResult(domainResult), nil
 	}
 	return wrappedCall
 }
 
 // AsBasicCall englobe dans des fonctions imbriqués l'appel à la fonction ainsi que le démarrage et l'arrêt de l'accès aux données
 func AsBasicCall[R any](callback BasicCall[R]) WrappedCall {
+	var result R
+	mapper := mapper.GetMapper[int](0, result)
 	wrappedCall := func(ctx context.Context, callContext CallContext, request *http.Request) (any, error) {
-		return callback(ctx, callContext.dataAccess)
+		domainResult, err := callback(ctx, callContext.dataAccess)
+		if err != nil {
+			return nil, err
+		}
+		return mapper.ConvertToWebResult(domainResult), nil
 	}
 	return wrapWithDataAccess(wrappedCall)
 }
 
 // AsCallWithParam englobe dans des fonctions imbriqués l'appel à la fonction avec passage du paramètre de la requête ainsi que le démarrage et l'arrêt de l'accès aux données
 func AsCallWithParam[P, R any](callback CallWithParam[P, R]) WrappedCall {
+	var parameter P
+	var result R
+	mapper := mapper.GetMapper[P](parameter, result)
+
 	wrappedCall := func(ctx context.Context, callContext CallContext, request *http.Request) (any, error) {
-		parameter, err := readRequestParameter[P](request)
+		domainParameter, err := readRequestParameter[P](request, mapper)
 		if err != nil {
 			return nil, err
 		}
-		return callback(ctx, callContext.dataAccess, *parameter)
+		domainResult, err := callback(ctx, callContext.dataAccess, *domainParameter)
+		if err != nil {
+			return nil, err
+		}
+		return mapper.ConvertToWebResult(domainResult), nil
 	}
 	return wrapWithDataAccess(wrappedCall)
 }
 
 func AsLoginCall[P, R any](callback LoginCall[P, R]) WrappedCall {
+	var parameter P
+	var result R
+	mapper := mapper.GetMapper[P](parameter, result)
+
 	wrappedCall := func(ctx context.Context, callContext CallContext, request *http.Request) (any, error) {
-		parameter, err := readRequestParameter[P](request)
+		domainParameter, err := readRequestParameter[P](request, mapper)
 		if err != nil {
 			return nil, err
 		}
-		return callback(ctx, callContext.dataAccess, callContext.tokenGenerator, *parameter)
+		domainResult, err := callback(ctx, callContext.dataAccess, callContext.tokenGenerator, *domainParameter)
+		if err != nil {
+			return nil, err
+		}
+		return mapper.ConvertToWebResult(domainResult), nil
 	}
 	return wrapWithDataAccess(wrappedCall)
 }
 
 func AsRefreshCall(callback RefreshCall) WrappedCall {
 	wrappedCall := func(ctx context.Context, callContext CallContext, request *http.Request) (any, error) {
-		return callback(ctx, callContext.dataAccess, callContext.tokenGenerator, *callContext.user)
+		domainResult, err := callback(ctx, callContext.dataAccess, callContext.tokenGenerator, *callContext.user)
+		if err != nil {
+			return nil, err
+		}
+		return mapper.ConvertLoggedUserToWebResult(domainResult), nil
 	}
 	return wrapWithDataAccess(wrappedCall)
 }
@@ -95,8 +127,8 @@ func wrapWithDataAccess(wrappedCall WrappedCall) WrappedCall {
 	}
 }
 
-func readRequestParam(request *http.Request, parameterP any) (any, error) {
-	webParameter := webResult.GetInstance(parameterP)
+func readRequestParameter[P any](request *http.Request, mapper mapper.Mapper) (*P, error) {
+	webParameter := mapper.GetWebResultInstance()
 	err := json.NewDecoder(request.Body).Decode(&webParameter)
 	if err != nil {
 		return nil, err
@@ -104,23 +136,9 @@ func readRequestParam(request *http.Request, parameterP any) (any, error) {
 	if validationErr := validate.Struct(webParameter); validationErr != nil {
 		return nil, validationErr
 	}
-	return webResult.ConvertToEntity(webParameter), nil
-}
-
-func readRequestParameter[P any](request *http.Request) (*P, error) {
-	parameter := new(P)
-	requestParameter := webResult.GetInstance(parameter)
-	err := json.NewDecoder(request.Body).Decode(requestParameter)
-	if err != nil {
-		return nil, err
-	}
-	if validationErr := validate.Struct(requestParameter); validationErr != nil {
-		return nil, validationErr
-	}
-	entity := webResult.ConvertToEntity(requestParameter)
-	parameter, ok := entity.(*P)
+	domainParameter, ok := mapper.ConvertToDomain(webParameter).(*P)
 	if !ok {
-		panic("Conversion incorrect du paramètre de la requête")
+		panic("Problème de conversion du paramètre de la requête vers l'entité du domain")
 	}
-	return parameter, nil
+	return domainParameter, nil
 }

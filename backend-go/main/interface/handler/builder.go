@@ -7,7 +7,6 @@ import (
 	"net/http/httptest"
 
 	"goTool/interface/handler/authentication"
-	"goTool/interface/webResult"
 )
 
 const (
@@ -16,13 +15,17 @@ const (
 	REQUEST_PATH  = "/api/hello"
 )
 
+type JsonParameter struct {
+	Value string `json:"value"`
+}
+
 type requestBuilder struct {
 	method, path, token string
-	requestParam        webResult.JsonParameter
+	requestParam        JsonParameter
 }
 
 func (s requestBuilder) WithParam(requestParam string) requestBuilder {
-	s.requestParam = webResult.JsonParameter{Value: requestParam}
+	s.requestParam = JsonParameter{Value: requestParam}
 	return s
 }
 

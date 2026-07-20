@@ -1,4 +1,4 @@
-package webResult
+package mapper
 
 import (
 	"goTool/domain"
@@ -14,7 +14,7 @@ type SpaceWebResult struct {
 	CRUDMode string            `json:"CRUDMode"`
 }
 
-func (spaceWebResult SpaceWebResult) ConvertToSpace() *domain.Space {
+func (spaceWebResult SpaceWebResult) ConvertToDomain() *domain.Space {
 	space := new(domain.Space)
 	space.SetId(spaceWebResult.ID)
 	space.SetTitle(spaceWebResult.Title)
@@ -25,7 +25,7 @@ func (spaceWebResult SpaceWebResult) ConvertToSpace() *domain.Space {
 	spaces := new(domain.Spaces)
 	childrenSpace := spaceWebResult.Children
 	for _, childSpace := range childrenSpace {
-		spaces.AddSpace(childSpace.ConvertToSpace())
+		spaces.AddSpace(childSpace.ConvertToDomain())
 	}
 	space.SetChildrenSpaces(spaces)
 	return space

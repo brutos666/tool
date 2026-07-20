@@ -1,4 +1,4 @@
-package webResult
+package mapper
 
 import (
 	"net/http"

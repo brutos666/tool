@@ -10,7 +10,7 @@ import (
 	"goTool/domain"
 	"goTool/domain/domainMessage"
 	"goTool/interface/handler/call"
-	"goTool/interface/webResult"
+	"goTool/interface/mapper"
 	"goTool/utilities"
 
 	"github.com/lib/pq"
@@ -114,7 +114,7 @@ func (s *HandlerTestSuite) TestGetHandler(t *gotest.T) {
 		gotest.Equal(it, http.StatusOK, actualStatusCode)
 	})
 	t.It("Vérification de l'exécution d'une méthode avec paramètre", func(it *gotest.T) {
-		sayHelloParameter := func(ctx context.Context, dataAccess domain.DataAccess, parameter webResult.JsonParameter) (string, error) {
+		sayHelloParameter := func(ctx context.Context, dataAccess domain.DataAccess, parameter JsonParameter) (string, error) {
 			return "Hello " + parameter.Value, nil
 		}
 		request := requestBuilder{}.WithPostMethod().WithParam("Monsieur Vincent").build()
@@ -152,7 +152,7 @@ func (s *HandlerTestSuite) TestGetHandler(t *gotest.T) {
 			}
 			request := requestBuilder{}.WithGetMethod().build()
 
-			var actual *webResult.MessageWebResult
+			var actual *mapper.MessageWebResult
 			handlerFunc := getHandler(http.MethodGet, call.AsContextCall(withError), &domain.NilDataAccessProvider{})
 			actualStatusCode := handlerCaller{}.Call(request, handlerFunc, &actual)
 
@@ -169,7 +169,7 @@ func (s *HandlerTestSuite) TestGetHandler(t *gotest.T) {
 			}
 			request := requestBuilder{}.WithGetMethod().build()
 
-			var actual *webResult.MessageWebResult
+			var actual *mapper.MessageWebResult
 			handlerFunc := getHandler(http.MethodGet, call.AsContextCall(withError), &domain.NilDataAccessProvider{})
 			actualStatusCode := handlerCaller{}.Call(request, handlerFunc, &actual)
 
@@ -192,7 +192,7 @@ func (s *HandlerTestSuite) TestGetHandler(t *gotest.T) {
 			}
 			request := requestBuilder{}.WithGetMethod().build()
 
-			var actual *webResult.MessageWebResult
+			var actual *mapper.MessageWebResult
 			handlerFunc := getHandler(http.MethodGet, call.AsContextCall(withError), &domain.NilDataAccessProvider{})
 			actualStatusCode := handlerCaller{}.Call(request, handlerFunc, &actual)
 
@@ -211,7 +211,7 @@ func (s *HandlerTestSuite) TestGetHandler(t *gotest.T) {
 			}
 			request := requestBuilder{}.WithPostMethod().build()
 
-			var actual *webResult.MessageWebResult
+			var actual *mapper.MessageWebResult
 			handlerFunc := getHandler(http.MethodGet, call.AsContextCall(sayHello), &domain.NilDataAccessProvider{})
 			actualStatusCode := handlerCaller{}.Call(request, handlerFunc, &actual)
 
@@ -228,7 +228,7 @@ func (s *HandlerTestSuite) TestGetHandler(t *gotest.T) {
 			}
 			request := requestBuilder{}.WithGetMethod().build()
 
-			var actual *webResult.MessageWebResult
+			var actual *mapper.MessageWebResult
 			handlerFunc := getHandler(http.MethodPost, call.AsContextCall(sayHello), &domain.NilDataAccessProvider{})
 			actualStatusCode := handlerCaller{}.Call(request, handlerFunc, &actual)
 
@@ -265,7 +265,7 @@ func (s *HandlerTestSuite) TestGetHandler(t *gotest.T) {
 			}
 			request := requestBuilder{}.WithGetMethod().build()
 
-			var actual *webResult.MessageWebResult
+			var actual *mapper.MessageWebResult
 			handlerFunc := getHandler(http.MethodGet, call.AsBasicCall(sayHello), &dataAccessProviderMock{})
 			handlerCaller{}.Call(request, handlerFunc, &actual)
 
@@ -286,7 +286,7 @@ func (s *HandlerTestSuite) TestGetHandler(t *gotest.T) {
 			// NOTE : on remet le serveur à l'état démarré pour les tests suivants
 			defer srvService.ServerStart()
 
-			var actual *webResult.MessageWebResult
+			var actual *mapper.MessageWebResult
 			handlerFunc := getHandler(http.MethodGet, call.AsContextCall(sayHello), &domain.NilDataAccessProvider{})
 			actualStatusCode := handlerCaller{}.Call(request, handlerFunc, &actual)
 
@@ -304,7 +304,7 @@ func (s *HandlerTestSuite) TestGetHandler(t *gotest.T) {
 			}
 			request := requestBuilder{}.WithGetMethod().WithInvalidToken().build()
 
-			var actual *webResult.MessageWebResult
+			var actual *mapper.MessageWebResult
 			handlerFunc := getHandler(http.MethodGet, call.AsContextCall(sayHello), &domain.NilDataAccessProvider{})
 			actualStatusCode := handlerCaller{}.Call(request, handlerFunc, &actual)
 

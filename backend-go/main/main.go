@@ -9,7 +9,6 @@ import (
 	"goTool/infrastructure/bdd"
 	"goTool/infrastructure/bddAccess"
 	"goTool/interface/handler"
-	"goTool/interface/handler/authentication"
 	"goTool/interface/handler/call"
 	"goTool/interface/handler/route"
 	"goTool/interface/httpServer"
@@ -27,7 +26,6 @@ func main() {
 	if config.IsDev() {
 		httpServer.ServeLocalFrontEnd()
 	}
-	authentication.InitAuthService(application.AuthentificationService())
 	// Services : lien entre le métier et les données. Ici les données sont en base et la base de données est configurable
 	spaceQueryService := application.SpaceQueryService(bdd.SpaceQueryRepository())
 	spaceCommandService := application.SpaceCommandService(bdd.SpaceCommandRepository())
@@ -36,6 +34,7 @@ func main() {
 
 	httpServerService := httpServer.HttpServerService()
 	handler.InitServerService(&httpServerService)
+	handler.InitAuthService(application.AuthentificationService())
 	// Routes : les transformations des paramètres des requêtes et du retour sont faites dans la partie interface
 	handler.Verify(route.START)
 	handler.Stop(route.STOP)

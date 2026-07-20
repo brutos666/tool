@@ -1,4 +1,4 @@
-package webResult
+package mapper
 
 import (
 	"goTool/domain"
@@ -11,9 +11,9 @@ type NodeSpaceWebResult struct {
 	NextItemId     string         `json:"nextItemId,omitempty"`
 }
 
-func (node NodeSpaceWebResult) ConvertToNodeSpace() *domain.NodeSpace {
+func (node NodeSpaceWebResult) ConvertToDomain() *domain.NodeSpace {
 	nodeSpaceParam := new(domain.NodeSpace)
-	nodeSpaceParam.SetSpace(node.Space.ConvertToSpace())
+	nodeSpaceParam.SetSpace(node.Space.ConvertToDomain())
 	nodeSpaceParam.SetPreviousId(node.PreviousItemId)
 	nodeSpaceParam.SetParentId(node.ParentItemId)
 	nodeSpaceParam.SetNextId(node.NextItemId)
