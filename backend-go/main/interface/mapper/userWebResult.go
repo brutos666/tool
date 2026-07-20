@@ -20,6 +20,14 @@ func ConvertUserToWebResult(user *domain.User) *UserWebResult {
 	return userModel
 }
 
+func ConvertUsersToWebResult(users []*domain.User) []*UserWebResult {
+	spaceList := make([]*UserWebResult, len(users))
+	for index := range users {
+		spaceList[index] = ConvertUserToWebResult(users[index])
+	}
+	return spaceList
+}
+
 type RegisterUserWebResult struct {
 	FirstName string `json:"firstName" validate:"required,min=2,max=100"`
 	LastName  string `json:"lastName" validate:"required,min=2,max=100"`

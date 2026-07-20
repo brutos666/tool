@@ -47,3 +47,11 @@ func ConvertSpaceToWebResult(space *domain.Space) *SpaceWebResult {
 	spaceWebResult.Children = children
 	return spaceWebResult
 }
+
+func ConvertSpacesToWebResult(spaces []*domain.Space) []*SpaceWebResult {
+	spaceList := make([]*SpaceWebResult, len(spaces))
+	for index := range spaces {
+		spaceList[index] = ConvertSpaceToWebResult(spaces[index])
+	}
+	return spaceList
+}

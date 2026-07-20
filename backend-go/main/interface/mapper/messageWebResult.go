@@ -39,7 +39,7 @@ func ConvertHttpMessageToWebResult(message *responseMessage.Message) *MessageWeb
 	return messageWebResult
 }
 
-func ConvertDomainMessageToWebResult(message *domainMessage.Message) *MessageWebResult {
+func ConvertMessageToWebResult(message *domainMessage.Message) *MessageWebResult {
 	messageWebResult := new(MessageWebResult)
 	// TODO : côté front, distinguer les messages des erreurs par rapport au statusCode
 	messageWebResult.StatusCode = http.StatusOK
