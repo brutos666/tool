@@ -7,7 +7,6 @@ import (
 
 	"goTool/domain"
 	"goTool/interface/handler/authentication"
-	"goTool/interface/handler/call"
 	"goTool/interface/handler/responseMessage"
 )
 
@@ -44,7 +43,7 @@ func Verify(requestPath string) {
 		message := responseMessage.NewMessage(SERVER_STARTED, http.StatusOK)
 		return message, nil
 	}
-	http.HandleFunc(requestPath, getHandler(http.MethodGet, call.AsContextCall(startApp), &domain.NilDataAccessProvider{}))
+	http.HandleFunc(requestPath, getHandler(http.MethodGet, AsContextCall(startApp), &domain.NilDataAccessProvider{}))
 }
 
 func Stop(requestPath string) {
@@ -53,7 +52,7 @@ func Stop(requestPath string) {
 		srvService.ServerStop()
 		return message, nil
 	}
-	http.HandleFunc(requestPath, getHandler(http.MethodGet, call.AsContextCall(stopApp), &domain.NilDataAccessProvider{}))
+	http.HandleFunc(requestPath, getHandler(http.MethodGet, AsContextCall(stopApp), &domain.NilDataAccessProvider{}))
 }
 
 func stopServerIfPanic() {

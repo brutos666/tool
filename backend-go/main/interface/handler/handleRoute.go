@@ -8,10 +8,8 @@ import (
 
 	"goTool/domain"
 	"goTool/interface/handler/authentication"
-	"goTool/interface/handler/call"
 	"goTool/interface/handler/responseMessage"
 	"goTool/interface/handler/route"
-	"goTool/interface/mapper"
 )
 
 const (
@@ -19,16 +17,16 @@ const (
 	REQUEST_TIMEOUT       = 100 * time.Second
 )
 
-func HandleGetRoute(requestPath string, toCall call.WrappedCall, dataAccessProvider domain.DataAccessProvider) {
+func HandleGetRoute(requestPath string, toCall wrappedCall, dataAccessProvider domain.DataAccessProvider) {
 	http.HandleFunc(requestPath, getHandler(http.MethodGet, toCall, dataAccessProvider))
 }
 
-func HandlePostRoute(requestPath string, toCall call.WrappedCall, dataAccessProvider domain.DataAccessProvider) {
+func HandlePostRoute(requestPath string, toCall wrappedCall, dataAccessProvider domain.DataAccessProvider) {
 	http.HandleFunc(requestPath, getHandler(http.MethodPost, toCall, dataAccessProvider))
 }
 
 // getHandler construit la fonction contenant les appels aux middlewares, ainsi que l'appel du service
-func getHandler(method string, toCall call.WrappedCall, dataAccessProvider domain.DataAccessProvider) func(response http.ResponseWriter, request *http.Request) {
+func getHandler(method string, toCall wrappedCall, dataAccessProvider domain.DataAccessProvider) func(response http.ResponseWriter, request *http.Request) {
 	return func(response http.ResponseWriter, request *http.Request) {
 		requestPath := request.URL.Path
 		requestMethod := request.Method
@@ -71,7 +69,7 @@ func getHandler(method string, toCall call.WrappedCall, dataAccessProvider domai
 // appel Middleware pour vérifier si le serveur est en cours d'arrêt et si l'utilisateur est authentifié
 // appel de la méthode liée à la route (service)
 // envoi de la réponse
-func processRequest(response http.ResponseWriter, request *http.Request, toCall call.WrappedCall, dataAccess domain.DataAccess) {
+func processRequest(response http.ResponseWriter, request *http.Request, toCall wrappedCall, dataAccess domain.DataAccess) {
 	requestPath := request.URL.Path
 
 	ctx, cancel := context.WithTimeout(request.Context(), REQUEST_TIMEOUT)
@@ -83,15 +81,10 @@ func processRequest(response http.ResponseWriter, request *http.Request, toCall 
 		sendError(response, requestPath, err)
 		return
 	}
-	values, err := toCall(ctx, call.WithContext(dataAccess, connectedUser), request)
-	if err != nil {
-		sendError(response, requestPath, err)
-		return
-	}
-	sendOkResponse(response, requestPath, values)
+	toCall(ctx, WithContext(dataAccess, connectedUser), response, request)
 }
 
-func processLoginRequest(response http.ResponseWriter, request *http.Request, toCall call.WrappedCall, dataAccess domain.DataAccess) {
+func processLoginRequest(response http.ResponseWriter, request *http.Request, toCall wrappedCall, dataAccess domain.DataAccess) {
 	requestPath := request.URL.Path
 
 	ctx, cancel := context.WithTimeout(request.Context(), REQUEST_TIMEOUT)
@@ -99,7 +92,7 @@ func processLoginRequest(response http.ResponseWriter, request *http.Request, to
 	defer stopServerIfPanic()
 
 	tokenGenerator := new(authentication.TokensGenerator)
-	callContext := call.WithLoginContext(dataAccess, tokenGenerator)
+	callContext := WithLoginContext(dataAccess, tokenGenerator)
 
 	if requestPath == route.REFRESH {
 		connectedUser, err := authentication.AuthenticateWithRefreshToken(request)
@@ -110,14 +103,5 @@ func processLoginRequest(response http.ResponseWriter, request *http.Request, to
 		callContext.AddConnectedUser(connectedUser)
 	}
 
-	loggedUser, err := toCall(ctx, callContext, request)
-	if err != nil {
-		sendError(response, requestPath, err)
-		return
-	}
-
-	authentication.SendRefreshTokenCookie(response, tokenGenerator.GetRefreshToken())
-	loggedUser.(*mapper.LoggedUserWebResult).SetToken(tokenGenerator.GetAccessToken())
-
-	sendOkResponse(response, requestPath, loggedUser)
+	toCall(ctx, callContext, response, request)
 }

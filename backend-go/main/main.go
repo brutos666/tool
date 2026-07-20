@@ -9,7 +9,6 @@ import (
 	"goTool/infrastructure/bdd"
 	"goTool/infrastructure/bddAccess"
 	"goTool/interface/handler"
-	"goTool/interface/handler/call"
 	"goTool/interface/handler/route"
 	"goTool/interface/httpServer"
 )
@@ -38,14 +37,14 @@ func main() {
 	// Routes : les transformations des paramètres des requêtes et du retour sont faites dans la partie interface
 	handler.Verify(route.START)
 	handler.Stop(route.STOP)
-	handler.HandlePostRoute(route.ITEM_SAVE, call.AsCallWithParam(spaceCommandService.Save), bddAccess.AsWrite())
-	handler.HandleGetRoute(route.ITEM_FIND_ALL, call.AsBasicCall(spaceQueryService.FindAll), bddAccess.AsRead())
+	handler.HandlePostRoute(route.ITEM_SAVE, handler.AsCallWithParam(spaceCommandService.Save), bddAccess.AsWrite())
+	handler.HandleGetRoute(route.ITEM_FIND_ALL, handler.AsBasicCall(spaceQueryService.FindAll), bddAccess.AsRead())
 
-	handler.HandlePostRoute(route.REFRESH, call.AsRefreshCall(userCommandService.Refresh), bddAccess.AsWrite())
-	handler.HandlePostRoute(route.SIGNUP, call.AsLoginCall(userCommandService.Signup), bddAccess.AsWrite())
-	handler.HandlePostRoute(route.LOGIN, call.AsLoginCall(userCommandService.Login), bddAccess.AsWrite())
+	handler.HandlePostRoute(route.REFRESH, handler.AsRefreshCall(userCommandService.Refresh), bddAccess.AsWrite())
+	handler.HandlePostRoute(route.SIGNUP, handler.AsLoginCall(userCommandService.Signup), bddAccess.AsWrite())
+	handler.HandlePostRoute(route.LOGIN, handler.AsLoginCall(userCommandService.Login), bddAccess.AsWrite())
 
-	handler.HandleGetRoute(route.USER_FIND_ALL, call.AsBasicCall(userQueryService.FindAll), bddAccess.AsRead())
+	handler.HandleGetRoute(route.USER_FIND_ALL, handler.AsBasicCall(userQueryService.FindAll), bddAccess.AsRead())
 
 	httpServerService.ServerWait()
 
