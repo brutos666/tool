@@ -43,7 +43,7 @@ func Verify(requestPath string) {
 		message := responseMessage.NewMessage(SERVER_STARTED, http.StatusOK)
 		return message, nil
 	}
-	http.HandleFunc(requestPath, getHandler(http.MethodGet, AsContextCall(startApp), &domain.NilDataAccessProvider{}))
+	http.HandleFunc(requestPath, getHandler(http.MethodGet, AsContextCall(startApp)))
 }
 
 func Stop(requestPath string) {
@@ -52,7 +52,7 @@ func Stop(requestPath string) {
 		srvService.ServerStop()
 		return message, nil
 	}
-	http.HandleFunc(requestPath, getHandler(http.MethodGet, AsContextCall(stopApp), &domain.NilDataAccessProvider{}))
+	http.HandleFunc(requestPath, getHandler(http.MethodGet, AsContextCall(stopApp)))
 }
 
 func stopServerIfPanic() {

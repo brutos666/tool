@@ -24,7 +24,7 @@ type (
 	LoginCall[P, R any]         func(context context.Context, dataAccess domain.DataAccess, tokenGeneration domain.TokensProduct, parameter P) (R, error)
 	RefreshCall                 func(context context.Context, dataAccess domain.DataAccess, tokenGeneration domain.TokensProduct, user domain.ConnectedUser) (*domain.LoggedUser, error)
 	wrappedCall                 func(context context.Context, callContext CallContext, response http.ResponseWriter, request *http.Request)
-	wrappedCall2                func(context context.Context, callContext CallContext, request *http.Request) (values any, err error)
+	wrappedRequestCall          func(context context.Context, callContext CallContext, request *http.Request) (values any, err error)
 	WrappedCallWithParam[P any] func(context context.Context, callContext CallContext, parameter P) (values any, err error)
 )
 
@@ -37,42 +37,42 @@ func AsContextCall[R any](callback OnlyContextCall[R]) wrappedCall {
 }
 
 // AsBasicCall englobe dans des fonctions imbriqués l'appel à la fonction (démarrage et l'arrêt bdd, conversion de la réponse)
-func AsBasicCall[R any](callback BasicCall[R]) wrappedCall {
+func AsBasicCall[R any](callback BasicCall[R], dataAccessProvider domain.DataAccessProvider) wrappedCall {
 	wrappedCall := func(ctx context.Context, callContext CallContext, request *http.Request) (any, error) {
 		return callback(ctx, callContext.dataAccess)
 	}
-	wrappedCall = wrapWithDataAccess(wrappedCall)
+	wrappedCall = wrapDataAccess(wrappedCall, dataAccessProvider)
 	return wrapResponse[R](wrappedCall)
 }
 
 // AsCallWithParam englobe dans des fonctions imbriqués l'appel à la fonction (passage du paramètre de la requête, bdd, conversion réponse)
-func AsCallWithParam[P, R any](callback CallWithParam[P, R]) wrappedCall {
+func AsCallWithParam[P, R any](callback CallWithParam[P, R], dataAccessProvider domain.DataAccessProvider) wrappedCall {
 	call := func(ctx context.Context, callContext CallContext, domainParameter P) (any, error) {
 		return callback(ctx, callContext.dataAccess, domainParameter)
 	}
 	wrappedCall := wrapRequestParameter(call)
-	wrappedCall = wrapWithDataAccess(wrappedCall)
+	wrappedCall = wrapDataAccess(wrappedCall, dataAccessProvider)
 	return wrapResponse[R](wrappedCall)
 }
 
-func AsLoginCall[P, R any](callback LoginCall[P, R]) wrappedCall {
+func AsLoginCall[P, R any](callback LoginCall[P, R], dataAccessProvider domain.DataAccessProvider) wrappedCall {
 	call := func(ctx context.Context, callContext CallContext, domainParameter P) (any, error) {
 		return callback(ctx, callContext.dataAccess, callContext.tokenGenerator, domainParameter)
 	}
 	wrappedCall := wrapRequestParameter(call)
-	wrappedCall = wrapWithDataAccess(wrappedCall)
+	wrappedCall = wrapDataAccess(wrappedCall, dataAccessProvider)
 	return wrapLoginResponse(wrappedCall)
 }
 
-func AsRefreshCall(callback RefreshCall) wrappedCall {
+func AsRefreshCall(callback RefreshCall, dataAccessProvider domain.DataAccessProvider) wrappedCall {
 	call := func(ctx context.Context, callContext CallContext, request *http.Request) (any, error) {
 		return callback(ctx, callContext.dataAccess, callContext.tokenGenerator, *callContext.user)
 	}
-	wrappedCall := wrapWithDataAccess(call)
+	wrappedCall := wrapDataAccess(call, dataAccessProvider)
 	return wrapLoginResponse(wrappedCall)
 }
 
-func wrapRequestParameter[P any](wrappedCall WrappedCallWithParam[P]) wrappedCall2 {
+func wrapRequestParameter[P any](wrappedCall WrappedCallWithParam[P]) wrappedRequestCall {
 	var domainParameter P
 	mapper := mapper.GetRequestMapper[P](domainParameter)
 
@@ -95,7 +95,7 @@ func wrapRequestParameter[P any](wrappedCall WrappedCallWithParam[P]) wrappedCal
 	}
 }
 
-func wrapResponse[R any](wrappedCall wrappedCall2) wrappedCall {
+func wrapResponse[R any](wrappedCall wrappedRequestCall) wrappedCall {
 	var result R
 	mapper := mapper.GetResponseMapper(result)
 
@@ -110,7 +110,7 @@ func wrapResponse[R any](wrappedCall wrappedCall2) wrappedCall {
 	}
 }
 
-func wrapLoginResponse(wrappedCall wrappedCall2) wrappedCall {
+func wrapLoginResponse(wrappedCall wrappedRequestCall) wrappedCall {
 	return func(ctx context.Context, callContext CallContext, response http.ResponseWriter, request *http.Request) {
 		requestPath := request.URL.Path
 		loggedUser, err := wrappedCall(ctx, callContext, request)
@@ -128,9 +128,9 @@ func wrapLoginResponse(wrappedCall wrappedCall2) wrappedCall {
 	}
 }
 
-func wrapWithDataAccess(wrappedCall wrappedCall2) wrappedCall2 {
+func wrapDataAccess(wrappedCall wrappedRequestCall, dataAccessProvider domain.DataAccessProvider) wrappedRequestCall {
 	return func(ctx context.Context, callContext CallContext, request *http.Request) (values any, err error) {
-		dataAccess := callContext.dataAccess
+		dataAccess := dataAccessProvider.GetInstance()
 		if dataAccess == nil {
 			panic(DATA_ACCESS_ERROR)
 		}
@@ -146,6 +146,7 @@ func wrapWithDataAccess(wrappedCall wrappedCall2) wrappedCall2 {
 		defer func() {
 			err = utilities.JoinErrors(err, dataAccess.Close())
 		}()
+		callContext.AddDataAccess(dataAccess)
 		values, err = wrappedCall(ctx, callContext, request)
 		return
 	}

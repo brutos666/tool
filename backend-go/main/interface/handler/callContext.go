@@ -9,11 +9,12 @@ type CallContext struct {
 }
 
 func (c *CallContext) AddConnectedUser(user *domain.ConnectedUser) { c.user = user }
+func (c *CallContext) AddDataAccess(dataAccess domain.DataAccess)  { c.dataAccess = dataAccess }
 
-func WithContext(dataAccess domain.DataAccess, user *domain.ConnectedUser) CallContext {
-	return CallContext{dataAccess: dataAccess, user: user}
+func WithConnectedUser(user *domain.ConnectedUser) CallContext {
+	return CallContext{user: user}
 }
 
-func WithLoginContext(dataAccess domain.DataAccess, tokenGenerator domain.TokensProduct) CallContext {
-	return CallContext{dataAccess: dataAccess, tokenGenerator: tokenGenerator}
+func WithTokenGenerator(tokenGenerator domain.TokensProduct) CallContext {
+	return CallContext{tokenGenerator: tokenGenerator}
 }
