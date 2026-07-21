@@ -16,16 +16,16 @@ const (
 	REQUEST_TIMEOUT       = 100 * time.Second
 )
 
-func HandleGetRoute(requestPath string, toCall wrappedCall) {
+func HandleGetRoute(requestPath string, toCall responseRequestCall) {
 	http.HandleFunc(requestPath, getHandler(http.MethodGet, toCall))
 }
 
-func HandlePostRoute(requestPath string, toCall wrappedCall) {
+func HandlePostRoute(requestPath string, toCall responseRequestCall) {
 	http.HandleFunc(requestPath, getHandler(http.MethodPost, toCall))
 }
 
 // getHandler construit la fonction contenant les appels aux middlewares, ainsi que l'appel du service
-func getHandler(method string, toCall wrappedCall) func(response http.ResponseWriter, request *http.Request) {
+func getHandler(method string, toCall responseRequestCall) func(response http.ResponseWriter, request *http.Request) {
 	return func(response http.ResponseWriter, request *http.Request) {
 		requestPath := request.URL.Path
 		requestMethod := request.Method
@@ -67,7 +67,7 @@ func getHandler(method string, toCall wrappedCall) func(response http.ResponseWr
 // appel Middleware pour vérifier si le serveur est en cours d'arrêt et si l'utilisateur est authentifié
 // appel de la méthode liée à la route (service)
 // envoi de la réponse
-func processRequest(response http.ResponseWriter, request *http.Request, toCall wrappedCall) {
+func processRequest(response http.ResponseWriter, request *http.Request, toCall responseRequestCall) {
 	requestPath := request.URL.Path
 
 	ctx, cancel := context.WithTimeout(request.Context(), REQUEST_TIMEOUT)
@@ -83,7 +83,7 @@ func processRequest(response http.ResponseWriter, request *http.Request, toCall 
 	toCall(ctx, WithConnectedUser(connectedUser), response, request)
 }
 
-func processLoginRequest(response http.ResponseWriter, request *http.Request, toCall wrappedCall) {
+func processLoginRequest(response http.ResponseWriter, request *http.Request, toCall responseRequestCall) {
 	requestPath := request.URL.Path
 
 	ctx, cancel := context.WithTimeout(request.Context(), REQUEST_TIMEOUT)

@@ -20,7 +20,10 @@ func (mapper IdealMapper[D, W]) ConvertToDomain(webResult W) *D { return webResu
 
 type ResponseMapper struct {
 	ConvertToWebResult func(domain any) any
+	login              bool
 }
+
+func (mapper ResponseMapper) IsLoginResponse() bool { return mapper.login }
 
 type RequestMapper struct {
 	GetWebResultInstance func() any
@@ -51,6 +54,7 @@ func GetRequestMapper[I any](input any) RequestMapper {
 
 func GetResponseMapper(output any) ResponseMapper {
 	var convertToWebResult func(domain any) any
+	forLogin := false
 
 	switch output.(type) {
 	case *domain.NodeSpace:
@@ -61,6 +65,7 @@ func GetResponseMapper(output any) ResponseMapper {
 		convertToWebResult = func(domainParam any) any { return ConvertSpacesToWebResult(domainParam.([]*domain.Space)) }
 	case *domain.LoggedUser:
 		convertToWebResult = func(domainParam any) any { return ConvertLoggedUserToWebResult(domainParam.(*domain.LoggedUser)) }
+		forLogin = true
 	case *domain.User:
 		convertToWebResult = func(domainParam any) any { return ConvertUserToWebResult(domainParam.(*domain.User)) }
 	case []*domain.User:
@@ -82,5 +87,5 @@ func GetResponseMapper(output any) ResponseMapper {
 		convertToWebResult = func(domainParam any) any { return domainParam }
 	}
 
-	return ResponseMapper{ConvertToWebResult: convertToWebResult}
+	return ResponseMapper{ConvertToWebResult: convertToWebResult, login: forLogin}
 }
