@@ -38,21 +38,15 @@ func InitAuthService(service AuthentificationService) {
 	authentication.InitAuthService(service)
 }
 
-func Verify(requestPath string) {
-	startApp := func(ctx context.Context) (*responseMessage.Message, error) {
-		message := responseMessage.NewMessage(SERVER_STARTED, http.StatusOK)
-		return message, nil
-	}
-	http.HandleFunc(requestPath, getHandler(http.MethodGet, AsContextCall(startApp)))
+func VerifyIfStarted(ctx context.Context) (*responseMessage.Message, error) {
+	message := responseMessage.NewMessage(SERVER_STARTED, http.StatusOK)
+	return message, nil
 }
 
-func Stop(requestPath string) {
-	stopApp := func(ctx context.Context) (*responseMessage.Message, error) {
-		message := responseMessage.NewMessage(SERVER_ABOUT_TO_STOP, http.StatusOK)
-		srvService.ServerStop()
-		return message, nil
-	}
-	http.HandleFunc(requestPath, getHandler(http.MethodGet, AsContextCall(stopApp)))
+func StopApp(ctx context.Context) (*responseMessage.Message, error) {
+	srvService.ServerStop()
+	message := responseMessage.NewMessage(SERVER_ABOUT_TO_STOP, http.StatusOK)
+	return message, nil
 }
 
 func stopServerIfPanic() {

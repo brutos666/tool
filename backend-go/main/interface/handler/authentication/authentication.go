@@ -27,7 +27,7 @@ func InitAuthService(service AuthentificationService) { authService = service }
 
 var noAuthentication = []string{
 	route.STOP,
-	route.TEST,
+	route.START,
 	"/",
 }
 

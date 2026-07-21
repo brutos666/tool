@@ -19,7 +19,7 @@ var validate = validator.New()
 
 type (
 	OnlyContextCall[R any]      func(context context.Context) (R, error)
-	BasicCall[R any]            func(context context.Context, dataAccess domain.DataAccess) (R, error)
+	DataAccessCall[R any]       func(context context.Context, dataAccess domain.DataAccess) (R, error)
 	CallWithParam[P, R any]     func(context context.Context, dataAccess domain.DataAccess, parameter P) (R, error)
 	LoginCall[P, R any]         func(context context.Context, dataAccess domain.DataAccess, tokenGeneration domain.TokensProduct, parameter P) (R, error)
 	RefreshCall                 func(context context.Context, dataAccess domain.DataAccess, tokenGeneration domain.TokensProduct, user domain.ConnectedUser) (*domain.LoggedUser, error)
@@ -28,16 +28,16 @@ type (
 	WrappedCallWithParam[P any] func(context context.Context, callContext CallContext, parameter P) (values any, err error)
 )
 
-// AsContextCall englobe l'appel à la fonction dans un appel plus générique
-func AsContextCall[R any](callback OnlyContextCall[R]) wrappedCall {
+// AsNoDataAccessCall englobe l'appel à la fonction dans un appel plus générique
+func AsNoDataAccessCall[R any](callback OnlyContextCall[R]) wrappedCall {
 	wrappedCall := func(ctx context.Context, callContext CallContext, request *http.Request) (any, error) {
 		return callback(ctx)
 	}
 	return wrapResponse[R](wrappedCall)
 }
 
-// AsBasicCall englobe dans des fonctions imbriqués l'appel à la fonction (démarrage et l'arrêt bdd, conversion de la réponse)
-func AsBasicCall[R any](callback BasicCall[R], dataAccessProvider domain.DataAccessProvider) wrappedCall {
+// AsDataAccessCall englobe dans des fonctions imbriqués l'appel à la fonction (démarrage et l'arrêt bdd, conversion de la réponse)
+func AsDataAccessCall[R any](callback DataAccessCall[R], dataAccessProvider domain.DataAccessProvider) wrappedCall {
 	wrappedCall := func(ctx context.Context, callContext CallContext, request *http.Request) (any, error) {
 		return callback(ctx, callContext.dataAccess)
 	}
@@ -45,8 +45,8 @@ func AsBasicCall[R any](callback BasicCall[R], dataAccessProvider domain.DataAcc
 	return wrapResponse[R](wrappedCall)
 }
 
-// AsCallWithParam englobe dans des fonctions imbriqués l'appel à la fonction (passage du paramètre de la requête, bdd, conversion réponse)
-func AsCallWithParam[P, R any](callback CallWithParam[P, R], dataAccessProvider domain.DataAccessProvider) wrappedCall {
+// AsParamDataAccessCall englobe dans des fonctions imbriqués l'appel à la fonction (passage du paramètre de la requête, bdd, conversion réponse)
+func AsParamDataAccessCall[P, R any](callback CallWithParam[P, R], dataAccessProvider domain.DataAccessProvider) wrappedCall {
 	call := func(ctx context.Context, callContext CallContext, domainParameter P) (any, error) {
 		return callback(ctx, callContext.dataAccess, domainParameter)
 	}

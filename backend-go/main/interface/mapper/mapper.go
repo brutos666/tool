@@ -69,8 +69,8 @@ func GetResponseMapper(output any) ResponseMapper {
 		convertToWebResult = func(domainParam any) any {
 			return ConvertHttpMessageToWebResult(domainParam.(*responseMessage.Message))
 		}
-	case *domainMessage.Message:
-		convertToWebResult = func(domainParam any) any { return ConvertMessageToWebResult(domainParam.(*domainMessage.Message)) }
+	case domainMessage.Message:
+		convertToWebResult = func(domainParam any) any { return ConvertMessageToWebResult(domainParam.(domainMessage.Message)) }
 
 		// NOTE : si on choisit de ne pas transformer la réponse (vocabulaire et forme identique à la partie cliente)
 		// le formaliser ici en ajoutant les cases

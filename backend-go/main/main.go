@@ -44,17 +44,17 @@ func main() {
 	handler.InitServerService(&httpServerService)
 	handler.InitAuthService(application.AuthentificationService())
 	// Routes : les transformations des paramètres des requêtes et du retour sont faites dans la partie interface
-	handler.Verify(route.START)
-	handler.Stop(route.STOP)
+	handler.HandleGetRoute(route.START, handler.AsNoDataAccessCall(handler.VerifyIfStarted))
+	handler.HandleGetRoute(route.STOP, handler.AsNoDataAccessCall(handler.StopApp))
 
-	handler.HandlePostRoute(route.ITEM_SAVE, handler.AsCallWithParam(spaceCommandService.Save, bddWriteService))
-	handler.HandleGetRoute(route.ITEM_FIND_ALL, handler.AsBasicCall(spaceQueryService.FindAll, bddReadService))
+	handler.HandlePostRoute(route.ITEM_SAVE, handler.AsParamDataAccessCall(spaceCommandService.Save, bddWriteService))
+	handler.HandleGetRoute(route.ITEM_FIND_ALL, handler.AsDataAccessCall(spaceQueryService.FindAll, bddReadService))
 
 	handler.HandlePostRoute(route.REFRESH, handler.AsRefreshCall(userCommandService.Refresh, bddWriteService))
 	handler.HandlePostRoute(route.SIGNUP, handler.AsLoginCall(userCommandService.Signup, bddWriteService))
 	handler.HandlePostRoute(route.LOGIN, handler.AsLoginCall(userCommandService.Login, bddWriteService))
 
-	handler.HandleGetRoute(route.USER_FIND_ALL, handler.AsBasicCall(userQueryService.FindAll, bddReadService))
+	handler.HandleGetRoute(route.USER_FIND_ALL, handler.AsDataAccessCall(userQueryService.FindAll, bddReadService))
 
 	// Attente arrêt du serveur http
 	httpServerService.ServerWait()

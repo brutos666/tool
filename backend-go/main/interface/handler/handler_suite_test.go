@@ -106,7 +106,7 @@ func (s *HandlerTestSuite) TestGetHandler(t *gotest.T) {
 		request := requestBuilder{}.WithGetMethod().build()
 
 		var actual string
-		handlerFunc := getHandler(http.MethodGet, AsContextCall(sayHello))
+		handlerFunc := getHandler(http.MethodGet, AsNoDataAccessCall(sayHello))
 		actualStatusCode := handlerCaller{}.Call(request, handlerFunc, &actual)
 
 		gotest.Equal(it, "Hello", actual)
@@ -119,7 +119,7 @@ func (s *HandlerTestSuite) TestGetHandler(t *gotest.T) {
 		request := requestBuilder{}.WithPostMethod().WithParam("Monsieur Vincent").build()
 
 		var actual string
-		handlerFunc := getHandler(http.MethodPost, AsCallWithParam(sayHelloParameter, &dataAccessProviderMock{}))
+		handlerFunc := getHandler(http.MethodPost, AsParamDataAccessCall(sayHelloParameter, &dataAccessProviderMock{}))
 		actualStatusCode := handlerCaller{}.Call(request, handlerFunc, &actual)
 
 		gotest.Equal(it, "Hello Monsieur Vincent", actual)
@@ -134,7 +134,7 @@ func (s *HandlerTestSuite) TestGetHandler(t *gotest.T) {
 
 			recover := gotest.Panics(it, func() {
 				noDataAccess := domain.NilDataAccessProvider{}
-				handlerFunc := getHandler(http.MethodGet, AsBasicCall(sayHello, &noDataAccess))
+				handlerFunc := getHandler(http.MethodGet, AsDataAccessCall(sayHello, &noDataAccess))
 				handlerFunc(httptest.NewRecorder(), request)
 			})
 			if recover != nil {
@@ -152,7 +152,7 @@ func (s *HandlerTestSuite) TestGetHandler(t *gotest.T) {
 			request := requestBuilder{}.WithGetMethod().build()
 
 			var actual *mapper.MessageWebResult
-			handlerFunc := getHandler(http.MethodGet, AsContextCall(withError))
+			handlerFunc := getHandler(http.MethodGet, AsNoDataAccessCall(withError))
 			actualStatusCode := handlerCaller{}.Call(request, handlerFunc, &actual)
 
 			gotest.Equal(it, ERROR, actual.GetMessage())
@@ -169,7 +169,7 @@ func (s *HandlerTestSuite) TestGetHandler(t *gotest.T) {
 			request := requestBuilder{}.WithGetMethod().build()
 
 			var actual *mapper.MessageWebResult
-			handlerFunc := getHandler(http.MethodGet, AsContextCall(withError))
+			handlerFunc := getHandler(http.MethodGet, AsNoDataAccessCall(withError))
 			actualStatusCode := handlerCaller{}.Call(request, handlerFunc, &actual)
 
 			gotest.Contains(it, actual.GetMessage(), DETAIL_ERROR)
@@ -192,7 +192,7 @@ func (s *HandlerTestSuite) TestGetHandler(t *gotest.T) {
 			request := requestBuilder{}.WithGetMethod().build()
 
 			var actual *mapper.MessageWebResult
-			handlerFunc := getHandler(http.MethodGet, AsContextCall(withError))
+			handlerFunc := getHandler(http.MethodGet, AsNoDataAccessCall(withError))
 			actualStatusCode := handlerCaller{}.Call(request, handlerFunc, &actual)
 
 			gotest.Contains(it, actual.GetMessage(), ADDITIONAL_ERROR)
@@ -211,7 +211,7 @@ func (s *HandlerTestSuite) TestGetHandler(t *gotest.T) {
 			request := requestBuilder{}.WithPostMethod().build()
 
 			var actual *mapper.MessageWebResult
-			handlerFunc := getHandler(http.MethodGet, AsContextCall(sayHello))
+			handlerFunc := getHandler(http.MethodGet, AsNoDataAccessCall(sayHello))
 			actualStatusCode := handlerCaller{}.Call(request, handlerFunc, &actual)
 
 			gotest.Equal(it, METHOD_IS_NOT_ALLOWED, actual.GetMessage())
@@ -228,7 +228,7 @@ func (s *HandlerTestSuite) TestGetHandler(t *gotest.T) {
 			request := requestBuilder{}.WithGetMethod().build()
 
 			var actual *mapper.MessageWebResult
-			handlerFunc := getHandler(http.MethodPost, AsContextCall(sayHello))
+			handlerFunc := getHandler(http.MethodPost, AsNoDataAccessCall(sayHello))
 			actualStatusCode := handlerCaller{}.Call(request, handlerFunc, &actual)
 
 			gotest.Equal(it, METHOD_IS_NOT_ALLOWED, actual.GetMessage())
@@ -248,7 +248,7 @@ func (s *HandlerTestSuite) TestGetHandler(t *gotest.T) {
 			request := requestBuilder{}.WithGetMethod().build()
 
 			var actual string
-			handlerFunc := getHandler(http.MethodGet, AsBasicCall(sayHello, &dataAccessProviderMock{}))
+			handlerFunc := getHandler(http.MethodGet, AsDataAccessCall(sayHello, &dataAccessProviderMock{}))
 			handlerCaller{}.Call(request, handlerFunc, &actual)
 
 			gotest.False(it, dataAccessMock.isOpen(), "L'accès aux données doit être fermée après l'appel de la méthode")
@@ -265,7 +265,7 @@ func (s *HandlerTestSuite) TestGetHandler(t *gotest.T) {
 			request := requestBuilder{}.WithGetMethod().build()
 
 			var actual *mapper.MessageWebResult
-			handlerFunc := getHandler(http.MethodGet, AsBasicCall(sayHello, &dataAccessProviderMock{}))
+			handlerFunc := getHandler(http.MethodGet, AsDataAccessCall(sayHello, &dataAccessProviderMock{}))
 			handlerCaller{}.Call(request, handlerFunc, &actual)
 
 			gotest.Equal(it, ERROR, actual.GetMessage(), "La méthode renvoie une erreur : cette erreur doit être retournée dans la réponse")
@@ -286,7 +286,7 @@ func (s *HandlerTestSuite) TestGetHandler(t *gotest.T) {
 			defer srvService.ServerStart()
 
 			var actual *mapper.MessageWebResult
-			handlerFunc := getHandler(http.MethodGet, AsContextCall(sayHello))
+			handlerFunc := getHandler(http.MethodGet, AsNoDataAccessCall(sayHello))
 			actualStatusCode := handlerCaller{}.Call(request, handlerFunc, &actual)
 
 			gotest.Equal(it, SERVER_IS_STOPPING, actual.GetMessage())
@@ -304,7 +304,7 @@ func (s *HandlerTestSuite) TestGetHandler(t *gotest.T) {
 			request := requestBuilder{}.WithGetMethod().WithInvalidToken().build()
 
 			var actual *mapper.MessageWebResult
-			handlerFunc := getHandler(http.MethodGet, AsContextCall(sayHello))
+			handlerFunc := getHandler(http.MethodGet, AsNoDataAccessCall(sayHello))
 			actualStatusCode := handlerCaller{}.Call(request, handlerFunc, &actual)
 
 			gotest.Equal(it, TOKEN_INVALID_ERROR, actual.GetMessage())
