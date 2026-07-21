@@ -49,9 +49,8 @@ func (s *AuthServiceTestSuite) TestVerify(t *gotest.T) {
 	})
 
 	t.When("Le jeton est vide", func(w *gotest.T) {
+		connectedUser, err := s.svc.Verify(EMPTY_TOKEN, s.tokenGenerator)
 		w.It("retourne une erreur indiquant que l'utilisateur n'est pas connecté avec une cause de token absent", func(it *gotest.T) {
-			connectedUser, err := s.svc.Verify(EMPTY_TOKEN, s.tokenGenerator)
-
 			expectedError := domainMessage.TokenErrorf(NOT_LOGGED)
 			expectedError.SetTokenAbsent()
 			gotest.ErrorIs(it, err, expectedError)
@@ -59,9 +58,8 @@ func (s *AuthServiceTestSuite) TestVerify(t *gotest.T) {
 		})
 	})
 	t.When("Le jeton est expiré", func(w *gotest.T) {
+		connectedUser, err := s.svc.Verify(EXPIRED_TOKEN, s.tokenGenerator)
 		w.It("retourne une erreur indiquant que l'accès n'est pas autorisé avec une cause de token expiré", func(it *gotest.T) {
-			connectedUser, err := s.svc.Verify(EXPIRED_TOKEN, s.tokenGenerator)
-
 			expectedError := domainMessage.TokenErrorf(NOT_AUTHORIZED)
 			expectedError.SetTokenExpired()
 			gotest.ErrorIs(it, err, expectedError)
@@ -69,9 +67,8 @@ func (s *AuthServiceTestSuite) TestVerify(t *gotest.T) {
 		})
 	})
 	t.When("Le jeton est invalide", func(w *gotest.T) {
+		connectedUser, err := s.svc.Verify(INVALID_TOKEN, s.tokenGenerator)
 		w.It("retourne une erreur indiquant que l'accès n'est pas autorisé avec une cause de token invalide", func(it *gotest.T) {
-			connectedUser, err := s.svc.Verify(INVALID_TOKEN, s.tokenGenerator)
-
 			expectedError := domainMessage.TokenErrorf(NOT_AUTHORIZED)
 			expectedError.SetTokenInvalid()
 			gotest.ErrorIs(it, err, expectedError)

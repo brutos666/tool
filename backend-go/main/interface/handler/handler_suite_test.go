@@ -125,13 +125,12 @@ func (s *HandlerTestSuite) TestGetHandler(t *gotest.T) {
 		gotest.Equal(it, "Hello Monsieur Vincent", actual)
 		gotest.Equal(it, http.StatusOK, actualStatusCode)
 	})
-	t.When("Si la méthode a besoin d'un accès à des données mais qu'il n'est pas fourni", func(w *gotest.T) {
-		w.It("Alors une panique survient et le serveur est arrêté", func(it *gotest.T) {
-			sayHello := func(ctx context.Context, dataAccess domain.DataAccess) (string, error) {
-				return "Hello", nil
-			}
-			request := requestBuilder{}.WithGetMethod().WithParam("World").build()
-
+	t.When("La méthode a besoin d'un accès à des données mais il n'est pas fourni", func(w *gotest.T) {
+		sayHello := func(ctx context.Context, dataAccess domain.DataAccess) (string, error) {
+			return "Hello", nil
+		}
+		request := requestBuilder{}.WithGetMethod().WithParam("World").build()
+		w.It("une panique survient et le serveur est arrêté", func(it *gotest.T) {
 			recover := gotest.Panics(it, func() {
 				noDataAccess := domain.NilDataAccessProvider{}
 				handlerFunc := getHandler(http.MethodGet, AsDataAccessCall(sayHello, &noDataAccess))
@@ -144,171 +143,196 @@ func (s *HandlerTestSuite) TestGetHandler(t *gotest.T) {
 			}
 		})
 	})
-	t.When("Si la méthode retourne une erreur non fonctionnelle", func(w *gotest.T) {
-		w.It("Alors la réponse retourne une message avec l'erreur, le status de la requête est de type http 500", func(it *gotest.T) {
-			withError := func(ctx context.Context) (string, error) {
-				return "", errors.New(ERROR)
-			}
-			request := requestBuilder{}.WithGetMethod().build()
+	t.When("La méthode retourne une erreur non fonctionnelle", func(w *gotest.T) {
+		withError := func(ctx context.Context) (string, error) {
+			return "", errors.New(ERROR)
+		}
+		request := requestBuilder{}.WithGetMethod().build()
 
-			var actual *mapper.MessageWebResult
-			handlerFunc := getHandler(http.MethodGet, AsNoDataAccessCall(withError))
-			actualStatusCode := handlerCaller{}.Call(request, handlerFunc, &actual)
+		var actual *mapper.MessageWebResult
+		handlerFunc := getHandler(http.MethodGet, AsNoDataAccessCall(withError))
+		actualStatusCode := handlerCaller{}.Call(request, handlerFunc, &actual)
 
+		w.It("la réponse retourne le message avec l'erreur", func(it *gotest.T) {
 			gotest.Equal(it, ERROR, actual.GetMessage())
+		})
+		w.It("la réponse retourne le status http 500", func(it *gotest.T) {
 			gotest.Equal(it, REQUEST_PATH, actual.GetPath())
 			gotest.Equal(it, http.StatusInternalServerError, actual.GetHttpStatusCode())
 			gotest.Equal(it, http.StatusInternalServerError, actualStatusCode)
 		})
 	})
-	t.When("Si la méthode retourne une erreur avec du détail (pqErr)", func(w *gotest.T) {
-		w.It("Alors la réponse retourne une message avec l'erreur détaillée, le status de la requête est de type http 500", func(it *gotest.T) {
-			withError := func(ctx context.Context) (string, error) {
-				return "", &pq.Error{Detail: DETAIL_ERROR, Message: ERROR}
-			}
-			request := requestBuilder{}.WithGetMethod().build()
+	t.When("La méthode retourne une erreur avec du détail (pqErr)", func(w *gotest.T) {
+		withError := func(ctx context.Context) (string, error) {
+			return "", &pq.Error{Detail: DETAIL_ERROR, Message: ERROR}
+		}
+		request := requestBuilder{}.WithGetMethod().build()
 
-			var actual *mapper.MessageWebResult
-			handlerFunc := getHandler(http.MethodGet, AsNoDataAccessCall(withError))
-			actualStatusCode := handlerCaller{}.Call(request, handlerFunc, &actual)
-
+		var actual *mapper.MessageWebResult
+		handlerFunc := getHandler(http.MethodGet, AsNoDataAccessCall(withError))
+		actualStatusCode := handlerCaller{}.Call(request, handlerFunc, &actual)
+		w.It("la réponse retourne le message avec l'erreur détaillée", func(it *gotest.T) {
 			gotest.Contains(it, actual.GetMessage(), DETAIL_ERROR)
 			gotest.Contains(it, actual.GetMessage(), ERROR)
+		})
+		w.It("le status de la requête est de type http 500", func(it *gotest.T) {
 			gotest.Equal(it, REQUEST_PATH, actual.GetPath())
 			gotest.Equal(it, http.StatusInternalServerError, actual.GetHttpStatusCode())
 			gotest.Equal(it, http.StatusInternalServerError, actualStatusCode)
 		})
 	})
-	t.When("Si la méthode retourne plusieurs erreurs dont une erreur détaillée", func(w *gotest.T) {
-		w.It("Alors la réponse doit contenir toutes les erreurs, le status de la requête est de type http 500", func(it *gotest.T) {
-			withError := func(ctx context.Context) (result string, err error) {
-				defer func() {
-					deferErr := errors.New(ADDITIONAL_ERROR)
-					err = utilities.JoinErrors(err, deferErr)
-				}()
-				return "", &pq.Error{Detail: DETAIL_ERROR, Message: ERROR}
-				// NOTE : la variable err de retour est bine affectée par le return puis le defer ajoute l'erreur à cette variable qui est finalement retournée
-			}
-			request := requestBuilder{}.WithGetMethod().build()
+	t.When("La méthode retourne plusieurs erreurs dont une erreur détaillée", func(w *gotest.T) {
+		withError := func(ctx context.Context) (result string, err error) {
+			defer func() {
+				deferErr := errors.New(ADDITIONAL_ERROR)
+				err = utilities.JoinErrors(err, deferErr)
+			}()
+			return "", &pq.Error{Detail: DETAIL_ERROR, Message: ERROR}
+			// NOTE : la variable err de retour est bien affectée par le return puis le defer ajoute l'erreur à cette variable qui est finalement retournée
+		}
+		request := requestBuilder{}.WithGetMethod().build()
 
-			var actual *mapper.MessageWebResult
-			handlerFunc := getHandler(http.MethodGet, AsNoDataAccessCall(withError))
-			actualStatusCode := handlerCaller{}.Call(request, handlerFunc, &actual)
+		var actual *mapper.MessageWebResult
+		handlerFunc := getHandler(http.MethodGet, AsNoDataAccessCall(withError))
+		actualStatusCode := handlerCaller{}.Call(request, handlerFunc, &actual)
 
+		w.It("la réponse doit contenir toutes les erreurs", func(it *gotest.T) {
 			gotest.Contains(it, actual.GetMessage(), ADDITIONAL_ERROR)
 			gotest.Contains(it, actual.GetMessage(), DETAIL_ERROR)
 			gotest.Contains(it, actual.GetMessage(), ERROR)
+		})
+		w.It("le status de la requête est de type http 500", func(it *gotest.T) {
 			gotest.Equal(it, REQUEST_PATH, actual.GetPath())
 			gotest.Equal(it, http.StatusInternalServerError, actual.GetHttpStatusCode())
 			gotest.Equal(it, http.StatusInternalServerError, actualStatusCode)
 		})
 	})
-	t.When("Si la méthode est de type GET et que la requête est de type POST", func(w *gotest.T) {
-		w.It("Alors la réponse retourne une message avec l'erreur, le status de la requête est de type http 405", func(it *gotest.T) {
-			sayHello := func(ctx context.Context) (string, error) {
-				return "Hello", nil
-			}
-			request := requestBuilder{}.WithPostMethod().build()
+	t.When("La méthode est de type GET et que la requête est de type POST", func(w *gotest.T) {
+		sayHello := func(ctx context.Context) (string, error) {
+			return "Hello", nil
+		}
+		request := requestBuilder{}.WithPostMethod().build()
 
-			var actual *mapper.MessageWebResult
-			handlerFunc := getHandler(http.MethodGet, AsNoDataAccessCall(sayHello))
-			actualStatusCode := handlerCaller{}.Call(request, handlerFunc, &actual)
-
+		var actual *mapper.MessageWebResult
+		handlerFunc := getHandler(http.MethodGet, AsNoDataAccessCall(sayHello))
+		actualStatusCode := handlerCaller{}.Call(request, handlerFunc, &actual)
+		w.It("la réponse retourne l'erreur "+METHOD_IS_NOT_ALLOWED, func(it *gotest.T) {
 			gotest.Equal(it, METHOD_IS_NOT_ALLOWED, actual.GetMessage())
+		})
+		w.It("le status de la requête est de type http 405 (not allowed)", func(it *gotest.T) {
 			gotest.Equal(it, REQUEST_PATH, actual.GetPath())
 			gotest.Equal(it, http.StatusMethodNotAllowed, actual.GetHttpStatusCode())
 			gotest.Equal(it, http.StatusMethodNotAllowed, actualStatusCode)
 		})
 	})
-	t.When("Si la méthode est de type POST et que la requête est de type GET", func(w *gotest.T) {
-		w.It("Alors la réponse retourne une message avec l'erreur, le status de la requête est de type http 405", func(it *gotest.T) {
-			sayHello := func(ctx context.Context) (string, error) {
-				return "Hello", nil
-			}
-			request := requestBuilder{}.WithGetMethod().build()
+	t.When("La méthode est de type POST et que la requête est de type GET", func(w *gotest.T) {
+		sayHello := func(ctx context.Context) (string, error) {
+			return "Hello", nil
+		}
+		request := requestBuilder{}.WithGetMethod().build()
 
-			var actual *mapper.MessageWebResult
-			handlerFunc := getHandler(http.MethodPost, AsNoDataAccessCall(sayHello))
-			actualStatusCode := handlerCaller{}.Call(request, handlerFunc, &actual)
-
+		var actual *mapper.MessageWebResult
+		handlerFunc := getHandler(http.MethodPost, AsNoDataAccessCall(sayHello))
+		actualStatusCode := handlerCaller{}.Call(request, handlerFunc, &actual)
+		w.It("la réponse retourne l'erreur "+METHOD_IS_NOT_ALLOWED, func(it *gotest.T) {
 			gotest.Equal(it, METHOD_IS_NOT_ALLOWED, actual.GetMessage())
+		})
+		w.It("le status de la requête est de type http 405 (not allowed)", func(it *gotest.T) {
 			gotest.Equal(it, REQUEST_PATH, actual.GetPath())
 			gotest.Equal(it, http.StatusMethodNotAllowed, actual.GetHttpStatusCode())
 			gotest.Equal(it, http.StatusMethodNotAllowed, actualStatusCode)
 		})
 	})
-	t.When("Si la méthode utilise des données", func(w *gotest.T) {
-		w.It("Alors l'accès doit être démarré (ouverture fichier, connection bdd) avant l'appel et être arrêté après (fermeture ficher, connection)", func(it *gotest.T) {
-			var dataAccessMock *dataBaseMock
-			sayHello := func(ctx context.Context, dataAccess domain.DataAccess) (string, error) {
-				dataAccessMock = dataAccess.(*dataBaseMock)
-				gotest.True(it, dataAccessMock.isOpen(), "L'accès aux données doit ouvert à l'appel de la méthode")
-				return "Hello", nil
-			}
-			request := requestBuilder{}.WithGetMethod().build()
+	t.When("La méthode utilise des données", func(w *gotest.T) {
+		var dataAccessMock *dataBaseMock
+		openInMethod := false
+		sayHello := func(ctx context.Context, dataAccess domain.DataAccess) (string, error) {
+			dataAccessMock = dataAccess.(*dataBaseMock)
+			openInMethod = dataAccessMock.isOpen()
+			return "Hello", nil
+		}
+		request := requestBuilder{}.WithGetMethod().build()
 
-			var actual string
-			handlerFunc := getHandler(http.MethodGet, AsDataAccessCall(sayHello, &dataAccessProviderMock{}))
-			handlerCaller{}.Call(request, handlerFunc, &actual)
+		var actual string
+		handlerFunc := getHandler(http.MethodGet, AsDataAccessCall(sayHello, &dataAccessProviderMock{}))
+		handlerCaller{}.Call(request, handlerFunc, &actual)
 
+		w.It("l'accès doit être ouvert (ouverture fichier, connection bdd) dans la méthode", func(it *gotest.T) {
+			gotest.True(it, openInMethod, "L'accès aux données doit ouvert à l'appel de la méthode")
+		})
+		w.It("l'accès doit être fermé (fermeture ficher, connection) après l'appel", func(it *gotest.T) {
 			gotest.False(it, dataAccessMock.isOpen(), "L'accès aux données doit être fermée après l'appel de la méthode")
 		})
 	})
-	t.When("Si une erreur survient dans une méthode qui utilise des données", func(w *gotest.T) {
-		w.It("Alors les modifications éventuelles des données doivent être annulées", func(it *gotest.T) {
-			var dataAccessMock *dataBaseMock
-			sayHello := func(ctx context.Context, dataAccess domain.DataAccess) (string, error) {
-				dataAccessMock = dataAccess.(*dataBaseMock)
-				gotest.True(it, dataAccessMock.isOpen(), "L'accès aux données doit ouverte à l'appel de la méthode")
-				return "", errors.New(ERROR)
-			}
-			request := requestBuilder{}.WithGetMethod().build()
+	t.When("Une erreur survient dans une méthode qui utilise des données", func(w *gotest.T) {
+		var dataAccessMock *dataBaseMock
+		openInMethod := false
+		sayHello := func(ctx context.Context, dataAccess domain.DataAccess) (string, error) {
+			dataAccessMock = dataAccess.(*dataBaseMock)
+			openInMethod = dataAccessMock.isOpen()
+			return "", errors.New(ERROR)
+		}
+		request := requestBuilder{}.WithGetMethod().build()
 
-			var actual *mapper.MessageWebResult
-			handlerFunc := getHandler(http.MethodGet, AsDataAccessCall(sayHello, &dataAccessProviderMock{}))
-			handlerCaller{}.Call(request, handlerFunc, &actual)
+		var actual *mapper.MessageWebResult
+		handlerFunc := getHandler(http.MethodGet, AsDataAccessCall(sayHello, &dataAccessProviderMock{}))
+		handlerCaller{}.Call(request, handlerFunc, &actual)
 
+		w.It("l'accès doit être ouvert (ouverture fichier, connection bdd) dans la méthode", func(it *gotest.T) {
+			gotest.True(it, openInMethod, "L'accès aux données doit ouverte à l'appel de la méthode")
+		})
+		w.It("l'accès doit être fermé (fermeture ficher, connection) après l'appel", func(it *gotest.T) {
+			gotest.False(it, dataAccessMock.isOpen(), "L'accès aux données doit être fermée après l'appel de la méthode")
+		})
+		w.It("l'erreur doit être retournée", func(it *gotest.T) {
 			gotest.Equal(it, ERROR, actual.GetMessage(), "La méthode renvoie une erreur : cette erreur doit être retournée dans la réponse")
+		})
+		w.It("les modifications éventuelles des données doivent être annulées", func(it *gotest.T) {
 			gotest.True(it, dataAccessMock.isCancelled(), "Les modifications des données doivent être annulées car une erreur est survenue")
-			gotest.False(it, dataAccessMock.isOpen(), "L'accès aux données doit être fermée après l'appel de la méthode")
 		})
 	})
-	t.When("Si le serveur http est en cours d'arrêt", func(w *gotest.T) {
-		w.It("Alors une erreur survient avec le code http 503 (service Unavailable) et la requête ne doit pas être traitée", func(it *gotest.T) {
-			sayHelloCalled := false
-			sayHello := func(ctx context.Context) (string, error) {
-				sayHelloCalled = true
-				return "Hello", nil
-			}
-			request := requestBuilder{}.WithGetMethod().build()
-			srvService.ServerStop()
-			// NOTE : on remet le serveur à l'état démarré pour les tests suivants
-			defer srvService.ServerStart()
+	t.When("Le serveur http est en cours d'arrêt", func(w *gotest.T) {
+		sayHelloCalled := false
+		sayHello := func(ctx context.Context) (string, error) {
+			sayHelloCalled = true
+			return "Hello", nil
+		}
+		request := requestBuilder{}.WithGetMethod().build()
+		srvService.ServerStop()
+		// NOTE : on remet le serveur à l'état démarré pour les tests suivants
+		defer srvService.ServerStart()
 
-			var actual *mapper.MessageWebResult
-			handlerFunc := getHandler(http.MethodGet, AsNoDataAccessCall(sayHello))
-			actualStatusCode := handlerCaller{}.Call(request, handlerFunc, &actual)
-
+		var actual *mapper.MessageWebResult
+		handlerFunc := getHandler(http.MethodGet, AsNoDataAccessCall(sayHello))
+		actualStatusCode := handlerCaller{}.Call(request, handlerFunc, &actual)
+		w.It("l'erreur indiquant que le serveur est en cours d'arrêt doit être retournée", func(it *gotest.T) {
 			gotest.Equal(it, SERVER_IS_STOPPING, actual.GetMessage())
+		})
+		w.It("la requête ne doit pas être traitée", func(it *gotest.T) {
 			gotest.False(it, sayHelloCalled, "La méthode ne doit pas être appelée car le serveur est en cours d'arrêt")
+		})
+		w.It("le code http 503 (service Unavailable) doit être retourné", func(it *gotest.T) {
 			gotest.Equal(it, http.StatusServiceUnavailable, actualStatusCode, "Le code http doit être StatusServiceUnavailable (503)")
 		})
 	})
-	t.When("Si l'utilisateur n'est pas correctement authentifié", func(w *gotest.T) {
-		w.It("Alors une erreur survient avec le code http 401 (service Unauthorized) et la requête ne doit pas être traitée", func(it *gotest.T) {
-			sayHelloCalled := false
-			sayHello := func(ctx context.Context) (string, error) {
-				sayHelloCalled = true
-				return "Hello", nil
-			}
-			request := requestBuilder{}.WithGetMethod().WithInvalidToken().build()
+	t.When("L'utilisateur n'est pas correctement authentifié", func(w *gotest.T) {
+		sayHelloCalled := false
+		sayHello := func(ctx context.Context) (string, error) {
+			sayHelloCalled = true
+			return "Hello", nil
+		}
+		request := requestBuilder{}.WithGetMethod().WithInvalidToken().build()
 
-			var actual *mapper.MessageWebResult
-			handlerFunc := getHandler(http.MethodGet, AsNoDataAccessCall(sayHello))
-			actualStatusCode := handlerCaller{}.Call(request, handlerFunc, &actual)
-
+		var actual *mapper.MessageWebResult
+		handlerFunc := getHandler(http.MethodGet, AsNoDataAccessCall(sayHello))
+		actualStatusCode := handlerCaller{}.Call(request, handlerFunc, &actual)
+		w.It("une erreur indiquant que le jeton d'authentification est incorrect doit être retournée", func(it *gotest.T) {
 			gotest.Equal(it, TOKEN_INVALID_ERROR, actual.GetMessage())
+		})
+		w.It("la requête ne doit pas être traitée", func(it *gotest.T) {
 			gotest.False(it, sayHelloCalled, "La méthode ne doit pas être appelée car le token d'authentification n'est pas valide")
+		})
+		w.It("le code http 401 (service Unauthorized) doit être retourné", func(it *gotest.T) {
 			gotest.Equal(it, http.StatusUnauthorized, actualStatusCode, "Le code http doit être StatusServiceUnavailable (503)")
 		})
 	})
