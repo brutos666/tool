@@ -2,8 +2,6 @@ package bdd
 
 import (
 	"context"
-	"database/server/connection"
-	"database/server/requestSQL"
 
 	"goTool/domain"
 	"goTool/infrastructure/bddAccess"
@@ -19,12 +17,12 @@ func UserQueryRepository() domain.UserQueryRepository {
 }
 
 func (repo *userQryRepository) FindAll(ctx context.Context, dataAccess domain.DataAccess) ([]*domain.User, error) {
-	return selectAllUsers(ctx, dataAccess.(bddAccess.Access).GetConnection())
+	return selectAllUsers(ctx, dataAccess.(bddAccess.ReadAccess))
 }
 
-func selectAllUsers(ctx context.Context, connection connection.Connection) ([]*domain.User, error) {
+func selectAllUsers(ctx context.Context, bddAccess bddAccess.ReadAccess) ([]*domain.User, error) {
 	var usersModel []entityBdd.UserModel
-	err := requestSQL.Select(ctx, connection, &usersModel, SELECT_ALL_USERS)
+	err := bddAccess.Select(ctx, SELECT_ALL_USERS, &usersModel)
 	if err != nil {
 		return nil, err
 	}

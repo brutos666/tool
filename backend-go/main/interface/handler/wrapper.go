@@ -46,7 +46,6 @@ func (w ParamWrapper[P, R]) forLoginCall(callback LoginCall[P, R]) ParamWrapper[
 type Wrapper[R any] struct {
 	requestCall        requestCall
 	dataAccessProvider domain.DataAccessProvider
-	needDataAccess     bool
 }
 
 func (w Wrapper[R]) forNoAccessCall(callback NoDataAccessCall[R]) Wrapper[R] {
@@ -60,7 +59,6 @@ func (w Wrapper[R]) forDataAccessCall(callback DataAccessCall[R]) Wrapper[R] {
 	w.requestCall = func(ctx context.Context, callContext CallContext, request *http.Request) (any, error) {
 		return callback(ctx, callContext.dataAccess)
 	}
-	w.needDataAccess = true
 	return w
 }
 
@@ -68,7 +66,6 @@ func (w Wrapper[R]) forRefreshCall(callback RefreshCall) Wrapper[R] {
 	w.requestCall = func(ctx context.Context, callContext CallContext, request *http.Request) (any, error) {
 		return callback(ctx, callContext.dataAccess, callContext.tokenGenerator, *callContext.user)
 	}
-	w.needDataAccess = true
 	return w
 }
 
@@ -78,7 +75,7 @@ func (w Wrapper[R]) withDataAccessProvider(dataAccessProvider domain.DataAccessP
 }
 
 func (w Wrapper[R]) wrap() responseRequestCall {
-	if w.needDataAccess {
+	if w.dataAccessProvider != nil {
 		w.requestCall = wrapDataAccess(w.requestCall, w.dataAccessProvider)
 	}
 	return wrapResponse[R](w.requestCall)
@@ -107,6 +104,9 @@ func wrapRequestParameter[P any](wrappedCall parameterCall[P]) requestCall {
 
 func wrapDataAccess(wrappedCall requestCall, dataAccessProvider domain.DataAccessProvider) requestCall {
 	return func(ctx context.Context, callContext CallContext, request *http.Request) (values any, err error) {
+		if dataAccessProvider == nil {
+			panic(DATA_ACCESS_PANIC)
+		}
 		dataAccess := dataAccessProvider.GetInstance()
 		if dataAccess == nil {
 			panic(DATA_ACCESS_PANIC)
@@ -116,13 +116,14 @@ func wrapDataAccess(wrappedCall requestCall, dataAccessProvider domain.DataAcces
 			return nil, err
 		}
 		defer func() {
+			err = utilities.JoinErrors(err, dataAccess.Close())
+		}()
+		defer func() {
 			if err != nil {
 				err = utilities.JoinErrors(err, dataAccess.Cancel())
 			}
 		}()
-		defer func() {
-			err = utilities.JoinErrors(err, dataAccess.Close())
-		}()
+
 		callContext.AddDataAccess(dataAccess)
 		values, err = wrappedCall(ctx, callContext, request)
 		return

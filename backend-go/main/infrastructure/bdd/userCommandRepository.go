@@ -2,8 +2,6 @@ package bdd
 
 import (
 	"context"
-	"database/server/connection"
-	"database/server/requestSQL"
 	"time"
 
 	"goTool/domain"
@@ -25,21 +23,21 @@ func UserCommandRepository() domain.UserCommandRepository {
 
 // Signup implements [domain.UserCommandRepository].
 func (repository *userCmdRepository) CreateUserIfNotExists(ctx context.Context, dataAccess domain.DataAccess, user *domain.User, hashPassword string) (alreadyExists bool, err error) {
-	return doCreateUserIfNotExists(ctx, dataAccess.(bddAccess.Access).GetConnection(), user, hashPassword)
+	return doCreateUserIfNotExists(ctx, dataAccess.(bddAccess.WriteAccess), user, hashPassword)
 }
 
 func (repository *userCmdRepository) GetUsersWithEmail(ctx context.Context, dataAccess domain.DataAccess, email string) ([]domain.User, error) {
-	return getUsersWithMail(ctx, dataAccess.(bddAccess.Access).GetConnection(), email)
+	return getUsersWithMail(ctx, dataAccess.(bddAccess.ReadAccess), email)
 }
 
 func (repository *userCmdRepository) UpdateToken(ctx context.Context, dataAccess domain.DataAccess, userId string, tokenGenerator domain.TokensProduct) error {
 	accessToken, refreshToken := tokenGenerator.Generate()
-	return doUpdateUser(ctx, dataAccess.(bddAccess.Access).GetConnection(), userId, accessToken, refreshToken)
+	return doUpdateUser(ctx, dataAccess.(bddAccess.WriteAccess), userId, accessToken, refreshToken)
 }
 
-func doCreateUserIfNotExists(ctx context.Context, connection connection.Connection, user *domain.User, hashPassword string) (alreadyExist bool, err error) {
+func doCreateUserIfNotExists(ctx context.Context, bddAccess bddAccess.WriteAccess, user *domain.User, hashPassword string) (alreadyExist bool, err error) {
 	// Vérification si l'utilisateur existe déjà
-	userModels, err := selectUsers(ctx, connection, user.GetEmail())
+	userModels, err := selectUsers(ctx, bddAccess, user.GetEmail())
 	if err != nil {
 		return false, err
 	}
@@ -47,15 +45,15 @@ func doCreateUserIfNotExists(ctx context.Context, connection connection.Connecti
 		return true, nil
 	}
 
-	return false, insertUser(ctx, connection, user, hashPassword)
+	return false, insertUser(ctx, bddAccess, user, hashPassword)
 }
 
-func doUpdateUser(ctx context.Context, connection connection.Connection, userId, accessToken, refreshToken string) error {
-	return updateUserToken(ctx, connection, userId, accessToken, refreshToken)
+func doUpdateUser(ctx context.Context, bddAccess bddAccess.WriteAccess, userId, accessToken, refreshToken string) error {
+	return updateUserToken(ctx, bddAccess, userId, accessToken, refreshToken)
 }
 
-func getUsersWithMail(ctx context.Context, connection connection.Connection, email string) ([]domain.User, error) {
-	userModels, err := selectUsers(ctx, connection, email)
+func getUsersWithMail(ctx context.Context, bddAccess bddAccess.ReadAccess, email string) ([]domain.User, error) {
+	userModels, err := selectUsers(ctx, bddAccess, email)
 	if err != nil {
 		return nil, err
 	}
@@ -69,19 +67,19 @@ func getUsersWithMail(ctx context.Context, connection connection.Connection, ema
 	return []domain.User{}, nil
 }
 
-func selectUsers(ctx context.Context, connection connection.Connection, email string) ([]entityBdd.UserModel, error) {
+func selectUsers(ctx context.Context, bddAccess bddAccess.ReadAccess, email string) ([]entityBdd.UserModel, error) {
 	var existingUsers []entityBdd.UserModel
-	err := requestSQL.Select(ctx, connection, &existingUsers, SELECT_WITH_EMAIL, email)
+	err := bddAccess.Select(ctx, SELECT_WITH_EMAIL, &existingUsers, email)
 	if err != nil {
 		return nil, err
 	}
 	return existingUsers, nil
 }
 
-func insertUser(ctx context.Context, connection connection.Connection, user *domain.User, hashPassword string) error {
+func insertUser(ctx context.Context, bddAccess bddAccess.WriteAccess, user *domain.User, hashPassword string) error {
 	userModel := *entityBdd.CreateUserToRegister(*user, hashPassword)
 
-	err := requestSQL.ExecWithReturn(ctx, connection, userModel, &userModel, INSERT_USER)
+	err := bddAccess.Insert(ctx, INSERT_USER, userModel)
 	if err != nil {
 		return err
 	}
@@ -89,7 +87,7 @@ func insertUser(ctx context.Context, connection connection.Connection, user *dom
 	return nil
 }
 
-func updateUserToken(ctx context.Context, connection connection.Connection, userId, accessToken, refreshToken string) error {
-	_, err := requestSQL.ExecArgs(ctx, connection, UPDATE_USER_TOKEN, accessToken, refreshToken, time.Now(), userId)
+func updateUserToken(ctx context.Context, bddAccess bddAccess.WriteAccess, userId, accessToken, refreshToken string) error {
+	_, err := bddAccess.Update(ctx, UPDATE_USER_TOKEN, accessToken, refreshToken, time.Now(), userId)
 	return err
 }

@@ -3,7 +3,7 @@ package domain
 import "context"
 
 type DataInitRepository interface {
-	Init(ctx context.Context, dataAccess DataAccess) error
+	Init(ctx context.Context) error
 }
 type DataAccessProvider interface {
 	GetInstance() DataAccess
@@ -13,7 +13,3 @@ type DataAccess interface {
 	Close() error
 	Cancel() error
 }
-
-type NilDataAccessProvider struct{}
-
-func (access *NilDataAccessProvider) GetInstance() DataAccess { return nil }

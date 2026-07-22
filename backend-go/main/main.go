@@ -18,6 +18,14 @@ const BDD_INIT_TIMEOUT = 10 * time.Second
 
 func main() {
 	config.InitConfig()
+	/*
+		// Si la base de données n'est pas démarrée, on la démarre
+		err := server.StartServer(config.GetBaseConnection())
+		if err != nil {
+				log.Fatalf("Impossible de démarrer H2 : %s", err)
+		}
+		defer server.StopServer(config.GetBaseConnection())
+	*/
 	// Bases de données
 	bddWriteService := bddAccess.AsWrite()
 	bddReadService := bddAccess.AsRead()
@@ -26,9 +34,9 @@ func main() {
 	defer cancel()
 
 	initDataService := application.DataInitService(bdd.DataInitRepository())
-	err := initDataService.Init(ctx, bddWriteService.GetInstance())
+	err := initDataService.Init(ctx)
 	if err != nil {
-		panic(err)
+		panic("Impossible d'initialiser la structure des données :" + err.Error())
 	}
 
 	if config.IsDev() {

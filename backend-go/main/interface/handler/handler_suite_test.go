@@ -132,8 +132,7 @@ func (s *HandlerTestSuite) TestGetHandler(t *gotest.T) {
 		request := requestBuilder{}.WithGetMethod().WithParam("World").build()
 		w.It("une panique survient et le serveur est arrêté", func(it *gotest.T) {
 			recover := gotest.Panics(it, func() {
-				noDataAccess := domain.NilDataAccessProvider{}
-				handlerFunc := getHandler(http.MethodGet, AsDataAccessCall(sayHello, &noDataAccess))
+				handlerFunc := getHandler(http.MethodGet, AsDataAccessCall(sayHello, nil))
 				handlerFunc(httptest.NewRecorder(), request)
 			})
 			if recover != nil {

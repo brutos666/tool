@@ -74,7 +74,6 @@ func OpenConnection(base DatabaseConnection) *sqlx.DB {
 	if err != nil {
 		log.Fatalf("Base %s : impossible de ping (%s)", driverName, err)
 	}
-	log.Printf("Base %s : connectée", driverName)
 	return db
 }
 

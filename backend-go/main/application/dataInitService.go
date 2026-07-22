@@ -14,6 +14,6 @@ func DataInitService(repository domain.DataInitRepository) InitService {
 	return InitService{repository: repository}
 }
 
-func (service InitService) Init(ctx context.Context, dataAccess domain.DataAccess) error {
-	return service.repository.Init(ctx, dataAccess)
+func (service InitService) Init(ctx context.Context) error {
+	return service.repository.Init(ctx)
 }

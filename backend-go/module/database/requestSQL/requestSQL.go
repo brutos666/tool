@@ -17,7 +17,7 @@ func LaunchSQLScript(ctx context.Context, connection connection.Connection, file
 	if err != nil {
 		return 0, err
 	}
-	return returnResult(connection.GetDb().ExecContext(ctx, string(sqlBytes)))
+	return returnResult(connection.GetTx().ExecContext(ctx, string(sqlBytes)))
 }
 
 func Select(ctx context.Context, connection connection.Connection, dest interface{}, query string, args ...interface{}) error {
@@ -28,8 +28,7 @@ func Select(ctx context.Context, connection connection.Connection, dest interfac
 	return db.SelectContext(ctx, dest, query, args...)
 }
 
-func ExecIn(ctx context.Context, connection connection.Connection, query string, inValues any) (int, error) {
-	argList := []any{inValues}
+func ExecIn(ctx context.Context, connection connection.Connection, query string, argList ...any) (int, error) {
 	query, args, err := sqlx.In(query, argList...)
 	if err != nil {
 		return 0, err
