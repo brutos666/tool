@@ -71,6 +71,7 @@ func (spaceBdd *SpaceModel) SetNextId(nextId string) error {
 		return err
 	}
 	spaceBdd.NextId.Int64 = intId
+	spaceBdd.NextId.Valid = true
 	return nil
 }
 

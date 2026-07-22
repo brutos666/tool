@@ -32,7 +32,6 @@ func (commandService SpaceCmdService) SaveSpaces(ctx context.Context, dataAccess
 	if err != nil {
 		return spaces, err
 	}
-	spaces.RemoveToDelete()
 	spaces.ApplyModification()
 	return spaces, nil
 }
@@ -43,8 +42,6 @@ func (commandService SpaceCmdService) SaveCurrentSpace(ctx context.Context, data
 		return &nodeSpace, err
 	}
 	// Si tout s'est bien passé, on met à jour les références
-	space := nodeSpace.GetSpace()
-	space.RemoveToDelete()
-	space.ApplyModification()
+	nodeSpace.ApplyModification()
 	return &nodeSpace, nil
 }

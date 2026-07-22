@@ -29,7 +29,7 @@ func (spaces Spaces) GetDeleteIds() []string {
 	return ids
 }
 
-func (spaces Spaces) ApplyModification() {
+func (spaces *Spaces) ApplyModification() {
 	for index := range spaces.list {
 		spaces.list[index].ApplyModification()
 	}
@@ -96,7 +96,9 @@ func (space *Space) SetChildren(children []treeConverter.TreeEntity) {
 	spaces.SetList(list)
 	space.SetChildrenSpaces(spaces)
 }
+
 func (space Space) GetContext() string { return "Identifiant=" + space.id + ", Titre=" + space.title }
+
 func (space Space) GetDeleteIds() []string {
 	ids := make([]string, 0)
 	if space.IsToDelete() {
@@ -120,9 +122,6 @@ func (space *Space) Save(id string) {
 func (space *Space) ApplyModification() {
 	space.id = space.GetCurrentId()
 	space.crudMode = READ
-	space.children.ApplyModification()
-}
-
-func (space *Space) RemoveToDelete() {
 	space.children.RemoveToDelete()
+	space.children.ApplyModification()
 }

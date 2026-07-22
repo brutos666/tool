@@ -18,6 +18,9 @@ func (nodeSpace NodeSpace) GetPreviousId() string            { return nodeSpace.
 func (nodeSpace *NodeSpace) SetPreviousId(previousId string) { nodeSpace.previousId = previousId }
 func (nodeSpace NodeSpace) GetNextId() string                { return nodeSpace.nextId }
 func (nodeSpace *NodeSpace) SetNextId(nextId string)         { nodeSpace.nextId = nextId }
+func (nodeSpace NodeSpace) ApplyModification() {
+	nodeSpace.space.ApplyModification()
+}
 
 func CreateNodeSpace(space *Space, parentId, previousId, nextId string) *NodeSpace {
 	nodeSpace := new(NodeSpace)
