@@ -17,6 +17,6 @@ func SpaceQueryService(repository domain.SpaceQueryRepository) SpaceQryService {
 	return SpaceQryService{repository: repository}
 }
 
-func (queryService SpaceQryService) FindAll(ctx context.Context, dataAccess domain.DataAccess) ([]*domain.Space, error) {
-	return queryService.repository.FindAll(ctx, dataAccess)
+func (queryService SpaceQryService) FindAll(ctx context.Context, dataAccessId int) ([]*domain.Space, error) {
+	return queryService.repository.FindAll(ctx, dataAccessId)
 }

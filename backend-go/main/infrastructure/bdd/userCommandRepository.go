@@ -22,20 +22,20 @@ func UserCommandRepository() domain.UserCommandRepository {
 }
 
 // Signup implements [domain.UserCommandRepository].
-func (repository *userCmdRepository) CreateUserIfNotExists(ctx context.Context, dataAccess domain.DataAccess, user *domain.User, hashPassword string) (alreadyExists bool, err error) {
-	return doCreateUserIfNotExists(ctx, dataAccess.(bddAccess.WriteAccess), user, hashPassword)
+func (repository *userCmdRepository) CreateUserIfNotExists(ctx context.Context, dataAccessId int, user *domain.User, hashPassword string) (alreadyExists bool, err error) {
+	return doCreateUserIfNotExists(ctx, bddAccessService.WriteAccess(dataAccessId), user, hashPassword)
 }
 
-func (repository *userCmdRepository) GetUsersWithEmail(ctx context.Context, dataAccess domain.DataAccess, email string) ([]domain.User, error) {
-	return getUsersWithMail(ctx, dataAccess.(bddAccess.ReadAccess), email)
+func (repository *userCmdRepository) GetUsersWithEmail(ctx context.Context, dataAccessId int, email string) ([]domain.User, error) {
+	return getUsersWithMail(ctx, bddAccessService.WriteAccess(dataAccessId), email)
 }
 
-func (repository *userCmdRepository) UpdateToken(ctx context.Context, dataAccess domain.DataAccess, userId string, tokenGenerator domain.TokensProduct) error {
+func (repository *userCmdRepository) UpdateToken(ctx context.Context, dataAccessId int, userId string, tokenGenerator domain.TokensProduct) error {
 	accessToken, refreshToken := tokenGenerator.Generate()
-	return doUpdateUser(ctx, dataAccess.(bddAccess.WriteAccess), userId, accessToken, refreshToken)
+	return doUpdateUser(ctx, bddAccessService.WriteAccess(dataAccessId), userId, accessToken, refreshToken)
 }
 
-func doCreateUserIfNotExists(ctx context.Context, bddAccess bddAccess.WriteAccess, user *domain.User, hashPassword string) (alreadyExist bool, err error) {
+func doCreateUserIfNotExists(ctx context.Context, bddAccess bddAccess.WriteDataOperation, user *domain.User, hashPassword string) (alreadyExist bool, err error) {
 	// Vérification si l'utilisateur existe déjà
 	userModels, err := selectUsers(ctx, bddAccess, user.GetEmail())
 	if err != nil {
@@ -48,11 +48,11 @@ func doCreateUserIfNotExists(ctx context.Context, bddAccess bddAccess.WriteAcces
 	return false, insertUser(ctx, bddAccess, user, hashPassword)
 }
 
-func doUpdateUser(ctx context.Context, bddAccess bddAccess.WriteAccess, userId, accessToken, refreshToken string) error {
+func doUpdateUser(ctx context.Context, bddAccess bddAccess.WriteDataOperation, userId, accessToken, refreshToken string) error {
 	return updateUserToken(ctx, bddAccess, userId, accessToken, refreshToken)
 }
 
-func getUsersWithMail(ctx context.Context, bddAccess bddAccess.ReadAccess, email string) ([]domain.User, error) {
+func getUsersWithMail(ctx context.Context, bddAccess bddAccess.ReadDataOperation, email string) ([]domain.User, error) {
 	userModels, err := selectUsers(ctx, bddAccess, email)
 	if err != nil {
 		return nil, err
@@ -67,7 +67,7 @@ func getUsersWithMail(ctx context.Context, bddAccess bddAccess.ReadAccess, email
 	return []domain.User{}, nil
 }
 
-func selectUsers(ctx context.Context, bddAccess bddAccess.ReadAccess, email string) ([]entityBdd.UserModel, error) {
+func selectUsers(ctx context.Context, bddAccess bddAccess.ReadDataOperation, email string) ([]entityBdd.UserModel, error) {
 	var existingUsers []entityBdd.UserModel
 	err := bddAccess.Select(ctx, SELECT_WITH_EMAIL, &existingUsers, email)
 	if err != nil {
@@ -76,7 +76,7 @@ func selectUsers(ctx context.Context, bddAccess bddAccess.ReadAccess, email stri
 	return existingUsers, nil
 }
 
-func insertUser(ctx context.Context, bddAccess bddAccess.WriteAccess, user *domain.User, hashPassword string) error {
+func insertUser(ctx context.Context, bddAccess bddAccess.WriteDataOperation, user *domain.User, hashPassword string) error {
 	userModel := *entityBdd.CreateUserToRegister(*user, hashPassword)
 
 	err := bddAccess.Insert(ctx, INSERT_USER, userModel)
@@ -87,7 +87,7 @@ func insertUser(ctx context.Context, bddAccess bddAccess.WriteAccess, user *doma
 	return nil
 }
 
-func updateUserToken(ctx context.Context, bddAccess bddAccess.WriteAccess, userId, accessToken, refreshToken string) error {
+func updateUserToken(ctx context.Context, bddAccess bddAccess.WriteDataOperation, userId, accessToken, refreshToken string) error {
 	_, err := bddAccess.Update(ctx, UPDATE_USER_TOKEN, accessToken, refreshToken, time.Now(), userId)
 	return err
 }

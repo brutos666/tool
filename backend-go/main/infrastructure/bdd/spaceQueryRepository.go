@@ -17,11 +17,11 @@ func SpaceQueryRepository() domain.SpaceQueryRepository {
 	return &spaceQryRepository{}
 }
 
-func (repo *spaceQryRepository) FindAll(ctx context.Context, dataAccess domain.DataAccess) ([]*domain.Space, error) {
-	return selectAllSpaces(ctx, dataAccess.(bddAccess.ReadAccess))
+func (repo *spaceQryRepository) FindAll(ctx context.Context, dataAccessId int) ([]*domain.Space, error) {
+	return selectAllSpaces(ctx, bddAccessService.ReadAccess(dataAccessId))
 }
 
-func selectAllSpaces(ctx context.Context, bddAccess bddAccess.ReadAccess) ([]*domain.Space, error) {
+func selectAllSpaces(ctx context.Context, bddAccess bddAccess.ReadDataOperation) ([]*domain.Space, error) {
 	var spaceModels []entityBdd.SpaceModel
 	err := bddAccess.Select(ctx, SELECT_ALL, &spaceModels)
 	if err != nil {

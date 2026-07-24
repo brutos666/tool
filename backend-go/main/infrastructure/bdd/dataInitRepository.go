@@ -17,24 +17,24 @@ func DataInitRepository() domain.DataInitRepository {
 }
 
 func (repo *dataInitRepository) Init(ctx context.Context) (err error) {
-	bddAccess := new(bddAccess.Writer)
-	err = bddAccess.Open()
+	access := new(bddAccess.Writer)
+	err = access.Open()
 	if err != nil {
 		return err
 	}
 	defer func() {
-		err = utilities.JoinErrors(err, bddAccess.Close())
+		err = utilities.JoinErrors(err, access.Close())
 	}()
 	defer func() {
 		if err != nil {
-			err = utilities.JoinErrors(err, bddAccess.Cancel())
+			err = utilities.JoinErrors(err, access.Cancel())
 		}
 	}()
 
-	return doLaunchScript(ctx, *bddAccess, config.GetSchemaPath())
+	return doLaunchScript(ctx, access, config.GetSchemaPath())
 }
 
-func doLaunchScript(ctx context.Context, bddAccess bddAccess.Writer, filepath string) error {
+func doLaunchScript(ctx context.Context, bddAccess bddAccess.WriteDataOperation, filepath string) error {
 	nbRows, err := bddAccess.LaunchSQLScript(ctx, filepath)
 	if err != nil {
 		return err

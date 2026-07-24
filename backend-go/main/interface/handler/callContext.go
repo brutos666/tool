@@ -1,20 +1,26 @@
 package handler
 
-import "goTool/domain"
+import (
+	"goTool/domain"
+	"goTool/interface/handler/authentication"
+)
 
 type CallContext struct {
-	dataAccess     domain.DataAccess
-	tokenGenerator domain.TokensProduct
+	dataAccessId   int
+	tokenGenerator *authentication.TokensGenerator
 	user           *domain.ConnectedUser
 }
 
-func (c *CallContext) AddConnectedUser(user *domain.ConnectedUser) { c.user = user }
-func (c *CallContext) AddDataAccess(dataAccess domain.DataAccess)  { c.dataAccess = dataAccess }
+func (c *CallContext) AddConnectedUser(user *domain.ConnectedUser)       { c.user = user }
+func (c *CallContext) AddDataAccessId(dataAccessId int)                  { c.dataAccessId = dataAccessId }
+func (c CallContext) GetDataAccessId() int                               { return c.dataAccessId }
+func (c CallContext) GetTokenGenerator() *authentication.TokensGenerator { return c.tokenGenerator }
+func (c CallContext) GetConnectedUser() *domain.ConnectedUser            { return c.user }
 
 func WithConnectedUser(user *domain.ConnectedUser) CallContext {
 	return CallContext{user: user}
 }
 
-func WithTokenGenerator(tokenGenerator domain.TokensProduct) CallContext {
+func WithTokenGenerator(tokenGenerator *authentication.TokensGenerator) CallContext {
 	return CallContext{tokenGenerator: tokenGenerator}
 }

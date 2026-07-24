@@ -14,6 +14,6 @@ func UserQueryService(repository domain.UserQueryRepository) UserQryService {
 	return UserQryService{repository: repository}
 }
 
-func (queryService UserQryService) FindAll(ctx context.Context, dataAccess domain.DataAccess) ([]*domain.User, error) {
-	return queryService.repository.FindAll(ctx, dataAccess)
+func (queryService UserQryService) FindAll(ctx context.Context, dataAccessId int) ([]*domain.User, error) {
+	return queryService.repository.FindAll(ctx, dataAccessId)
 }

@@ -6,34 +6,21 @@ import (
 	"database/server/requestSQL"
 
 	"goTool/config"
-	"goTool/domain"
+	"goTool/generic"
 )
 
-type Service struct {
-	accessForRead bool
-}
+// Nombre max de connections simultanées
+const (
+	MAX_CONNECTION = 5
+	WRITE          = "W"
+	READ           = "R"
+)
 
-func (service Service) GetInstance() domain.DataAccess {
-	if service.accessForRead {
-		return new(Reader)
-	}
-	return new(Writer)
-}
-
-func AsRead() Service {
-	return Service{accessForRead: true}
-}
-
-func AsWrite() Service {
-	return Service{accessForRead: false}
-}
-
-type ReadAccess interface {
+type ReadDataOperation interface {
 	Select(ctx context.Context, sql string, modelsOut any, args ...any) error
 }
-
-type WriteAccess interface {
-	ReadAccess
+type WriteDataOperation interface {
+	ReadDataOperation
 	Insert(ctx context.Context, sql string, modelInOut any) error
 	Update(ctx context.Context, sql string, args ...any) (int, error)
 	UpdateModel(ctx context.Context, sql string, modelIn any) (int, error)
@@ -41,11 +28,25 @@ type WriteAccess interface {
 	LaunchSQLScript(ctx context.Context, filepath string) (int, error)
 }
 
+type Provider struct{}
+
+func (p Provider) ProvideAccess(accessType string) generic.DataAccess {
+	var dataAccess generic.DataAccess
+	switch accessType {
+	case READ:
+		dataAccess = &Reader{}
+	case WRITE:
+		dataAccess = &Writer{Reader{}}
+	default:
+		panic("Type d'accès à la base de données inexistant : doit être READ ou WRITE")
+	}
+	return dataAccess
+}
+
 type Reader struct {
 	connection *connection.Connection
 }
 
-func (bddAccess *Reader) GetConnection() connection.Connection { return *bddAccess.connection }
 func (bddAccess *Reader) Open() error {
 	connection, err := connection.OpenAutoCommitConnection(config.GetBaseConnection())
 	if err != nil {

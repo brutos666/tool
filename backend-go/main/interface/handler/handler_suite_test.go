@@ -4,11 +4,19 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"log"
 	"net/http"
 	"net/http/httptest"
+	"runtime"
+	"strconv"
+	"sync"
+	"time"
 
 	"goTool/domain"
 	"goTool/domain/domainMessage"
+	"goTool/infrastructure/bddAccess"
+	"goTool/infrastructure/mock"
 	"goTool/interface/mapper"
 	"goTool/utilities"
 
@@ -45,30 +53,32 @@ func (service authServiceMock) Verify(token string, tokenCheck domain.TokensChec
 	return nil, domainMessage.TokenErrorf(TOKEN_INVALID_ERROR)
 }
 
-type dataAccessProviderMock struct{}
-
-func (access *dataAccessProviderMock) GetInstance() domain.DataAccess { return new(dataBaseMock) }
-
-type dataBaseMock struct {
-	open   bool
-	cancel bool
+type concurrentCaller struct {
+	group       sync.WaitGroup
+	lockManager sync.Mutex
+	caller      handlerCaller
+	results     []any
 }
 
-func (f *dataBaseMock) isOpen() bool      { return f.open }
-func (f *dataBaseMock) isCancelled() bool { return f.cancel }
-func (f *dataBaseMock) Open() error {
-	f.open = true
-	return nil
+func (caller *concurrentCaller) getResponseResults() []any { return caller.results }
+func (caller *concurrentCaller) waitCallsDone()            { caller.group.Wait() }
+
+func (caller *concurrentCaller) call(request *http.Request, handlerFunc func(http.ResponseWriter, *http.Request), result any) {
+	caller.group.Add(1)
+	go func() {
+		defer caller.group.Done()
+		caller.caller.Call(request, handlerFunc, &result)
+
+		// Le tableau results est lu et modifié par plusieurs go routine. Il faut donc un verrou
+		caller.lockManager.Lock()
+		defer caller.lockManager.Unlock()
+		caller.results = append(caller.results, result)
+	}()
 }
 
-func (f *dataBaseMock) Close() error {
-	f.open = false
-	return nil
-}
-
-func (f *dataBaseMock) Cancel() error {
-	f.cancel = true
-	return nil
+func concurrentHttpCaller() concurrentCaller {
+	fmt.Printf("%v processeurs sur cette machine ", runtime.NumCPU())
+	return concurrentCaller{caller: handlerCaller{}}
 }
 
 type handlerCaller struct{}
@@ -84,13 +94,16 @@ func (s handlerCaller) Call(request *http.Request, handlerFunc func(http.Respons
 	return response.StatusCode
 }
 
-type HandlerTestSuite struct{}
+type HandlerTestSuite struct {
+	bddProvider *mock.DataAccessProviderMock
+}
 
 // BeforeEach : pour chaque fonction TestXxx(t *gotest.T), PAS pour chaque t.It
 func (s *HandlerTestSuite) BeforeEach(t *gotest.T) {
 	InitAuthService(authServiceMock{})
 	InitServerService(&httpServiceMock{})
 	srvService.ServerStart()
+	s.bddProvider = &mock.DataAccessProviderMock{}
 }
 
 // AfterEach : pour chaque fonction TestXxx(t *gotest.T), PAS pour chaque t.It
@@ -113,26 +126,27 @@ func (s *HandlerTestSuite) TestGetHandler(t *gotest.T) {
 		gotest.Equal(it, http.StatusOK, actualStatusCode)
 	})
 	t.It("Vérification de l'exécution d'une méthode avec paramètre", func(it *gotest.T) {
-		sayHelloParameter := func(ctx context.Context, dataAccess domain.DataAccess, parameter JsonParameter) (string, error) {
+		bddService := bddAccess.BddService(s.bddProvider)
+		sayHelloParameter := func(ctx context.Context, dataAccessId int, parameter JsonParameter) (string, error) {
 			return "Hello " + parameter.Value, nil
 		}
 		request := requestBuilder{}.WithPostMethod().WithParam("Monsieur Vincent").build()
 
 		var actual string
-		handlerFunc := getHandler(http.MethodPost, AsParamDataAccessCall(sayHelloParameter, &dataAccessProviderMock{}))
+		handlerFunc := getHandler(http.MethodPost, AsParamDataAccessCall(sayHelloParameter, bddService, bddAccess.READ))
 		actualStatusCode := handlerCaller{}.Call(request, handlerFunc, &actual)
 
 		gotest.Equal(it, "Hello Monsieur Vincent", actual)
 		gotest.Equal(it, http.StatusOK, actualStatusCode)
 	})
-	t.When("La méthode a besoin d'un accès à des données mais il n'est pas fourni", func(w *gotest.T) {
-		sayHello := func(ctx context.Context, dataAccess domain.DataAccess) (string, error) {
-			return "Hello", nil
+	t.When("Lorsque la méthode provoque une panique", func(w *gotest.T) {
+		sayHello := func(ctx context.Context) (string, error) {
+			panic("C'est la panique totale là !!! C'est la faute du réchauffement climatique !")
 		}
 		request := requestBuilder{}.WithGetMethod().WithParam("World").build()
-		w.It("une panique survient et le serveur est arrêté", func(it *gotest.T) {
+		w.It("la panique est propagée et le serveur est arrêté", func(it *gotest.T) {
 			recover := gotest.Panics(it, func() {
-				handlerFunc := getHandler(http.MethodGet, AsDataAccessCall(sayHello, nil))
+				handlerFunc := getHandler(http.MethodGet, AsNoDataAccessCall(sayHello))
 				handlerFunc(httptest.NewRecorder(), request)
 			})
 			if recover != nil {
@@ -243,51 +257,53 @@ func (s *HandlerTestSuite) TestGetHandler(t *gotest.T) {
 		})
 	})
 	t.When("La méthode utilise des données", func(w *gotest.T) {
-		var dataAccessMock *dataBaseMock
+		var dataAccess *mock.DataAccessMock
+		bddService := bddAccess.BddService(s.bddProvider)
 		openInMethod := false
-		sayHello := func(ctx context.Context, dataAccess domain.DataAccess) (string, error) {
-			dataAccessMock = dataAccess.(*dataBaseMock)
-			openInMethod = dataAccessMock.isOpen()
+		sayHello := func(ctx context.Context, dataAccessId int) (string, error) {
+			dataAccess = bddService.GetAccess(dataAccessId).(*mock.DataAccessMock)
+			openInMethod = dataAccess.IsOpen()
 			return "Hello", nil
 		}
 		request := requestBuilder{}.WithGetMethod().build()
 
 		var actual string
-		handlerFunc := getHandler(http.MethodGet, AsDataAccessCall(sayHello, &dataAccessProviderMock{}))
+		handlerFunc := getHandler(http.MethodGet, AsDataAccessCall(sayHello, bddService, bddAccess.READ))
 		handlerCaller{}.Call(request, handlerFunc, &actual)
 
 		w.It("l'accès doit être ouvert (ouverture fichier, connection bdd) dans la méthode", func(it *gotest.T) {
 			gotest.True(it, openInMethod, "L'accès aux données doit ouvert à l'appel de la méthode")
 		})
 		w.It("l'accès doit être fermé (fermeture ficher, connection) après l'appel", func(it *gotest.T) {
-			gotest.False(it, dataAccessMock.isOpen(), "L'accès aux données doit être fermée après l'appel de la méthode")
+			gotest.False(it, dataAccess.IsOpen(), "L'accès aux données doit être fermée après l'appel de la méthode")
 		})
 	})
 	t.When("Une erreur survient dans une méthode qui utilise des données", func(w *gotest.T) {
-		var dataAccessMock *dataBaseMock
+		var dataAccess *mock.DataAccessMock
+		bddService := bddAccess.BddService(s.bddProvider)
 		openInMethod := false
-		sayHello := func(ctx context.Context, dataAccess domain.DataAccess) (string, error) {
-			dataAccessMock = dataAccess.(*dataBaseMock)
-			openInMethod = dataAccessMock.isOpen()
+		sayHello := func(ctx context.Context, dataAccessId int) (string, error) {
+			dataAccess = bddService.GetAccess(dataAccessId).(*mock.DataAccessMock)
+			openInMethod = dataAccess.IsOpen()
 			return "", errors.New(ERROR)
 		}
 		request := requestBuilder{}.WithGetMethod().build()
 
 		var actual *mapper.MessageWebResult
-		handlerFunc := getHandler(http.MethodGet, AsDataAccessCall(sayHello, &dataAccessProviderMock{}))
+		handlerFunc := getHandler(http.MethodGet, AsDataAccessCall(sayHello, bddService, bddAccess.READ))
 		handlerCaller{}.Call(request, handlerFunc, &actual)
 
 		w.It("l'accès doit être ouvert (ouverture fichier, connection bdd) dans la méthode", func(it *gotest.T) {
 			gotest.True(it, openInMethod, "L'accès aux données doit ouverte à l'appel de la méthode")
 		})
 		w.It("l'accès doit être fermé (fermeture ficher, connection) après l'appel", func(it *gotest.T) {
-			gotest.False(it, dataAccessMock.isOpen(), "L'accès aux données doit être fermée après l'appel de la méthode")
+			gotest.False(it, dataAccess.IsOpen(), "L'accès aux données doit être fermée après l'appel de la méthode")
 		})
 		w.It("l'erreur doit être retournée", func(it *gotest.T) {
 			gotest.Equal(it, ERROR, actual.GetMessage(), "La méthode renvoie une erreur : cette erreur doit être retournée dans la réponse")
 		})
 		w.It("les modifications éventuelles des données doivent être annulées", func(it *gotest.T) {
-			gotest.True(it, dataAccessMock.isCancelled(), "Les modifications des données doivent être annulées car une erreur est survenue")
+			gotest.True(it, dataAccess.IsCancelled(), "Les modifications des données doivent être annulées car une erreur est survenue")
 		})
 	})
 	t.When("Le serveur http est en cours d'arrêt", func(w *gotest.T) {
@@ -335,7 +351,42 @@ func (s *HandlerTestSuite) TestGetHandler(t *gotest.T) {
 			gotest.Equal(it, http.StatusUnauthorized, actualStatusCode, "Le code http doit être StatusServiceUnavailable (503)")
 		})
 	})
+}
+
+func (s *HandlerTestSuite) TestGoGetHandler(t *gotest.T) {
+	t.When("Appel simultané de plusieurs fois la même requête avec accès à la base de données", func(w *gotest.T) {
+		bddService := bddAccess.BddService(s.bddProvider)
+		nbCalls := bddAccess.MAX_CONNECTION * 2
+
+		giveBddIdentity := func(ctx context.Context, dataAccessId int) (string, error) {
+			log.Printf("Appel method sayHello (%v)", dataAccessId)
+			// Ce délai permet que la libération d'une connection ne soit pas trop rapide pour que toutes les connections soient prises au bout de MAX_CONNECTION fois
+			time.Sleep(time.Duration(50) * time.Millisecond)
+			return strconv.Itoa(dataAccessId), nil
+		}
+		request := requestBuilder{}.WithGetMethod().build()
+		handlerFunc := getHandler(http.MethodGet, AsDataAccessCall(giveBddIdentity, bddService, bddAccess.READ))
+		concurrentCaller := concurrentHttpCaller()
+		var result string
+		for range nbCalls {
+			concurrentCaller.call(request, handlerFunc, result)
+		}
+		concurrentCaller.waitCallsDone()
+
+		w.It("les résultats doivent contenir les identifiants 4 à 0 puis des identifiants compris entre 0 et 4 aléatoirement", func(it *gotest.T) {
+			identities := make([]any, bddAccess.MAX_CONNECTION)
+			for i := bddAccess.MAX_CONNECTION - 1; i >= 0; i-- {
+				identities[i] = strconv.Itoa(i)
+			}
+			results := concurrentCaller.getResponseResults()
+			gotest.Equal(it, len(results), nbCalls)
+			gotest.ElementsMatch(it, results[0:5], identities)
+			gotest.NotContains(it, results[0:5], identities)
+			for _, v := range results[6:] {
+				gotest.Contains(it, identities, v)
+			}
+		})
+	})
 
 	// TODO : tester les appels avec paramètres
-	// TODO : tester l'arrêt du serveur quand il y a une panic
 }

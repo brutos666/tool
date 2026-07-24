@@ -16,11 +16,11 @@ func UserQueryRepository() domain.UserQueryRepository {
 	return &userQryRepository{}
 }
 
-func (repo *userQryRepository) FindAll(ctx context.Context, dataAccess domain.DataAccess) ([]*domain.User, error) {
-	return selectAllUsers(ctx, dataAccess.(bddAccess.ReadAccess))
+func (repo *userQryRepository) FindAll(ctx context.Context, dataAccessId int) ([]*domain.User, error) {
+	return selectAllUsers(ctx, bddAccessService.ReadAccess(dataAccessId))
 }
 
-func selectAllUsers(ctx context.Context, bddAccess bddAccess.ReadAccess) ([]*domain.User, error) {
+func selectAllUsers(ctx context.Context, bddAccess bddAccess.ReadDataOperation) ([]*domain.User, error) {
 	var usersModel []entityBdd.UserModel
 	err := bddAccess.Select(ctx, SELECT_ALL_USERS, &usersModel)
 	if err != nil {

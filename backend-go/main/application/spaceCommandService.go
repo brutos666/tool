@@ -14,21 +14,21 @@ func SpaceCommandService(repository domain.SpaceCommandRepository) SpaceCmdServi
 	return SpaceCmdService{repository: repository}
 }
 
-func (commandService SpaceCmdService) Save(ctx context.Context, dataAccess domain.DataAccess, nodeSpace domain.NodeSpace) (*domain.NodeSpace, error) {
+func (commandService SpaceCmdService) Save(ctx context.Context, dataAccessId int, nodeSpace domain.NodeSpace) (*domain.NodeSpace, error) {
 	// Le navigateur ne distingue pas encore espaces qui est la liste des espaces (Navigation) de l'espace courant qui est visualisé à droite. On va faire la distinction ici
 	if len(nodeSpace.GetParentId()) == 0 {
-		spaces, err := commandService.SaveSpaces(ctx, dataAccess, nodeSpace.GetSpace().GetChildrenSpaces())
+		spaces, err := commandService.SaveSpaces(ctx, dataAccessId, nodeSpace.GetSpace().GetChildrenSpaces())
 		if err != nil {
 			return nil, err
 		}
 		rootNode := domain.CreateNodeSpace(domain.CreateRootSpace(nodeSpace.GetSpace().GetId(), spaces), "", "", "")
 		return rootNode, nil
 	}
-	return commandService.SaveCurrentSpace(ctx, dataAccess, nodeSpace)
+	return commandService.SaveCurrentSpace(ctx, dataAccessId, nodeSpace)
 }
 
-func (commandService SpaceCmdService) SaveSpaces(ctx context.Context, dataAccess domain.DataAccess, spaces *domain.Spaces) (*domain.Spaces, error) {
-	err := commandService.repository.SaveSpaces(ctx, dataAccess, spaces)
+func (commandService SpaceCmdService) SaveSpaces(ctx context.Context, dataAccessId int, spaces *domain.Spaces) (*domain.Spaces, error) {
+	err := commandService.repository.SaveSpaces(ctx, dataAccessId, spaces)
 	if err != nil {
 		return spaces, err
 	}
@@ -36,8 +36,8 @@ func (commandService SpaceCmdService) SaveSpaces(ctx context.Context, dataAccess
 	return spaces, nil
 }
 
-func (commandService SpaceCmdService) SaveCurrentSpace(ctx context.Context, dataAccess domain.DataAccess, nodeSpace domain.NodeSpace) (*domain.NodeSpace, error) {
-	err := commandService.repository.SaveCurrentSpace(ctx, dataAccess, &nodeSpace)
+func (commandService SpaceCmdService) SaveCurrentSpace(ctx context.Context, dataAccessId int, nodeSpace domain.NodeSpace) (*domain.NodeSpace, error) {
+	err := commandService.repository.SaveCurrentSpace(ctx, dataAccessId, &nodeSpace)
 	if err != nil {
 		return &nodeSpace, err
 	}
