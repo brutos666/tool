@@ -7,7 +7,7 @@ import (
 	"log"
 
 	"goTool/domain"
-	"goTool/infrastructure/bddAccess"
+	"goTool/infrastructure/bddService"
 	"goTool/infrastructure/entityBdd"
 )
 
@@ -26,31 +26,31 @@ func SpaceCommandRepository() domain.SpaceCommandRepository {
 }
 
 func (repo *spaceCmdRepository) SaveCurrentSpace(ctx context.Context, dataAccessId int, nodeSpace *domain.NodeSpace) error {
-	return saveSpace(ctx, bddAccessService.WriteAccess(dataAccessId), nodeSpace)
+	return saveSpace(ctx, bddAccessService.RetrieveWriteAccess(dataAccessId), nodeSpace)
 }
 
 func (repo *spaceCmdRepository) SaveSpaces(ctx context.Context, dataAccessId int, spaces *domain.Spaces) error {
-	return saveSpaces(ctx, bddAccessService.WriteAccess(dataAccessId), spaces)
+	return saveSpaces(ctx, bddAccessService.RetrieveWriteAccess(dataAccessId), spaces)
 }
 
-func saveSpace(ctx context.Context, bddAccess bddAccess.WriteDataOperation, nodeSpace *domain.NodeSpace) error {
+func saveSpace(ctx context.Context, dataBase bddService.WriteCommands, nodeSpace *domain.NodeSpace) error {
 	if nodeSpace == nil {
 		return nil
 	}
-	err := deleteInBase(ctx, bddAccess, nodeSpace.GetSpace())
+	err := deleteInBase(ctx, dataBase, nodeSpace.GetSpace())
 	if err != nil {
 		return err
 	}
-	err = createInBase(ctx, bddAccess, nodeSpace)
+	err = createInBase(ctx, dataBase, nodeSpace)
 	if err != nil {
 		return err
 	}
 	// Une fois les éléments créés, on peut mettre sereinement à jour les modifications en récupérant les nouveaux identifiants
-	return updateInBase(ctx, bddAccess, nodeSpace)
+	return updateInBase(ctx, dataBase, nodeSpace)
 }
 
-func saveSpaces(ctx context.Context, bddAccess bddAccess.WriteDataOperation, spaces *domain.Spaces) error {
-	nbRows, err := deleteSpaces(ctx, bddAccess, spaces.GetDeleteIds())
+func saveSpaces(ctx context.Context, dataBase bddService.WriteCommands, spaces *domain.Spaces) error {
+	nbRows, err := deleteSpaces(ctx, dataBase, spaces.GetDeleteIds())
 	if err != nil {
 		return err
 	}
@@ -58,7 +58,7 @@ func saveSpaces(ctx context.Context, bddAccess bddAccess.WriteDataOperation, spa
 		log.Printf("%v lignes supprimées", nbRows)
 	}
 
-	nbRows, err = createSpacesInBase(ctx, bddAccess, spaces, domain.ROOT_ID)
+	nbRows, err = createSpacesInBase(ctx, dataBase, spaces, domain.ROOT_ID)
 	if err != nil {
 		return err
 	}
@@ -66,7 +66,7 @@ func saveSpaces(ctx context.Context, bddAccess bddAccess.WriteDataOperation, spa
 		log.Printf("%v lignes créées", nbRows)
 	}
 	// Une fois les éléments créés, on peut mettre sereinement à jour les modifications en récupérant les nouveaux identifiants
-	nbUpdated, nbNextIdUpdated, err := updateSpacesInBase(ctx, bddAccess, spaces, domain.ROOT_ID)
+	nbUpdated, nbNextIdUpdated, err := updateSpacesInBase(ctx, dataBase, spaces, domain.ROOT_ID)
 	if err != nil {
 		return err
 	}
@@ -79,8 +79,8 @@ func saveSpaces(ctx context.Context, bddAccess bddAccess.WriteDataOperation, spa
 	return nil
 }
 
-func deleteInBase(ctx context.Context, bddAccess bddAccess.WriteDataOperation, space *domain.Space) error {
-	nbRows, err := deleteSpaces(ctx, bddAccess, space.GetDeleteIds())
+func deleteInBase(ctx context.Context, dataBase bddService.WriteCommands, space *domain.Space) error {
+	nbRows, err := deleteSpaces(ctx, dataBase, space.GetDeleteIds())
 	if err != nil {
 		return err
 	}
@@ -90,8 +90,8 @@ func deleteInBase(ctx context.Context, bddAccess bddAccess.WriteDataOperation, s
 	return nil
 }
 
-func createInBase(ctx context.Context, bddAccess bddAccess.WriteDataOperation, nodeSpace *domain.NodeSpace) error {
-	nbRows, err := createTreeInBase(ctx, bddAccess, nodeSpace.GetSpace(), nodeSpace.GetParentId(), nodeSpace.GetNextId())
+func createInBase(ctx context.Context, dataBase bddService.WriteCommands, nodeSpace *domain.NodeSpace) error {
+	nbRows, err := createTreeInBase(ctx, dataBase, nodeSpace.GetSpace(), nodeSpace.GetParentId(), nodeSpace.GetNextId())
 	if err != nil {
 		return err
 	}
@@ -101,13 +101,13 @@ func createInBase(ctx context.Context, bddAccess bddAccess.WriteDataOperation, n
 	return nil
 }
 
-func updateInBase(ctx context.Context, bddAccess bddAccess.WriteDataOperation, nodeSpace *domain.NodeSpace) error {
+func updateInBase(ctx context.Context, dataBase bddService.WriteCommands, nodeSpace *domain.NodeSpace) error {
 	space := nodeSpace.GetSpace()
-	previousUpdated, err := updatePreviousNextId(ctx, bddAccess, space, nodeSpace.GetPreviousId())
+	previousUpdated, err := updatePreviousNextId(ctx, dataBase, space, nodeSpace.GetPreviousId())
 	if err != nil {
 		return err
 	}
-	nbUpdated, nbNextIdUpdated, err := updateTreeInBase(ctx, bddAccess, space, nodeSpace.GetParentId(), nodeSpace.GetNextId())
+	nbUpdated, nbNextIdUpdated, err := updateTreeInBase(ctx, dataBase, space, nodeSpace.GetParentId(), nodeSpace.GetNextId())
 	if err != nil {
 		return err
 	}
@@ -123,16 +123,16 @@ func updateInBase(ctx context.Context, bddAccess bddAccess.WriteDataOperation, n
 	return nil
 }
 
-func createTreeInBase(ctx context.Context, bddAccess bddAccess.WriteDataOperation, space *domain.Space, parentId, nextId string) (int, error) {
+func createTreeInBase(ctx context.Context, dataBase bddService.WriteCommands, space *domain.Space, parentId, nextId string) (int, error) {
 	nbCreated := 0
 	if space.IsToCreate() {
-		err := createSpace(ctx, bddAccess, space, parentId, nextId)
+		err := createSpace(ctx, dataBase, space, parentId, nextId)
 		if err != nil {
 			return 0, err
 		}
 		nbCreated++
 	}
-	nbChildCreation, err := createSpacesInBase(ctx, bddAccess, space.GetChildrenSpaces(), space.GetCurrentId())
+	nbChildCreation, err := createSpacesInBase(ctx, dataBase, space.GetChildrenSpaces(), space.GetCurrentId())
 	if err != nil {
 		return 0, err
 	}
@@ -140,13 +140,13 @@ func createTreeInBase(ctx context.Context, bddAccess bddAccess.WriteDataOperatio
 	return nbCreated, nil
 }
 
-func createSpacesInBase(ctx context.Context, bddAccess bddAccess.WriteDataOperation, spaces *domain.Spaces, parentId string) (int, error) {
+func createSpacesInBase(ctx context.Context, dataBase bddService.WriteCommands, spaces *domain.Spaces, parentId string) (int, error) {
 	nbCreated := 0
 	listOfSpaces := spaces.GetList()
 	nextId := ""
 	for index := len(listOfSpaces) - 1; index >= 0; index-- {
 		space := listOfSpaces[index]
-		nbSpaceCreation, err := createTreeInBase(ctx, bddAccess, space, parentId, nextId)
+		nbSpaceCreation, err := createTreeInBase(ctx, dataBase, space, parentId, nextId)
 		if err != nil {
 			return 0, err
 		}
@@ -158,11 +158,11 @@ func createSpacesInBase(ctx context.Context, bddAccess bddAccess.WriteDataOperat
 	return nbCreated, nil
 }
 
-func updateTreeInBase(ctx context.Context, bddAccess bddAccess.WriteDataOperation, space *domain.Space, parentId, nextId string) (int, int, error) {
+func updateTreeInBase(ctx context.Context, dataBase bddService.WriteCommands, space *domain.Space, parentId, nextId string) (int, int, error) {
 	nbUpdated := 0
 	nbNextIdUpdated := 0
 	if space.IsToUpdate() {
-		updated, err := updateSpace(ctx, bddAccess, space, parentId, nextId)
+		updated, err := updateSpace(ctx, dataBase, space, parentId, nextId)
 		if err != nil {
 			return 0, 0, err
 		}
@@ -170,7 +170,7 @@ func updateTreeInBase(ctx context.Context, bddAccess bddAccess.WriteDataOperatio
 			nbUpdated++
 		}
 	} else if !space.IsToDelete() {
-		updated, err := updateNextId(ctx, bddAccess, space, nextId)
+		updated, err := updateNextId(ctx, dataBase, space, nextId)
 		if err != nil {
 			return 0, 0, err
 		}
@@ -178,7 +178,7 @@ func updateTreeInBase(ctx context.Context, bddAccess bddAccess.WriteDataOperatio
 			nbNextIdUpdated++
 		}
 	}
-	nbChildUpdated, nbChildNextIdUpdated, err := updateSpacesInBase(ctx, bddAccess, space.GetChildrenSpaces(), space.GetCurrentId())
+	nbChildUpdated, nbChildNextIdUpdated, err := updateSpacesInBase(ctx, dataBase, space.GetChildrenSpaces(), space.GetCurrentId())
 	if err != nil {
 		return 0, 0, err
 	}
@@ -187,14 +187,14 @@ func updateTreeInBase(ctx context.Context, bddAccess bddAccess.WriteDataOperatio
 	return nbUpdated, nbNextIdUpdated, nil
 }
 
-func updateSpacesInBase(ctx context.Context, bddAccess bddAccess.WriteDataOperation, spaces *domain.Spaces, parentId string) (int, int, error) {
+func updateSpacesInBase(ctx context.Context, dataBase bddService.WriteCommands, spaces *domain.Spaces, parentId string) (int, int, error) {
 	nbUpdated := 0
 	nbNextIdUpdated := 0
 	listOfSpaces := spaces.GetList()
 	nextId := ""
 	for index := len(listOfSpaces) - 1; index >= 0; index-- {
 		space := listOfSpaces[index]
-		nbSpaceUpdated, nbSpaceNextIdUpdated, err := updateTreeInBase(ctx, bddAccess, space, parentId, nextId)
+		nbSpaceUpdated, nbSpaceNextIdUpdated, err := updateTreeInBase(ctx, dataBase, space, parentId, nextId)
 		if err != nil {
 			return 0, 0, err
 		}
@@ -207,16 +207,16 @@ func updateSpacesInBase(ctx context.Context, bddAccess bddAccess.WriteDataOperat
 	return nbUpdated, nbNextIdUpdated, nil
 }
 
-func deleteSpaces(ctx context.Context, bddAccess bddAccess.WriteDataOperation, itemsIdToDelete []string) (int, error) {
+func deleteSpaces(ctx context.Context, dataBase bddService.WriteCommands, itemsIdToDelete []string) (int, error) {
 	if len(itemsIdToDelete) > 0 {
-		return bddAccess.DeleteIn(ctx, DELETE_SQL, itemsIdToDelete)
+		return dataBase.DeleteIn(ctx, DELETE_SQL, itemsIdToDelete)
 	}
 	return 0, nil
 }
 
-func createSpace(ctx context.Context, bddAccess bddAccess.WriteDataOperation, space *domain.Space, parentId, nextId string) error {
+func createSpace(ctx context.Context, dataBase bddService.WriteCommands, space *domain.Space, parentId, nextId string) error {
 	itemModel := entityBdd.ConvertSpaceToModel(*space, parentId, nextId)
-	err := bddAccess.Insert(ctx, INSERT_SQL, itemModel)
+	err := dataBase.Insert(ctx, INSERT_SQL, itemModel)
 	if err != nil {
 		return err
 	}
@@ -226,9 +226,9 @@ func createSpace(ctx context.Context, bddAccess bddAccess.WriteDataOperation, sp
 
 // updateSpace : modification d'un espace. Retourne une erreur si la requête échoue. Retourne true si la requête a modifié
 // l'espace
-func updateSpace(ctx context.Context, bddAccess bddAccess.WriteDataOperation, space *domain.Space, parentId, nextId string) (bool, error) {
+func updateSpace(ctx context.Context, dataBase bddService.WriteCommands, space *domain.Space, parentId, nextId string) (bool, error) {
 	itemModel := entityBdd.ConvertSpaceToModel(*space, parentId, nextId)
-	nbUpdates, err := bddAccess.UpdateModel(ctx, UPDATE_SQL, itemModel)
+	nbUpdates, err := dataBase.UpdateModel(ctx, UPDATE_SQL, itemModel)
 	if err != nil {
 		return false, err
 	}
@@ -240,13 +240,13 @@ func updateSpace(ctx context.Context, bddAccess bddAccess.WriteDataOperation, sp
 
 // updatePreviousNextId : modification de l'identifiant suivant de l'espace précédent.
 // Retourne une erreur si la requête échoue. Retourne true si la requête a modifié l'espace précédent
-func updatePreviousNextId(ctx context.Context, bddAccess bddAccess.WriteDataOperation, space *domain.Space, previousId string) (bool, error) {
+func updatePreviousNextId(ctx context.Context, dataBase bddService.WriteCommands, space *domain.Space, previousId string) (bool, error) {
 	if len(previousId) == 0 {
 		return false, nil
 	}
 	id := entityBdd.ConvertIdToBdd(previousId)
 	nextIdBdd := entityBdd.GetCurrentBddId(space)
-	nbNextIdUpdates, err := bddAccess.Update(ctx, UPDATE_NEXT_SQL, nextIdBdd, id, nextIdBdd)
+	nbNextIdUpdates, err := dataBase.Update(ctx, UPDATE_NEXT_SQL, nextIdBdd, id, nextIdBdd)
 	if err != nil {
 		return false, err
 	}
@@ -257,15 +257,15 @@ func updatePreviousNextId(ctx context.Context, bddAccess bddAccess.WriteDataOper
 	return true, nil
 }
 
-func updateNextId(ctx context.Context, bddAccess bddAccess.WriteDataOperation, space *domain.Space, nextId string) (bool, error) {
+func updateNextId(ctx context.Context, dataBase bddService.WriteCommands, space *domain.Space, nextId string) (bool, error) {
 	var nbNextIdUpdated int
 	var err error
 	idBdd := entityBdd.GetCurrentBddId(space)
 	if len(nextId) == 0 {
-		nbNextIdUpdated, err = bddAccess.Update(ctx, UPDATE_NEXT_NULL_SQL, idBdd)
+		nbNextIdUpdated, err = dataBase.Update(ctx, UPDATE_NEXT_NULL_SQL, idBdd)
 	} else {
 		nextBddId := entityBdd.ConvertIdToBdd(nextId)
-		nbNextIdUpdated, err = bddAccess.Update(ctx, UPDATE_NEXT_SQL, nextBddId, idBdd, nextBddId)
+		nbNextIdUpdated, err = dataBase.Update(ctx, UPDATE_NEXT_SQL, nextBddId, idBdd, nextBddId)
 	}
 	if err != nil {
 		return false, err

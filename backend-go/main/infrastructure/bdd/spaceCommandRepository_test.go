@@ -19,7 +19,7 @@ type SpaceCommandRepositoryTestSuite struct {
 func (s *SpaceCommandRepositoryTestSuite) BeforeEach(t *gotest.T) {
 	s.repo = SpaceCommandRepository()
 	s.srv = mock.BddAccessServiceMock()
-	InitServerService(s.srv)
+	InitAccessService(s.srv)
 }
 
 func (s *SpaceCommandRepositoryTestSuite) TestSaveCurrentSpace(t *gotest.T) {
@@ -35,7 +35,7 @@ func (s *SpaceCommandRepositoryTestSuite) TestSaveCurrentSpace(t *gotest.T) {
 			gotest.NoError(it, err)
 		})
 		w.It("la base de données est appelée pour supprimer l'espace", func(it *gotest.T) {
-			bddWriteMock := s.srv.GetWriteAccess()
+			bddWriteMock := s.srv.RetrieveMockAccessWrite()
 			gotest.ElementsMatch(it, bddWriteMock.GetDeleteIds(), []string{SPACE_ID})
 		})
 	})

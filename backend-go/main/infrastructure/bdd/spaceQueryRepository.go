@@ -5,7 +5,7 @@ import (
 	"treeConverter"
 
 	"goTool/domain"
-	"goTool/infrastructure/bddAccess"
+	"goTool/infrastructure/bddService"
 	"goTool/infrastructure/entityBdd"
 )
 
@@ -18,12 +18,12 @@ func SpaceQueryRepository() domain.SpaceQueryRepository {
 }
 
 func (repo *spaceQryRepository) FindAll(ctx context.Context, dataAccessId int) ([]*domain.Space, error) {
-	return selectAllSpaces(ctx, bddAccessService.ReadAccess(dataAccessId))
+	return selectAllSpaces(ctx, bddAccessService.RetrieveReadAccess(dataAccessId))
 }
 
-func selectAllSpaces(ctx context.Context, bddAccess bddAccess.ReadDataOperation) ([]*domain.Space, error) {
+func selectAllSpaces(ctx context.Context, dataBase bddService.ReadCommands) ([]*domain.Space, error) {
 	var spaceModels []entityBdd.SpaceModel
-	err := bddAccess.Select(ctx, SELECT_ALL, &spaceModels)
+	err := dataBase.Select(ctx, SELECT_ALL, &spaceModels)
 	if err != nil {
 		return nil, err
 	}

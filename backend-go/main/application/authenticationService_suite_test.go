@@ -12,9 +12,9 @@ const (
 	EMAIL         = "alice@example.com"
 	ROLE          = "ADMIN"
 	EMPTY_TOKEN   = ""
-	VALID_TOKEN   = "tokenvalid"
-	INVALID_TOKEN = "tokeninvalid"
-	EXPIRED_TOKEN = "tokenexpired"
+	VALID_TOKEN   = "token valid"
+	INVALID_TOKEN = "token invalid"
+	EXPIRED_TOKEN = "token expired"
 )
 
 type AuthServiceTestSuite struct {

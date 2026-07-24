@@ -6,7 +6,7 @@ import (
 
 	"goTool/config"
 	"goTool/domain"
-	"goTool/infrastructure/bddAccess"
+	"goTool/infrastructure/bddService"
 	"goTool/utilities"
 )
 
@@ -17,7 +17,7 @@ func DataInitRepository() domain.DataInitRepository {
 }
 
 func (repo *dataInitRepository) Init(ctx context.Context) (err error) {
-	access := new(bddAccess.Writer)
+	access := new(bddService.Writer)
 	err = access.Open()
 	if err != nil {
 		return err
@@ -34,8 +34,8 @@ func (repo *dataInitRepository) Init(ctx context.Context) (err error) {
 	return doLaunchScript(ctx, access, config.GetSchemaPath())
 }
 
-func doLaunchScript(ctx context.Context, bddAccess bddAccess.WriteDataOperation, filepath string) error {
-	nbRows, err := bddAccess.LaunchSQLScript(ctx, filepath)
+func doLaunchScript(ctx context.Context, dataBase bddService.WriteCommands, filepath string) error {
+	nbRows, err := dataBase.LaunchSQLScript(ctx, filepath)
 	if err != nil {
 		return err
 	}

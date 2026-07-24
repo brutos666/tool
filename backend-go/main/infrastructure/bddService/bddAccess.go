@@ -1,4 +1,4 @@
-package bddAccess
+package bddService
 
 import (
 	"context"
@@ -16,19 +16,7 @@ const (
 	READ           = "R"
 )
 
-// Les manipulations sur la base de données sont isolées pour faciliter les tests unitaires
-type ReadDataOperation interface {
-	Select(ctx context.Context, sql string, modelsOut any, args ...any) error
-}
-type WriteDataOperation interface {
-	ReadDataOperation
-	Insert(ctx context.Context, sql string, modelInOut any) error
-	Update(ctx context.Context, sql string, args ...any) (int, error)
-	UpdateModel(ctx context.Context, sql string, modelIn any) (int, error)
-	DeleteIn(ctx context.Context, sql string, inValues []string) (int, error)
-	LaunchSQLScript(ctx context.Context, filepath string) (int, error)
-}
-
+// Provider : fourni un accès en lecture ou en écriture à la base de données
 type Provider struct{}
 
 func (p Provider) ProvideAccess(accessType string) generic.DataAccess {
@@ -44,6 +32,7 @@ func (p Provider) ProvideAccess(accessType string) generic.DataAccess {
 	return dataAccess
 }
 
+// Reader permet l'ouverture de la connection et des commands de lecture
 type Reader struct {
 	connection *connection.Connection
 }
@@ -67,6 +56,7 @@ func (bddAccess Reader) Select(ctx context.Context, sql string, modelsOut any, a
 	return requestSQL.Select(ctx, *bddAccess.connection, modelsOut, sql, args...)
 }
 
+// Writer permet l'ouverture de la connection en mode transactionnel et des commands de lecture et d'écriture
 type Writer struct {
 	Reader
 }

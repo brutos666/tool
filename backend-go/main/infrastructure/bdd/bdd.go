@@ -1,9 +1,9 @@
 package bdd
 
-import "goTool/infrastructure/bddAccess"
+import "goTool/infrastructure/bddService"
 
-var bddAccessService bddAccess.BddDataOperation
+var bddAccessService bddService.BddAccessReadWrite
 
-func InitServerService(bddService bddAccess.BddDataOperation) {
+func InitAccessService(bddService bddService.BddAccessReadWrite) {
 	bddAccessService = bddService
 }

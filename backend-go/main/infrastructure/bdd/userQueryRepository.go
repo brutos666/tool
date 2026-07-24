@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"goTool/domain"
-	"goTool/infrastructure/bddAccess"
+	"goTool/infrastructure/bddService"
 	"goTool/infrastructure/entityBdd"
 )
 
@@ -17,12 +17,12 @@ func UserQueryRepository() domain.UserQueryRepository {
 }
 
 func (repo *userQryRepository) FindAll(ctx context.Context, dataAccessId int) ([]*domain.User, error) {
-	return selectAllUsers(ctx, bddAccessService.ReadAccess(dataAccessId))
+	return selectAllUsers(ctx, bddAccessService.RetrieveReadAccess(dataAccessId))
 }
 
-func selectAllUsers(ctx context.Context, bddAccess bddAccess.ReadDataOperation) ([]*domain.User, error) {
+func selectAllUsers(ctx context.Context, dataBase bddService.ReadCommands) ([]*domain.User, error) {
 	var usersModel []entityBdd.UserModel
-	err := bddAccess.Select(ctx, SELECT_ALL_USERS, &usersModel)
+	err := dataBase.Select(ctx, SELECT_ALL_USERS, &usersModel)
 	if err != nil {
 		return nil, err
 	}

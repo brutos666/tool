@@ -16,7 +16,7 @@ import (
 	"goTool/domain"
 	"goTool/domain/domainMessage"
 	"goTool/generic"
-	"goTool/infrastructure/bddAccess"
+	"goTool/infrastructure/bddService"
 	"goTool/interface/mapper"
 	"goTool/utilities"
 
@@ -126,14 +126,14 @@ func (s *HandlerTestSuite) TestGetHandler(t *gotest.T) {
 		gotest.Equal(it, http.StatusOK, actualStatusCode)
 	})
 	t.It("Vérification de l'exécution d'une méthode avec paramètre", func(it *gotest.T) {
-		bddService := bddAccess.BddService(s.bddProvider)
+		bddAccessService := bddService.Service(s.bddProvider)
 		sayHelloParameter := func(ctx context.Context, dataAccessId int, parameter JsonParameter) (string, error) {
 			return "Hello " + parameter.Value, nil
 		}
 		request := requestBuilder{}.WithPostMethod().WithParam("Monsieur Vincent").build()
 
 		var actual string
-		handlerFunc := getHandler(http.MethodPost, AsParamDataAccessCall(sayHelloParameter, bddService, bddAccess.READ))
+		handlerFunc := getHandler(http.MethodPost, AsParamDataAccessCall(sayHelloParameter, bddAccessService, bddService.READ))
 		actualStatusCode := handlerCaller{}.Call(request, handlerFunc, &actual)
 
 		gotest.Equal(it, "Hello Monsieur Vincent", actual)
@@ -258,17 +258,17 @@ func (s *HandlerTestSuite) TestGetHandler(t *gotest.T) {
 	})
 	t.When("La méthode utilise des données", func(w *gotest.T) {
 		var dataAccess *generic.DataAccessMock
-		bddService := bddAccess.BddService(s.bddProvider)
+		bddAccessService := bddService.Service(s.bddProvider)
 		openInMethod := false
 		sayHello := func(ctx context.Context, dataAccessId int) (string, error) {
-			dataAccess = bddService.GetAccess(dataAccessId).(*generic.DataAccessMock)
+			dataAccess = bddAccessService.GetAccess(dataAccessId).(*generic.DataAccessMock)
 			openInMethod = dataAccess.IsOpen()
 			return "Hello", nil
 		}
 		request := requestBuilder{}.WithGetMethod().build()
 
 		var actual string
-		handlerFunc := getHandler(http.MethodGet, AsDataAccessCall(sayHello, bddService, bddAccess.READ))
+		handlerFunc := getHandler(http.MethodGet, AsDataAccessCall(sayHello, bddAccessService, bddService.READ))
 		handlerCaller{}.Call(request, handlerFunc, &actual)
 
 		w.It("l'accès doit être ouvert (ouverture fichier, connection bdd) dans la méthode", func(it *gotest.T) {
@@ -280,17 +280,17 @@ func (s *HandlerTestSuite) TestGetHandler(t *gotest.T) {
 	})
 	t.When("Une erreur survient dans une méthode qui utilise des données", func(w *gotest.T) {
 		var dataAccess *generic.DataAccessMock
-		bddService := bddAccess.BddService(s.bddProvider)
+		bddAccessService := bddService.Service(s.bddProvider)
 		openInMethod := false
 		sayHello := func(ctx context.Context, dataAccessId int) (string, error) {
-			dataAccess = bddService.GetAccess(dataAccessId).(*generic.DataAccessMock)
+			dataAccess = bddAccessService.GetAccess(dataAccessId).(*generic.DataAccessMock)
 			openInMethod = dataAccess.IsOpen()
 			return "", errors.New(ERROR)
 		}
 		request := requestBuilder{}.WithGetMethod().build()
 
 		var actual *mapper.MessageWebResult
-		handlerFunc := getHandler(http.MethodGet, AsDataAccessCall(sayHello, bddService, bddAccess.READ))
+		handlerFunc := getHandler(http.MethodGet, AsDataAccessCall(sayHello, bddAccessService, bddService.READ))
 		handlerCaller{}.Call(request, handlerFunc, &actual)
 
 		w.It("l'accès doit être ouvert (ouverture fichier, connection bdd) dans la méthode", func(it *gotest.T) {
@@ -355,8 +355,8 @@ func (s *HandlerTestSuite) TestGetHandler(t *gotest.T) {
 
 func (s *HandlerTestSuite) TestGoGetHandler(t *gotest.T) {
 	t.When("Appel simultané de plusieurs fois la même requête avec accès à la base de données", func(w *gotest.T) {
-		bddService := bddAccess.BddService(s.bddProvider)
-		nbCalls := bddAccess.MAX_CONNECTION * 2
+		bddAccessService := bddService.Service(s.bddProvider)
+		nbCalls := bddService.MAX_CONNECTION * 2
 
 		giveBddIdentity := func(ctx context.Context, dataAccessId int) (string, error) {
 			log.Printf("Appel method sayHello (%v)", dataAccessId)
@@ -365,7 +365,7 @@ func (s *HandlerTestSuite) TestGoGetHandler(t *gotest.T) {
 			return strconv.Itoa(dataAccessId), nil
 		}
 		request := requestBuilder{}.WithGetMethod().build()
-		handlerFunc := getHandler(http.MethodGet, AsDataAccessCall(giveBddIdentity, bddService, bddAccess.READ))
+		handlerFunc := getHandler(http.MethodGet, AsDataAccessCall(giveBddIdentity, bddAccessService, bddService.READ))
 		concurrentCaller := concurrentHttpCaller()
 		var result string
 		for range nbCalls {
@@ -374,8 +374,8 @@ func (s *HandlerTestSuite) TestGoGetHandler(t *gotest.T) {
 		concurrentCaller.waitCallsDone()
 
 		w.It("les résultats doivent contenir les identifiants 4 à 0 puis des identifiants compris entre 0 et 4 aléatoirement", func(it *gotest.T) {
-			identities := make([]any, bddAccess.MAX_CONNECTION)
-			for i := bddAccess.MAX_CONNECTION - 1; i >= 0; i-- {
+			identities := make([]any, bddService.MAX_CONNECTION)
+			for i := bddService.MAX_CONNECTION - 1; i >= 0; i-- {
 				identities[i] = strconv.Itoa(i)
 			}
 			results := concurrentCaller.getResponseResults()

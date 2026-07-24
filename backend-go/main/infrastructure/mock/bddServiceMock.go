@@ -1,12 +1,14 @@
 package mock
 
-import "goTool/infrastructure/bddAccess"
+import (
+	"goTool/infrastructure/bddService"
+)
 
 func BddAccessServiceMock() BddServiceMock {
-	bddService := new(BddServiceMock)
-	bddService.readDataAccess = &BddAccessMock{accessType: bddAccess.READ}
-	bddService.writeDataAccess = &BddAccessMock{accessType: bddAccess.WRITE}
-	return *bddService
+	bddServiceMock := new(BddServiceMock)
+	bddServiceMock.readDataAccess = &BddAccessMock{accessType: bddService.READ}
+	bddServiceMock.writeDataAccess = &BddAccessMock{accessType: bddService.WRITE}
+	return *bddServiceMock
 }
 
 type BddServiceMock struct {
@@ -14,13 +16,14 @@ type BddServiceMock struct {
 	writeDataAccess *BddAccessMock
 }
 
-func (service BddServiceMock) ReadAccess(identity int) bddAccess.ReadDataOperation {
+func (service BddServiceMock) RetrieveReadAccess(identity int) bddService.ReadCommands {
 	return service.readDataAccess
 }
 
-func (service BddServiceMock) WriteAccess(identity int) bddAccess.WriteDataOperation {
+func (service BddServiceMock) RetrieveWriteAccess(identity int) bddService.WriteCommands {
 	return service.writeDataAccess
 }
 
-func (access *BddServiceMock) GetReadAccess() *BddAccessMock  { return access.readDataAccess }
-func (access *BddServiceMock) GetWriteAccess() *BddAccessMock { return access.writeDataAccess }
+func (access *BddServiceMock) RetrieveMockAccessRead() *BddAccessMock { return access.readDataAccess }
+
+func (access *BddServiceMock) RetrieveMockAccessWrite() *BddAccessMock { return access.writeDataAccess }
