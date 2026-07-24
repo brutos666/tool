@@ -34,6 +34,9 @@ func (repo *spaceCmdRepository) SaveSpaces(ctx context.Context, dataAccessId int
 }
 
 func saveSpace(ctx context.Context, bddAccess bddAccess.WriteDataOperation, nodeSpace *domain.NodeSpace) error {
+	if nodeSpace == nil {
+		return nil
+	}
 	err := deleteInBase(ctx, bddAccess, nodeSpace.GetSpace())
 	if err != nil {
 		return err
@@ -214,7 +217,6 @@ func deleteSpaces(ctx context.Context, bddAccess bddAccess.WriteDataOperation, i
 func createSpace(ctx context.Context, bddAccess bddAccess.WriteDataOperation, space *domain.Space, parentId, nextId string) error {
 	itemModel := entityBdd.ConvertSpaceToModel(*space, parentId, nextId)
 	err := bddAccess.Insert(ctx, INSERT_SQL, itemModel)
-	//err := requestSQL.ExecWithReturn(ctx, bddAccess.GetConnection(), itemModel, &itemModel, INSERT_SQL)
 	if err != nil {
 		return err
 	}

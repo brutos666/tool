@@ -15,8 +15,8 @@ import (
 
 	"goTool/domain"
 	"goTool/domain/domainMessage"
+	"goTool/generic"
 	"goTool/infrastructure/bddAccess"
-	"goTool/infrastructure/mock"
 	"goTool/interface/mapper"
 	"goTool/utilities"
 
@@ -95,7 +95,7 @@ func (s handlerCaller) Call(request *http.Request, handlerFunc func(http.Respons
 }
 
 type HandlerTestSuite struct {
-	bddProvider *mock.DataAccessProviderMock
+	bddProvider *generic.DataAccessProviderMock
 }
 
 // BeforeEach : pour chaque fonction TestXxx(t *gotest.T), PAS pour chaque t.It
@@ -103,7 +103,7 @@ func (s *HandlerTestSuite) BeforeEach(t *gotest.T) {
 	InitAuthService(authServiceMock{})
 	InitServerService(&httpServiceMock{})
 	srvService.ServerStart()
-	s.bddProvider = &mock.DataAccessProviderMock{}
+	s.bddProvider = &generic.DataAccessProviderMock{}
 }
 
 // AfterEach : pour chaque fonction TestXxx(t *gotest.T), PAS pour chaque t.It
@@ -257,11 +257,11 @@ func (s *HandlerTestSuite) TestGetHandler(t *gotest.T) {
 		})
 	})
 	t.When("La méthode utilise des données", func(w *gotest.T) {
-		var dataAccess *mock.DataAccessMock
+		var dataAccess *generic.DataAccessMock
 		bddService := bddAccess.BddService(s.bddProvider)
 		openInMethod := false
 		sayHello := func(ctx context.Context, dataAccessId int) (string, error) {
-			dataAccess = bddService.GetAccess(dataAccessId).(*mock.DataAccessMock)
+			dataAccess = bddService.GetAccess(dataAccessId).(*generic.DataAccessMock)
 			openInMethod = dataAccess.IsOpen()
 			return "Hello", nil
 		}
@@ -279,11 +279,11 @@ func (s *HandlerTestSuite) TestGetHandler(t *gotest.T) {
 		})
 	})
 	t.When("Une erreur survient dans une méthode qui utilise des données", func(w *gotest.T) {
-		var dataAccess *mock.DataAccessMock
+		var dataAccess *generic.DataAccessMock
 		bddService := bddAccess.BddService(s.bddProvider)
 		openInMethod := false
 		sayHello := func(ctx context.Context, dataAccessId int) (string, error) {
-			dataAccess = bddService.GetAccess(dataAccessId).(*mock.DataAccessMock)
+			dataAccess = bddService.GetAccess(dataAccessId).(*generic.DataAccessMock)
 			openInMethod = dataAccess.IsOpen()
 			return "", errors.New(ERROR)
 		}

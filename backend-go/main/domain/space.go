@@ -60,6 +60,14 @@ func CreateRootSpace(id string, children *Spaces) *Space {
 	return rootSpace
 }
 
+func CreateSpace(id, title string, children *Spaces) *Space {
+	space := new(Space)
+	space.SetId(id)
+	space.SetTitle(id)
+	space.SetChildrenSpaces(children)
+	return space
+}
+
 func (space Space) GetId() string                     { return space.id }
 func (space *Space) SetId(id string)                  { space.id = id }
 func (space Space) GetTitle() string                  { return space.title }

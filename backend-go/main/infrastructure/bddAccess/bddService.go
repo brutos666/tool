@@ -13,6 +13,11 @@ import (
 	"goTool/utilities"
 )
 
+type BddDataOperation interface {
+	ReadAccess(identity int) ReadDataOperation
+	WriteAccess(identity int) WriteDataOperation
+}
+
 func BddService(provider generic.DataAccessProvider) *Service {
 	freeIdentity := make([]int, MAX_CONNECTION)
 	for i := range freeIdentity {

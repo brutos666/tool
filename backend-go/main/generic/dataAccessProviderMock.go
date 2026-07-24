@@ -1,13 +1,9 @@
-package mock
-
-import (
-	"goTool/generic"
-)
+package generic
 
 type DataAccessProviderMock struct{}
 
-func (access *DataAccessProviderMock) ProvideAccess(accessType string) generic.DataAccess {
-	return &DataAccessMock{accessType: accessType}
+func (access *DataAccessProviderMock) ProvideAccess(accessType string) DataAccess {
+	return &DataAccessMock{}
 }
 
 type DataAccessServiceMock struct {
@@ -15,7 +11,7 @@ type DataAccessServiceMock struct {
 }
 
 func (access *DataAccessServiceMock) OpenAccess(accessType string) (int, error) {
-	access.dataAccess = &DataAccessMock{accessType: accessType}
+	access.dataAccess = &DataAccessMock{}
 	return 0, nil
 }
 func (access *DataAccessServiceMock) CloseAccess(identity int, err error) error { return nil }

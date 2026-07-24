@@ -16,6 +16,7 @@ const (
 	READ           = "R"
 )
 
+// Les manipulations sur la base de données sont isolées pour faciliter les tests unitaires
 type ReadDataOperation interface {
 	Select(ctx context.Context, sql string, modelsOut any, args ...any) error
 }
