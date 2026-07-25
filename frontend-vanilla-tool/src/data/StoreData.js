@@ -60,7 +60,9 @@ class StoreData {
   }
 
   static giveTreeItemNewId() {
-    this.state.treeItemLastId = 0;
+    if (this.state.treeItemLastId === undefined) {
+      this.state.treeItemLastId = 0;
+    }
     return String(this.state.treeItemLastId++);
   }
 
