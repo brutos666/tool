@@ -179,6 +179,7 @@ class DragDropDecoratorView extends DecoratorView {
     const draggedOverId = dragOverElement.getAttribute('data-over-id');
     StoreData.getTreeItem()
       .moveItem(draggedId, draggedOverId, position);
+    this.removeOver();
   }
 
   /**
