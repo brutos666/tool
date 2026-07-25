@@ -1,4 +1,4 @@
-package bdd
+package repository
 
 import (
 	"context"
@@ -12,7 +12,7 @@ import (
 
 type dataInitRepository struct{}
 
-func DataInitRepository() domain.DataInitRepository {
+func DataInit() domain.DataInitRepository {
 	return &dataInitRepository{}
 }
 

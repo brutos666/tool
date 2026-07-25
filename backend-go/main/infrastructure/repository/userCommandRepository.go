@@ -1,4 +1,4 @@
-package bdd
+package repository
 
 import (
 	"context"
@@ -17,7 +17,7 @@ const (
 
 type userCmdRepository struct{}
 
-func UserCommandRepository() domain.UserCommandRepository {
+func UserCommand() domain.UserCommandRepository {
 	return &userCmdRepository{}
 }
 

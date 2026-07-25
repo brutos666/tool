@@ -1,4 +1,4 @@
-package bdd
+package repository
 
 import (
 	"context"
@@ -13,7 +13,7 @@ const SELECT_ALL string = "SELECT id, title, text, state, parent_id, next_id FRO
 
 type spaceQryRepository struct{}
 
-func SpaceQueryRepository() domain.SpaceQueryRepository {
+func SpaceQuery() domain.SpaceQueryRepository {
 	return &spaceQryRepository{}
 }
 

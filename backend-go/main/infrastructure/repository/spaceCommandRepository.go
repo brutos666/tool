@@ -1,6 +1,4 @@
-// Package bdd s'occupe de la recherche et la mise à jour des données en base.
-// Ce package connaît le package "domain"
-package bdd
+package repository
 
 import (
 	"context"
@@ -21,7 +19,7 @@ const (
 	DELETE_SQL           string = "DELETE FROM item WHERE id IN (?)"
 )
 
-func SpaceCommandRepository() domain.SpaceCommandRepository {
+func SpaceCommand() domain.SpaceCommandRepository {
 	return &spaceCmdRepository{}
 }
 

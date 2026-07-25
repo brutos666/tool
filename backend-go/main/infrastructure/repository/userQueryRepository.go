@@ -1,4 +1,4 @@
-package bdd
+package repository
 
 import (
 	"context"
@@ -12,7 +12,7 @@ const SELECT_ALL_USERS string = "SELECT id, first_name, last_name, password, ema
 
 type userQryRepository struct{}
 
-func UserQueryRepository() domain.UserQueryRepository {
+func UserQuery() domain.UserQueryRepository {
 	return &userQryRepository{}
 }
 

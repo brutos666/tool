@@ -7,8 +7,8 @@ import (
 
 	"goTool/application"
 	"goTool/config"
-	"goTool/infrastructure/bdd"
 	"goTool/infrastructure/bddService"
+	"goTool/infrastructure/repository"
 	"goTool/interface/handler"
 	"goTool/interface/handler/route"
 	"goTool/interface/httpServer"
@@ -28,12 +28,12 @@ func main() {
 	*/
 	// Bases de données
 	bddAccessService := bddService.Service(bddService.Provider{})
-	bdd.InitAccessService(bddAccessService)
+	repository.InitAccessService(bddAccessService)
 
 	ctx, cancel := context.WithTimeout(context.Background(), BDD_INIT_TIMEOUT)
 	defer cancel()
 
-	initDataService := application.DataInitService(bdd.DataInitRepository())
+	initDataService := application.DataInitService(repository.DataInit())
 	err := initDataService.Init(ctx)
 	if err != nil {
 		panic("Impossible d'initialiser la structure des données :" + err.Error())
@@ -42,11 +42,11 @@ func main() {
 	if config.IsDev() {
 		httpServer.ServeLocalFrontEnd()
 	}
-	// Services : lien entre le métier et les données. Ici les données sont en base et la base de données est configurable
-	spaceQueryService := application.SpaceQueryService(bdd.SpaceQueryRepository())
-	spaceCommandService := application.SpaceCommandService(bdd.SpaceCommandRepository())
-	userCommandService := application.UserCommandService(bdd.UserCommandRepository())
-	userQueryService := application.UserQueryService(bdd.UserQueryRepository())
+	// Services : lien entre le métier (service) et les données (repository). Ici les données sont en base et la base de données est configurable
+	spaceQueryService := application.SpaceQueryService(repository.SpaceQuery())
+	spaceCommandService := application.SpaceCommandService(repository.SpaceCommand())
+	userCommandService := application.UserCommandService(repository.UserCommand())
+	userQueryService := application.UserQueryService(repository.UserQuery())
 
 	httpServerService := httpServer.HttpServerService()
 	handler.InitServerService(&httpServerService)

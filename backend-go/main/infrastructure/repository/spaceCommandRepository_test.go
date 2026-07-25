@@ -1,4 +1,4 @@
-package bdd
+package repository
 
 import (
 	"context"
@@ -17,7 +17,7 @@ type SpaceCommandRepositoryTestSuite struct {
 }
 
 func (s *SpaceCommandRepositoryTestSuite) BeforeEach(t *gotest.T) {
-	s.repo = SpaceCommandRepository()
+	s.repo = SpaceCommand()
 	s.srv = mock.BddAccessServiceMock()
 	InitAccessService(s.srv)
 }
