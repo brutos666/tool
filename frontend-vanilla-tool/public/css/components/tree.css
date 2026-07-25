@@ -1,6 +1,7 @@
 .tree--node:not(.tree--root) {
   padding-left: 24px;
 }
+
 /** Disposition **/
 .tree {
   display: flex;
@@ -45,7 +46,7 @@
   flex-direction: column;
 }
 
-/* -- Statut : selection/courant/focus -- */
+/* -- Apparence -- */
 .tree__item > .current,
 .tree__item:has(> .current) > .tree__toggle {
   background-color: var(--color-bg-current);
@@ -54,14 +55,26 @@
 .current .tree__item:has(> .current) > .tree__toggle {
   background-color: var(--color-bg-focus);
 }
-.tree__item:has(> *:focus-visible) > .tree__toggle {
-  border: var(--color-secondary) solid 2px;
-  border-right: none;
+
+/* Encadrer tree__toggle et tree__content lorsque tree_content a le focus */
+.tree__toggle {
+  border-radius: 0;
+}
+.tree__content {
   outline: none;
 }
-.tree__item:has(> *:focus-visible) > .tree__content {
-  border: var(--color-secondary) solid 2px;
+.tree__item:has(> .tree__content:focus) > .tree__toggle {
+  border: var(--color-border-focus) solid 2px;
+  border-right: none;
+}
+.tree__content:focus {
+  border: var(--color-border-focus) solid 2px;
   border-left: none;
   outline: none;
+}
+/* Encadrer le noeud de l'arbre dont un enfant a le focus */
+.tree:has(> .tree__item > .tree__list > .focus-manager--decorator > .placeholder),
+.tree:has(> .tree__item > .tree__list > .focus-manager--decorator > .tree > .tree__item > .tree__content:focus) {
+  outline: 1px solid var(--color-border-focus);
 }
 

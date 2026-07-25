@@ -41,7 +41,7 @@
 }
 
 .drag-drop--decorator > .placeholder {
-  background-color: var(--color-secondary);
+  background-color: var(--color-border-drag-over);
   position: absolute;
   z-index: 1;
 }
@@ -51,7 +51,7 @@
 .drag-drop--decorator > .placeholder::before {
   content: "";
   position: absolute;
-  border: var(--indicator-thickness) solid var(--color-secondary);
+  border: var(--indicator-thickness) solid var(--color-border-drag-over);
   width: var(--indicator-round-size);
   height: var(--indicator-round-size);
   border-radius: 50%;
@@ -107,22 +107,16 @@
   opacity: 0.5;
 }
 
-/* Encadrer le noeud de l'arbre dont on survole les enfants ou entre les enfants */
-.drag-drop--decorator:has(> .tree > .tree__item > .tree__list > .drag-drop--decorator > .placeholder),
-.drag-drop--decorator:has(> .tree > .tree__item > .tree__list > .drag-drop--decorator > .drag-over) {
-  outline: 1px solid var(--color-secondary);
-}
-
 .drag-over.list__element:not(.tree) {
-  outline: var(--color-secondary) solid 2px;
+  outline: var(--color-border-drag-over) solid 2px;
 }
 .drag-over > .tree__item > .tree__toggle {
-  border: var(--color-secondary) solid 2px;
+  border: var(--color-border-drag-over) solid 2px;
   border-right: none;
   outline: none;
 }
 .drag-over > .tree__item > .tree__content {
-  border: var(--color-secondary) solid 2px;
+  border: var(--color-border-drag-over) solid 2px;
   border-left: none;
   outline: none;
 }
@@ -137,7 +131,7 @@
     background: transparent;
   }
   100% {
-    background: var(--color-secondary);
+    background: var(--color-border-drag-over);
   }
 }
 

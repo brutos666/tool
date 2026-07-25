@@ -7,7 +7,7 @@
   display: flex;
   justify-content: center;
 }
-.check-list__header-title .item__title {
+.check-list__header-title {
   font-weight: bold;
   font-size: 1.5em;
   margin: var(--global-margin);
@@ -45,5 +45,15 @@
 .check-list__space > .items__space .item-like-button {
   flex: 1;
   min-height: 40px;
+}
+
+/* Encadrer la check-list si un element de la check-list a le focus */
+.check-list__space > .items__space:has(> .focus-manager--decorator > .placeholder),
+.check-list__space > .items__space:has(> .focus-manager--decorator > .tree > .tree__item > .tree__content:focus),
+.check-list__space > .items__space:has(> .list__element > .item-like-button:focus) {
+  outline: 1px solid var(--color-border-focus);
+}
+.check-list:has(> .check-list__header .item:focus) {
+  outline: 1px solid var(--color-border-focus);
 }
 

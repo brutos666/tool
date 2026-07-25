@@ -20,12 +20,6 @@
   --color-text-muted: light-dark(oklch(0.48 0.02 var(--hue-primary)), oklch(0.65 0.015 var(--hue-primary)));
   --color-text-on-primary: oklch(0.99 0 0);
 
-  /* === BORDURES === */
-  --color-border: light-dark(oklch(0.76 0.014 var(--hue-primary)), oklch(0.42 0.016 var(--hue-primary)));
-  --color-border-hover: light-dark(oklch(0.62 0.018 var(--hue-primary)), oklch(0.54 0.018 var(--hue-primary)));
-  --color-box-shadow: light-dark(oklch(0.5 0 0), oklch(0 0 0));
-  --color-border-current: var(--color-bg-current);
-
   /* === PRIMAIRE === */
   /* Primaire — la couleur de marque, pour les boutons principaux, liens, éléments actifs. */
   --color-primary: light-dark(oklch(0.5 0.22 var(--hue-primary)), oklch(0.65 0.2 var(--hue-primary)));
@@ -37,6 +31,13 @@
   /* Secondaire — couleur d'accentuation complémentaire, pour les badges, tags, éléments secondaires. */
   --color-secondary: light-dark(oklch(0.55 0.18 var(--hue-secondary)), oklch(0.68 0.16 var(--hue-secondary)));
   --color-secondary-hover: light-dark(oklch(0.47 0.18 var(--hue-secondary)), oklch(0.74 0.16 var(--hue-secondary)));
+
+  /* === BORDURES === */
+  --color-border: light-dark(oklch(0.76 0.014 var(--hue-primary)), oklch(0.42 0.016 var(--hue-primary)));
+  --color-border-hover: light-dark(oklch(0.62 0.018 var(--hue-primary)), oklch(0.54 0.018 var(--hue-primary)));
+  --color-box-shadow: light-dark(oklch(0.5 0 0), oklch(0 0 0));
+  --color-border-drag-over: var(--color-primary);
+  --color-border-focus: var(--color-secondary);
 
   /* === FOCUS === */
   --color-bg-focus: light-dark(oklch(0.5 0.22 var(--hue-primary) / 0.25), oklch(0.65 0.2 var(--hue-primary) / 0.3));
