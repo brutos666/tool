@@ -5,6 +5,7 @@ import ClassDecoratorView from './views/ClassDecoratorView.js';
 /** @import TreeItem from '../../data/TreeItem.js'; */
 /** @import Item from '../../components/Item.js'; */
 
+// Cette classe s'occupe de donner le focus à une item après un ajout ou une suppression avec les boutons de la barre d'outil
 class FocusManagerDecorator extends ItemDecorator {
 
   name = 'FocusManagerDecorator';

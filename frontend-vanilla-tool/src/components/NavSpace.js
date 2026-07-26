@@ -1,5 +1,5 @@
 import Component from './Component.js';
-import ManagerItemsDecorator from './decorators/ManagerItemsDecorator.js';
+import ItemsKeyboardNavDecorator from './decorators/ItemsKeyboardNavDecorator.js';
 import NavTree from './NavTree.js';
 import NavSpaceView from './views/NavSpaceView.js';
 
@@ -10,7 +10,7 @@ class NavSpace extends Component {
     super(new NavSpaceView());
 
     const navTree = new NavTree();
-    this.setStaticChild('navTree', new ManagerItemsDecorator(navTree));
+    this.setStaticChild('navTree', new ItemsKeyboardNavDecorator(navTree));
   }
 
 }

@@ -1,15 +1,15 @@
-import ManagerItemsDecoratorView from './views/ManagerItemsDecoratorView.js';
-import Decorator from './Decorator.js';
-import Item from '../Item.js';
 import AddItemButton from '../AddItemButton.js';
+import Item from '../Item.js';
+import Decorator from './Decorator.js';
+import ItemsKeyboardNavDecoratorView from './views/ItemsKeyboardNavDecoratorView.js';
 
 /**
  * Cette classe s'occupe de modifier l'item courant dans l'espace qu'elle décore.
  * Sa vue s'occupe des touches de navigation et de la prise de focus
  */
-class ManagerItemsDecorator extends Decorator {
+class ItemsKeyboardNavDecorator extends Decorator {
 
-  name = 'ManagerItemsDecorator';
+  name = 'ItemsKeyboardNavDecorator';
 
   /** @type {Item} */
   #currentItem = null;
@@ -17,7 +17,7 @@ class ManagerItemsDecorator extends Decorator {
   #focusItem = null;
 
   constructor(decoratedElement) {
-    super(new ManagerItemsDecoratorView(decoratedElement.getView()), decoratedElement);
+    super(new ItemsKeyboardNavDecoratorView(decoratedElement.getView()), decoratedElement);
     // Écoute la prise de focus d'un item afin de modifier l'item qui devient courant
     decoratedElement.getView()
       .addEventListener(Item.EVENTS.focus, this.onItemFocus.bind(this));
@@ -70,4 +70,4 @@ class ManagerItemsDecorator extends Decorator {
 
 }
 
-export default ManagerItemsDecorator;
+export default ItemsKeyboardNavDecorator;

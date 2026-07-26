@@ -1,7 +1,7 @@
 import ActionButton from './ActionButton.js';
 import CheckBox from './CheckBox.js';
 import Component from './Component.js';
-import ManagerItemsDecorator from './decorators/ManagerItemsDecorator.js';
+import ItemsKeyboardNavDecorator from './decorators/ItemsKeyboardNavDecorator.js';
 import SampleMapping from './SampleMapping.js';
 import Toolbar from './Toolbar.js';
 import SampleMappingSpaceView from './views/SampleMappingSpaceView.js';
@@ -32,7 +32,7 @@ class SampleMappingSpace extends Component {
     toolbar.addChild(magnify);
 
     this.setStaticChild('toolbar', toolbar);
-    this.setStaticChild('sampleMappingTable', new ManagerItemsDecorator(this.#sampleMapping));
+    this.setStaticChild('sampleMappingTable', new ItemsKeyboardNavDecorator(this.#sampleMapping));
   }
 
   setTreeItem(treeItem) {

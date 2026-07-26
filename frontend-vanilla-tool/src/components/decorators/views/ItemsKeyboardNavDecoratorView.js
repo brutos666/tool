@@ -1,6 +1,6 @@
+import StoreData from '../../../data/StoreData.js';
 import TreeUtilities from '../../../tools/TreeUtilities.js';
 import ClassDecoratorView from './ClassDecoratorView.js';
-import StoreData from '../../../data/StoreData.js';
 /** @import ItemView from '../../views/ItemView.js'; */
 /** @import View from '../../views/View.js'; */
 
@@ -9,10 +9,12 @@ import StoreData from '../../../data/StoreData.js';
  * Lorsque le focus est sur l'espace contenant les items, il faut taper entrer pour se positionner sur le premier item
  * afin de pouvoir naviguer dans les items. Échap pour en sortir.
  * Sur le même principe, lorsque l'on est positionné sur un item, il faut taper sur Entrée pour passer en mode édition et pouvoir naviguer dans les zones de texte et les boutons. Échap pour en sortir.
+ * TODO : il me semble qu'une fois entré dans un espace permettant la navigation avec la tabulation, il faudrait y rester tant que l'on n'a pas fait echap. Ce n'est pas le cas dans un item. Le truc qui peut être aussi déroutant, c'est que la navigation dans un arbre de fait avec les flèches, tandis que la navigation dans un item se fait avec la tabulation.
+ * TODO : Trouver de la documentation sur le Net avant de faire les modifications
  */
-class ManagerItemsDecoratorView extends ClassDecoratorView {
+class ItemsKeyboardNavDecoratorView extends ClassDecoratorView {
 
-  name = 'ManagerItemsDecoratorView';
+  name = 'ItemsKeyboardNavDecoratorView';
 
   #focusedItem;
   /** @type {ItemView} */
@@ -324,4 +326,4 @@ function giveNewColumnIndex(currentItemIndex, newColumnItems) {
   return currentItemIndex;
 }
 
-export default ManagerItemsDecoratorView;
+export default ItemsKeyboardNavDecoratorView;
