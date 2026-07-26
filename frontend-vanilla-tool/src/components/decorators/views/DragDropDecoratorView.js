@@ -132,21 +132,17 @@ class DragDropDecoratorView extends DecoratorView {
   addOverInside() {
     removePlaceholder();
     this.#dragOverElement.classList.add('drag-over');
-    const item = this.#dragOverElement.querySelector('.item') || this.#dragOverElement;
-    item.focus();
   }
 
   addOverBefore() {
     const draggedOverId = this.#dragOverElement.getAttribute('data-over-id');
-    const placeholder = addPlaceholder(this, 'before', draggedOverId);
-    placeholder.focus();
+    addPlaceholder(this, 'before', draggedOverId);
     this.removeInsideOver();
   }
 
   addOverAfter() {
     const draggedOverId = this.#dragOverElement.getAttribute('data-over-id');
-    const placeholder = addPlaceholder(this, 'after', draggedOverId);
-    placeholder.focus();
+    addPlaceholder(this, 'after', draggedOverId);
     this.removeInsideOver();
   }
 
@@ -229,7 +225,6 @@ class DragDropDecoratorView extends DecoratorView {
  * @param {DragDropDecoratorView} draggedOverView - décorateur sur lequel l'item est drag-and-drop
  * @param {string} position - position du placeholder (avant/après)
  * @param {number} draggedOverId - identifiant de l'item sur lequel l'item est drag-and-drop
- * @returns {HTMLDivElement} placeholder
  */
 function addPlaceholder(draggedOverView, position, draggedOverId) {
   let placeHolder = document.querySelector('.placeholder');
@@ -248,7 +243,6 @@ function addPlaceholder(draggedOverView, position, draggedOverId) {
   placeHolder.setAttribute('position', position);
   const dragDropDecorator = draggedOverView.getElementView();
   dragDropDecorator.insertAdjacentElement(position === 'before' ? 'afterbegin' : 'beforeend', placeHolder);
-  return placeHolder;
 }
 /**
  * Suppression du placeholder

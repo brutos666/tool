@@ -68,7 +68,7 @@ class ItemView extends View {
   getHtmlArticle() {
     return String.raw`<article id="itemArticle" class="item__article" aria-label="Item">
           <template id="done" property="done" class="item__checkbox" aria-label="Effectué/non effectué" aria-description="Cliquez pour marquer comme effectué"></template>
-          <div contenteditable="true" property="title" class="item__title" role="textbox" aria-label="Titre de l'item" aria-multiline="true"></div>
+          <header contenteditable="true" property="title" class="item__title" role="textbox" aria-label="Titre de l'item" aria-multiline="true"></header>
           <div contenteditable="true" property="text" class="item__text" role="textbox" aria-label="Détail de l'item" aria-multiline="true"></div>
       </article>`;
   }
@@ -109,6 +109,10 @@ class ItemView extends View {
     this.#onFocusCallback = onFocusCallback;
   }
   onFocus(event) {
+    // Exclure les boutons de la barre d'outils de la prise de focus
+    if (event.target.closest('.toolbar')) {
+      return;
+    }
     if (event.relatedTarget === null || (!this.getElementView()
       .contains(event.relatedTarget))) {
       this.#onFocusCallback();

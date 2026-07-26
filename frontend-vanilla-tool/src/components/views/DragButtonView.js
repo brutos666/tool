@@ -5,6 +5,8 @@ class DragButtonView extends View {
   name = 'DragButtonView';
 
   #doActionCallback = () => {};
+  #onMouseUpEvent = () => {};
+  #focusBefore = null;
 
   constructor() {
     super();
@@ -28,18 +30,24 @@ class DragButtonView extends View {
   }
 
   setDragElementView(dragElementView) {
+    this.#onMouseUpEvent = this.onMouseUp.bind(this, dragElementView);
+
     this.addEventListener('mousedown', () => {
+      this.#focusBefore = document.activeElement;
       dragElementView.getElementView()
         .setAttribute('draggable', 'true');
-    });
-    this.addEventListener('mousemove', () => {
-      document.activeElement.blur();
-    });
-
-    this.addEventListener('mouseup', () => {
+      document.addEventListener('mouseup', this.#onMouseUpEvent);
       dragElementView.getElementView()
-        .setAttribute('draggable', 'false');
+        .addEventListener('dragend', this.#onMouseUpEvent);
     });
+  }
+  onMouseUp(dragElementView) {
+    if (document.activeElement === this.getElementView()) {
+      this.#focusBefore.focus();
+    }
+    dragElementView.getElementView()
+      .setAttribute('draggable', 'false');
+    document.removeEventListener('mouseup', this.#onMouseUpEvent);
   }
 
   /**

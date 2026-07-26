@@ -52,7 +52,6 @@ class DragDropCenterView extends View {
       document.addEventListener('keydown', this.#onKeyDown);
       document.addEventListener('click', this.#stopEventFunction, true);
       document.addEventListener('mousedown', this.#stopEventFunction, true);
-      document.activeElement.blur();
       this.setOverElement(draggedView.getElementView(), 'before');
       document.querySelector('.working-space').classList.add('drag-drop-mode-keyboard');
     }
@@ -161,7 +160,7 @@ class DragDropCenterView extends View {
     }
   }
   onKeyEnter(event) {
-    if (!this.#overElement || !this.#overElement.contains(document.activeElement)) {
+    if (!this.#overElement) {
       return;
     }
     event.stopPropagation();
