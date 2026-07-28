@@ -1,4 +1,7 @@
 .menu {
+  --menu-height: 4em;
+  height: var(--menu-height);
+  list-style-type: none;
   display: flex;
   justify-content: flex-start;
   align-items: center;
@@ -6,44 +9,37 @@
   padding-left: var(--global-padding);
 }
 .menu__button {
-  display: none;
-  font-size: 1.2em;
+  font-size: var(--medium-font-size);
   cursor: pointer;
   padding: var(--global-padding);
 }
 .menu__actions {
+  padding: 0;
+  margin: var(--global-margin);
   display: flex;
   flex-direction: row;
   gap: var(--global-gap);
   flex-wrap: wrap;
 }
+.menu__actions-vertical[popover] {
+  margin: 0;
+  display: none;
+  background-color: var(--color-bg-surface);
+  position: absolute;
+  top: var(--menu-height);
+  left: var(--global-padding);
+  padding: var(--global-padding);
+  width: fit-content;
+}
+.menu__actions-vertical[popover]:popover-open {
+  display: flex;
+  flex-direction: column;
+}
+
 .menu__element {
   background-color: var(--color-bg-surface);
 }
 .menu__element:hover {
   background-color: var(--color-bg-hover);
-}
-
-/* Responsive */
-@media (max-width: 50em) {
-  .menu__actions {
-    display: none;
-  }
-  .menu__button {
-    display: block;
-  }
-  /* Affichage du menu verticalement si l'utilisateur clique sur le bouton de menu */
-  #menuButton:checked ~ .menu__actions {
-    display: flex;
-    flex-direction: column;
-    z-index: 1;
-    /*background-color: var(--color-bg-surface);*/
-    background-color: var(--color-primary);
-    position: absolute;
-    top: 35px;
-    left: var(--global-padding);
-    padding: var(--global-padding);
-    width: fit-content;
-  }
 }
 

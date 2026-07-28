@@ -7,9 +7,7 @@ class MenuView extends CompositeView {
   name = 'MenuView';
 
   #keyEvent = {
-    // Enter et Escape sont utiles pour le menu hamburger (affiché lorsque la largeur de l'application est petite)
-    Enter: this.onKeyEnter.bind(this),
-    Escape: this.onKeyEscape.bind(this),
+    Tab: this.onKeyTab.bind(this),
     // Les flèches sont nécessaires pour naviguer entre les différentes options du menu
     ArrowUp: this.onKeyArrowUp.bind(this),
     ArrowDown: this.onKeyArrowDown.bind(this),
@@ -23,9 +21,10 @@ class MenuView extends CompositeView {
   #menu_elements = [];
   /** @type {HTMLLabelElement} */
   #menu_button = null;
-  /** @type {HTMLInputElement} */
-  #menu_show_button = null;
+  /** @type {HTMLMenuElement} */
+  #menu_actions = null;
 
+  #font_size = null;
   #verticalMode = false;
   /** @type {MenuElementView} */
   #current = null;
@@ -38,20 +37,26 @@ class MenuView extends CompositeView {
       .addEventListener('keydown', this.onKeyDown.bind(this));
     this.#menu_button = this.getElementView()
       .querySelector('.menu__button');
-    this.#menu_show_button = this.getElementView()
-      .querySelector('.menu__button-checkbox');
-    this.#menu_show_button.addEventListener('change', this.onCheckMenuButton.bind(this));
+    this.#menu_actions = this.getElementView()
+      .querySelector('.menu__actions');
+    this.#menu_actions.addEventListener('toggle', event => {
+      if (event.newState === 'open') {
+        this.#menu_button.setAttribute('tabindex', '-1');
+        this.#current.focus();
+      } else {
+        this.#menu_button.setAttribute('tabindex', '0');
+        this.#menu_button.focus();
+      }
+    });
 
     this.#resizeObserver = new ResizeObserver(this.sizeHasChanged.bind(this));
     this.#resizeObserver.observe(this.getElementView(), { box: 'content-box' });
   }
 
   getHtmlView() {
-    // TODO : passer par une dialog pour le menu burger : ça mieux pour la navigation
-    return String.raw`<nav class="menu" >
-      <input id="menuButton" class="menu__button-checkbox" type="checkbox" aria-expanded="false" aria-controls="spaceChildren" aria-label="Ouvrir le menu" hidden/>
-      <label for="menuButton" class="menu__button menu__element" tabindex="0">☰</label>
-      <menu class="menu__actions" id="spaceChildren" role="menu"></menu>
+    return String.raw`<nav class="menu" aria-label="Menu des commandes" >
+      <button class="menu__button menu__element" aria-label="Ouvrir le menu" aria-controls="spaceChildren" aria-haspopup="true" type="button" tabindex="0" >☰</button>
+      <menu class="menu__actions" id="spaceChildren" role="menu" aria-label="Commandes"></menu>
   </nav>`;
   }
 
@@ -66,6 +71,9 @@ class MenuView extends CompositeView {
 
     this.#menu_elements.push(button);
     button.setAttribute('tabindex', '-1');
+    // Lorsqu'un bouton de menu sera cliquer lorsque le menu burger sera ouvert, ce dernier se fermera
+    button.popoverTargetElement = this.#menu_actions;
+    button.popoverTargetAction = 'hide';
   }
 
   addedToPage() {
@@ -73,6 +81,7 @@ class MenuView extends CompositeView {
     this.#menu_elements[0].setAttribute('tabindex', 0);
 
     this.#current = this.#menu_elements[0];
+    this.#font_size = parseFloat(getComputedStyle(this.#menu_actions).fontSize);
   }
 
   setCurrent(button) {
@@ -83,15 +92,33 @@ class MenuView extends CompositeView {
     this.#current.focus();
   }
 
-  sizeHasChanged() {
-    // Si le bouton qui affiche le menu verticalement est caché, il faut revenir à une navigation horizontale
-    if (DOMUtilities.isHidden(this.#menu_button)) {
-      if (document.activeElement === this.#menu_button) {
-        this.#current.focus();
+  sizeHasChanged(entries) {
+    for (const entry of entries) {
+      if (!entry.contentBoxSize) {
+        continue;
       }
-      this.hideMenu();
-    } else if (DOMUtilities.isHidden(document.activeElement) && DOMUtilities.isHidden(this.#current)) {
-      this.#menu_button.focus();
+      const boxSize = entry.contentBoxSize[0] || entry.contentBoxSize;
+      if (boxSize.inlineSize / this.#font_size > 50) {
+        this.#menu_button.classList.add('hidden');
+        this.#menu_actions.classList.remove('menu__actions-vertical');
+        this.#menu_button.popoverTargetElement = null;
+        this.#menu_button.popoverTargetAction = null;
+        this.#menu_actions.popover = null;
+        this.#verticalMode = false;
+        if (document.activeElement === this.#menu_button) {
+          this.#current.focus();
+        }
+      } else {
+        this.#menu_button.classList.remove('hidden');
+        this.#menu_actions.classList.add('menu__actions-vertical');
+        this.#menu_button.popoverTargetElement = this.#menu_actions;
+        this.#menu_button.popoverTargetAction = 'toggle';
+        this.#menu_actions.popover = 'auto';
+        this.#verticalMode = true;
+        if (document.activeElement === this.#current) {
+          this.#menu_button.focus();
+        }
+      }
     }
   }
 
@@ -119,50 +146,31 @@ class MenuView extends CompositeView {
   onKeyArrowUp() {
     this.focusToDirection('Up');
   }
-
   onKeyArrowRight() {
     this.focusToDirection('Right');
   }
-
   onKeyArrowLeft() {
     this.focusToDirection('Left');
   }
-  onKeyEnter() {
-    this.showHideMenu(!this.#menu_show_button.checked);
-    this.setCurrent(this.#menu_elements[0]);
-  }
-  onKeyEscape() {
-    this.hideMenu();
-    this.#menu_button.focus();
-  }
-
-  showHideMenu(show) {
-    this.#menu_show_button.checked = show;
-    this.onCheckMenuButton();
-  }
-  showMenu() {
-    this.showHideMenu(true);
-  }
-  hideMenu() {
-    this.showHideMenu(false);
+  onKeyTab(event) {
+    this.focusToDirection(event.shiftKey ? 'Up' : 'Down');
   }
 
   interceptKeys() {
-    if (document.activeElement === this.#menu_button) {
-      return [ 'Enter', 'Escape' ];
-    }
     if (this.#verticalMode) {
-      return [ 'Escape', 'ArrowDown', 'ArrowUp', 'Home', 'End' ];
+      if (DOMUtilities.isHidden(this.#menu_actions)) {
+        return [];
+      }
+      return [ 'Tab', 'ArrowDown', 'ArrowUp', 'Home', 'End' ];
     }
     return [ 'ArrowRight', 'ArrowLeft', 'Home', 'End' ];
   }
 
-  onCheckMenuButton() {
-    this.#verticalMode = this.#menu_show_button.checked;
-  }
-
   focusToFirst() {
     this.setCurrent(this.#menu_elements[0]);
+  }
+  focusToLast() {
+    this.setCurrent(this.#menu_elements[this.#menu_elements.length - 1]);
   }
 
   focusToDirection(direction) {
