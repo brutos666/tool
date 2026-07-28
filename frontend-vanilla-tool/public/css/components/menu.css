@@ -25,16 +25,9 @@
 }
 
 /* Responsive */
-@media (max-width: 800px) {
+@media (max-width: 50em) {
   .menu__actions {
     display: none;
-    flex-direction: column;
-    background-color: var(--color-bg-surface);
-    position: absolute;
-    top: 35px;
-    left: var(--global-padding);
-    padding: var(--global-padding);
-    width: fit-content;
   }
   .menu__button {
     display: block;
@@ -42,6 +35,15 @@
   /* Affichage du menu verticalement si l'utilisateur clique sur le bouton de menu */
   #menuButton:checked ~ .menu__actions {
     display: flex;
+    flex-direction: column;
+    z-index: 1;
+    /*background-color: var(--color-bg-surface);*/
+    background-color: var(--color-primary);
+    position: absolute;
+    top: 35px;
+    left: var(--global-padding);
+    padding: var(--global-padding);
+    width: fit-content;
   }
 }
 

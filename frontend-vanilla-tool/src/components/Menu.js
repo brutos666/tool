@@ -1,6 +1,6 @@
 import Composite from './Composite.js';
-import MenuView from './views/MenuView.js';
 import MenuElement from './decorators/MenuElement.js';
+import MenuView from './views/MenuView.js';
 
 class Menu extends Composite {
 
@@ -14,6 +14,11 @@ class Menu extends Composite {
     // Ajout du décorateur de l'élément du menu
     const decorator = new MenuElement(element);
     return super.addChild(decorator);
+  }
+
+  addedToPage() {
+    this.getView()
+      .addedToPage();
   }
 
 }

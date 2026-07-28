@@ -49,6 +49,8 @@ class NodeElement {
     // destroy de tous les staticChild
     Object.values(this.#staticChildren)
       .forEach(child => child.destroy());
+    this.getView()
+      .destroy();
   }
   /**
    * Donne la vue pour permettre de modifier l'affichage si besoin

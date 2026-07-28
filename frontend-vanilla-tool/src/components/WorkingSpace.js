@@ -13,12 +13,13 @@ import WorkingSpaceView from './views/WorkingSpaceView.js';
 class WorkingSpace extends Component {
 
   #currentTreeItem;
+  #menu;
 
   constructor() {
     super(new WorkingSpaceView());
 
     this.#currentTreeItem = StoreData.getTreeItem();
-    const menu = new Menu();
+    this.#menu = new Menu();
     const decorateNavSpace = new CommandItemsDecorator(new NavSpace(), { treeItem: this.#currentTreeItem });
     const decorateMainSpace = new CommandItemsDecorator(new MainSpace(), { treeItem: this.#currentTreeItem });
 
@@ -35,13 +36,13 @@ class WorkingSpace extends Component {
     importFile.setDoActionCallback(decorateNavSpace.importItems.bind(decorateNavSpace));
     const importAction = new ButtonDialog(importFile, { id: 'import', label: 'Importer', role: 'menuitem', type: 'menu' });
 
-    menu.addChild(reloadAction);
-    menu.addChild(saveAllAction);
-    menu.addChild(saveMainAction);
-    menu.addChild(exportAction);
-    menu.addChild(importAction);
+    this.#menu.addChild(reloadAction);
+    this.#menu.addChild(saveAllAction);
+    this.#menu.addChild(saveMainAction);
+    this.#menu.addChild(exportAction);
+    this.#menu.addChild(importAction);
 
-    this.setStaticChild('menu', menu);
+    this.setStaticChild('menu', this.#menu);
     this.setStaticChild('nav', decorateNavSpace);
     this.setStaticChild('main', decorateMainSpace);
 
@@ -58,6 +59,10 @@ class WorkingSpace extends Component {
       });
 
     decorateNavSpace.loadItems();
+  }
+
+  addedToPage() {
+    this.#menu.addedToPage();
   }
 
 }

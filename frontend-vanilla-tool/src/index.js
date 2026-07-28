@@ -13,6 +13,7 @@ function loadApp() {
     .then(() => {
       const homePage = new WorkingSpace();
       appRoot.appendChild(homePage.getElementView());
+      homePage.addedToPage(appRoot);
     });
 }
 window.addEventListener('load', loadApp);

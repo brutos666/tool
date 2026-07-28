@@ -183,6 +183,9 @@ class View {
       .addEventListener(event, callback, bubble);
   }
 
+  destroy() {
+  }
+
 }
 
 export default View;
