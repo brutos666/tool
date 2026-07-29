@@ -59,7 +59,7 @@ class ItemsView extends View {
    */
   getHtmlView(data) {
     if (data.addButton) {
-      return String.raw`<ol id="itemsSpace" class="items__space" aria-orientation="vertical"><li class="list__element"><template id="addItemAction"></template></li></ol>`;
+      return String.raw`<ol id="itemsSpace" class="items__space" aria-orientation="vertical"><li class="list__element"><template id="addItemAction" tabindex="0"></template></li></ol>`;
     }
     return String.raw`<ol id="itemsSpace" class="items__space" aria-orientation="vertical"></ol>`;
   }

@@ -36,17 +36,24 @@ class FocusManager {
     this.#parent = parent;
   }
 
-  addFocusableElement(element) {
-    element.setAttribute('tabindex', '-1');
-    this.#focusableElements.push(element);
+  /**
+   * Ajout d'un élément focusable
+   * @param {HTMLElement} element
+   * @param {string|undefined} selector : sélecteur facultatif pour spécifier un sous-élément
+   */
+  addFocusableElement(element, selector) {
+    const focusableElement = selector ? element.querySelector(selector) : element;
+    focusableElement.setAttribute('tabindex', '-1');
+    this.#focusableElements.push(focusableElement);
     if (!this.#current) {
       this.#current = this.#focusableElements[0];
       this.#current.setAttribute('tabindex', 0);
     }
   }
-  removeFocusableElement(element) {
+  removeFocusableElement(index) {
+    const element = this.#focusableElements[index];
     element.removeAttribute('tabindex');
-    this.#focusableElements.splice(this.#focusableElements.indexOf(element), 1);
+    this.#focusableElements.splice(index, 1);
     if (this.#current === element) {
       if (this.#focusableElements.length === 0) {
         this.#current = null;

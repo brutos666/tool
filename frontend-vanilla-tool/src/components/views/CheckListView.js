@@ -1,11 +1,16 @@
+import FocusManager from './FocusManager.js';
 import ItemsView from './ItemsView.js';
 
 class CheckListView extends ItemsView {
 
   name = 'CheckListView';
 
+  /** @type {FocusManager} */
+  #focusManager = null;
+
   constructor() {
     super({ addButton: true });
+    this.#focusManager = new FocusManager(this.getElementView(), 'horizontal', false);
   }
 
   getHtmlView() {
@@ -14,6 +19,35 @@ class CheckListView extends ItemsView {
     <section class="check-list__space">
       <ol id="itemsSpace" class="items__space" role="tree" aria-orientation="horizontal"><li class="list__element"><template id="addItemAction"></template></li></ol>
     </section></div>`;
+  }
+
+  addItemView(itemView) {
+    super.addItemView(itemView);
+    this.#focusManager.addFocusableElement(itemView.getElementView(), '.tree');
+  }
+
+  addItemViewAt(itemView, index) {
+    super.addItemViewAt(itemView, index);
+    this.#focusManager.addFocusableElement(itemView.getElementView());
+  }
+
+  removeItemView(index) {
+    super.removeItemView(index);
+    this.#focusManager.removeFocusableElement(index);
+  }
+
+  removeAllItemsViews() {
+    super.removeAllItemsViews();
+    this.#focusManager.removeAllFocusableElement();
+  }
+
+  added(parent) {
+    super.added(parent);
+    this.#focusManager.listenKeys();
+  }
+
+  destroy() {
+    this.#focusManager.stopListenKeys();
   }
 
 }
