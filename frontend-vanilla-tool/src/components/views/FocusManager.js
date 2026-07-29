@@ -18,12 +18,11 @@ class FocusManager {
   #current = null;
   /** @type {HTMLElement} */
   #parent = null;
-  /** @type {Array<HTMLButtonElement>} */
-  #focusable_elements = [];
+  /** @type {Array<HTMLElement>} */
+  #focusableElements = [];
   /** @type {'horizontal'|'vertical'} */
   #orientation = 'horizontal';
   #tabulation = false;
-  #navigationStart = false;
 
   /**
    * @constructor
@@ -37,48 +36,43 @@ class FocusManager {
     this.#parent = parent;
   }
 
+  addFocusableElement(element) {
+    element.setAttribute('tabindex', '-1');
+    this.#focusableElements.push(element);
+    if (!this.#current) {
+      this.#current = this.#focusableElements[0];
+      this.#current.setAttribute('tabindex', 0);
+    }
+  }
+  removeFocusableElement(element) {
+    element.removeAttribute('tabindex');
+    this.#focusableElements.splice(this.#focusableElements.indexOf(element), 1);
+    if (this.#current === element) {
+      if (this.#focusableElements.length === 0) {
+        this.#current = null;
+      } else {
+        this.#current = this.#focusableElements[0];
+        this.#current.setAttribute('tabindex', 0);
+      }
+    }
+  }
+  removeAllFocusableElement() {
+    this.#focusableElements = [];
+    if (this.#current) {
+      this.#current = null;
+    }
+  }
+
   /**
    * Liste les éléments pouvant prendre le focus.
    * Positionne l'élément devant prendre le focus au clavier parmi tous les éléments
    * Écoute l'appui sur les touches du clavier (si plus d'un élément)
    */
   listenKeys() {
-    this.#navigationStart = true;
-    this.#focusable_elements = [];
-    this.#parent.querySelectorAll('button, select, input')
-      .forEach(focusableElement => {
-        focusableElement.setAttribute('tabindex', '-1');
-        this.#focusable_elements.push(focusableElement);
-      });
-
-    const nbFocusable = this.#focusable_elements.length;
-    switch (nbFocusable) {
-      case 0:
-        this.#current = null;
-        break;
-      case 1:
-        this.#current = this.#focusable_elements[0];
-        this.#current.setAttribute('tabindex', 0);
-        break;
-      default:
-        this.#parent.addEventListener('keydown', this.#onKeyDownEvent);
-        if (!(this.#current && this.#focusable_elements.includes(this.#current))) {
-          this.#current = this.#focusable_elements[0];
-        }
-        this.#current.setAttribute('tabindex', 0);
-        break;
-    }
-  }
-  restartListenKeys() {
-    this.stopListenKeys();
-    this.listenKeys();
+    this.#parent.addEventListener('keydown', this.#onKeyDownEvent);
   }
   stopListenKeys() {
-    this.#navigationStart = false;
     this.#parent.removeEventListener('keydown', this.#onKeyDownEvent);
-  }
-  areKeysListened() {
-    return this.#navigationStart;
   }
 
   changeOrientation(orientation) {
@@ -146,25 +140,25 @@ class FocusManager {
   }
 
   #focusToFirst() {
-    this.#setCurrent(this.#focusable_elements[0]);
+    this.#setCurrent(this.#focusableElements[0]);
   }
   #focusToLast() {
-    this.#setCurrent(this.#focusable_elements[this.#focusable_elements.length - 1]);
+    this.#setCurrent(this.#focusableElements[this.#focusableElements.length - 1]);
   }
 
   #focusToDirection(direction) {
-    let indexFocus = this.#focusable_elements.indexOf(this.#current);
+    let indexFocus = this.#focusableElements.indexOf(this.#current);
     if ([ 'Up', 'Left' ].includes(direction)) {
       indexFocus--;
     } else if ([ 'Down', 'Right' ].includes(direction)) {
       indexFocus++;
     }
-    if (indexFocus === this.#focusable_elements.length) {
+    if (indexFocus === this.#focusableElements.length) {
       indexFocus = 0;
     } else if (indexFocus === -1) {
-      indexFocus = this.#focusable_elements.length - 1;
+      indexFocus = this.#focusableElements.length - 1;
     }
-    this.#setCurrent(this.#focusable_elements[indexFocus]);
+    this.#setCurrent(this.#focusableElements[indexFocus]);
     if (DOMUtilities.isHidden(this.#current)) {
       this.#focusToDirection(direction);
     }

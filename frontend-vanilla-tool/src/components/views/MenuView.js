@@ -61,6 +61,8 @@ class MenuView extends CompositeView {
     // Lorsqu'un bouton de menu sera cliquer lorsque le menu burger sera ouvert, ce dernier se fermera
     button.popoverTargetElement = this.#menu_actions;
     button.popoverTargetAction = 'hide';
+
+    this.#focusManager.addFocusableElement(button);
   }
 
   added(parent) {

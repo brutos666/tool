@@ -22,10 +22,7 @@ class ToolbarView extends CompositeView {
   addView(view) {
     super.addView(view);
 
-    // Un bouton est parfois ajouté après l'ajout de la bar d'outils au parent. On doit donc relancer l'écoute des touches de navigation au clavier en prenant en compte le nouveau bouton
-    if (this.#focusManager.areKeysListened()) {
-      this.#focusManager.restartListenKeys();
-    }
+    this.#focusManager.addFocusableElement(view.getElementView());
   }
 
   added(parent) {
