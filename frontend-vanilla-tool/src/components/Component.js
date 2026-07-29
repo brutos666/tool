@@ -22,6 +22,8 @@ class Component extends NodeElement {
    */
   added(parent) {
     this.#parent = parent;
+    this.getView()
+      .addedToParent(parent.getView());
   }
 
   /**

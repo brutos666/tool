@@ -28,6 +28,10 @@ class DecoratorView extends View {
     super.added();
     this.#decoratedView.added();
   }
+  addedToParent(parent) {
+    super.addedToParent(parent);
+    this.#decoratedView.addedToParent(parent);
+  }
 
   /**
    * Positionne la vue statique

@@ -13,8 +13,6 @@ class MenuView extends mix(CompositeView)
 
   name = 'MenuView KeyNavigationMixin';
 
-  /** @type {Array<HTMLButtonElement>} */
-  #menu_elements = [];
   /** @type {HTMLLabelElement} */
   #menu_button = null;
   /** @type {HTMLMenuElement} */
@@ -64,16 +62,16 @@ class MenuView extends mix(CompositeView)
     const button = view.getElementView()
       .querySelector('button');
 
-    this.#menu_elements.push(button);
     // Lorsqu'un bouton de menu sera cliquer lorsque le menu burger sera ouvert, ce dernier se fermera
     button.popoverTargetElement = this.#menu_actions;
     button.popoverTargetAction = 'hide';
   }
 
-  addedToPage() {
+  addedToParent(parent) {
+    super.addedToParent(parent);
+
     this.#menu_button.setAttribute('tabindex', 0);
-    this.#font_size = parseFloat(getComputedStyle(this.#menu_actions).fontSize);
-    this.setNavigation(this.getElementView(), this.#menu_elements);
+    this.setNavigation(this.#menu_actions);
   }
 
   sizeHasChanged(entries) {
@@ -82,6 +80,9 @@ class MenuView extends mix(CompositeView)
         continue;
       }
       const boxSize = entry.contentBoxSize[0] || entry.contentBoxSize;
+      if (!this.#font_size) {
+        this.#font_size = parseFloat(getComputedStyle(this.#menu_actions).fontSize);
+      }
       if (boxSize.inlineSize / this.#font_size > 50) {
         this.changeToHorizontalMenu();
       } else {

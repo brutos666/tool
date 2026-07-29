@@ -14,7 +14,7 @@ const KeyNavigationMixin = superclass => class extends superclass {
   /** @type {HTMLElement} */
   #current = null;
   /** @type {Array<HTMLButtonElement>} */
-  #button_elements = [];
+  #focusable_elements = [];
   /** @type {'horizontal'|'vertical'|'none'} */
   #orientation = 'horizontal';
   #tabulation = false;
@@ -22,18 +22,27 @@ const KeyNavigationMixin = superclass => class extends superclass {
   /**
    * Met en place la navigation
    * @param {HTMLElement} parent : conteneur des éléments
-   * @param {Array<HTMLButtonElement} elements : Boutons ou éléments de navigation
    * @param {'horizontal'|'vertical'|'none'} orientation : déplacement horizontal ou vertical ou non positionné
    * @param {boolean} tabulation : traite la tabulation en plus des flèches et garde la navigation à l'intérieur du conteneur
    */
-  setNavigation(parent, elements, orientation = 'none', tabulation = false) {
-    this.#button_elements = elements;
+  setNavigation(parent, orientation = 'none', tabulation = false) {
+    this.#focusable_elements = [];
+    parent.querySelectorAll('button, select, input')
+      .forEach(focusableElement => {
+        focusableElement.setAttribute('tabindex', '-1');
+        this.#focusable_elements.push(focusableElement);
+      });
+    const nbFocusable = this.#focusable_elements.length;
+    if (nbFocusable === 0) {
+      return;
+    }
+    if (nbFocusable === 1) {
+      this.#focusable_elements[0].setAttribute('tabindex', 0);
+      return;
+    }
     this.#orientation = orientation;
     this.#tabulation = tabulation;
-    for (const button of this.#button_elements) {
-      button.setAttribute('tabindex', '-1');
-    }
-    this.#current = this.#button_elements[0];
+    this.#current = this.#focusable_elements[0];
     this.#current.setAttribute('tabindex', 0);
 
     parent.addEventListener('keydown', this.onKeyDown.bind(this));
@@ -125,29 +134,28 @@ const KeyNavigationMixin = superclass => class extends superclass {
   }
 
   focusToFirst() {
-    this.setCurrent(this.#button_elements[0]);
+    this.setCurrent(this.#focusable_elements[0]);
   }
   focusToLast() {
-    this.setCurrent(this.#button_elements[this.#button_elements.length - 1]);
+    this.setCurrent(this.#focusable_elements[this.#focusable_elements.length - 1]);
   }
 
   focusToDirection(direction) {
-    let indexFocus = this.#button_elements.indexOf(this.#current);
-    if (direction === 'Up') {
+    let indexFocus = this.#focusable_elements.indexOf(this.#current);
+    if ([ 'Up', 'Left' ].includes(direction)) {
       indexFocus--;
-    } else if (direction === 'Down') {
-      indexFocus++;
-    } else if (direction === 'Left') {
-      indexFocus--;
-    } else if (direction === 'Right') {
+    } else if ([ 'Down', 'Right' ].includes(direction)) {
       indexFocus++;
     }
-    if (indexFocus === this.#button_elements.length) {
+    if (indexFocus === this.#focusable_elements.length) {
       indexFocus = 0;
     } else if (indexFocus === -1) {
-      indexFocus = this.#button_elements.length - 1;
+      indexFocus = this.#focusable_elements.length - 1;
     }
-    this.setCurrent(this.#button_elements[indexFocus]);
+    this.setCurrent(this.#focusable_elements[indexFocus]);
+    if (DOMUtilities.isHidden(this.#current)) {
+      this.focusToDirection(direction);
+    }
   }
 
 };

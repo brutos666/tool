@@ -16,11 +16,6 @@ class Menu extends Composite {
     return super.addChild(decorator);
   }
 
-  addedToPage() {
-    this.getView()
-      .addedToPage();
-  }
-
 }
 
 export default Menu;

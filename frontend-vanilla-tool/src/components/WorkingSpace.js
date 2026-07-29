@@ -61,10 +61,6 @@ class WorkingSpace extends Component {
     decorateNavSpace.loadItems();
   }
 
-  addedToPage() {
-    this.#menu.addedToPage();
-  }
-
 }
 
 export default WorkingSpace;

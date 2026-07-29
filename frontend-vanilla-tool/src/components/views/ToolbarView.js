@@ -1,6 +1,16 @@
 import CompositeView from './CompositeView.js';
+import KeyNavigationMixin from './KeyNavigationMixIn.js';
 
-class ToolbarView extends CompositeView {
+const mix = superclass => ({
+  with(mixin) {
+    return mixin(superclass);
+  }
+});
+
+class ToolbarView extends mix(CompositeView)
+  .with(KeyNavigationMixin) {
+
+  name = 'ToolbarView KeyNavigationMixin';
 
   constructor() {
     super();
@@ -10,6 +20,12 @@ class ToolbarView extends CompositeView {
    */
   getHtmlView() {
     return String.raw`<div id="spaceChildren" class="toolbar toolbar__space" role="toolbar"></div>`;
+  }
+
+  addedToParent(parent) {
+    super.added(parent);
+
+    this.setNavigation(this.getElementView(), 'horizontal', false);
   }
 
 }
