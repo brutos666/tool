@@ -2,6 +2,7 @@ import StoreData from '../../data/StoreData.js';
 import DragButton from '../DragButton.js';
 import ItemDecorator from './ItemDecorator.js';
 import DragDropDecoratorView from './views/DragDropDecoratorView.js';
+/** @import Item from '../Item.js'; */
 
 class DragDropDecorator extends ItemDecorator {
 
@@ -24,7 +25,11 @@ class DragDropDecorator extends ItemDecorator {
 
     const dragAction = new DragButton(decoratedElement);
     dragAction.setDoActionCallback(this.startDragDrop.bind(this));
-    this.setStaticChild('dragAction', dragAction);
+    // Ajout à la barre d'outil de l'item décoré
+    /** @type {Item} */
+    const item = this.getDecoratedElement();
+    item.getStaticChild('toolbar')
+      .addChild(dragAction);
 
     /** @type {DragDropDecoratorView} */
     const view = this.getView();

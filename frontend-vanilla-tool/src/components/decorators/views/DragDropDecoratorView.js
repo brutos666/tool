@@ -49,18 +49,6 @@ class DragDropDecoratorView extends DecoratorView {
     dragDropDecorator.setAttribute('direction', direction);
   }
 
-  setStaticView(id, child) {
-    if (id !== 'dragAction') {
-      return;
-    }
-    // Positionner l'icon de drag dans la barre d'outils de l'item
-    this.getDecoratedView()
-      .getElementView()
-      .querySelector('.toolbar')
-      .appendChild(child.getElementView());
-    return;
-  }
-
   authorizeDrop(dropIsAuthorized) {
     if (dropIsAuthorized) {
       this.getElementView().classList.remove('drop--forbidden');
