@@ -1,25 +1,22 @@
 import CompositeView from './CompositeView.js';
-import KeyNavigationMixin from './KeyNavigationMixIn.js';
+import FocusManager from './FocusManager.js';
 /** @import DecoratorView from '../decorators/views/DecoratorView.js'; */
 
-const mix = superclass => ({
-  with(mixin) {
-    return mixin(superclass);
-  }
-});
+class MenuView extends CompositeView {
 
-class MenuView extends mix(CompositeView)
-  .with(KeyNavigationMixin) {
-
-  name = 'MenuView KeyNavigationMixin';
+  name = 'MenuView';
 
   /** @type {HTMLLabelElement} */
   #menu_button = null;
   /** @type {HTMLMenuElement} */
   #menu_actions = null;
+  #horizontal = false;
 
   #font_size = null;
   #resizeObserver = null;
+
+  /** @type {FocusManager} */
+  #focusManager = null;
 
   constructor() {
     super();
@@ -28,14 +25,13 @@ class MenuView extends mix(CompositeView)
       .querySelector('.menu__button');
     this.#menu_actions = this.getElementView()
       .querySelector('.menu__actions');
+
+    this.#focusManager = new FocusManager(this.#menu_actions, 'horizontal', false);
+
     this.#menu_actions.addEventListener('toggle', event => {
       if (event.newState === 'open') {
         this.#menu_button.setAttribute('tabindex', '-1');
-        if (this.isNavigationHorizontal()) {
-          this.navigationChangeOrientation('vertical');
-          this.navigationChangeTabulation(true);
-        }
-        this.navigationGiveFocus();
+        this.#focusManager.giveFocus();
         return;
       }
       this.#menu_button.setAttribute('tabindex', '0');
@@ -69,9 +65,7 @@ class MenuView extends mix(CompositeView)
 
   added(parent) {
     super.added(parent);
-
-    this.#menu_button.setAttribute('tabindex', 0);
-    this.setNavigation(this.#menu_actions);
+    this.#focusManager.listenKeys();
   }
 
   sizeHasChanged(entries) {
@@ -92,39 +86,44 @@ class MenuView extends mix(CompositeView)
   }
 
   changeToBurgerMenu() {
-    if (this.isNavigationVertical()) {
+    if (!this.#horizontal) {
       return;
     }
-    this.navigationChangeOrientation('vertical');
-    this.navigationChangeTabulation(true);
+    this.#horizontal = false;
+    this.#focusManager.changeOrientation('vertical');
+    this.#focusManager.listenTabKey(true);
     this.#menu_button.classList.remove('hidden');
+    this.#menu_button.setAttribute('tabindex', 0);
     this.#menu_actions.classList.add('menu__actions-vertical');
     this.#menu_button.popoverTargetElement = this.#menu_actions;
     this.#menu_button.popoverTargetAction = 'toggle';
     this.#menu_actions.popover = 'auto';
-    if (this.navigationIsFocused()) {
+    if (this.#focusManager.isCurrentFocused()) {
       this.#menu_button.focus();
     }
   }
 
   changeToHorizontalMenu() {
-    if (this.isNavigationHorizontal()) {
+    if (this.#horizontal) {
       return;
     }
-    this.navigationChangeOrientation('horizontal');
-    this.navigationChangeTabulation(false);
+    this.#horizontal = true;
+    this.#focusManager.changeOrientation('horizontal');
+    this.#focusManager.listenTabKey(false);
     this.#menu_button.classList.add('hidden');
+    this.#menu_button.setAttribute('tabindex', -1);
     this.#menu_actions.classList.remove('menu__actions-vertical');
     this.#menu_button.popoverTargetElement = null;
     this.#menu_button.popoverTargetAction = null;
     this.#menu_actions.popover = null;
     if (document.activeElement === this.#menu_button) {
-      this.navigationGiveFocus();
+      this.#focusManager.giveFocus();
     }
   }
 
   destroy() {
     this.#resizeObserver.disconnect();
+    this.#focusManager.stopListenKeys();
   }
 
 }
