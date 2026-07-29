@@ -69,15 +69,9 @@ class View {
       oldView.parentNode.replaceChild(view.getElementView(), oldView);
     }
     this.#staticViews[id] = view;
-    view.added();
   }
-  /**
-   * Cette méthode n'est pas appelé si la vue est ajouté dans une autre vue (class xxxView)
-   * TODO : voir si on peut en avoir qu'une seul added ou addedToParent
-   */
-  addedToParent(/* parent */) {}
 
-  added() {}
+  added(/* parent */) {}
 
   removed() {}
 

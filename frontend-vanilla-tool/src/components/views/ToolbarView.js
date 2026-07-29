@@ -22,7 +22,7 @@ class ToolbarView extends mix(CompositeView)
     return String.raw`<div id="spaceChildren" class="toolbar toolbar__space" role="toolbar"></div>`;
   }
 
-  addedToParent(parent) {
+  added(parent) {
     super.added(parent);
 
     this.setNavigation(this.getElementView(), 'horizontal', false);

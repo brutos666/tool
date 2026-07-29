@@ -23,7 +23,7 @@ class Component extends NodeElement {
   added(parent) {
     this.#parent = parent;
     this.getView()
-      .addedToParent(parent.getView());
+      .added(parent.getView());
   }
 
   /**
@@ -31,6 +31,8 @@ class Component extends NodeElement {
    */
   removed() {
     this.#parent = null;
+    this.getView()
+      .removed();
     this.destroy();
   }
 

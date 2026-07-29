@@ -37,8 +37,9 @@ class DragDropDecoratorView extends DecoratorView {
     return String.raw`<div class="drag-drop--decorator">${ super.getTemplateDecoratorHTML() }</div>`;
   }
 
-  added() {
-    super.added();
+  added(parent) {
+    super.added(parent);
+
     const dragDropDecorator = this.getElementView();
     const componentWithDirection = dragDropDecorator.closest('[aria-orientation]');
     if (!componentWithDirection) {

@@ -67,8 +67,8 @@ class MenuView extends mix(CompositeView)
     button.popoverTargetAction = 'hide';
   }
 
-  addedToParent(parent) {
-    super.addedToParent(parent);
+  added(parent) {
+    super.added(parent);
 
     this.#menu_button.setAttribute('tabindex', 0);
     this.setNavigation(this.#menu_actions);

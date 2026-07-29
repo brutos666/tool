@@ -25,14 +25,14 @@ class ItemsView extends View {
       itemsSpace.appendChild(itemView.getElementView());
     }
     this.#itemViews.push(itemView);
-    itemView.added();
+    itemView.added(this);
   }
 
   addItemViewAt(itemView, index) {
     const itemsSpace = getItemsSpace(this.getElementView());
     itemsSpace.insertBefore(itemView.getElementView(), itemsSpace.children[index]);
     this.#itemViews.splice(index, 0, itemView);
-    itemView.added();
+    itemView.added(this);
   }
 
   removeItemView(index) {

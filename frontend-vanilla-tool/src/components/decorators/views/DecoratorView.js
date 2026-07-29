@@ -24,13 +24,9 @@ class DecoratorView extends View {
     return String.raw`<template id="decoratedSpace"></template>`;
   }
 
-  added() {
-    super.added();
-    this.#decoratedView.added();
-  }
-  addedToParent(parent) {
-    super.addedToParent(parent);
-    this.#decoratedView.addedToParent(parent);
+  added(parent) {
+    super.added(parent);
+    this.#decoratedView.added(parent);
   }
 
   /**
