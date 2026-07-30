@@ -47,6 +47,7 @@ class CheckListView extends ItemsView {
   }
 
   destroy() {
+    super.destroy();
     this.#focusManager.stopListenKeys();
   }
 

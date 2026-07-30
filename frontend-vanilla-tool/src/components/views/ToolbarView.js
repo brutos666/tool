@@ -32,6 +32,7 @@ class ToolbarView extends CompositeView {
   }
 
   destroy() {
+    super.destroy();
     this.#focusManager.stopListenKeys();
   }
 

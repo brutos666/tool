@@ -124,6 +124,7 @@ class MenuView extends CompositeView {
   }
 
   destroy() {
+    super.destroy();
     this.#resizeObserver.disconnect();
     this.#focusManager.stopListenKeys();
   }
