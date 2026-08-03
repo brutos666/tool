@@ -59,8 +59,14 @@ class DecoratorView extends View {
     }
     return this.#decoratedView;
   }
-  getImmediateDecoratedView() {
-    return this.#decoratedView;
+  getDecoratedViewByName(name) {
+    if (this.#decoratedView.getName() === name) {
+      return this.#decoratedView;
+    }
+    if (this.#decoratedView.getDecoratedView) {
+      return this.#decoratedView.getDecoratedViewByName(name);
+    }
+    return null;
   }
 
   /** @override */

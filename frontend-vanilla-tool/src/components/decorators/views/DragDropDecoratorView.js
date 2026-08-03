@@ -186,10 +186,7 @@ class DragDropDecoratorView extends DecoratorView {
 
   openNodeAfterDelay() {
     /** @type {TreeView} */
-    const treeView = this.getImmediateDecoratedView()
-      .getName() === 'TreeView'
-      ? this.getImmediateDecoratedView()
-      : null;
+    const treeView = this.getDecoratedViewByName('TreeView');
     if (!treeView || !treeView.isClosed()) {
       return;
     }
