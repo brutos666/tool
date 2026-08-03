@@ -1,43 +1,48 @@
-import FocusManager from './FocusManager.js';
 import ItemsView from './ItemsView.js';
+import TreeFocusManager from './TreeFocusManager.js';
 
 class TreeListView extends ItemsView {
 
   name = 'TreeListView';
 
-  /** @type {FocusManager} */
+  /** @type {TreeFocusManager} */
   #focusManager = null;
 
   constructor(data) {
     super(data);
     this.getElementView()
       .classList.add('tree-list__space');
-    this.#focusManager = new FocusManager(this.getElementView(), 'vertical', false);
+    // NOTE : le système de focus est positionné mais l'écoute des touches de navigation ne doit pas être effective au départ. C'est le composant qui contient les racines des arbres qui doit piloter au départ
+    this.#focusManager = new TreeFocusManager(this.getElementView(), 'vertical', true);
+  }
+
+  getFocusManager() {
+    return this.#focusManager;
   }
 
   addItemView(itemView) {
     super.addItemView(itemView);
-    this.#focusManager.addFocusableElement(itemView.getElementView(), '.tree');
+    this.#focusManager.addFocusableView(itemView.getDecoratedViewByName('TreeView'));
   }
 
   addItemViewAt(itemView, index) {
     super.addItemViewAt(itemView, index);
-    this.#focusManager.addFocusableElement(itemView.getElementView());
+    this.#focusManager.addFocusableView(itemView.getDecoratedViewByName('TreeView'), '.tree');
   }
 
   removeItemView(index) {
     super.removeItemView(index);
-    this.#focusManager.removeFocusableElement(index);
+    this.#focusManager.removeFocusableView(index);
   }
 
   removeAllItemsViews() {
     super.removeAllItemsViews();
-    this.#focusManager.removeAllFocusableElement();
+    this.#focusManager.removeAllFocusableViews();
   }
 
   added(parent) {
     super.added(parent);
-    this.#focusManager.listenKeys();
+    this.#focusManager.setParent(parent);
   }
 
   destroy() {

@@ -10,7 +10,7 @@ class ToolbarView extends CompositeView {
 
   constructor() {
     super();
-    this.#focusManager = new FocusManager(this.getElementView(), 'horizontal', false);
+    this.#focusManager = new FocusManager(this.getElementView(), 'horizontal', false, false);
   }
   /**
    * @override {@link View.getHtmlView}

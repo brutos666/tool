@@ -1,16 +1,19 @@
-import FocusManager from './FocusManager.js';
 import ItemsView from './ItemsView.js';
+import TreeFocusManager from './TreeFocusManager.js';
 
 class CheckListView extends ItemsView {
 
   name = 'CheckListView';
 
-  /** @type {FocusManager} */
+  /** @type {TreeFocusManager} */
   #focusManager = null;
 
   constructor() {
     super({ addButton: true });
-    this.#focusManager = new FocusManager(this.getElementView(), 'horizontal', false);
+    this.#focusManager = new TreeFocusManager(this.getElementView(), 'horizontal', false);
+  }
+  getFocusManager() {
+    return this.#focusManager;
   }
 
   getHtmlView() {
@@ -23,26 +26,33 @@ class CheckListView extends ItemsView {
 
   addItemView(itemView) {
     super.addItemView(itemView);
-    this.#focusManager.addFocusableElement(itemView.getElementView(), '.tree');
+    this.#focusManager.addFocusableView(itemView.getDecoratedViewByName('TreeView'));
   }
 
   addItemViewAt(itemView, index) {
     super.addItemViewAt(itemView, index);
-    this.#focusManager.addFocusableElement(itemView.getElementView());
+    this.#focusManager.addFocusableView(itemView.getDecoratedViewByName('TreeView'));
   }
 
   removeItemView(index) {
     super.removeItemView(index);
-    this.#focusManager.removeFocusableElement(index);
+    this.#focusManager.removeFocusableView(index);
   }
 
   removeAllItemsViews() {
     super.removeAllItemsViews();
-    this.#focusManager.removeAllFocusableElement();
+    this.#focusManager.removeAllFocusableViews();
   }
 
   added(parent) {
     super.added(parent);
+
+    this.getStaticView('title')
+      .getDecoratedViewByName('ItemView')
+      .getElementView()
+      .setAttribute('tabindex', 0);
+
+    this.#focusManager.setParent(parent);
     this.#focusManager.listenKeys();
   }
 

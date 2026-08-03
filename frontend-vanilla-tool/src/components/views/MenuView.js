@@ -26,15 +26,15 @@ class MenuView extends CompositeView {
     this.#menu_actions = this.getElementView()
       .querySelector('.menu__actions');
 
-    this.#focusManager = new FocusManager(this.#menu_actions, 'horizontal', false);
+    this.#focusManager = new FocusManager(this.#menu_actions, 'horizontal', false, false);
 
     this.#menu_actions.addEventListener('toggle', event => {
       if (event.newState === 'open') {
-        this.#menu_button.setAttribute('tabindex', '-1');
+        this.#menu_button.setAttribute('tabindex', -1);
         this.#focusManager.giveFocus();
         return;
       }
-      this.#menu_button.setAttribute('tabindex', '0');
+      this.#menu_button.setAttribute('tabindex', 0);
       this.#menu_button.focus();
     });
 

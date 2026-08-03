@@ -18,9 +18,8 @@ class AddItemButtonView extends ActionView {
     this.getElementView().classList.add('item-like-button');
     this.getElementView().classList.add(getClassForViewChoice(data.layout));
 
-    // Ces boutons seront gérés via la navigation des items avec les flèches
     this.getElementView()
-      .setAttribute('tabindex', '-1');
+      .setAttribute('tabindex', 0);
 
     this.getElementView()
       .addEventListener('focus', this.onFocus.bind(this), true);

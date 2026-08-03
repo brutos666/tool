@@ -1,39 +1,64 @@
 import DOMUtilities from '../../tools/DOMUtilities.js';
+/** @import TreeView from '../decorators/views/TreeView.js'; */
+/** @import View from './View.js'; */
 
 class FocusManager {
 
   #keyEvent = {
+    // Lorsque la tabulation doit permettre de naviguer et surtout ne pas sortir de la zone
     Tab: this.#onKeyTab.bind(this),
+    // Lorsque que l'on peut "entrer" dans un des éléments pour entamer une navigation à l'intérieur de celui-ci
+    Enter: this.#onKeyEnter.bind(this),
+    Escape: this.#onKeyEscape.bind(this),
     // Les flèches sont nécessaires pour naviguer entre les différentes éléments
-    ArrowUp: this.#focusToDirection.bind(this, 'Up'),
-    ArrowDown: this.#focusToDirection.bind(this, 'Down'),
-    ArrowLeft: this.#focusToDirection.bind(this, 'Left'),
-    ArrowRight: this.#focusToDirection.bind(this, 'Right'),
+    ArrowUp: this.focusToDirection.bind(this, 'Up'),
+    ArrowDown: this.focusToDirection.bind(this, 'Down'),
+    ArrowLeft: this.focusToDirection.bind(this, 'Left'),
+    ArrowRight: this.focusToDirection.bind(this, 'Right'),
     Home: this.#focusToFirst.bind(this),
     End: this.#focusToLast.bind(this)
   };
   #onKeyDownEvent = this.#onKeyDown.bind(this);
 
+  #onBlurEvent = this.onBlur.bind(this);
+
   /** @type {HTMLElement} */
   #current = null;
   /** @type {HTMLElement} */
-  #parent = null;
+  #container = null;
   /** @type {Array<HTMLElement>} */
   #focusableElements = [];
+  #listened = false;
+
   /** @type {'horizontal'|'vertical'} */
   #orientation = 'horizontal';
-  #tabulation = false;
+  #canTab = false;
+  #canEnter = false;
+
+  #isEnter = false;
 
   /**
    * @constructor
-   * @param {HTMLElement} parent : conteneur des éléments
-   * @param {'horizontal'|'vertical'} orientation : déplacement horizontal ou vertical ou non positionné
-   * @param {boolean} tabulation : traite la tabulation en plus des flèches et garde la navigation à l'intérieur du conteneur
+   * @param {HTMLElement} container : conteneur des éléments
+   * @param {'horizontal'|'vertical'|'tree'} orientation : déplacement horizontal ou vertical ou arbre
+   * @param {boolean} canTab : traite la tabulation en plus des flèches et garde la navigation à l'intérieur du conteneur
+   * @param {boolean} canEnter : traite la possibilité d'entrer dans un élément pour naviguer à l'intérieur
    */
-  constructor(parent, orientation, tabulation) {
+  constructor(container, orientation, canTab, canEnter) {
+    this.#container = container;
     this.#orientation = orientation;
-    this.#tabulation = tabulation;
-    this.#parent = parent;
+    this.#canTab = canTab;
+    this.#canEnter = canEnter;
+  }
+
+  isCanEnter() {
+    return this.#canEnter;
+  }
+  isEnter() {
+    return this.#isEnter;
+  }
+  getContainer() {
+    return this.#container;
   }
 
   /**
@@ -43,11 +68,10 @@ class FocusManager {
    */
   addFocusableElement(element, selector) {
     const focusableElement = selector ? element.querySelector(selector) : element;
-    focusableElement.setAttribute('tabindex', '-1');
+    focusableElement.setAttribute('tabindex', -1);
     this.#focusableElements.push(focusableElement);
-    if (!this.#current) {
-      this.#current = this.#focusableElements[0];
-      this.#current.setAttribute('tabindex', 0);
+    if (this.#focusableElements.length === 1) {
+      this.setCurrent(this.#focusableElements[0]);
     }
   }
   removeFocusableElement(index) {
@@ -56,18 +80,15 @@ class FocusManager {
     this.#focusableElements.splice(index, 1);
     if (this.#current === element) {
       if (this.#focusableElements.length === 0) {
-        this.#current = null;
+        this.removeCurrent();
       } else {
-        this.#current = this.#focusableElements[0];
-        this.#current.setAttribute('tabindex', 0);
+        this.setCurrent(this.#focusableElements[0]);
       }
     }
   }
-  removeAllFocusableElement() {
+  removeAllFocusableElements() {
     this.#focusableElements = [];
-    if (this.#current) {
-      this.#current = null;
-    }
+    this.removeCurrent();
   }
 
   /**
@@ -76,10 +97,25 @@ class FocusManager {
    * Écoute l'appui sur les touches du clavier (si plus d'un élément)
    */
   listenKeys() {
-    this.#parent.addEventListener('keydown', this.#onKeyDownEvent);
+    this.#listened = true;
+    this.#current?.setAttribute('tabindex', 0);
+    this.#current?.addEventListener('blur', this.#onBlurEvent, true);
+
+    this.#container.addEventListener('keydown', this.#onKeyDownEvent);
   }
   stopListenKeys() {
-    this.#parent.removeEventListener('keydown', this.#onKeyDownEvent);
+    this.#listened = false;
+    this.#current?.setAttribute('tabindex', -1);
+    this.#current?.removeEventListener('blur', this.#onBlurEvent, true);
+
+    this.#container.removeEventListener('keydown', this.#onKeyDownEvent);
+  }
+  isListened() {
+    return this.#listened;
+  }
+
+  onBlur() {
+    this.#isEnter = false;
   }
 
   changeOrientation(orientation) {
@@ -93,7 +129,7 @@ class FocusManager {
   }
 
   listenTabKey(tabulation) {
-    this.#tabulation = tabulation;
+    this.#canTab = tabulation;
   }
 
   giveFocus() {
@@ -103,21 +139,47 @@ class FocusManager {
     return document.activeElement === this.#current;
   }
 
-  #setCurrent(button) {
-    this.#current.setAttribute('tabindex', '-1');
-
+  setCurrent(button) {
+    this.removeCurrent();
     this.#current = button;
-    this.#current.setAttribute('tabindex', 0);
-    this.#current.focus();
+    // Ne permettre la prise de focus que si le focusManager est à l'écoute
+    this.#current.setAttribute('tabindex', this.isListened() ? 0 : -1);
+    if (this.isListened()) {
+      this.#current.addEventListener('blur', this.#onBlurEvent, true);
+    }
+  }
+  setCurrentWithIndex(index) {
+    this.setCurrent(this.#focusableElements[index]);
+  }
+  getCurrent() {
+    return this.#current;
+  }
+  getIndexCurrent() {
+    return this.#focusableElements.indexOf(this.#current);
+  }
+  removeCurrent() {
+    if (!this.#current) {
+      return;
+    }
+    this.#current.setAttribute('tabindex', -1);
+    this.#current.removeEventListener('blur', this.#onBlurEvent, true);
+    this.#current = null;
   }
 
-  #interceptKeys() {
+  interceptKeys() {
     if (DOMUtilities.isHidden(this.#current)) {
       return [];
     }
+    if (this.isEnter()) {
+      return ['Escape'];
+    }
+
     const keys = [ 'Home', 'End' ];
-    if (this.#tabulation) {
+    if (this.#canTab) {
       keys.push('Tab');
+    }
+    if (this.isCanEnter()) {
+      keys.push('Enter');
     }
     if (this.#orientation === 'vertical') {
       keys.push('ArrowUp');
@@ -134,7 +196,7 @@ class FocusManager {
    * @param {Event} event - Event de clavier
    */
   #onKeyDown(event) {
-    if (!this.#interceptKeys()
+    if (!this.interceptKeys()
       .includes(event.key)) {
       return;
     }
@@ -143,31 +205,44 @@ class FocusManager {
   }
 
   #onKeyTab(event) {
-    this.#focusToDirection(event.shiftKey ? 'Up' : 'Down');
+    this.focusToDirection(event.shiftKey ? 'Up' : 'Down');
+  }
+
+  #onKeyEnter() {
+    this.#current.setAttribute('tabindex', -1);
+    this.#isEnter = true;
+  }
+  #onKeyEscape() {
+    this.#current.setAttribute('tabindex', 0);
+    this.#isEnter = false;
   }
 
   #focusToFirst() {
-    this.#setCurrent(this.#focusableElements[0]);
+    this.setCurrent(this.#focusableElements[0]);
+    this.#current.focus();
   }
   #focusToLast() {
-    this.#setCurrent(this.#focusableElements[this.#focusableElements.length - 1]);
+    this.setCurrent(this.#focusableElements[this.#focusableElements.length - 1]);
+    this.#current.focus();
   }
 
-  #focusToDirection(direction) {
-    let indexFocus = this.#focusableElements.indexOf(this.#current);
+  focusToDirection(direction) {
+    let indexCurrent = this.#focusableElements.indexOf(this.#current);
     if ([ 'Up', 'Left' ].includes(direction)) {
-      indexFocus--;
+      indexCurrent--;
     } else if ([ 'Down', 'Right' ].includes(direction)) {
-      indexFocus++;
+      indexCurrent++;
     }
-    if (indexFocus === this.#focusableElements.length) {
-      indexFocus = 0;
-    } else if (indexFocus === -1) {
-      indexFocus = this.#focusableElements.length - 1;
+    if (indexCurrent === this.#focusableElements.length) {
+      indexCurrent = 0;
+    } else if (indexCurrent === -1) {
+      indexCurrent = this.#focusableElements.length - 1;
     }
-    this.#setCurrent(this.#focusableElements[indexFocus]);
+    this.setCurrent(this.#focusableElements[indexCurrent]);
     if (DOMUtilities.isHidden(this.#current)) {
-      this.#focusToDirection(direction);
+      this.focusToDirection(direction);
+    } else {
+      this.#current.focus();
     }
   }
 

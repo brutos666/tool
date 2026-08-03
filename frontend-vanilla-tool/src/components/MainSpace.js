@@ -3,7 +3,6 @@ import ActionButton from './ActionButton.js';
 import CheckList from './CheckList.js';
 import Component from './Component.js';
 import CommandItemsDecorator from './decorators/CommandItemsDecorator.js';
-import ItemsKeyboardNavDecorator from './decorators/ItemsKeyboardNavDecorator.js';
 import SampleMappingSpace from './SampleMappingSpace.js';
 import Select from './Select.js';
 import Toolbar from './Toolbar.js';
@@ -58,7 +57,7 @@ class MainSpace extends Component {
         this.#main = new SampleMappingSpace(this.#treeItem);
         break;
       case LAYOUT.CheckList:
-        this.#main = new ItemsKeyboardNavDecorator(new CheckList(this.#treeItem));
+        this.#main = new CheckList(this.#treeItem);
         break;
       default:
         this.#main = null;
