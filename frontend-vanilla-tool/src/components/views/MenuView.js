@@ -62,7 +62,7 @@ class MenuView extends CompositeView {
     button.popoverTargetElement = this.#menu_actions;
     button.popoverTargetAction = 'hide';
 
-    this.#focusManager.addFocusableElement(button);
+    this.#focusManager.addFocusableView(view, 'button');
   }
 
   added(parent) {

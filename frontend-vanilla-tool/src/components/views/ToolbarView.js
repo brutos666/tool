@@ -22,7 +22,7 @@ class ToolbarView extends CompositeView {
   addView(view) {
     super.addView(view);
 
-    this.#focusManager.addFocusableElement(view.getElementView());
+    this.#focusManager.addFocusableView(view);
   }
 
   added(parent) {

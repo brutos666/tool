@@ -5,9 +5,6 @@ import FocusManager from './FocusManager.js';
 
 class TreeFocusManager extends FocusManager {
 
-  /** @type {Array<TreeView>} */
-  #focusableViews = [];
-
   /** @type {TreeView} */
   #parentTree;
 
@@ -45,30 +42,27 @@ class TreeFocusManager extends FocusManager {
    * @param {View} view
    * @param {string|undefined} selector : sélecteur facultatif pour spécifier un sous-élément
    */
-  addFocusableView(view) {
-    this.#focusableViews.push(view);
-    this.addFocusableElement(view.getElementView());
+  addFocusableView(view, selector) {
+    super.addFocusableView(view, selector);
+
     view.getElementView()
       .addEventListener('mousedown', this.#onMouseDownEvent);
   }
   removeFocusableView(index) {
-    this.#focusableViews[index].getElementView()
+    this.getFocusableViewAt(index)
+      .getElementView()
       .removeEventListener('mousedown', this.#onMouseDownEvent);
-    this.#focusableViews.splice(index, 1);
-    this.removeFocusableElement(index);
+
+    super.removeFocusableView(index);
   }
   removeAllFocusableViews() {
-    for (const focusableView of this.#focusableViews) {
+    for (const focusableView of this.getFocusableViews()) {
       focusableView.getElementView()
         .removeEventListener('mousedown', this.#onMouseDownEvent);
     }
-    this.#focusableViews = [];
-    this.removeAllFocusableElements();
-
     this.giveControlToFocusManager(this.getRootFocusManager());
-  }
-  getCurrentView() {
-    return this.#focusableViews[this.getIndexCurrent()];
+
+    super.removeAllFocusableViews();
   }
 
   onBlur(event) {
@@ -98,11 +92,12 @@ class TreeFocusManager extends FocusManager {
   }
 
   giveFocusTo(treeView) {
-    this.setCurrentWithIndex(this.#focusableViews.indexOf(treeView));
+    this.setCurrentWithIndex(this.getFocusableViews()
+      .indexOf(treeView));
     super.giveFocus();
   }
   giveFocusToLast() {
-    this.setCurrentWithIndex(this.#focusableViews.length - 1);
+    this.setCurrentWithIndex(this.getFocusableViews().length - 1);
     super.giveFocus();
   }
   giveFocusToFirst() {
@@ -111,7 +106,7 @@ class TreeFocusManager extends FocusManager {
   }
   giveFocusToNext() {
     const index = this.getIndexCurrent() + 1;
-    if (index < this.#focusableViews.length) {
+    if (index < this.getFocusableViews().length) {
       this.setCurrentWithIndex(index);
       super.giveFocus();
     }
@@ -218,7 +213,7 @@ class TreeFocusManager extends FocusManager {
     }
     // Si on est sur le dernier élément de la liste, on doit donner le contrôle au parent
     const indexCurrent = this.getIndexCurrent();
-    if (indexCurrent === this.#focusableViews.length - 1 && this.#parentTree) {
+    if (indexCurrent === this.getFocusableViews().length - 1 && this.#parentTree) {
       const parentFocusManager = this.giveControlToParent();
       parentFocusManager.moveVertically('Down');
       return;
@@ -328,7 +323,7 @@ class TreeFocusManager extends FocusManager {
       return;
     }
     const indexCurrent = this.getIndexCurrent() + (direction === 'Up' ? -1 : 1);
-    if (indexCurrent >= 0 && indexCurrent < this.#focusableViews.length) {
+    if (indexCurrent >= 0 && indexCurrent < this.getFocusableViews().length) {
       super.focusToDirection(direction);
       return;
     }

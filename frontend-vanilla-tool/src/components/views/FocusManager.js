@@ -28,6 +28,8 @@ class FocusManager {
   #container = null;
   /** @type {Array<HTMLElement>} */
   #focusableElements = [];
+  /** @type {Array<View>} */
+  #focusableViews = [];
   #listened = false;
 
   /** @type {'horizontal'|'vertical'} */
@@ -63,10 +65,13 @@ class FocusManager {
 
   /**
    * Ajout d'un élément focusable
-   * @param {HTMLElement} element
+   * @param {View} view
    * @param {string|undefined} selector : sélecteur facultatif pour spécifier un sous-élément
    */
-  addFocusableElement(element, selector) {
+  addFocusableView(view, selector) {
+    this.#focusableViews.push(view);
+
+    const element = view.getElementView();
     const focusableElement = selector ? element.querySelector(selector) : element;
     focusableElement.setAttribute('tabindex', -1);
     this.#focusableElements.push(focusableElement);
@@ -74,7 +79,9 @@ class FocusManager {
       this.setCurrent(this.#focusableElements[0]);
     }
   }
-  removeFocusableElement(index) {
+  removeFocusableView(index) {
+    this.#focusableViews.splice(index, 1);
+
     const element = this.#focusableElements[index];
     element.removeAttribute('tabindex');
     this.#focusableElements.splice(index, 1);
@@ -86,9 +93,19 @@ class FocusManager {
       }
     }
   }
-  removeAllFocusableElements() {
+  removeAllFocusableViews() {
+    this.#focusableViews = [];
     this.#focusableElements = [];
     this.removeCurrent();
+  }
+  getCurrentView() {
+    return this.#focusableViews[this.getIndexCurrent()];
+  }
+  getFocusableViews() {
+    return this.#focusableViews;
+  }
+  getFocusableViewAt(index) {
+    return this.#focusableViews[index];
   }
 
   /**
