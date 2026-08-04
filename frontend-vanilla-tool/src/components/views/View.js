@@ -1,6 +1,7 @@
 'use strict';
 
 import { createNode } from '../../tools/NodeUtilities.js';
+/** @import FocusManager from './FocusManager.js'; */
 
 class View {
 
@@ -16,6 +17,9 @@ class View {
 
   #name;
 
+  /** @type {FocusManager} (facultatif) */
+  #focusManager;
+
   /**
    * @constructor. Crée la vue à partir des données passées en paramètre
    * @param {Object} data - Données à utiliser pour créer la vue
@@ -27,6 +31,13 @@ class View {
 
   getName() {
     return this.#name;
+  }
+
+  setFocusManager(focusManager) {
+    this.#focusManager = focusManager;
+  }
+  getFocusManager() {
+    return this.#focusManager;
   }
 
   /**
@@ -71,9 +82,13 @@ class View {
     this.#staticViews[id] = view;
   }
 
-  added(/* parent */) {}
+  added(parent) {
+    this.#focusManager?.setParent(parent);
+  }
 
-  removed() {}
+  removed() {
+    this.#focusManager?.stopListenKeys();
+  }
 
   getStaticView(id) {
     return this.#staticViews[id];
@@ -183,6 +198,7 @@ class View {
   }
 
   destroy() {
+    this.#focusManager?.stopListenKeys();
   }
 
 }

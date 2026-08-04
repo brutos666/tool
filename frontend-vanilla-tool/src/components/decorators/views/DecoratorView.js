@@ -69,6 +69,11 @@ class DecoratorView extends View {
     return null;
   }
 
+  getFocusManager() {
+    return this.getDecoratedView()
+      .getFocusManager();
+  }
+
   /** @override */
   refreshView(data) {
     const elementView = this.getElementView();

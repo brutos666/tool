@@ -5,15 +5,9 @@ class CheckListView extends ItemsView {
 
   name = 'CheckListView';
 
-  /** @type {TreeFocusManager} */
-  #focusManager = null;
-
   constructor() {
     super({ addButton: true });
-    this.#focusManager = new TreeFocusManager(this.getElementView(), 'horizontal', false);
-  }
-  getFocusManager() {
-    return this.#focusManager;
+    super.setFocusManager(new TreeFocusManager(this.getElementView(), 'horizontal', false));
   }
 
   getHtmlView() {
@@ -26,22 +20,26 @@ class CheckListView extends ItemsView {
 
   addItemView(itemView) {
     super.addItemView(itemView);
-    this.#focusManager.addFocusableView(itemView.getDecoratedViewByName('TreeView'));
+    super.getFocusManager()
+      .addFocusableView(itemView.getDecoratedViewByName('TreeView'));
   }
 
   addItemViewAt(itemView, index) {
     super.addItemViewAt(itemView, index);
-    this.#focusManager.addFocusableView(itemView.getDecoratedViewByName('TreeView'));
+    super.getFocusManager()
+      .addFocusableView(itemView.getDecoratedViewByName('TreeView'));
   }
 
   removeItemView(index) {
     super.removeItemView(index);
-    this.#focusManager.removeFocusableView(index);
+    super.getFocusManager()
+      .removeFocusableView(index);
   }
 
   removeAllItemsViews() {
     super.removeAllItemsViews();
-    this.#focusManager.removeAllFocusableViews();
+    super.getFocusManager()
+      .removeAllFocusableViews();
   }
 
   added(parent) {
@@ -52,13 +50,8 @@ class CheckListView extends ItemsView {
       .getElementView()
       .setAttribute('tabindex', 0);
 
-    this.#focusManager.setParent(parent);
-    this.#focusManager.listenKeys();
-  }
-
-  destroy() {
-    super.destroy();
-    this.#focusManager.stopListenKeys();
+    super.getFocusManager()
+      .listenKeys();
   }
 
 }

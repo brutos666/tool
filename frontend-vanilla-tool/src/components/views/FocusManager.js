@@ -53,6 +53,12 @@ class FocusManager {
     this.#canEnter = canEnter;
   }
 
+  /**
+   * Positionne le parent si besoin
+   * @param {View} parent : parent
+   */
+  setParent(/* parent*/) {}
+
   isCanEnter() {
     return this.#canEnter;
   }

@@ -5,12 +5,9 @@ class ToolbarView extends CompositeView {
 
   name = 'ToolbarView';
 
-  /** @type {FocusManager} */
-  #focusManager = null;
-
   constructor() {
     super();
-    this.#focusManager = new FocusManager(this.getElementView(), 'horizontal', false, false);
+    super.setFocusManager(new FocusManager(this.getElementView(), 'horizontal', false, false));
   }
   /**
    * @override {@link View.getHtmlView}
@@ -22,18 +19,15 @@ class ToolbarView extends CompositeView {
   addView(view) {
     super.addView(view);
 
-    this.#focusManager.addFocusableView(view);
+    super.getFocusManager()
+      .addFocusableView(view);
   }
 
   added(parent) {
     super.added(parent);
 
-    this.#focusManager.listenKeys();
-  }
-
-  destroy() {
-    super.destroy();
-    this.#focusManager.stopListenKeys();
+    super.getFocusManager()
+      .listenKeys();
   }
 
 }
