@@ -22,10 +22,12 @@ class FocusManager {
 
   #onBlurEvent = this.onBlur.bind(this);
 
+  #parentFocusManager = null;
   /** @type {HTMLElement} */
   #current = null;
   /** @type {HTMLElement} */
   #container = null;
+  #parent = null;
   /** @type {Array<HTMLElement>} */
   #focusableElements = [];
   /** @type {Array<View>} */
@@ -36,8 +38,6 @@ class FocusManager {
   #orientation = 'horizontal';
   #canTab = false;
   #canEnter = false;
-
-  #isEnter = false;
 
   /**
    * @constructor
@@ -57,13 +57,15 @@ class FocusManager {
    * Positionne le parent si besoin
    * @param {View} parent : parent
    */
-  setParent(/* parent*/) {}
+  setParent(parent) {
+    this.#parent = parent;
+  }
+  getParent() {
+    return this.#parent;
+  }
 
   isCanEnter() {
     return this.#canEnter;
-  }
-  isEnter() {
-    return this.#isEnter;
   }
   getContainer() {
     return this.#container;
@@ -82,6 +84,24 @@ class FocusManager {
     focusableElement.setAttribute('tabindex', -1);
     this.#focusableElements.push(focusableElement);
     if (this.#focusableElements.length === 1) {
+      this.setCurrent(this.#focusableElements[0]);
+    }
+  }
+  /**
+   * Ajout des éléments focusables d'une vue
+   * @param {View} view
+   * @param {string} selector : sélecteur pour spécifier les sous-éléments
+   */
+  addFocusableElements(view, selector) {
+    this.#focusableViews.push(view);
+
+    const element = view.getElementView();
+    element.querySelectorAll(selector)
+      .forEach(focusableElement => {
+        focusableElement.setAttribute('tabindex', -1);
+        this.#focusableElements.push(focusableElement);
+      });
+    if (this.#focusableElements.length >= 1) {
       this.setCurrent(this.#focusableElements[0]);
     }
   }
@@ -137,10 +157,6 @@ class FocusManager {
     return this.#listened;
   }
 
-  onBlur() {
-    this.#isEnter = false;
-  }
-
   changeOrientation(orientation) {
     this.#orientation = orientation;
   }
@@ -156,7 +172,7 @@ class FocusManager {
   }
 
   giveFocus() {
-    this.#current.focus();
+    this.#current?.focus();
   }
   isCurrentFocused() {
     return document.activeElement === this.#current;
@@ -189,15 +205,16 @@ class FocusManager {
     this.#current = null;
   }
 
+  /** Navigation **/
   interceptKeys() {
     if (DOMUtilities.isHidden(this.#current)) {
       return [];
     }
-    if (this.isEnter()) {
-      return ['Escape'];
-    }
 
     const keys = [ 'Home', 'End' ];
+    if (this.getParentFocusManager()) {
+      keys.push('Escape');
+    }
     if (this.#canTab) {
       keys.push('Tab');
     }
@@ -231,15 +248,6 @@ class FocusManager {
     this.focusToDirection(event.shiftKey ? 'Up' : 'Down');
   }
 
-  #onKeyEnter() {
-    this.#current.setAttribute('tabindex', -1);
-    this.#isEnter = true;
-  }
-  #onKeyEscape() {
-    this.#current.setAttribute('tabindex', 0);
-    this.#isEnter = false;
-  }
-
   #focusToFirst() {
     this.setCurrent(this.#focusableElements[0]);
     this.#current.focus();
@@ -267,6 +275,68 @@ class FocusManager {
     } else {
       this.#current.focus();
     }
+  }
+
+  /** Entrée et sortie dans un autre système de navigation **/
+
+  #onKeyEnter() {
+    const viewFocusManager = this.giveControlToCurrentView();
+    viewFocusManager.setParentFocusManager(this);
+  }
+  #onKeyEscape() {
+    const parentFocusManager = this.giveControlToParent();
+    parentFocusManager.giveFocus();
+    this.setParentFocusManager(null);
+  }
+
+  onBlur() {
+    const parentFocusManager = this.getParentFocusManager();
+    if (parentFocusManager) {
+      this.giveControlToParent();
+      this.setParentFocusManager(null);
+    }
+  }
+
+  setParentFocusManager(parentFocusManager) {
+    this.#parentFocusManager = parentFocusManager;
+  }
+  getParentFocusManager() {
+    return this.#parentFocusManager;
+  }
+
+  /**
+   * Donne le contrôle au focusManager de la vue courante
+   * @returns {FocusManager} focusManager de la vue
+   */
+  giveControlToCurrentView() {
+    const viewFocusManager = this.getCurrentView()
+      .getFocusManager();
+    this.giveControlToFocusManager(viewFocusManager);
+    viewFocusManager.giveFocus();
+    viewFocusManager.setParentFocusManager(this);
+    return viewFocusManager;
+  }
+
+  /**
+   * Donne le contrôle au focusManager parent
+   * @returns {FocusManager} focusManager parent
+   */
+  giveControlToParent() {
+    const parentFocusManager = this.getParentFocusManager();
+    this.giveControlToFocusManager(parentFocusManager);
+    return parentFocusManager;
+  }
+
+  /**
+   * Donne le contrôle au focusManager précisé en entrée
+   * @param {FocusManager} focusManager
+   */
+  giveControlToFocusManager(focusManager) {
+    this.stopListenKeys();
+    // Astuce pour l'écoute de la touche en cours d'appui ne soit pas pris en comte
+    setTimeout(() => {
+      focusManager.listenKeys();
+    }, 0);
   }
 
 }

@@ -1,4 +1,5 @@
-import { RIGHT, ITEM_LAYOUT, STATUS, CRUD_MODE } from '../../tools/Constants.js';
+import { CRUD_MODE, ITEM_LAYOUT, RIGHT, STATUS } from '../../tools/Constants.js';
+import FocusManager from './FocusManager.js';
 import View from './View.js';
 /** @import TreeItem from '../../data/TreeItem.js' */
 /** @import {ItemInfos} from '../../data/TreeItem.js'; */
@@ -29,6 +30,8 @@ class ItemView extends View {
     this.getElementView()
       .addEventListener('focus', this.onFocus.bind(this), true);
 
+    super.setFocusManager(new FocusManager(this.getElementView(), 'horizontal', false, false));
+
     this.viewAdded(data);
   }
 
@@ -47,6 +50,13 @@ class ItemView extends View {
       this.getElementView().classList.add(getClassColorForViewChoice(data.layout));
     }
     this.majNodes();
+  }
+
+  added(parent) {
+    super.added(parent);
+
+    super.getFocusManager()
+      .addFocusableElements(this, '.item__checkbox, .item__title, .item__text');
   }
 
   /**

@@ -5,9 +5,6 @@ import FocusManager from './FocusManager.js';
 
 class TreeFocusManager extends FocusManager {
 
-  /** @type {TreeView} */
-  #parentTree;
-
   #TREE_SELECTOR = '.tree';
 
   #onMouseDownEvent = this.onMouseDown.bind(this);
@@ -24,17 +21,12 @@ class TreeFocusManager extends FocusManager {
     super(container, orientation, false, canEnter);
   }
 
-  /**
-   * Positionne le parent des arbres. Utile lorsqu'il s'agit d'un arbre
-   * @param {View} parent : parent des arbres
-   */
-  setParent(parent) {
-    if (parent instanceof TreeView) {
-      this.#parentTree = parent;
-    }
-  }
   hasParentTree() {
-    return !!this.#parentTree;
+    const parent = this.getParent();
+    if (parent instanceof TreeView) {
+      return parent;
+    }
+    return false;
   }
 
   /**
@@ -123,10 +115,6 @@ class TreeFocusManager extends FocusManager {
     if (DOMUtilities.isHidden(this.getCurrent())) {
       return [];
     }
-    if (this.isEnter()) {
-      return ['Escape'];
-    }
-
     const keys = [ 'Home', 'End', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown' ];
     if (super.isCanEnter()) {
       keys.push('Enter');
@@ -194,9 +182,9 @@ class TreeFocusManager extends FocusManager {
 
     if (currentView.isOpened()) {
       currentView.setOpen(false);
-    } else if (this.#parentTree) {
-      const parentFocusManager = this.giveControlToParent();
-      parentFocusManager.giveFocusTo(this.#parentTree);
+    } else if (this.hasParentTree()) {
+      const parentFocusManager = this.giveControlToParentTree();
+      parentFocusManager.giveFocus();
     } else {
       super.focusToDirection('Left');
     }
@@ -213,8 +201,9 @@ class TreeFocusManager extends FocusManager {
     }
     // Si on est sur le dernier élément de la liste, on doit donner le contrôle au parent
     const indexCurrent = this.getIndexCurrent();
-    if (indexCurrent === this.getFocusableViews().length - 1 && this.#parentTree) {
-      const parentFocusManager = this.giveControlToParent();
+    if (indexCurrent === this.getFocusableViews().length - 1 && this.hasParentTree()) {
+      const parentFocusManager = this.giveControlToParentTree();
+      parentFocusManager.giveFocus();
       parentFocusManager.moveVertically('Down');
       return;
     }
@@ -224,9 +213,9 @@ class TreeFocusManager extends FocusManager {
   reactToUp() {
     // Si on est sur le dernier élément de la liste, on doit donner le contrôle au parent
     const indexCurrent = this.getIndexCurrent();
-    if (indexCurrent === 0 && this.#parentTree) {
-      const parentFocusManager = this.giveControlToParent();
-      parentFocusManager.giveFocusTo(this.#parentTree);
+    if (indexCurrent === 0 && this.hasParentTree()) {
+      const parentFocusManager = this.giveControlToParentTree();
+      parentFocusManager.giveFocus();
       return;
     }
 
@@ -244,46 +233,28 @@ class TreeFocusManager extends FocusManager {
   }
 
   /**
-   * Donne le contrôle au focusManager enfant
-   * @param {TreeView} currentView : vue ayant le focus
+   * Donne le contrôle au focusManager enfant d'une vue
+   * @param {TreeView} view : vue ayant le focus
    * @returns {TreeFocusManager} focusManager enfant
    */
-  giveControlToChild(currentView) {
-    const childFocusManager = currentView.getStaticView('treeList')
+  giveControlToChild(view) {
+    const childFocusManager = view.getStaticView('treeList')
       .getFocusManager();
     this.giveControlToFocusManager(childFocusManager);
     childFocusManager.giveFocus();
     return childFocusManager;
-  }
-  /**
-   * Donne le contrôle au focusManager parent
-   * @returns {TreeFocusManager} focusManager parent
-   */
-  giveControlToParent() {
-    const parentFocusManager = this.getParentFocusManager();
-    this.giveControlToFocusManager(parentFocusManager);
-    parentFocusManager.giveFocusTo(this.#parentTree);
-    return parentFocusManager;
-  }
-
-  /**
-   * Donne le contrôle au focusManager précisé en entrée
-   * @param {TreeFocusManager} focusManager
-   */
-  giveControlToFocusManager(focusManager) {
-    this.stopListenKeys();
-    // Astuce pour l'écoute de la touche en cours d'appui ne soit pas pris en comte
-    setTimeout(() => {
-      focusManager.listenKeys();
-    }, 0);
   }
 
   /**
    * Retourne le focusManager parent
    * @returns {TreeFocusManager} focusManager parent
    */
-  getParentFocusManager() {
-    return this.#parentTree?.getParentView()
+  getParentTreeFocusManager() {
+    if (!this.hasParentTree()) {
+      return null;
+    }
+    return this.getParent()
+      .getParentView()
       .getFocusManager();
   }
   /**
@@ -291,13 +262,21 @@ class TreeFocusManager extends FocusManager {
    * @returns {TreeFocusManager} focusManager racine
    */
   getRootFocusManager() {
-    const parent = this.getParentFocusManager();
+    const parent = this.getParentTreeFocusManager();
     if (parent) {
       return parent.getRootFocusManager();
     }
     return this;
   }
-
+  /**
+   * Donne le contrôle au focusManager de la liste des arbres parente
+   * @returns {FocusManager} focusManager parent
+   */
+  giveControlToParentTree() {
+    const parentFocusManager = this.getParentTreeFocusManager();
+    this.giveControlToFocusManager(parentFocusManager);
+    return parentFocusManager;
+  }
   /**
    * Recherche si l'élément se trouve parmi les mêmes arbres de navigation que ceux géré par la classe
    * @param {HTMLElement} element - Element
@@ -318,7 +297,7 @@ class TreeFocusManager extends FocusManager {
    * @param {'Up'|'Down'} direction
    */
   moveVertically(direction) {
-    if (!this.#parentTree) {
+    if (!this.hasParentTree()) {
       super.focusToDirection(direction);
       return;
     }
@@ -328,7 +307,8 @@ class TreeFocusManager extends FocusManager {
       return;
     }
     // Dans tous les cas, la liste parente doit reprendre le contrôle
-    const parentFocusManager = this.giveControlToParent();
+    const parentFocusManager = this.giveControlToParentTree();
+    parentFocusManager.giveFocus();
     parentFocusManager.focusToDirection(direction);
   }
 
