@@ -30,7 +30,7 @@ class ItemView extends View {
     this.getElementView()
       .addEventListener('focus', this.onFocus.bind(this), true);
 
-    super.setFocusManager(new FocusManager(this.getElementView(), 'horizontal', false, false));
+    super.setFocusManager(new FocusManager(this.getElementView(), 'horizontal', false, true));
 
     this.viewAdded(data);
   }

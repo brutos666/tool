@@ -1,5 +1,4 @@
 import DOMUtilities from '../../tools/DOMUtilities.js';
-/** @import TreeView from '../decorators/views/TreeView.js'; */
 /** @import View from './View.js'; */
 
 class FocusManager {
@@ -19,57 +18,105 @@ class FocusManager {
     End: this.#focusToLast.bind(this)
   };
   #onKeyDownEvent = this.#onKeyDown.bind(this);
+  #onMouseDownEvent = this.#onMouseDown.bind(this);
 
-  #onBlurEvent = this.onBlur.bind(this);
-
+  /** @type {FocusManager} */
   #parentFocusManager = null;
   /** @type {HTMLElement} */
   #current = null;
   /** @type {HTMLElement} */
   #container = null;
-  #parent = null;
+  /** @type {View} */
+  #parentView = null;
   /** @type {Array<HTMLElement>} */
   #focusableElements = [];
   /** @type {Array<View>} */
   #focusableViews = [];
+  /** @type {boolean} */
   #listened = false;
 
   /** @type {'horizontal'|'vertical'} */
   #orientation = 'horizontal';
+
   #canTab = false;
-  #canEnter = false;
+  #enterToAccess = false;
+  #canExit = false;
 
   /**
    * @constructor
    * @param {HTMLElement} container : conteneur des éléments
    * @param {'horizontal'|'vertical'|'tree'} orientation : déplacement horizontal ou vertical ou arbre
    * @param {boolean} canTab : traite la tabulation en plus des flèches et garde la navigation à l'intérieur du conteneur
-   * @param {boolean} canEnter : traite la possibilité d'entrer dans un élément pour naviguer à l'intérieur
+   * @param {boolean} enterToAccess : indique si la navigation peut-être activée en tapant sur la touche Entrée
    */
-  constructor(container, orientation, canTab, canEnter) {
+  constructor(container, orientation, canTab, enterToAccess) {
     this.#container = container;
     this.#orientation = orientation;
     this.#canTab = canTab;
-    this.#canEnter = canEnter;
+    this.#enterToAccess = enterToAccess;
+    if (enterToAccess) {
+      this.setCanExit(false);
+    }
+  }
+
+  getContainer() {
+    return this.#container;
   }
 
   /**
    * Positionne le parent si besoin
    * @param {View} parent : parent
    */
-  setParent(parent) {
-    this.#parent = parent;
+  setParentView(parent) {
+    this.#parentView = parent;
   }
-  getParent() {
-    return this.#parent;
+  getParentView() {
+    return this.#parentView;
   }
 
-  isCanEnter() {
-    return this.#canEnter;
+  /*
+   * Entrée et sortie d'un système de navigation par les touches Entrée/Escape
+   * -------------------------------------------------------------------------
+   */
+  pressEnterToAccess() {
+    return this.#enterToAccess;
   }
-  getContainer() {
-    return this.#container;
+  canEnter() {
+    return this.getCurrentView()
+      ?.getFocusManager()
+      ?.pressEnterToAccess();
   }
+
+  setCanExit(canExit) {
+    this.#canExit = canExit;
+
+    const description = canExit ? 'Navigation active. Échap pour quitter.' : 'Entrée pour activer la navigation.';
+    this.getContainer()
+      .setAttribute('aria-description', description);
+  }
+  canExit() {
+    return this.#canExit;
+  }
+
+  enter() {
+    const viewFocusManager = this.giveControlToCurrentView();
+    viewFocusManager.setParentFocusManager(this);
+    viewFocusManager.setCanExit(true);
+  }
+
+  exit() {
+    if (!this.canExit()) {
+      return;
+    }
+    const parentFocusManager = this.giveControlToParent();
+    parentFocusManager.giveFocus();
+    this.setCanExit(false);
+  }
+
+  /*
+   * Vues et élément pouvant prendre le focus par les touches du clavier ou un clic de la souris
+   * -------------------------------------------------------------------------------------------
+   */
 
   /**
    * Ajout d'un élément focusable
@@ -82,23 +129,26 @@ class FocusManager {
     const element = view.getElementView();
     const focusableElement = selector ? element.querySelector(selector) : element;
     focusableElement.setAttribute('tabindex', -1);
+    focusableElement.addEventListener('mousedown', this.#onMouseDownEvent);
+
     this.#focusableElements.push(focusableElement);
     if (this.#focusableElements.length === 1) {
       this.setCurrent(this.#focusableElements[0]);
     }
   }
   /**
-   * Ajout des éléments focusables d'une vue
+   * Ajout des éléments pouvant prendre le focus dans une vue
    * @param {View} view
    * @param {string} selector : sélecteur pour spécifier les sous-éléments
    */
   addFocusableElements(view, selector) {
-    this.#focusableViews.push(view);
+    // this.#focusableViews.push(view);
 
     const element = view.getElementView();
     element.querySelectorAll(selector)
       .forEach(focusableElement => {
         focusableElement.setAttribute('tabindex', -1);
+        focusableElement.addEventListener('mousedown', this.#onMouseDownEvent);
         this.#focusableElements.push(focusableElement);
       });
     if (this.#focusableElements.length >= 1) {
@@ -110,6 +160,7 @@ class FocusManager {
 
     const element = this.#focusableElements[index];
     element.removeAttribute('tabindex');
+    element.removeEventListener('mousedown', this.#onMouseDownEvent);
     this.#focusableElements.splice(index, 1);
     if (this.#current === element) {
       if (this.#focusableElements.length === 0) {
@@ -120,6 +171,9 @@ class FocusManager {
     }
   }
   removeAllFocusableViews() {
+    for (const element of this.#focusableElements) {
+      element.removeEventListener('mousedown', this.#onMouseDownEvent);
+    }
     this.#focusableViews = [];
     this.#focusableElements = [];
     this.removeCurrent();
@@ -134,6 +188,11 @@ class FocusManager {
     return this.#focusableViews[index];
   }
 
+  /*
+   * Démarrage/Arrêt de la navigation au clavier
+   * --------------------------------------------------
+   */
+
   /**
    * Liste les éléments pouvant prendre le focus.
    * Positionne l'élément devant prendre le focus au clavier parmi tous les éléments
@@ -142,21 +201,30 @@ class FocusManager {
   listenKeys() {
     this.#listened = true;
     this.#current?.setAttribute('tabindex', 0);
-    this.#current?.addEventListener('blur', this.#onBlurEvent, true);
-
-    this.#container.addEventListener('keydown', this.#onKeyDownEvent);
+    setTimeout(() => {
+      // Astuce pour que l'écoute ne soit pas prise en compte lorsque l'appui sur une touche est en cours
+      this.#container.addEventListener('keydown', this.#onKeyDownEvent);
+    }, 0);
   }
   stopListenKeys() {
     this.#listened = false;
     this.#current?.setAttribute('tabindex', -1);
-    this.#current?.removeEventListener('blur', this.#onBlurEvent, true);
-
     this.#container.removeEventListener('keydown', this.#onKeyDownEvent);
+  }
+  stopAllListenKeys() {
+    this.stopListenKeys();
+    const childFocusManager = this.getCurrentView()
+      ?.getFocusManager();
+    childFocusManager?.stopAllListenKeys();
   }
   isListened() {
     return this.#listened;
   }
 
+  /*
+   * Orientation horizontale ou verticale et tabulation
+   * --------------------------------------------------
+   */
   changeOrientation(orientation) {
     this.#orientation = orientation;
   }
@@ -166,11 +234,14 @@ class FocusManager {
   isVertical() {
     return this.#orientation === 'vertical';
   }
-
   listenTabKey(tabulation) {
     this.#canTab = tabulation;
   }
 
+  /*
+   * Prise de focus et positionnement du courant
+   * ---------------------------------------------------
+   */
   giveFocus() {
     this.#current?.focus();
   }
@@ -183,9 +254,6 @@ class FocusManager {
     this.#current = button;
     // Ne permettre la prise de focus que si le focusManager est à l'écoute
     this.#current.setAttribute('tabindex', this.isListened() ? 0 : -1);
-    if (this.isListened()) {
-      this.#current.addEventListener('blur', this.#onBlurEvent, true);
-    }
   }
   setCurrentWithIndex(index) {
     this.setCurrent(this.#focusableElements[index]);
@@ -201,25 +269,36 @@ class FocusManager {
       return;
     }
     this.#current.setAttribute('tabindex', -1);
-    this.#current.removeEventListener('blur', this.#onBlurEvent, true);
     this.#current = null;
   }
+  setCurrentBranch(target) {
+    for (const element of this.#focusableElements) {
+      if (element === target || element.contains(target)) {
+        this.setCurrent(element);
+        break;
+      }
+    }
+    this.getParentFocusManager()
+      ?.setCurrentBranch(target);
+  }
 
-  /** Navigation **/
+  /*
+   * Navigation au clavier
+   * ---------------------
+   */
   interceptKeys() {
     if (DOMUtilities.isHidden(this.#current)) {
       return [];
     }
-
     const keys = [ 'Home', 'End' ];
-    if (this.getParentFocusManager()) {
+    if (this.canExit()) {
       keys.push('Escape');
+    }
+    if (this.canEnter()) {
+      keys.push('Enter');
     }
     if (this.#canTab) {
       keys.push('Tab');
-    }
-    if (this.isCanEnter()) {
-      keys.push('Enter');
     }
     if (this.#orientation === 'vertical') {
       keys.push('ArrowUp');
@@ -278,30 +357,41 @@ class FocusManager {
   }
 
   /** Entrée et sortie dans un autre système de navigation **/
-
   #onKeyEnter() {
-    const viewFocusManager = this.giveControlToCurrentView();
-    viewFocusManager.setParentFocusManager(this);
+    this.enter();
   }
   #onKeyEscape() {
-    const parentFocusManager = this.giveControlToParent();
-    parentFocusManager.giveFocus();
-    this.setParentFocusManager(null);
+    this.exit();
   }
 
-  onBlur() {
-    const parentFocusManager = this.getParentFocusManager();
-    if (parentFocusManager) {
-      this.giveControlToParent();
-      this.setParentFocusManager(null);
-    }
+  /*
+   * Prise de focus par la souris
+   * ---------------------------------------------------
+   */
+  #onMouseDown(event) {
+    const rootFocusManager = this.getRootFocusManager();
+    // Si nous sommes dans un arbre de focusManager, il faut désactiver les autres focusManager des vues courantes avant de positionner le nouvel élément courant
+    rootFocusManager.stopAllListenKeys();
+    // Positionner comme courant à chaque noeud de l'arbre
+    this.setCurrentBranch(event.currentTarget);
+
+    this.listenKeys();
+    // Si on clique dans une zone accessible par la touche entrée, on doit pouvoir la quitter avec la touche Escape
+    this.setCanExit(this.#enterToAccess);
+
+    event.stopPropagation();
   }
 
+  /*
+   * Gestion du contrôle de la navigation
+   * ---------------------------------------------------
+   */
   setParentFocusManager(parentFocusManager) {
     this.#parentFocusManager = parentFocusManager;
   }
   getParentFocusManager() {
-    return this.#parentFocusManager;
+    return this.#parentFocusManager || this.getParentView()
+      ?.getFocusManager();
   }
 
   /**
@@ -313,7 +403,6 @@ class FocusManager {
       .getFocusManager();
     this.giveControlToFocusManager(viewFocusManager);
     viewFocusManager.giveFocus();
-    viewFocusManager.setParentFocusManager(this);
     return viewFocusManager;
   }
 
@@ -333,10 +422,19 @@ class FocusManager {
    */
   giveControlToFocusManager(focusManager) {
     this.stopListenKeys();
-    // Astuce pour l'écoute de la touche en cours d'appui ne soit pas pris en comte
-    setTimeout(() => {
-      focusManager.listenKeys();
-    }, 0);
+    focusManager.listenKeys();
+  }
+
+  /**
+   * Retourne le focusManager racine
+   * @returns {FocusManager} focusManager racine
+   */
+  getRootFocusManager() {
+    const parent = this.getParentFocusManager();
+    if (parent) {
+      return parent.getRootFocusManager();
+    }
+    return this;
   }
 
 }

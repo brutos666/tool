@@ -10,7 +10,7 @@ class TreeListView extends ItemsView {
     this.getElementView()
       .classList.add('tree-list__space');
     // NOTE : le système de focus est positionné mais l'écoute des touches de navigation ne doit pas être effective au départ. C'est le composant qui contient les racines des arbres qui doit piloter au départ
-    super.setFocusManager(new TreeFocusManager(this.getElementView(), 'vertical', true));
+    super.setFocusManager(new TreeFocusManager(this.getElementView(), 'vertical', false));
   }
 
   addItemView(itemView) {

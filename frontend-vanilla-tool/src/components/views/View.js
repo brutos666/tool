@@ -83,7 +83,7 @@ class View {
   }
 
   added(parent) {
-    this.#focusManager?.setParent(parent);
+    this.#focusManager?.setParentView(parent);
   }
 
   removed() {
