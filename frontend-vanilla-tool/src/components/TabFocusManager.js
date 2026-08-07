@@ -18,7 +18,7 @@ class TabFocusManager extends FocusManager {
    * ---------------------
    */
   interceptKeys() {
-    if (DOMUtilities.isHidden(this.getCurrent())) {
+    if (DOMUtilities.isHidden(this.getCurrentElement())) {
       return [];
     }
     const keys = [ 'Home', 'End', 'Tab' ];

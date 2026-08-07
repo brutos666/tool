@@ -38,12 +38,12 @@ class TreeFocusManager extends FocusManager {
    * ---------------
    */
   giveFocusTo(tree) {
-    this.setCurrentWithIndex(this.getFocusable()
+    this.setCurrentWithIndex(this.getFocusableComponents()
       .indexOf(tree));
     super.giveFocus();
   }
   giveFocusToLast() {
-    this.setCurrentWithIndex(this.getFocusable().length - 1);
+    this.setCurrentWithIndex(this.getFocusableComponents().length - 1);
     super.giveFocus();
   }
   giveFocusToFirst() {
@@ -52,7 +52,7 @@ class TreeFocusManager extends FocusManager {
   }
   giveFocusToNext() {
     const index = this.getIndexCurrent() + 1;
-    if (index < this.getFocusable().length) {
+    if (index < this.getFocusableComponents().length) {
       this.setCurrentWithIndex(index);
       super.giveFocus();
     }
@@ -70,7 +70,7 @@ class TreeFocusManager extends FocusManager {
    * ---------------------
    */
   interceptKeys() {
-    if (DOMUtilities.isHidden(this.getCurrent())) {
+    if (DOMUtilities.isHidden(this.getCurrentElement())) {
       return [];
     }
     const keys = [ 'Home', 'End', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown' ];
@@ -101,7 +101,7 @@ class TreeFocusManager extends FocusManager {
    */
   reactToRightKey() {
     /**  @type {Tree} */
-    const current = this.getCurrentComponent();
+    const current = this.getCurrent();
 
     if (current.isClosed()) {
       current.setOpen(true);
@@ -134,7 +134,7 @@ class TreeFocusManager extends FocusManager {
    */
   reactToLeftKey() {
     /**  @type {Tree} */
-    const current = this.getCurrentComponent();
+    const current = this.getCurrent();
 
     if (current.isOpened()) {
       current.setOpen(false);
@@ -148,7 +148,7 @@ class TreeFocusManager extends FocusManager {
 
   reactToDown() {
     /**  @type {Tree} */
-    const current = this.getCurrentComponent();
+    const current = this.getCurrent();
     // Si le noeud courant est ouvert, on doit aller au 1er enfant
     if (current.isOpened()) {
       const childFocusManager = this.giveControlToChild(current);
@@ -157,7 +157,7 @@ class TreeFocusManager extends FocusManager {
     }
     // Si on est sur le dernier élément de la liste, on doit donner le contrôle au parent
     const indexCurrent = this.getIndexCurrent();
-    if (indexCurrent === this.getFocusable().length - 1 && this.hasParentTree()) {
+    if (indexCurrent === this.getFocusableComponents().length - 1 && this.hasParentTree()) {
       const parentFocusManager = this.giveControlToParentTree();
       parentFocusManager.giveFocus();
       parentFocusManager.moveVertically('Down');
@@ -178,7 +178,7 @@ class TreeFocusManager extends FocusManager {
     super.focusToDirection('Up');
 
     /**  @type {Tree} */
-    const current = this.getCurrentComponent();
+    const current = this.getCurrent();
     // Si le nouveau noeud courant est ouvert, on doit aller au dernier enfant
     if (!current.isOpened()) {
       return;
@@ -199,7 +199,7 @@ class TreeFocusManager extends FocusManager {
       return;
     }
     const indexCurrent = this.getIndexCurrent() + (direction === 'Up' ? -1 : 1);
-    if (indexCurrent >= 0 && indexCurrent < this.getFocusable().length) {
+    if (indexCurrent >= 0 && indexCurrent < this.getFocusableComponents().length) {
       super.focusToDirection(direction);
       return;
     }
@@ -216,12 +216,12 @@ class TreeFocusManager extends FocusManager {
   stopAllListenKeys() {
     this.stopListenKeys();
 
-    if (DOMUtilities.isHidden(this.getContainer()) || this.getFocusable().length === 0) {
+    if (DOMUtilities.isHidden(this.getContainer()) || this.getFocusableComponents().length === 0) {
       return;
     }
 
     /**  @type {Tree} */
-    const current = this.getCurrentComponent();
+    const current = this.getCurrent();
     // Element de l'arbre
     let childFocusManager = current.getFocusManager();
     childFocusManager?.stopAllListenKeys();

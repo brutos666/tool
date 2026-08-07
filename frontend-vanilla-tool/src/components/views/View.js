@@ -128,6 +128,10 @@ class View {
     return document.activeElement === this.getElementView();
   }
   setTabIndex(value) {
+    if (value === null) {
+      this.getElementView()
+        .removeAttribute('tabindex');
+    }
     this.getElementView()
       .setAttribute('tabindex', value);
   }
@@ -188,6 +192,10 @@ class View {
   addEventListener(event, callback, bubble = false) {
     this.getElementView()
       .addEventListener(event, callback, bubble);
+  }
+  removeEventListener(event, callback, bubble = false) {
+    this.getElementView()
+      .removeEventListener(event, callback, bubble);
   }
 
   destroy() {}

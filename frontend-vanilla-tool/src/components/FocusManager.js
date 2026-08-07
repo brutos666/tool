@@ -22,16 +22,12 @@ class FocusManager {
 
   /** @type {FocusManager} */
   #parentFocusManager = null;
-  /** @type {HTMLElement} */
-  #current = null;
   /** @type {Component} */
-  #currentComponent = null;
+  #current = null;
   /** @type {HTMLElement} */
   #container = null;
   /** @type {Component} */
   #parent = null;
-  /** @type {Array<HTMLElement>} */
-  #focusableElements = [];
   /** @type {Array<Component>} */
   #focusable = [];
   /** @type {boolean} */
@@ -84,8 +80,7 @@ class FocusManager {
     return this.#enterToAccess;
   }
   canEnter() {
-    return this.getCurrentComponent()
-      ?.getFocusManager()
+    return this.getChildFocusManager()
       ?.pressEnterToAccess();
   }
 
@@ -127,42 +122,35 @@ class FocusManager {
   addFocusable(component) {
     this.#focusable.push(component);
     component.setTabIndex(-1);
-
-    const element = component.getElementView();
-    const focusableElement = element;
-    focusableElement.addEventListener('mousedown', this.#onMouseDownEvent);
-
-    this.#focusableElements.push(focusableElement);
-    if (this.#focusableElements.length === 1) {
-      this.setCurrent(this.#focusableElements[0]);
+    component.getView()
+      .addEventListener('mousedown', this.#onMouseDownEvent);
+    if (this.#focusable.length === 1) {
+      this.setCurrent(this.#focusable[0]);
     }
   }
   removeFocusable(index) {
-    const element = this.#focusableElements[index];
-    element.removeAttribute('tabindex');
-    element.removeEventListener('mousedown', this.#onMouseDownEvent);
-    if (this.#current === element) {
-      if (this.#focusableElements.length === 1) {
+    const component = this.#focusable[index];
+    component.setTabIndex(null);
+    component.getView()
+      .removeEventListener('mousedown', this.#onMouseDownEvent);
+    if (this.getCurrent() === component) {
+      if (this.#focusable.length === 1) {
         this.removeCurrent();
       } else {
-        this.setCurrent(this.#focusableElements[0]);
+        this.setCurrent(this.#focusable[0]);
       }
     }
     this.#focusable.splice(index, 1);
-    this.#focusableElements.splice(index, 1);
   }
   removeAllFocusable() {
     this.removeCurrent();
-    for (const element of this.#focusableElements) {
-      element.removeEventListener('mousedown', this.#onMouseDownEvent);
+    for (const component of this.#focusable) {
+      component.getView()
+        .removeEventListener('mousedown', this.#onMouseDownEvent);
     }
     this.#focusable = [];
-    this.#focusableElements = [];
   }
-  getCurrentComponent() {
-    return this.#focusable[this.getIndexCurrent()];
-  }
-  getFocusable() {
+  getFocusableComponents() {
     return this.#focusable;
   }
   getFocusableAt(index) {
@@ -181,8 +169,7 @@ class FocusManager {
    */
   listenKeys() {
     this.#listened = true;
-    // this.#current?.setAttribute('tabindex', 0);
-    this.getCurrentComponent()
+    this.getCurrent()
       ?.setTabIndex(0);
     setTimeout(() => {
       // Astuce pour que l'écoute ne soit pas prise en compte lorsque l'appui sur une touche est en cours
@@ -191,15 +178,13 @@ class FocusManager {
   }
   stopListenKeys() {
     this.#listened = false;
-    // this.#current?.setAttribute('tabindex', -1);
-    this.getCurrentComponent()
+    this.getCurrent()
       ?.setTabIndex(-1);
     this.#container.removeEventListener('keydown', this.#onKeyDownEvent);
   }
   stopAllListenKeys() {
     this.stopListenKeys();
-    const childFocusManager = this.getCurrentComponent()
-      ?.getFocusManager();
+    const childFocusManager = this.getChildFocusManager();
     childFocusManager?.stopAllListenKeys();
   }
   isListened() {
@@ -228,46 +213,54 @@ class FocusManager {
    * ---------------------------------------------------
    */
   giveFocus() {
-    this.getCurrentComponent()
+    this.getCurrent()
       .giveFocus();
-    // this.#current?.focus();
   }
   isCurrentFocused() {
-    return document.activeElement === this.#current;
+    return this.getCurrent()
+      .isFocused();
   }
 
-  setCurrent(button) {
+  setCurrent(component) {
     this.removeCurrent();
-    this.#current = button;
-    /*
-     * Ne permettre la prise de focus que si le focusManager est à l'écoute
-     * this.#current.setAttribute('tabindex', this.isListened() ? 0 : -1);
-     */
-    this.getCurrentComponent()
-      .setTabIndex(this.isListened() ? 0 : -1);
+    // Ne permettre la prise de focus que si le focusManager est à l'écoute
+    component.setTabIndex(this.isListened() ? 0 : -1);
+    this.#current = component;
   }
   setCurrentWithIndex(index) {
-    this.setCurrent(this.#focusableElements[index]);
+    this.setCurrent(this.#focusable[index]);
   }
+  /**
+   * Retourne le composant courant
+   * @returns {Component}
+   */
   getCurrent() {
     return this.#current;
   }
+  /**
+   * Retourne l'élément HTML du composant courant
+   * @returns {HTMLElement}
+   */
+  getCurrentElement() {
+    return this.getCurrent()
+      .getElementView();
+  }
   getIndexCurrent() {
-    return this.#focusableElements.indexOf(this.#current);
+    return this.#focusable.indexOf(this.getCurrent());
   }
   removeCurrent() {
     if (!this.#current) {
       return;
     }
-    // this.#current.setAttribute('tabindex', -1);
-    this.getCurrentComponent()
+    this.getCurrent()
       .setTabIndex(-1);
     this.#current = null;
   }
   setCurrentBranch(target) {
-    for (const element of this.#focusableElements) {
+    for (const component of this.#focusable) {
+      const element = component.getElementView();
       if (element === target || element.contains(target)) {
-        this.setCurrent(element);
+        this.setCurrent(component);
         break;
       }
     }
@@ -280,7 +273,7 @@ class FocusManager {
    * ---------------------
    */
   interceptKeys() {
-    if (DOMUtilities.isHidden(this.#current)) {
+    if (DOMUtilities.isHidden(this.getCurrentElement())) {
       return [];
     }
     const keys = [ 'Home', 'End' ];
@@ -321,28 +314,28 @@ class FocusManager {
   }
 
   #focusToFirst() {
-    this.setCurrent(this.#focusableElements[0]);
+    this.setCurrent(this.#focusable[0]);
     this.giveFocus();
   }
   #focusToLast() {
-    this.setCurrent(this.#focusableElements[this.#focusableElements.length - 1]);
+    this.setCurrent(this.#focusable[this.#focusable.length - 1]);
     this.giveFocus();
   }
 
   focusToDirection(direction) {
-    let indexCurrent = this.#focusableElements.indexOf(this.#current);
+    let indexCurrent = this.getIndexCurrent();
     if ([ 'Up', 'Left' ].includes(direction)) {
       indexCurrent--;
     } else if ([ 'Down', 'Right' ].includes(direction)) {
       indexCurrent++;
     }
-    if (indexCurrent === this.#focusableElements.length) {
+    if (indexCurrent === this.#focusable.length) {
       indexCurrent = 0;
     } else if (indexCurrent === -1) {
-      indexCurrent = this.#focusableElements.length - 1;
+      indexCurrent = this.#focusable.length - 1;
     }
-    this.setCurrent(this.#focusableElements[indexCurrent]);
-    if (DOMUtilities.isHidden(this.#current)) {
+    this.setCurrent(this.#focusable[indexCurrent]);
+    if (DOMUtilities.isHidden(this.getCurrentElement())) {
       this.focusToDirection(direction);
     } else {
       this.giveFocus();
@@ -386,14 +379,17 @@ class FocusManager {
     return this.#parentFocusManager || this.getParentComponent()
       ?.getFocusManager();
   }
+  getChildFocusManager() {
+    return this.getCurrent()
+      ?.getFocusManager();
+  }
 
   /**
    * Donne le contrôle au focusManager de la vue courante
    * @returns {FocusManager} focusManager de la vue
    */
   giveControlToCurrent() {
-    const focusManager = this.getCurrentComponent()
-      .getFocusManager();
+    const focusManager = this.getChildFocusManager();
     this.giveControlToFocusManager(focusManager);
     focusManager.giveFocus();
     return focusManager;
