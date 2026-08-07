@@ -11,14 +11,14 @@ class CheckList extends Items {
 
   name = 'CheckList';
 
-  #item;
+  #decoratedTitleItem;
 
   constructor(treeItem) {
     super(new CheckListView(), treeItem, ITEM_LAYOUT.Todo);
 
     const rights = [RIGHT.update];
-    this.#item = new Item({ treeItem, layout: ITEM_LAYOUT.Todo, rights });
-    this.setStaticChild('title', new DragDropDecorator(this.#item));
+    this.#decoratedTitleItem = new DragDropDecorator(new Item({ treeItem, layout: ITEM_LAYOUT.Todo, rights }));
+    this.setStaticChild('title', this.#decoratedTitleItem);
 
     const addButton = new AddItemButton({ id: 'addNewItem', label: 'Ajouter un élément', layout: ITEM_LAYOUT.Todo });
     addButton.setDoActionCallback(this.addNewItem.bind(this, 'Saisir un pense-bête'));
@@ -35,7 +35,7 @@ class CheckList extends Items {
    * @param {TreeItem} treeItem - Informations sur la tache
    */
   setTreeItem(treeItem) {
-    this.#item.setTreeItem(treeItem);
+    this.#decoratedTitleItem.setTreeItem(treeItem);
     super.setTreeItem(treeItem);
   }
   /**
