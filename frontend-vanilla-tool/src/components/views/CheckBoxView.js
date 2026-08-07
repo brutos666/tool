@@ -44,6 +44,16 @@ class CheckBoxView extends View {
     this.#toggleCallback();
   }
 
+  giveFocus() {
+    this.#checkbox.focus();
+  }
+  isFocused() {
+    return document.activeElement === this.#checkbox;
+  }
+  setTabIndex(value) {
+    this.#checkbox.setAttribute('tabindex', value);
+  }
+
   setReadOnly() {
     super.setReadOnly();
     this.#checkbox.disabled = true;

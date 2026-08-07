@@ -26,13 +26,17 @@ class ButtonDialogView extends DecoratorView {
     </dialog></div>`;
   }
 
-  setTabIndex(value) {
-    this.getStaticView('button')
-      .setTabIndex(value);
-  }
   giveFocus() {
     this.getStaticView('button')
       .giveFocus();
+  }
+  isFocused() {
+    return this.getStaticView('button')
+      .isFocused();
+  }
+  setTabIndex(value) {
+    this.getStaticView('button')
+      .setTabIndex(value);
   }
 
 }
