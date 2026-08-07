@@ -28,13 +28,22 @@ class Decorator extends Component {
     }
     return this.#decoratedElement;
   }
+  getDecoratedElementByName(name) {
+    if (this.#decoratedElement.getName() === name) {
+      return this.#decoratedElement;
+    }
+    if (this.#decoratedElement.getDecoratedElement) {
+      return this.#decoratedElement.getDecoratedElementByName(name);
+    }
+    return null;
+  }
 
   getImmediateDecoratedElement() {
     return this.#decoratedElement;
   }
 
-  giveFocus() {
-    this.#decoratedElement.giveFocus();
+  getFocusManager() {
+    return this.#decoratedElement.getFocusManager();
   }
 
   setCurrent() {
@@ -47,6 +56,11 @@ class Decorator extends Component {
   destroy() {
     super.destroy();
     this.#decoratedElement.destroy();
+  }
+
+  added(parent) {
+    super.added(parent);
+    this.#decoratedElement.added(parent);
   }
 
   isDecorator() {

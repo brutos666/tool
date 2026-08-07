@@ -22,6 +22,8 @@ class Component extends NodeElement {
    */
   added(parent) {
     this.#parent = parent;
+    this.getFocusManager()
+      ?.setParentComponent(parent);
     this.getView()
       .added(parent.getView());
   }
@@ -31,6 +33,8 @@ class Component extends NodeElement {
    */
   removed() {
     this.#parent = null;
+    this.getFocusManager()
+      ?.stopListenKeys();
     this.getView()
       .removed();
     this.destroy();

@@ -23,12 +23,15 @@ class Items extends Composite {
    */
   constructor(view, treeItem, itemLayout) {
     super(view === undefined ? new ItemsView() : view);
+    this.initFocusManager();
+
     this.#treeItem = treeItem;
     this.#itemLayout = itemLayout;
     const treeItemList = treeItem.getTreeItemList();
     this.addItems(treeItemList.getTreeList());
     treeItemList.addObserver(this);
   }
+  initFocusManager() {}
   getLayout() {
     return this.#itemLayout;
   }

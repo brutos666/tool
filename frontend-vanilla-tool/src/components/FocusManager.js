@@ -1,5 +1,5 @@
-import DOMUtilities from '../../tools/DOMUtilities.js';
-/** @import View from './View.js'; */
+import DOMUtilities from '../tools/DOMUtilities.js';
+/** @import Component from './Component.js'; */
 
 class FocusManager {
 
@@ -24,14 +24,16 @@ class FocusManager {
   #parentFocusManager = null;
   /** @type {HTMLElement} */
   #current = null;
+  /** @type {Component} */
+  #currentComponent = null;
   /** @type {HTMLElement} */
   #container = null;
-  /** @type {View} */
-  #parentView = null;
+  /** @type {Component} */
+  #parent = null;
   /** @type {Array<HTMLElement>} */
   #focusableElements = [];
-  /** @type {Array<View>} */
-  #focusableViews = [];
+  /** @type {Array<Component>} */
+  #focusable = [];
   /** @type {boolean} */
   #listened = false;
 
@@ -65,13 +67,13 @@ class FocusManager {
 
   /**
    * Positionne le parent si besoin
-   * @param {View} parent : parent
+   * @param {Component} parent : parent
    */
-  setParentView(parent) {
-    this.#parentView = parent;
+  setParentComponent(parent) {
+    this.#parent = parent;
   }
-  getParentView() {
-    return this.#parentView;
+  getParentComponent() {
+    return this.#parent;
   }
 
   /*
@@ -82,7 +84,7 @@ class FocusManager {
     return this.#enterToAccess;
   }
   canEnter() {
-    return this.getCurrentView()
+    return this.getCurrentComponent()
       ?.getFocusManager()
       ?.pressEnterToAccess();
   }
@@ -99,9 +101,9 @@ class FocusManager {
   }
 
   enter() {
-    const viewFocusManager = this.giveControlToCurrentView();
-    viewFocusManager.setParentFocusManager(this);
-    viewFocusManager.setCanExit(true);
+    const focusManager = this.giveControlToCurrent();
+    focusManager.setParentFocusManager(this);
+    focusManager.setCanExit(true);
   }
 
   exit() {
@@ -120,15 +122,14 @@ class FocusManager {
 
   /**
    * Ajout d'un élément focusable
-   * @param {View} view
-   * @param {string|undefined} selector : sélecteur facultatif pour spécifier un sous-élément
+   * @param {Component} component
    */
-  addFocusableView(view, selector) {
-    this.#focusableViews.push(view);
+  addFocusable(component) {
+    this.#focusable.push(component);
+    component.setTabIndex(-1);
 
-    const element = view.getElementView();
-    const focusableElement = selector ? element.querySelector(selector) : element;
-    focusableElement.setAttribute('tabindex', -1);
+    const element = component.getElementView();
+    const focusableElement = element;
     focusableElement.addEventListener('mousedown', this.#onMouseDownEvent);
 
     this.#focusableElements.push(focusableElement);
@@ -136,56 +137,36 @@ class FocusManager {
       this.setCurrent(this.#focusableElements[0]);
     }
   }
-  /**
-   * Ajout des éléments pouvant prendre le focus dans une vue
-   * @param {View} view
-   * @param {string} selector : sélecteur pour spécifier les sous-éléments
-   */
-  addFocusableElements(view, selector) {
-    // this.#focusableViews.push(view);
-
-    const element = view.getElementView();
-    element.querySelectorAll(selector)
-      .forEach(focusableElement => {
-        focusableElement.setAttribute('tabindex', -1);
-        focusableElement.addEventListener('mousedown', this.#onMouseDownEvent);
-        this.#focusableElements.push(focusableElement);
-      });
-    if (this.#focusableElements.length >= 1) {
-      this.setCurrent(this.#focusableElements[0]);
-    }
-  }
-  removeFocusableView(index) {
-    this.#focusableViews.splice(index, 1);
-
+  removeFocusable(index) {
     const element = this.#focusableElements[index];
     element.removeAttribute('tabindex');
     element.removeEventListener('mousedown', this.#onMouseDownEvent);
-    this.#focusableElements.splice(index, 1);
     if (this.#current === element) {
-      if (this.#focusableElements.length === 0) {
+      if (this.#focusableElements.length === 1) {
         this.removeCurrent();
       } else {
         this.setCurrent(this.#focusableElements[0]);
       }
     }
+    this.#focusable.splice(index, 1);
+    this.#focusableElements.splice(index, 1);
   }
-  removeAllFocusableViews() {
+  removeAllFocusable() {
+    this.removeCurrent();
     for (const element of this.#focusableElements) {
       element.removeEventListener('mousedown', this.#onMouseDownEvent);
     }
-    this.#focusableViews = [];
+    this.#focusable = [];
     this.#focusableElements = [];
-    this.removeCurrent();
   }
-  getCurrentView() {
-    return this.#focusableViews[this.getIndexCurrent()];
+  getCurrentComponent() {
+    return this.#focusable[this.getIndexCurrent()];
   }
-  getFocusableViews() {
-    return this.#focusableViews;
+  getFocusable() {
+    return this.#focusable;
   }
-  getFocusableViewAt(index) {
-    return this.#focusableViews[index];
+  getFocusableAt(index) {
+    return this.#focusable[index];
   }
 
   /*
@@ -200,7 +181,9 @@ class FocusManager {
    */
   listenKeys() {
     this.#listened = true;
-    this.#current?.setAttribute('tabindex', 0);
+    // this.#current?.setAttribute('tabindex', 0);
+    this.getCurrentComponent()
+      ?.setTabIndex(0);
     setTimeout(() => {
       // Astuce pour que l'écoute ne soit pas prise en compte lorsque l'appui sur une touche est en cours
       this.#container.addEventListener('keydown', this.#onKeyDownEvent);
@@ -208,12 +191,14 @@ class FocusManager {
   }
   stopListenKeys() {
     this.#listened = false;
-    this.#current?.setAttribute('tabindex', -1);
+    // this.#current?.setAttribute('tabindex', -1);
+    this.getCurrentComponent()
+      ?.setTabIndex(-1);
     this.#container.removeEventListener('keydown', this.#onKeyDownEvent);
   }
   stopAllListenKeys() {
     this.stopListenKeys();
-    const childFocusManager = this.getCurrentView()
+    const childFocusManager = this.getCurrentComponent()
       ?.getFocusManager();
     childFocusManager?.stopAllListenKeys();
   }
@@ -243,7 +228,9 @@ class FocusManager {
    * ---------------------------------------------------
    */
   giveFocus() {
-    this.#current?.focus();
+    this.getCurrentComponent()
+      .giveFocus();
+    // this.#current?.focus();
   }
   isCurrentFocused() {
     return document.activeElement === this.#current;
@@ -252,8 +239,12 @@ class FocusManager {
   setCurrent(button) {
     this.removeCurrent();
     this.#current = button;
-    // Ne permettre la prise de focus que si le focusManager est à l'écoute
-    this.#current.setAttribute('tabindex', this.isListened() ? 0 : -1);
+    /*
+     * Ne permettre la prise de focus que si le focusManager est à l'écoute
+     * this.#current.setAttribute('tabindex', this.isListened() ? 0 : -1);
+     */
+    this.getCurrentComponent()
+      .setTabIndex(this.isListened() ? 0 : -1);
   }
   setCurrentWithIndex(index) {
     this.setCurrent(this.#focusableElements[index]);
@@ -268,7 +259,9 @@ class FocusManager {
     if (!this.#current) {
       return;
     }
-    this.#current.setAttribute('tabindex', -1);
+    // this.#current.setAttribute('tabindex', -1);
+    this.getCurrentComponent()
+      .setTabIndex(-1);
     this.#current = null;
   }
   setCurrentBranch(target) {
@@ -329,11 +322,11 @@ class FocusManager {
 
   #focusToFirst() {
     this.setCurrent(this.#focusableElements[0]);
-    this.#current.focus();
+    this.giveFocus();
   }
   #focusToLast() {
     this.setCurrent(this.#focusableElements[this.#focusableElements.length - 1]);
-    this.#current.focus();
+    this.giveFocus();
   }
 
   focusToDirection(direction) {
@@ -352,7 +345,7 @@ class FocusManager {
     if (DOMUtilities.isHidden(this.#current)) {
       this.focusToDirection(direction);
     } else {
-      this.#current.focus();
+      this.giveFocus();
     }
   }
 
@@ -390,7 +383,7 @@ class FocusManager {
     this.#parentFocusManager = parentFocusManager;
   }
   getParentFocusManager() {
-    return this.#parentFocusManager || this.getParentView()
+    return this.#parentFocusManager || this.getParentComponent()
       ?.getFocusManager();
   }
 
@@ -398,12 +391,12 @@ class FocusManager {
    * Donne le contrôle au focusManager de la vue courante
    * @returns {FocusManager} focusManager de la vue
    */
-  giveControlToCurrentView() {
-    const viewFocusManager = this.getCurrentView()
+  giveControlToCurrent() {
+    const focusManager = this.getCurrentComponent()
       .getFocusManager();
-    this.giveControlToFocusManager(viewFocusManager);
-    viewFocusManager.giveFocus();
-    return viewFocusManager;
+    this.giveControlToFocusManager(focusManager);
+    focusManager.giveFocus();
+    return focusManager;
   }
 
   /**

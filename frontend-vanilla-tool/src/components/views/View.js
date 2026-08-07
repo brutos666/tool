@@ -1,7 +1,7 @@
 'use strict';
 
 import { createNode } from '../../tools/NodeUtilities.js';
-/** @import FocusManager from './FocusManager.js'; */
+/** @import FocusManager from '../FocusManager.js'; */
 
 class View {
 
@@ -17,9 +17,6 @@ class View {
 
   #name;
 
-  /** @type {FocusManager} (facultatif) */
-  #focusManager;
-
   /**
    * @constructor. Crée la vue à partir des données passées en paramètre
    * @param {Object} data - Données à utiliser pour créer la vue
@@ -31,13 +28,6 @@ class View {
 
   getName() {
     return this.#name;
-  }
-
-  setFocusManager(focusManager) {
-    this.#focusManager = focusManager;
-  }
-  getFocusManager() {
-    return this.#focusManager;
   }
 
   /**
@@ -82,13 +72,9 @@ class View {
     this.#staticViews[id] = view;
   }
 
-  added(parent) {
-    this.#focusManager?.setParentView(parent);
-  }
+  added(/* parent*/) {}
 
-  removed() {
-    this.#focusManager?.stopListenKeys();
-  }
+  removed() {}
 
   getStaticView(id) {
     return this.#staticViews[id];
@@ -138,12 +124,19 @@ class View {
     this.getElementView()
       .focus();
   }
+  isFocused() {
+    return document.activeElement === this.getElementView();
+  }
+  setTabIndex(value) {
+    this.getElementView()
+      .setAttribute('tabindex', value);
+  }
+
   setCurrent() {
     this.getElementView().classList.add('current');
     this.getElementView()
       .setAttribute('aria-current', 'true');
   }
-
   removeCurrent() {
     this.getElementView().classList.remove('current');
     this.getElementView()
@@ -197,9 +190,7 @@ class View {
       .addEventListener(event, callback, bubble);
   }
 
-  destroy() {
-    this.#focusManager?.stopListenKeys();
-  }
+  destroy() {}
 
 }
 

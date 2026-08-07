@@ -9,7 +9,6 @@ class TreeView extends DecoratorView {
 
   #treeItem;
   #toggleActionButton;
-  #parentView;
 
   /**
    * @constructor
@@ -77,15 +76,6 @@ class TreeView extends DecoratorView {
   setTreeItemId(treeItemId) {
     this.getElementView()
       .setAttribute('data-tree-item-id', treeItemId);
-  }
-
-  added(parent) {
-    super.added(parent);
-    this.#parentView = parent;
-  }
-
-  getParentView() {
-    return this.#parentView;
   }
 
 }

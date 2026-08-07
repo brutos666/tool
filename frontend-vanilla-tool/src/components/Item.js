@@ -4,6 +4,7 @@ import { RIGHT } from '../tools/Constants.js';
 import ActionButton from './ActionButton.js';
 import CheckBox from './CheckBox.js';
 import Component from './Component.js';
+import TabFocusManager from './TabFocusManager.js';
 import TextInput from './TextInput.js';
 import Toolbar from './Toolbar.js';
 import ItemView from './views/ItemView.js';
@@ -36,15 +37,20 @@ class Item extends Component {
    */
   constructor(data) {
     super(new ItemView(data));
+    const focusManager = new TabFocusManager(this.getElementView(), 'horizontal', true);
+    super.setFocusManager(focusManager);
 
     this.#doneCheckbox = new CheckBox({ id: 'done', label: 'Fait', role: 'checkbox', type: 'checkbox' });
     this.setStaticChild('done', this.#doneCheckbox);
+    focusManager.addFocusable(this.#doneCheckbox);
 
     this.#titleInput = new TextInput();
     this.setStaticChild('title', this.#titleInput);
+    focusManager.addFocusable(this.#titleInput);
 
     this.#textInput = new TextInput();
     this.setStaticChild('text', this.#textInput);
+    focusManager.addFocusable(this.#textInput);
 
     const rights = data.rights;
     if (rights.includes(RIGHT.create) || rights.includes(RIGHT.delete)) {
@@ -63,6 +69,7 @@ class Item extends Component {
         toolbar.addChild(undoToDeleteAction);
       }
       this.setStaticChild('toolbar', toolbar);
+      focusManager.addFocusable(toolbar);
     }
 
     if (rights.includes(RIGHT.update)) {

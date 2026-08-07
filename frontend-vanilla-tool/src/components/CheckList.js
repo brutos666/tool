@@ -1,10 +1,11 @@
-import { RIGHT, ITEM_LAYOUT } from '../tools/Constants.js';
-import Item from './Item.js';
-import CheckListView from './views/CheckListView.js';
+import { ITEM_LAYOUT, RIGHT } from '../tools/Constants.js';
 import AddItemButton from './AddItemButton.js';
+import Item from './Item.js';
 import Items from './Items.js';
-import Tree from './decorators/Tree.js';
+import TreeFocusManager from './TreeFocusManager.js';
 import DragDropDecorator from './decorators/DragDropDecorator.js';
+import Tree from './decorators/Tree.js';
+import CheckListView from './views/CheckListView.js';
 
 class CheckList extends Items {
 
@@ -22,6 +23,11 @@ class CheckList extends Items {
     const addButton = new AddItemButton({ id: 'addNewItem', label: 'Ajouter un élément', layout: ITEM_LAYOUT.Todo });
     addButton.setDoActionCallback(this.addNewItem.bind(this, 'Saisir un pense-bête'));
     this.setStaticChild('addItemAction', addButton);
+  }
+
+  /** @override */
+  initFocusManager() {
+    super.setFocusManager(new TreeFocusManager(this.getElementView(), 'horizontal', false));
   }
 
   /**
@@ -47,8 +53,49 @@ class CheckList extends Items {
     return new DragDropDecorator(itemComponent);
   }
 
+  /** @override */
   giveFocus() {
     this.#item.giveFocus();
+  }
+
+  /** @override */
+  addItemView(itemComponent) {
+    super.addItemView(itemComponent);
+    super.getFocusManager()
+      .addFocusable(itemComponent.getDecoratedElementByName('Tree'));
+  }
+
+  /** @override */
+  addItemViewAt(itemComponent, index) {
+    super.addItemViewAt(itemComponent, index);
+    super.getFocusManager()
+      .addFocusable(itemComponent.getDecoratedElementByName('Tree'));
+  }
+
+  /** @override */
+  removeItemView(index) {
+    super.removeItemView(index);
+    super.getFocusManager()
+      .removeFocusable(index);
+  }
+
+  /** @override */
+  removeAllItemsViews() {
+    super.removeAllItemsViews();
+    super.getFocusManager()
+      .removeAllFocusable();
+  }
+
+  /** @override */
+  added(parent) {
+    super.added(parent);
+
+    this.getStaticChild('title')
+      .getDecoratedElementByName('Item')
+      .setTabIndex(0);
+
+    super.getFocusManager()
+      .listenKeys();
   }
 
 }

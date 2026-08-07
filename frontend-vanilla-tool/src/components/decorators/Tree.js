@@ -1,7 +1,7 @@
-import TreeList from '../TreeList.js';
-import TreeView from './views/TreeView.js';
-import ItemDecorator from './ItemDecorator.js';
 import { RIGHT } from '../../tools/Constants.js';
+import TreeList from '../TreeList.js';
+import ItemDecorator from './ItemDecorator.js';
+import TreeView from './views/TreeView.js';
 /** @import Component from '../Component.js'; */
 /** @import TreeItem from '../../data/TreeItem.js'; */
 
@@ -45,11 +45,26 @@ class Tree extends ItemDecorator {
     const view = this.getView();
     view.setOpen(open);
   }
+  isOpened() {
+    /** @type {TreeView} */
+    const view = this.getView();
+    return view.isOpened();
+  }
+  isClosed() {
+    /** @type {TreeView} */
+    const view = this.getView();
+    return view.isClosed();
+  }
 
   setLeaf(leaf) {
     /** @type {TreeView} */
     const view = this.getView();
     view.setLeaf(leaf);
+  }
+  isLeaf() {
+    /** @type {TreeView} */
+    const view = this.getView();
+    return view.isLeaf();
   }
 
   setRoot() {

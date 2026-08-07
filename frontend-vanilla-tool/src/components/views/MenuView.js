@@ -1,13 +1,13 @@
 import CompositeView from './CompositeView.js';
-import FocusManager from './FocusManager.js';
 /** @import DecoratorView from '../decorators/views/DecoratorView.js'; */
 
 class MenuView extends CompositeView {
 
   name = 'MenuView';
 
-  /** @type {HTMLLabelElement} */
-  #menu_button = null;
+  #menuChangeCallback = () => {};
+  #menuShowHideCallback = () => {};
+
   /** @type {HTMLMenuElement} */
   #menu_actions = null;
   #horizontal = false;
@@ -18,22 +18,11 @@ class MenuView extends CompositeView {
   constructor() {
     super();
 
-    this.#menu_button = this.getElementView()
-      .querySelector('.menu__button');
     this.#menu_actions = this.getElementView()
       .querySelector('.menu__actions');
 
-    super.setFocusManager(new FocusManager(this.#menu_actions, 'horizontal', false, false));
-
     this.#menu_actions.addEventListener('toggle', event => {
-      if (event.newState === 'open') {
-        this.#menu_button.setAttribute('tabindex', -1);
-        super.getFocusManager()
-          .giveFocus();
-        return;
-      }
-      this.#menu_button.setAttribute('tabindex', 0);
-      this.#menu_button.focus();
+      this.#menuShowHideCallback(event.newState);
     });
 
     this.#resizeObserver = new ResizeObserver(this.sizeHasChanged.bind(this));
@@ -42,7 +31,7 @@ class MenuView extends CompositeView {
 
   getHtmlView() {
     return String.raw`<nav class="menu" aria-label="Menu des commandes" >
-      <button class="menu__button menu__element" aria-label="Ouvrir le menu" aria-controls="spaceChildren" aria-haspopup="true" type="button" tabindex="0" >☰</button>
+      <template id='burgerButton' class="menu__button menu__element" aria-controls="spaceChildren" popovertarget='spaceChildren'></template>
       <menu class="menu__actions" id="spaceChildren" role="menu" aria-label="Commandes"></menu>
   </nav>`;
   }
@@ -59,15 +48,13 @@ class MenuView extends CompositeView {
     // Lorsqu'un bouton de menu sera cliquer lorsque le menu burger sera ouvert, ce dernier se fermera
     button.popoverTargetElement = this.#menu_actions;
     button.popoverTargetAction = 'hide';
-
-    super.getFocusManager()
-      .addFocusableView(view, 'button');
   }
 
-  added(parent) {
-    super.added(parent);
-    super.getFocusManager()
-      .listenKeys();
+  setOnMenuChangeCallback(menuChangeCallback) {
+    this.#menuChangeCallback = menuChangeCallback;
+  }
+  setOnMenuShowHideCallback(menuShowHideCallback) {
+    this.#menuShowHideCallback = menuShowHideCallback;
   }
 
   sizeHasChanged(entries) {
@@ -91,42 +78,21 @@ class MenuView extends CompositeView {
     if (!this.#horizontal) {
       return;
     }
+    this.#menuChangeCallback('vertical');
     this.#horizontal = false;
-    super.getFocusManager()
-      .changeOrientation('vertical');
-    super.getFocusManager()
-      .listenTabKey(true);
-    this.#menu_button.classList.remove('hidden');
-    this.#menu_button.setAttribute('tabindex', 0);
     this.#menu_actions.classList.add('menu__actions-vertical');
-    this.#menu_button.popoverTargetElement = this.#menu_actions;
-    this.#menu_button.popoverTargetAction = 'toggle';
     this.#menu_actions.popover = 'auto';
-    if (super.getFocusManager()
-      .isCurrentFocused()) {
-      this.#menu_button.focus();
-    }
   }
 
   changeToHorizontalMenu() {
     if (this.#horizontal) {
       return;
     }
+    this.#menuChangeCallback('horizontal');
     this.#horizontal = true;
-    super.getFocusManager()
-      .changeOrientation('horizontal');
-    super.getFocusManager()
-      .listenTabKey(false);
-    this.#menu_button.classList.add('hidden');
-    this.#menu_button.setAttribute('tabindex', -1);
+
     this.#menu_actions.classList.remove('menu__actions-vertical');
-    this.#menu_button.popoverTargetElement = null;
-    this.#menu_button.popoverTargetAction = null;
     this.#menu_actions.popover = null;
-    if (document.activeElement === this.#menu_button) {
-      super.getFocusManager()
-        .giveFocus();
-    }
   }
 
   destroy() {

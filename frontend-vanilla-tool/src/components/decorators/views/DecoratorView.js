@@ -23,12 +23,6 @@ class DecoratorView extends View {
   getTemplateDecoratorHTML() {
     return String.raw`<template id="decoratedSpace"></template>`;
   }
-
-  added(parent) {
-    super.added(parent);
-    this.#decoratedView.added(parent);
-  }
-
   /**
    * Positionne la vue statique
    * @param {View} view - Vue statique
@@ -67,11 +61,6 @@ class DecoratorView extends View {
       return this.#decoratedView.getDecoratedViewByName(name);
     }
     return null;
-  }
-
-  getFocusManager() {
-    return this.getDecoratedView()
-      .getFocusManager();
   }
 
   /** @override */

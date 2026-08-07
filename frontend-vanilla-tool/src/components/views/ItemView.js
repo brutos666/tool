@@ -1,5 +1,4 @@
 import { CRUD_MODE, ITEM_LAYOUT, STATUS } from '../../tools/Constants.js';
-import FocusManager from './FocusManager.js';
 import View from './View.js';
 /** @import TreeItem from '../../data/TreeItem.js' */
 /** @import {ItemInfos} from '../../data/TreeItem.js'; */
@@ -24,8 +23,6 @@ class ItemView extends View {
     this.getElementView()
       .addEventListener('focus', this.onFocus.bind(this), true);
 
-    super.setFocusManager(new FocusManager(this.getElementView(), 'horizontal', false, true));
-
     this.viewAdded(data);
   }
 
@@ -42,18 +39,6 @@ class ItemView extends View {
     if (ITEM_LAYOUT.isPostIt(data.layout)) {
       this.getElementView().classList.add(getClassColorForViewChoice(data.layout));
     }
-  }
-
-  /**
-   * Positionne la vue statique
-   * @param {string} id - Identifiant de la vue statique. Il s'agit de l'attribut id de l'element HTML
-   * @param {View} view - Vue statique
-   */
-  setStaticView(id, view) {
-    super.setStaticView(id, view);
-
-    super.getFocusManager()
-      .addFocusableView(view);
   }
 
   /**
@@ -148,11 +133,6 @@ class ItemView extends View {
   }
   undoToDelete() {
     this.getElementView().classList.remove('item--crud-deleted');
-  }
-
-  giveFocus() {
-    this.getFocusManager()
-      .giveFocus();
   }
 
 }

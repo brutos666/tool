@@ -1,6 +1,7 @@
 'use strict';
 
 import View from './views/View.js';
+/** @import FocusManager from './FocusManager.js'; */
 
 class NodeElement {
 
@@ -9,6 +10,9 @@ class NodeElement {
   #view;
   #staticChildren = {};
   #name;
+
+  /** @type {FocusManager} (facultatif) */
+  #focusManager;
 
   /**
    * @constructor
@@ -46,6 +50,7 @@ class NodeElement {
   }
 
   destroy() {
+    this.#focusManager?.stopListenKeys();
     // destroy de tous les staticChild
     Object.values(this.#staticChildren)
       .forEach(child => child.destroy());
@@ -87,9 +92,34 @@ class NodeElement {
       .refreshView(data);
   }
 
+  setFocusManager(focusManager) {
+    this.#focusManager = focusManager;
+  }
+  getFocusManager() {
+    return this.#focusManager;
+  }
+
   giveFocus() {
+    if (this.#focusManager) {
+      this.getFocusManager()
+        .giveFocus();
+    } else {
+      this.getView()
+        .giveFocus();
+    }
+  }
+  isFocused() {
+    if (this.#focusManager) {
+      this.getFocusManager()
+        .isCurrentFocused();
+    } else {
+      this.getView()
+        .isFocused();
+    }
+  }
+  setTabIndex(value) {
     this.getView()
-      .giveFocus();
+      .setTabIndex(value);
   }
   setCurrent() {
     this.getView()
