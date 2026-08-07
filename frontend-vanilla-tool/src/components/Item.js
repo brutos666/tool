@@ -215,9 +215,6 @@ class Item extends Component {
     this.#doneCheckbox.setDisabled();
     this.#titleInput.setDisabled();
     this.#textInput.setDisabled();
-
-    this.getView()
-      .setDisabled();
   }
 
   setReadOnly() {
