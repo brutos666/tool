@@ -213,8 +213,8 @@ class TreeFocusManager extends FocusManager {
    * Démarrage/Arrêt de la navigation au clavier
    * --------------------------------------------------
    */
-  stopAllListenKeys() {
-    this.stopListenKeys();
+  disableNavigationForAll() {
+    this.disableKeyNavigation();
 
     if (DOMUtilities.isHidden(this.getContainer()) || this.getFocusableComponents().length === 0) {
       return;
@@ -224,13 +224,13 @@ class TreeFocusManager extends FocusManager {
     const current = this.getCurrent();
     // Element de l'arbre
     let childFocusManager = current.getFocusManager();
-    childFocusManager?.stopAllListenKeys();
+    childFocusManager?.disableNavigationForAll();
 
     // Liste des enfants
     childFocusManager = current.getStaticChild('treeList')
       .getFocusManager();
     if (childFocusManager && childFocusManager !== this) {
-      childFocusManager.stopAllListenKeys();
+      childFocusManager.disableNavigationForAll();
     }
   }
   /*

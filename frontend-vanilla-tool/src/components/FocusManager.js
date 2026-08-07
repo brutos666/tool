@@ -163,11 +163,9 @@ class FocusManager {
    */
 
   /**
-   * Liste les éléments pouvant prendre le focus.
-   * Positionne l'élément devant prendre le focus au clavier parmi tous les éléments
-   * Écoute l'appui sur les touches du clavier (si plus d'un élément)
+   * Active la navigation via le clavier. La tabulation pourra accéder à la zone.
    */
-  listenKeys() {
+  enableKeyNavigation() {
     this.#listened = true;
     this.getCurrent()
       ?.setTabIndex(0);
@@ -176,16 +174,19 @@ class FocusManager {
       this.#container.addEventListener('keydown', this.#onKeyDownEvent);
     }, 0);
   }
-  stopListenKeys() {
+  /**
+   * Désactive la navigation. La tabulation ne pourra jamais accéder aux composants gérés par le focusManager
+   */
+  disableKeyNavigation() {
     this.#listened = false;
     this.getCurrent()
       ?.setTabIndex(-1);
     this.#container.removeEventListener('keydown', this.#onKeyDownEvent);
   }
-  stopAllListenKeys() {
-    this.stopListenKeys();
+  disableNavigationForAll() {
+    this.disableKeyNavigation();
     const childFocusManager = this.getChildFocusManager();
-    childFocusManager?.stopAllListenKeys();
+    childFocusManager?.disableNavigationForAll();
   }
   isListened() {
     return this.#listened;
@@ -357,11 +358,11 @@ class FocusManager {
   #onMouseDown(event) {
     const rootFocusManager = this.getRootFocusManager();
     // Si nous sommes dans un arbre de focusManager, il faut désactiver les autres focusManager des vues courantes avant de positionner le nouvel élément courant
-    rootFocusManager.stopAllListenKeys();
+    rootFocusManager.disableNavigationForAll();
     // Positionner comme courant à chaque noeud de l'arbre
     this.setCurrentBranch(event.currentTarget);
 
-    this.listenKeys();
+    this.enableKeyNavigation();
     // Si on clique dans une zone accessible par la touche entrée, on doit pouvoir la quitter avec la touche Escape
     this.setCanExit(this.#enterToAccess);
 
@@ -410,8 +411,8 @@ class FocusManager {
    * @param {FocusManager} focusManager
    */
   giveControlToFocusManager(focusManager) {
-    this.stopListenKeys();
-    focusManager.listenKeys();
+    this.disableKeyNavigation();
+    focusManager.enableKeyNavigation();
   }
 
   /**

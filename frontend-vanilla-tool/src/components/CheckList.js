@@ -54,11 +54,6 @@ class CheckList extends Items {
   }
 
   /** @override */
-  giveFocus() {
-    this.#item.giveFocus();
-  }
-
-  /** @override */
   addItemView(itemComponent) {
     super.addItemView(itemComponent);
     super.getFocusManager()
@@ -95,7 +90,7 @@ class CheckList extends Items {
       .setTabIndex(0);
 
     super.getFocusManager()
-      .listenKeys();
+      .enableKeyNavigation();
   }
 
 }
