@@ -6,6 +6,7 @@ class Toolbar extends Composite {
 
   constructor() {
     super(new ToolbarView());
+    // NOTE : le système de focus est positionné mais l'écoute des touches de navigation ne doit pas être effective au départ. C'est le composant qui contient la barre d'outils qui doit piloter au départ
     super.setFocusManager(new FocusManager(this.getElementView(), 'horizontal', false, false));
   }
   /**
@@ -22,14 +23,6 @@ class Toolbar extends Composite {
 
     super.getFocusManager()
       .addFocusable(element);
-  }
-
-  /** @override */
-  added(parent) {
-    super.added(parent);
-
-    super.getFocusManager()
-      .listenKeys();
   }
 
 }

@@ -14,6 +14,8 @@ class Menu extends Composite {
   constructor() {
     super(new MenuView());
     super.setFocusManager(new FocusManager(this.getElementView(), 'horizontal', false, false));
+    super.getFocusManager()
+      .enableKeyNavigation();
 
     this.#burgerButton = new BurgerMenuButton();
     this.setStaticChild('burgerButton', this.#burgerButton);
@@ -32,13 +34,6 @@ class Menu extends Composite {
     // Ajout du décorateur de l'élément du menu
     const decorator = new MenuElement(element);
     return super.addChild(decorator);
-  }
-
-  /** @override */
-  added(parent) {
-    super.added(parent);
-    super.getFocusManager()
-      .listenKeys();
   }
 
   onMenuChange(orientation) {

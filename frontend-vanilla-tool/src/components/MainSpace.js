@@ -29,6 +29,9 @@ class MainSpace extends Component {
     toolbar.addChild(select);
     toolbar.addChild(saveAction);
     this.setStaticChild('toolbar', toolbar);
+    // Active de la navigation au clavier. L'accès à la barre d'outils se fait directement par la tabulation
+    toolbar.getFocusManager()
+      .enableKeyNavigation();
   }
 
   async setTreeItem(treeItem) {

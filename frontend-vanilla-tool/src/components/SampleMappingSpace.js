@@ -30,8 +30,11 @@ class SampleMappingSpace extends Component {
     toolbar.addChild(zoomPlus);
     toolbar.addChild(reset);
     toolbar.addChild(magnify);
-
     this.setStaticChild('toolbar', toolbar);
+    // Active de la navigation au clavier. L'accès à la barre d'outils se fait directement par la tabulation
+    toolbar.getFocusManager()
+      .enableKeyNavigation();
+
     this.setStaticChild('sampleMappingTable', new ItemsKeyboardNavDecorator(this.#sampleMapping));
   }
 

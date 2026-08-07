@@ -5,7 +5,7 @@ class FocusManager {
 
   #keyEvent = {
     // Lorsque la tabulation doit permettre de naviguer et surtout ne pas sortir de la zone
-    Tab: this.#onKeyTab.bind(this),
+    Tab: this.onKeyTab.bind(this),
     // Lorsque que l'on peut "entrer" dans un des éléments pour entamer une navigation à l'intérieur de celui-ci
     Enter: this.#onKeyEnter.bind(this),
     Escape: this.#onKeyEscape.bind(this),
@@ -95,13 +95,16 @@ class FocusManager {
     return this.#canExit;
   }
 
-  enter() {
+  #enter() {
+    if (!this.getChildFocusManager()) {
+      return;
+    }
     const focusManager = this.giveControlToCurrent();
     focusManager.setParentFocusManager(this);
     focusManager.setCanExit(true);
   }
 
-  exit() {
+  #exit() {
     if (!this.canExit()) {
       return;
     }
@@ -310,7 +313,7 @@ class FocusManager {
     this.#keyEvent[event.key]?.(event);
   }
 
-  #onKeyTab(event) {
+  onKeyTab(event) {
     this.focusToDirection(event.shiftKey ? 'Up' : 'Down');
   }
 
@@ -345,10 +348,10 @@ class FocusManager {
 
   /** Entrée et sortie dans un autre système de navigation **/
   #onKeyEnter() {
-    this.enter();
+    this.#enter();
   }
   #onKeyEscape() {
-    this.exit();
+    this.#exit();
   }
 
   /*
