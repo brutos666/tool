@@ -1,4 +1,4 @@
-import { CRUD_MODE, ITEM_LAYOUT, RIGHT, STATUS } from '../../tools/Constants.js';
+import { CRUD_MODE, ITEM_LAYOUT, STATUS } from '../../tools/Constants.js';
 import FocusManager from './FocusManager.js';
 import View from './View.js';
 /** @import TreeItem from '../../data/TreeItem.js' */
@@ -8,15 +8,9 @@ class ItemView extends View {
 
   name = 'ItemView';
 
-  #title;
-  #text;
-
-  #rights;
   #currentStatusClass;
   #currentCRUDModeClass;
-  #readOnly = false;
 
-  #onInputCallback = () => {};
   #onFocusCallback = () => {};
 
   /**
@@ -44,19 +38,22 @@ class ItemView extends View {
    * @param {Array<RIGHT>} data.rights - Droits en création, modification et suppression
    */
   viewAdded(data) {
-    this.#rights = data.rights;
     this.getElementView().classList.add(getClassForViewChoice(data.layout));
     if (ITEM_LAYOUT.isPostIt(data.layout)) {
       this.getElementView().classList.add(getClassColorForViewChoice(data.layout));
     }
-    this.majNodes();
   }
 
-  added(parent) {
-    super.added(parent);
+  /**
+   * Positionne la vue statique
+   * @param {string} id - Identifiant de la vue statique. Il s'agit de l'attribut id de l'element HTML
+   * @param {View} view - Vue statique
+   */
+  setStaticView(id, view) {
+    super.setStaticView(id, view);
 
     super.getFocusManager()
-      .addFocusableElements(this, '.item__checkbox, .item__title, .item__text');
+      .addFocusableView(view);
   }
 
   /**
@@ -77,9 +74,9 @@ class ItemView extends View {
 
   getHtmlArticle() {
     return String.raw`<article id="itemArticle" class="item__article" aria-label="Item">
-          <template id="done" property="done" class="item__checkbox" aria-label="Effectué/non effectué" aria-description="Cliquez pour marquer comme effectué"></template>
-          <header contenteditable="true" property="title" class="item__title" role="textbox" aria-label="Titre de l'item" aria-multiline="true"></header>
-          <div contenteditable="true" property="text" class="item__text" role="textbox" aria-label="Détail de l'item" aria-multiline="true"></div>
+          <template id="done" class="item__checkbox" aria-label="Effectué/non effectué" aria-description="Cliquez pour marquer comme effectué"></template>
+          <template id="title" class="item__title" aria-label="Titre de l'item"></template>
+          <template id="text" class="item__text" aria-label="Détail de l'item"></template>
       </article>`;
   }
 
@@ -90,29 +87,8 @@ class ItemView extends View {
    * @param {ITEM_LAYOUT} data.layout - Affichage souhaité
    */
   refreshView(data) {
-    this.removeEventListeners();
     super.refreshView(data);
     this.viewAdded(data);
-    this.addEventListeners();
-  }
-
-  /**
-   * Positionne la fonction à appeler lorsqu'une modification est effectuée (titre, texte, statut)
-   * @param {Function} updateCallback - Fonction à appeler lorsqu'une modification est effectuée
-   */
-  setOnChangeCallback(updateCallback) {
-    if (!this.#rights.includes(RIGHT.update)) {
-      return;
-    }
-    this.#title.removeEventListener('input', this.#onInputCallback);
-    this.#text.removeEventListener('input', this.#onInputCallback);
-    this.#onInputCallback = event => {
-      const property = event.target.getAttribute('property');
-      const value = property === 'text' || property === 'title' ? event.target.innerHTML : event.target.value;
-      updateCallback(property, value);
-    };
-    this.#title.addEventListener('input', this.#onInputCallback);
-    this.#text.addEventListener('input', this.#onInputCallback);
   }
 
   setOnFocusCallback(onFocusCallback) {
@@ -129,12 +105,6 @@ class ItemView extends View {
     }
   }
 
-  majNodes() {
-    const mainNode = this.getElementView();
-    this.#title = mainNode.querySelector('.item__title');
-    this.#text = mainNode.querySelector('.item__text');
-  }
-
   /**
    * Positionne les informations de la tâche sur les éléments
    * @param {ItemInfos} itemInfos - Informations sur la tache
@@ -143,10 +113,6 @@ class ItemView extends View {
     if (itemInfos.id) {
       this.getElementView()
         .setAttribute('data-item-id', itemInfos.id);
-    }
-    this.#title.innerHTML = itemInfos.title;
-    if (itemInfos.text) {
-      this.#text.innerHTML = itemInfos.text;
     }
     if (itemInfos.status) {
       const newStatusClass = getClassForStatus(itemInfos.status);
@@ -180,74 +146,13 @@ class ItemView extends View {
   setToDelete() {
     this.getElementView().classList.add('item--crud-deleted');
   }
-
   undoToDelete() {
     this.getElementView().classList.remove('item--crud-deleted');
   }
 
   giveFocus() {
-    if (this.isEditable()) {
-      this.#title.focus();
-    } else {
-      this.getElementView()
-        .focus();
-    }
-  }
-
-  setReadOnly() {
-    super.setReadOnly();
-    this.#readOnly = true;
-    this.setEditable(false);
-  }
-
-  setEditable(editable) {
-    if (this.#readOnly && editable) {
-      return;
-    }
-    const elementView = this.getElementView();
-    const description = editable ? 'Mode édition. Échap pour quitter.' : 'Entrée pour passer en mode édition.';
-    elementView.setAttribute('aria-description', description);
-    this.#title.contentEditable = editable;
-    this.#text.contentEditable = editable;
-    const tabIndex = editable ? '0' : '-1';
-    if (!this.isCurrent()) {
-      elementView.setAttribute('tabindex', tabIndex);
-    }
-    // Ajouter les boutons et la case à cocher de la barre d'outil
-    elementView.querySelectorAll('button, input[type="checkbox"]')
-      .forEach(button => button.setAttribute('tabindex', tabIndex));
-  }
-  isEditable() {
-    return this.#title.contentEditable === 'true';
-  }
-
-  /** @override */
-  setDisabled() {
-    // Laisser la barre d'outil accessible pour pouvoir annuler le marquage comme supprimé
-    this.#title.classList.add('disabled');
-    this.#text.classList.add('disabled');
-    this.setEditable(false);
-  }
-
-  setEnabled() {
-    this.#title.classList.remove('disabled');
-    this.#text.classList.remove('disabled');
-  }
-
-  addEventListeners() {
-    if (!this.#rights.includes(RIGHT.update)) {
-      return;
-    }
-    this.#title.addEventListener('input', this.#onInputCallback);
-    this.#text.addEventListener('input', this.#onInputCallback);
-  }
-
-  removeEventListeners() {
-    if (!this.#rights.includes(RIGHT.update)) {
-      return;
-    }
-    this.#title.removeEventListener('input', this.#onInputCallback);
-    this.#text.removeEventListener('input', this.#onInputCallback);
+    this.getFocusManager()
+      .giveFocus();
   }
 
 }

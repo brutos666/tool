@@ -29,7 +29,7 @@ class DragDropDecorator extends ItemDecorator {
     /** @type {Item} */
     const item = this.getDecoratedElement();
     item.getStaticChild('toolbar')
-      .addChild(dragAction);
+      ?.addChild(dragAction);
 
     /** @type {DragDropDecoratorView} */
     const view = this.getView();

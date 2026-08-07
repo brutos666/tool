@@ -1,11 +1,12 @@
 'use strict';
 
-import ItemView from './views/ItemView.js';
-import Component from './Component.js';
 import { RIGHT } from '../tools/Constants.js';
 import ActionButton from './ActionButton.js';
-import Toolbar from './Toolbar.js';
 import CheckBox from './CheckBox.js';
+import Component from './Component.js';
+import TextInput from './TextInput.js';
+import Toolbar from './Toolbar.js';
+import ItemView from './views/ItemView.js';
 /** @import TreeItem from '../data/TreeItem.js' */
 /** @import { ITEM_LAYOUT } from '../tools/Constants.js' */
 /** @import Items from './Items.js' */
@@ -19,7 +20,12 @@ class Item extends Component {
   #treeItem = null;
   #readOnly = false;
 
+  /** @type {CheckBox} */
   #doneCheckbox = null;
+  /** @type {TextInput} */
+  #titleInput = null;
+  /** @type {TextInput} */
+  #textInput = null;
 
   /**
    * @constructor de la classe Item
@@ -31,30 +37,38 @@ class Item extends Component {
   constructor(data) {
     super(new ItemView(data));
 
-    const rights = data.rights;
-    const toolbar = new Toolbar();
-    if (rights.includes(RIGHT.create)) {
-      const addAction = new ActionButton({ id: 'addNewChild', label: 'Ajouter un item', icon: '+', role: 'button', type: 'icon' });
-      addAction.setDoActionCallback(this.doAdd.bind(this, 'Nouvel item'));
-      toolbar.addChild(addAction);
-    }
-    if (rights.includes(RIGHT.delete)) {
-      const deleteAction = new ActionButton({ id: 'markToDelete', label: 'Marquer à supprimer', icon: '-', role: 'button', type: 'icon' });
-      deleteAction.setDoActionCallback(this.markToDelete.bind(this));
-      toolbar.addChild(deleteAction);
-      const undoToDeleteAction = new ActionButton({ id: 'undoToDelete', label: 'Annuler la suppression', icon: '+', role: 'button', type: 'icon' });
-      undoToDeleteAction.setDoActionCallback(this.undoToDelete.bind(this));
-      toolbar.addChild(undoToDeleteAction);
-    }
-    this.setStaticChild('toolbar', toolbar);
-
     this.#doneCheckbox = new CheckBox({ id: 'done', label: 'Fait', role: 'checkbox', type: 'checkbox' });
-    this.#doneCheckbox.setToggleCallback(this.toggleDone.bind(this));
     this.setStaticChild('done', this.#doneCheckbox);
 
+    this.#titleInput = new TextInput();
+    this.setStaticChild('title', this.#titleInput);
+
+    this.#textInput = new TextInput();
+    this.setStaticChild('text', this.#textInput);
+
+    const rights = data.rights;
+    if (rights.includes(RIGHT.create) || rights.includes(RIGHT.delete)) {
+      const toolbar = new Toolbar();
+      if (rights.includes(RIGHT.create)) {
+        const addAction = new ActionButton({ id: 'addNewChild', label: 'Ajouter un item', icon: '+', role: 'button', type: 'icon' });
+        addAction.setDoActionCallback(this.doAdd.bind(this, 'Nouvel item'));
+        toolbar.addChild(addAction);
+      }
+      if (rights.includes(RIGHT.delete)) {
+        const deleteAction = new ActionButton({ id: 'markToDelete', label: 'Marquer à supprimer', icon: '-', role: 'button', type: 'icon' });
+        deleteAction.setDoActionCallback(this.markToDelete.bind(this));
+        const undoToDeleteAction = new ActionButton({ id: 'undoToDelete', label: 'Annuler la suppression', icon: '+', role: 'button', type: 'icon' });
+        undoToDeleteAction.setDoActionCallback(this.undoToDelete.bind(this));
+        toolbar.addChild(deleteAction);
+        toolbar.addChild(undoToDeleteAction);
+      }
+      this.setStaticChild('toolbar', toolbar);
+    }
+
     if (rights.includes(RIGHT.update)) {
-      this.getView()
-        .setOnChangeCallback(this.setPropertyValue.bind(this));
+      this.#doneCheckbox.setToggleCallback(this.toggleDone.bind(this));
+      this.#titleInput.setOnChangeCallback(this.onChange.bind(this, this.#titleInput, 'title'));
+      this.#textInput.setOnChangeCallback(this.onChange.bind(this, this.#textInput, 'text'));
     } else {
       this.setReadOnly();
     }
@@ -65,7 +79,6 @@ class Item extends Component {
       });
 
     this.setTreeItem(data.treeItem);
-    this.setEditable(false);
   }
 
   setCurrent() {
@@ -120,6 +133,7 @@ class Item extends Component {
   doAdd(title) {
     this.#treeItem.addChildItem({ title, state: 'TODO', children: [] });
   }
+
   markToDelete() {
     if (this.#treeItem.isNew()) {
       this.#treeItem.getParentItem()
@@ -128,26 +142,18 @@ class Item extends Component {
       this.#treeItem.markToDeleteItem();
     }
   }
-
   undoToDelete() {
     this.#treeItem.undoToDelete();
   }
 
-  /**
-   * Met à jour la tâche en fonction de l'événement reçu
-   * @param {string} property - Propriété de la tâche à mettre à jour
-   * @param {string} value - Valeur de la propriété
-   *
-   * @this {Item}
-   */
-  setPropertyValue(property, value) {
-    this.getTreeItem()
-      .setPropertyValue(property, value);
-  }
   toggleDone() {
     const value = this.#doneCheckbox.isChecked() ? 'DONE' : 'TODO';
     this.getTreeItem()
       .setPropertyValue('state', value);
+  }
+  onChange(textInput, property) {
+    this.getTreeItem()
+      .setPropertyValue(property, textInput.getValue());
   }
 
   /**
@@ -175,13 +181,14 @@ class Item extends Component {
     if (itemInfos.state) {
       this.#doneCheckbox.setChecked(itemInfos.state === 'DONE');
     }
+    this.#titleInput.setValue(itemInfos.title);
+    this.#textInput.setValue(itemInfos.text);
   }
 
   setToDelete() {
     // NOTE : Ne pas rendre la toolbar inaccessible car elle est utile même si l'item est supprimé
-    this.getView()
-      .setDisabled();
-    this.#doneCheckbox.setDisabled();
+    this.setDisabled();
+
     this.getView()
       .setToDelete();
   }
@@ -195,19 +202,20 @@ class Item extends Component {
       .undoToDelete();
   }
 
+  /** @override */
+  setDisabled() {
+    // NOTE : Ne pas rendre la toolbar inaccessible car elle est utile même si l'item est supprimé (donc pas de super.setDisabled())
+    this.#doneCheckbox.setDisabled();
+    this.#titleInput.setDisabled();
+    this.#textInput.setDisabled();
+
+    this.getView()
+      .setDisabled();
+  }
+
   setReadOnly() {
     super.setReadOnly();
     this.#readOnly = true;
-  }
-
-  setEditable(editable) {
-    this.getView()
-      .setEditable(editable);
-  }
-
-  isEditable() {
-    return this.getView()
-      .isEditable();
   }
 
 }
