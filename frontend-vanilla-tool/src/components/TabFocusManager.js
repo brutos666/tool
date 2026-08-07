@@ -36,12 +36,12 @@ class TabFocusManager extends FocusManager {
   }
 
   onKeyTab(event) {
-    this.#exit();
+    this.#exitWithTab();
     this.focusToDirection(event.shiftKey ? 'Up' : 'Down');
-    this.#enter();
+    this.#enterWithTab();
   }
 
-  #enter() {
+  #enterWithTab() {
     if (!this.getChildFocusManager()) {
       return;
     }
@@ -52,7 +52,7 @@ class TabFocusManager extends FocusManager {
     this.#onlyTab = true;
   }
 
-  #exit() {
+  #exitWithTab() {
     if (!this.#onlyTab) {
       return;
     }
@@ -60,6 +60,32 @@ class TabFocusManager extends FocusManager {
     const focusManager = this.getChildFocusManager();
     focusManager.disableKeyNavigation();
     this.#onlyTab = false;
+  }
+
+  exit() {
+    // Sortie avec Escape
+    super.exit();
+
+    if (this.#onlyTab) {
+      const focusManager = this.getChildFocusManager();
+      focusManager.disableKeyNavigation();
+    }
+  }
+
+  /*
+   * Démarrage/Arrêt de la navigation au clavier
+   * --------------------------------------------------
+   */
+  /**
+   * Active la navigation via le clavier. La tabulation pourra accéder à la zone.
+   */
+  enableKeyNavigation() {
+    super.enableKeyNavigation();
+
+    if (this.#onlyTab) {
+      const focusManager = this.getChildFocusManager();
+      focusManager.enableKeyNavigation();
+    }
   }
 
 }

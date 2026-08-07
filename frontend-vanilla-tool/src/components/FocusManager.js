@@ -104,7 +104,7 @@ class FocusManager {
     focusManager.setCanExit(true);
   }
 
-  #exit() {
+  exit() {
     if (!this.canExit()) {
       return;
     }
@@ -351,7 +351,7 @@ class FocusManager {
     this.#enter();
   }
   #onKeyEscape() {
-    this.#exit();
+    this.exit();
   }
 
   /*
