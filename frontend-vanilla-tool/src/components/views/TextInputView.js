@@ -38,5 +38,15 @@ class TextInputView extends View {
     // TODO DOMPurify.sanitize(value);
   }
 
+  setDisabled() {
+    super.setDisabled();
+    this.getElementView().contentEditable = false;
+  }
+
+  setEnabled() {
+    super.setEnabled();
+    this.getElementView().contentEditable = true;
+  }
+
 }
 export default TextInputView;

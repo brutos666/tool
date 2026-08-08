@@ -3,7 +3,7 @@ import ItemDecorator from './ItemDecorator.js';
 
 class SampleMappingColumnDecorator extends ItemDecorator {
 
-  name = 'SampleMappingColumn';
+  name = 'SampleMappingColumnDecorator';
 
   /** @type {Item} */
   #ruleItem;
@@ -23,6 +23,12 @@ class SampleMappingColumnDecorator extends ItemDecorator {
 
   getSampleItems() {
     return this.#sampleItems;
+  }
+
+  removed() {
+    super.removed();
+    this.#ruleItem.removed();
+    this.#sampleItems.removed();
   }
 
 }

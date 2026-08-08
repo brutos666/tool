@@ -170,9 +170,14 @@ class View {
   setHidden() {
     this.getElementView().classList.add('hidden');
   }
+  isHidden() {
+    return this.getElementView().classList.contains('hidden');
+  }
+
   setVisible() {
     this.getElementView().classList.remove('hidden');
   }
+
   setReadOnly() {
     this.getElementView().classList.add('readonly');
   }

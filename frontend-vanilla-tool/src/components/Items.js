@@ -1,7 +1,6 @@
 import { ITEM_LAYOUT, RIGHT } from '../tools/Constants.js';
 import Composite from './Composite.js';
 import DragDropDecorator from './decorators/DragDropDecorator.js';
-import FocusManagerDecorator from './decorators/FocusManagerDecorator.js';
 import Item from './Item.js';
 import ItemsView from './views/ItemsView.js';
 /** @import TreeItem from '../data/TreeItem.js'; */
@@ -102,11 +101,11 @@ class Items extends Composite {
       const itemComponent = this.getItemComponent(treeItem);
       if (index !== undefined) {
         this.addItemViewAt(itemComponent, index);
-        this.addChildAt(new FocusManagerDecorator(itemComponent, this), index);
+        this.addChildAt(itemComponent, index);
         return;
       }
       this.addItemView(itemComponent);
-      this.addChild(new FocusManagerDecorator(itemComponent, this));
+      this.addChild(itemComponent);
     });
   }
 

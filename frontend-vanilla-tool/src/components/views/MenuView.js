@@ -10,7 +10,7 @@ class MenuView extends CompositeView {
 
   /** @type {HTMLMenuElement} */
   #menu_actions = null;
-  #horizontal = false;
+  #horizontal = null;
 
   #font_size = null;
   #resizeObserver = null;
@@ -75,7 +75,7 @@ class MenuView extends CompositeView {
   }
 
   changeToBurgerMenu() {
-    if (!this.#horizontal) {
+    if (this.#horizontal === false) {
       return;
     }
     this.#menuChangeCallback('vertical');

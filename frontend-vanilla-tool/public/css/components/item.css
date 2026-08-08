@@ -40,13 +40,6 @@
   min-width: 20px;
   aspect-ratio: 1 / 1;
 }
-.item__toolbar #addNewChild,
-.item__toolbar #markToDelete {
-  display: block;
-}
-.item__toolbar #undoToDelete {
-  display: none;
-}
 
 .item--status-orphan,
 .item--status-next-not-found,
@@ -58,14 +51,6 @@
 .item--crud-updated .item__article::before {
   content: "•";
   color: var(--status-color);
-}
-.item--crud-deleted .item__toolbar #addNewChild,
-.item--crud-deleted .item__toolbar #markToDelete,
-.item--crud-deleted .item__toolbar .drag-button {
-  display: none;
-}
-.item--crud-deleted .item__toolbar #undoToDelete {
-  display: block;
 }
 
 /* -- Affichage item avec que le titre */

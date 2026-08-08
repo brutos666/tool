@@ -1,11 +1,14 @@
 import DOMUtilities from '../tools/DOMUtilities.js';
+import TabFocusManager from './TabFocusManager.js';
 /** @import Component from './Component.js'; */
 
 class FocusManager {
 
+  name = 'FocusManager';
+
   #keyEvent = {
     // Lorsque la tabulation doit permettre de naviguer et surtout ne pas sortir de la zone
-    Tab: this.onKeyTab.bind(this),
+    Tab: this.#onKeyTab.bind(this),
     // Lorsque que l'on peut "entrer" dans un des éléments pour entamer une navigation à l'intérieur de celui-ci
     Enter: this.#onKeyEnter.bind(this),
     Escape: this.#onKeyEscape.bind(this),
@@ -14,8 +17,8 @@ class FocusManager {
     ArrowDown: this.focusToDirection.bind(this, 'Down'),
     ArrowLeft: this.focusToDirection.bind(this, 'Left'),
     ArrowRight: this.focusToDirection.bind(this, 'Right'),
-    Home: this.#focusToFirst.bind(this),
-    End: this.#focusToLast.bind(this)
+    Home: this.giveFocusToFirst.bind(this),
+    End: this.giveFocusToLast.bind(this)
   };
   #onKeyDownEvent = this.#onKeyDown.bind(this);
   #onMouseDownEvent = this.#onMouseDown.bind(this);
@@ -29,7 +32,7 @@ class FocusManager {
   /** @type {Component} */
   #parent = null;
   /** @type {Array<Component>} */
-  #focusable = [];
+  #components = [];
   /** @type {boolean} */
   #listened = false;
 
@@ -38,7 +41,7 @@ class FocusManager {
 
   #canTab = false;
   #enterToAccess = false;
-  #canExit = false;
+  #isInside = false;
 
   /**
    * @constructor
@@ -53,7 +56,7 @@ class FocusManager {
     this.#canTab = canTab;
     this.#enterToAccess = enterToAccess;
     if (enterToAccess) {
-      this.setCanExit(false);
+      this.setOut();
     }
   }
 
@@ -84,15 +87,18 @@ class FocusManager {
       ?.pressEnterToAccess();
   }
 
-  setCanExit(canExit) {
-    this.#canExit = canExit;
-
-    const description = canExit ? 'Navigation active. Échap pour quitter.' : 'Entrée pour activer la navigation.';
+  setIn() {
+    this.#isInside = true;
     this.getContainer()
-      .setAttribute('aria-description', description);
+      .setAttribute('aria-description', 'Navigation active. Échap pour quitter.');
+  }
+  setOut() {
+    this.#isInside = false;
+    this.getContainer()
+      .setAttribute('aria-description', 'Entrée pour activer la navigation.');
   }
   canExit() {
-    return this.#canExit;
+    return this.#isInside;
   }
 
   #enter() {
@@ -101,63 +107,76 @@ class FocusManager {
     }
     const focusManager = this.giveControlToCurrent();
     focusManager.setParentFocusManager(this);
-    focusManager.setCanExit(true);
+    focusManager.setIn();
   }
-
   exit() {
-    if (!this.canExit()) {
-      return;
-    }
     const parentFocusManager = this.giveControlToParent();
     parentFocusManager.giveFocus();
-    this.setCanExit(false);
+    this.setOut();
   }
 
   /*
    * Vues et élément pouvant prendre le focus par les touches du clavier ou un clic de la souris
    * -------------------------------------------------------------------------------------------
    */
-
   /**
    * Ajout d'un élément focusable
    * @param {Component} component
    */
-  addFocusable(component) {
-    this.#focusable.push(component);
+  addComponent(component) {
+    this.#components.push(component);
     component.setTabIndex(-1);
     component.getView()
       .addEventListener('mousedown', this.#onMouseDownEvent);
-    if (this.#focusable.length === 1) {
-      this.setCurrent(this.#focusable[0]);
+    if (!this.getCurrent()) {
+      this.setCurrentFirstFocusable();
     }
   }
-  removeFocusable(index) {
-    const component = this.#focusable[index];
+  removeComponent(index) {
+    const component = this.#components[index];
     component.setTabIndex(null);
     component.getView()
       .removeEventListener('mousedown', this.#onMouseDownEvent);
+    this.#components.splice(index, 1);
     if (this.getCurrent() === component) {
-      if (this.#focusable.length === 1) {
-        this.removeCurrent();
-      } else {
-        this.setCurrent(this.#focusable[0]);
-      }
+      this.refreshCurrent(index);
     }
-    this.#focusable.splice(index, 1);
   }
-  removeAllFocusable() {
+  removeAllComponents() {
     this.removeCurrent();
-    for (const component of this.#focusable) {
+    for (const component of this.#components) {
       component.getView()
         .removeEventListener('mousedown', this.#onMouseDownEvent);
     }
-    this.#focusable = [];
+    this.#components = [];
   }
-  getFocusableComponents() {
-    return this.#focusable;
+  getAllComponents() {
+    return this.#components;
   }
-  getFocusableAt(index) {
-    return this.#focusable[index];
+  getFirstFocusable() {
+    return this.#components.find(component => this.isFocusable(component));
+  }
+  getLastFocusable() {
+    return this.#components.toReversed()
+      .find(component => this.isFocusable(component));
+  }
+  getLastFocusableBefore(beforeIndex) {
+    for (let i = beforeIndex - 1; i >= 0; i--) {
+      const component = this.#components[i];
+      if (this.isFocusable(component)) {
+        return component;
+      }
+    }
+    return null;
+  }
+  getFirstFocusableAfter(afterIndex) {
+    for (let i = afterIndex + 1; i < this.#components.length; i++) {
+      const component = this.#components[i];
+      if (this.isFocusable(component)) {
+        return component;
+      }
+    }
+    return null;
   }
 
   /*
@@ -176,6 +195,11 @@ class FocusManager {
       // Astuce pour que l'écoute ne soit pas prise en compte lorsque l'appui sur une touche est en cours
       this.#container.addEventListener('keydown', this.#onKeyDownEvent);
     }, 0);
+
+    // Si on clique dans une zone accessible par la touche entrée, on doit pouvoir la quitter avec la touche Escape
+    if (this.#enterToAccess) {
+      this.setIn();
+    }
   }
   /**
    * Désactive la navigation. La tabulation ne pourra jamais accéder aux composants gérés par le focusManager
@@ -213,7 +237,7 @@ class FocusManager {
   }
 
   /*
-   * Prise de focus et positionnement du courant
+   * Prise de focus
    * ---------------------------------------------------
    */
   giveFocus() {
@@ -222,9 +246,64 @@ class FocusManager {
   }
   isCurrentFocused() {
     return this.getCurrent()
-      .isFocused();
+      ?.isFocused();
+  }
+  isCurrentHasFocused() {
+    const current = this.getCurrent();
+    if (!current) {
+      return false;
+    }
+    return current?.isFocused() || current.getElementView()
+      .contains(document.activeElement);
+  }
+  giveFocusToFirst() {
+    const firstFocusable = this.getFirstFocusable();
+    if (firstFocusable) {
+      this.setCurrent(firstFocusable);
+      this.getCurrent()
+        .giveFocus();
+    }
+  }
+  giveFocusToLast() {
+    const lastFocusable = this.getLastFocusable();
+    if (lastFocusable) {
+      this.setCurrent(lastFocusable);
+      this.getCurrent()
+        .giveFocus();
+    }
+  }
+  focusToDirection(direction) {
+    const indexCurrent = this.getIndexCurrent();
+    let nextFocusable = null;
+    if ([ 'Up', 'Left' ].includes(direction)) {
+      nextFocusable = this.getLastFocusableBefore(indexCurrent);
+    } else if ([ 'Down', 'Right' ].includes(direction)) {
+      nextFocusable = this.getFirstFocusableAfter(indexCurrent);
+    }
+    if (nextFocusable) {
+      this.setCurrent(nextFocusable);
+      this.giveFocus();
+      return true;
+    }
+    return false;
+  }
+  isFocusable(component) {
+    // Si le composant contient un focusManager, alors ce dernier est accessible s'il existe un courant accessible
+    const childFocusManager = component.getFocusManager();
+    if (childFocusManager && !childFocusManager.getCurrent()) {
+      return false;
+    }
+    return !component.isHidden() && !component.isDisabled() && !DOMUtilities.isHidden(component.getElementView()) && this.#components.includes(component);
+  }
+  hasFocusable() {
+    // Le fait d'avoir un courant doit indiquer que
+    return this.getCurrent();
   }
 
+  /*
+   * Positionnement du courant
+   * ---------------------------------------------------
+   */
   setCurrent(component) {
     this.removeCurrent();
     // Ne permettre la prise de focus que si le focusManager est à l'écoute
@@ -232,7 +311,28 @@ class FocusManager {
     this.#current = component;
   }
   setCurrentWithIndex(index) {
-    this.setCurrent(this.#focusable[index]);
+    this.setCurrent(this.#components[index]);
+  }
+  setCurrentFirstFocusable() {
+    const firstFocusable = this.getFirstFocusable();
+    if (firstFocusable) {
+      this.setCurrent(firstFocusable);
+      return true;
+    }
+    this.removeCurrent();
+    return false;
+  }
+  setCurrentNextFocusable(index) {
+    let nextFocusable = this.getFirstFocusableAfter(index);
+    if (!nextFocusable) {
+      nextFocusable = this.getLastFocusableBefore(index);
+    }
+    if (nextFocusable) {
+      this.setCurrent(nextFocusable);
+      return true;
+    }
+    this.removeCurrent();
+    return false;
   }
   /**
    * Retourne le composant courant
@@ -241,16 +341,8 @@ class FocusManager {
   getCurrent() {
     return this.#current;
   }
-  /**
-   * Retourne l'élément HTML du composant courant
-   * @returns {HTMLElement}
-   */
-  getCurrentElement() {
-    return this.getCurrent()
-      .getElementView();
-  }
   getIndexCurrent() {
-    return this.#focusable.indexOf(this.getCurrent());
+    return this.#components.indexOf(this.getCurrent());
   }
   removeCurrent() {
     if (!this.#current) {
@@ -261,7 +353,7 @@ class FocusManager {
     this.#current = null;
   }
   setCurrentBranch(target) {
-    for (const component of this.#focusable) {
+    for (const component of this.#components) {
       const element = component.getElementView();
       if (element === target || element.contains(target)) {
         this.setCurrent(component);
@@ -271,15 +363,53 @@ class FocusManager {
     this.getParentFocusManager()
       ?.setCurrentBranch(target);
   }
+  /**
+   * Met à jour le courant lorsque un composant devient accessible ou inaccessible
+   * @param currentIndexBeforeRemove - Index du courant avant sa suppression de la liste des composants. Lorsqu'il n'est pas fourni, c'est que le courant est toujours présent et sa position sera recherchée si besoin
+   */
+  refreshCurrent(currentIndexBeforeRemove) {
+    if (DOMUtilities.isHidden(this.getContainer())) {
+      return;
+    }
+    const currentWasFocused = this.isCurrentHasFocused();
+
+    const focusManagerWithCurrent = this.updateCurrent(currentIndexBeforeRemove || this.getIndexCurrent());
+    // Donner le contrôle au premier ancêtre avec un courant
+    if (focusManagerWithCurrent) {
+      this.giveControlToFocusManager(focusManagerWithCurrent);
+      if (currentWasFocused) {
+        focusManagerWithCurrent.giveFocus();
+      }
+    }
+  }
+  /**
+   * Mise à jour du courant. Si pas de courant, on met à jour le courant du parent
+   * @param currentIndex - position du courant dans la liste (avant suppression si ce dernier est supprimé des composants)
+   * @returns le focusManager pour lequel le courant a pu être trouvé
+   */
+  updateCurrent(currentIndex) {
+    const current = this.getCurrent();
+    let found;
+    if (current) {
+      found = this.isFocusable(current) ? true : this.setCurrentNextFocusable(currentIndex);
+    } else {
+      found = this.setCurrentFirstFocusable();
+    }
+    const parentFocusManager = this.getParentFocusManager();
+    if (!found) {
+      if (!parentFocusManager) {
+        return null;
+      }
+      return parentFocusManager.updateCurrent(parentFocusManager.getIndexCurrent());
+    }
+    return this;
+  }
 
   /*
    * Navigation au clavier
    * ---------------------
    */
   interceptKeys() {
-    if (DOMUtilities.isHidden(this.getCurrentElement())) {
-      return [];
-    }
     const keys = [ 'Home', 'End' ];
     if (this.canExit()) {
       keys.push('Escape');
@@ -305,6 +435,9 @@ class FocusManager {
    * @param {Event} event - Event de clavier
    */
   #onKeyDown(event) {
+    if (!this.getCurrent()) {
+      return;
+    }
     if (!this.interceptKeys()
       .includes(event.key)) {
       return;
@@ -313,39 +446,16 @@ class FocusManager {
     this.#keyEvent[event.key]?.(event);
   }
 
-  onKeyTab(event) {
-    this.focusToDirection(event.shiftKey ? 'Up' : 'Down');
-  }
-
-  #focusToFirst() {
-    this.setCurrent(this.#focusable[0]);
-    this.giveFocus();
-  }
-  #focusToLast() {
-    this.setCurrent(this.#focusable[this.#focusable.length - 1]);
-    this.giveFocus();
-  }
-
-  focusToDirection(direction) {
-    let indexCurrent = this.getIndexCurrent();
-    if ([ 'Up', 'Left' ].includes(direction)) {
-      indexCurrent--;
-    } else if ([ 'Down', 'Right' ].includes(direction)) {
-      indexCurrent++;
-    }
-    if (indexCurrent === this.#focusable.length) {
-      indexCurrent = 0;
-    } else if (indexCurrent === -1) {
-      indexCurrent = this.#focusable.length - 1;
-    }
-    this.setCurrent(this.#focusable[indexCurrent]);
-    if (DOMUtilities.isHidden(this.getCurrentElement())) {
-      this.focusToDirection(direction);
-    } else {
-      this.giveFocus();
+  #onKeyTab(event) {
+    if (!this.focusToDirection(event.shiftKey ? 'Up' : 'Down')) {
+      // Boucler
+      if (event.shiftKey) {
+        this.giveFocusToLast();
+      } else {
+        this.giveFocusToFirst();
+      }
     }
   }
-
   /** Entrée et sortie dans un autre système de navigation **/
   #onKeyEnter() {
     this.#enter();
@@ -359,15 +469,23 @@ class FocusManager {
    * ---------------------------------------------------
    */
   #onMouseDown(event) {
+    if (!this.hasFocusable()) {
+      return;
+    }
+
     const rootFocusManager = this.getRootFocusManager();
     // Si nous sommes dans un arbre de focusManager, il faut désactiver les autres focusManager des vues courantes avant de positionner le nouvel élément courant
     rootFocusManager.disableNavigationForAll();
     // Positionner comme courant à chaque noeud de l'arbre
     this.setCurrentBranch(event.currentTarget);
 
-    this.enableKeyNavigation();
-    // Si on clique dans une zone accessible par la touche entrée, on doit pouvoir la quitter avec la touche Escape
-    this.setCanExit(this.#enterToAccess);
+    if (this.getParentFocusManager() instanceof TabFocusManager) {
+      // Des systèmes de navigation via des flèches peuvent être pilotés par un système de navigation plus global via tabulation. Ainsi, on naviguera d'un composant à l'autre via Tab et à l'intérieur du composant via les flèches. On donne ici la main au TabFocusManager. Il s'occupera d'activer le focusManager du composant courant.
+      this.getParentFocusManager()
+        .enableKeyNavigation();
+    } else {
+      this.enableKeyNavigation();
+    }
 
     event.stopPropagation();
   }
@@ -387,6 +505,19 @@ class FocusManager {
     return this.getCurrent()
       ?.getFocusManager();
   }
+  /**
+   * Parcours des parents jusqu'à trouver un parent pouvant avoir le focus
+   * @returns focusManager du 1er parent avec un courant
+   */
+  getFocusableParentFocusManager() {
+    const parentFocusManager = this.getParentFocusManager();
+    while (parentFocusManager) {
+      if (parentFocusManager.hasFocusable()) {
+        return parentFocusManager;
+      }
+    }
+    return null;
+  }
 
   /**
    * Donne le contrôle au focusManager de la vue courante
@@ -405,6 +536,9 @@ class FocusManager {
    */
   giveControlToParent() {
     const parentFocusManager = this.getParentFocusManager();
+    if (!parentFocusManager) {
+      return null;
+    }
     this.giveControlToFocusManager(parentFocusManager);
     return parentFocusManager;
   }

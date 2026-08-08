@@ -22,7 +22,7 @@ class Toolbar extends Composite {
     super.addChild(element);
 
     super.getFocusManager()
-      .addFocusable(element);
+      .addComponent(element);
   }
 
 }

@@ -14,8 +14,6 @@ class Menu extends Composite {
   constructor() {
     super(new MenuView());
     super.setFocusManager(new FocusManager(this.getElementView(), 'horizontal', false, false));
-    super.getFocusManager()
-      .enableKeyNavigation();
 
     this.#burgerButton = new BurgerMenuButton();
     this.setStaticChild('burgerButton', this.#burgerButton);
@@ -29,7 +27,7 @@ class Menu extends Composite {
   /** @override */
   addChild(element) {
     super.getFocusManager()
-      .addFocusable(element);
+      .addComponent(element);
 
     // Ajout du décorateur de l'élément du menu
     const decorator = new MenuElement(element);
@@ -49,6 +47,8 @@ class Menu extends Composite {
         .isCurrentFocused()) {
         this.#burgerButton.giveFocus();
       }
+      super.getFocusManager()
+        .disableKeyNavigation();
       return;
     }
     this.#burgerButton.setHidden();
@@ -57,17 +57,23 @@ class Menu extends Composite {
       super.getFocusManager()
         .giveFocus();
     }
+    super.getFocusManager()
+      .enableKeyNavigation();
   }
 
-  onMenuShowHide(open) {
-    if (open) {
+  onMenuShowHide(state) {
+    if (state === 'open') {
       this.#burgerButton.setTabIndex(-1);
       super.getFocusManager()
         .giveFocus();
-    } else {
-      this.#burgerButton.setTabIndex(0);
-      this.#burgerButton.giveFocus();
+      super.getFocusManager()
+        .enableKeyNavigation();
+      return;
     }
+    this.#burgerButton.setTabIndex(0);
+    this.#burgerButton.giveFocus();
+    super.getFocusManager()
+      .disableKeyNavigation();
   }
 
 }

@@ -1,9 +1,14 @@
-import DOMUtilities from '../tools/DOMUtilities.js';
 import FocusManager from './FocusManager.js';
 
+/**
+ * Navigation via les touches Tab. Un composant enfant peut contenir un autre système de navigation qui devra être avec les flèches.
+ * Ainsi, le système TabFocusManager écoutera toujours la touche Tab en même temps que le focusManager enfant écoutera les flèches
+ */
 class TabFocusManager extends FocusManager {
 
-  #onlyTab = false;
+  name = 'TabFocusManager';
+
+  #navigateInChild = false;
 
   /**
    * @constructor
@@ -14,34 +19,27 @@ class TabFocusManager extends FocusManager {
   constructor(container, orientation, enterToAccess) {
     super(container, orientation, true, enterToAccess);
   }
+  /*
+   * Entrée et sortie d'un système de navigation par les touches Entrée/Escape
+   * -------------------------------------------------------------------------
+   */
+  exit() {
+    // Sortie avec Escape
+    super.exit();
+
+    if (this.#navigateInChild) {
+      const focusManager = this.getChildFocusManager();
+      focusManager.disableKeyNavigation();
+    }
+  }
 
   /*
-   * Navigation au clavier
-   * ---------------------
+   * Prise de focus et positionnement du courant
+   * ---------------------------------------------------
    */
-  interceptKeys() {
-    if (DOMUtilities.isHidden(this.getCurrentElement())) {
-      return [];
-    }
-    const keys = ['Tab'];
-    if (super.canExit()) {
-      keys.push('Escape');
-    }
-    if (this.#onlyTab) {
-      return keys;
-    }
-    keys.push('Home');
-    keys.push('End');
-    return keys;
-  }
+  setCurrent(component) {
+    super.setCurrent(component);
 
-  onKeyTab(event) {
-    this.#exitWithTab();
-    this.focusToDirection(event.shiftKey ? 'Up' : 'Down');
-    this.#enterWithTab();
-  }
-
-  #enterWithTab() {
     if (!this.getChildFocusManager()) {
       return;
     }
@@ -49,27 +47,34 @@ class TabFocusManager extends FocusManager {
     const focusManager = this.getChildFocusManager();
     focusManager.enableKeyNavigation();
     focusManager.giveFocus();
-    this.#onlyTab = true;
+    this.#navigateInChild = true;
   }
-
-  #exitWithTab() {
-    if (!this.#onlyTab) {
-      return;
-    }
-    // Si le composant que l'on quitte gère la navigation, on la désactive et on écoute à nouveau toutes les touches de navigation
-    const focusManager = this.getChildFocusManager();
-    focusManager.disableKeyNavigation();
-    this.#onlyTab = false;
-  }
-
-  exit() {
-    // Sortie avec Escape
-    super.exit();
-
-    if (this.#onlyTab) {
+  removeCurrent() {
+    if (this.#navigateInChild) {
+      // Si le composant que l'on quitte gère la navigation, on la désactive et on écoute à nouveau toutes les touches de navigation
       const focusManager = this.getChildFocusManager();
       focusManager.disableKeyNavigation();
+      this.#navigateInChild = false;
     }
+
+    super.removeCurrent();
+  }
+
+  /*
+   * Navigation au clavier
+   * ---------------------
+   */
+  interceptKeys() {
+    const keys = ['Tab'];
+    if (super.canExit()) {
+      keys.push('Escape');
+    }
+    if (this.#navigateInChild) {
+      return keys;
+    }
+    keys.push('Home');
+    keys.push('End');
+    return keys;
   }
 
   /*
@@ -82,7 +87,7 @@ class TabFocusManager extends FocusManager {
   enableKeyNavigation() {
     super.enableKeyNavigation();
 
-    if (this.#onlyTab) {
+    if (this.#navigateInChild) {
       const focusManager = this.getChildFocusManager();
       focusManager.enableKeyNavigation();
     }

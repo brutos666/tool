@@ -27,6 +27,14 @@ class Item extends Component {
   #titleInput = null;
   /** @type {TextInput} */
   #textInput = null;
+  /** @type {Toolbar} */
+  #toolbar = null;
+  /** @type {ActionButton} */
+  #addAction = null;
+  /** @type {ActionButton} */
+  #deleteAction = null;
+  /** @type {ActionButton} */
+  #undoToDeleteAction = null;
 
   /**
    * @constructor de la classe Item
@@ -42,34 +50,35 @@ class Item extends Component {
 
     this.#doneCheckbox = new CheckBox({ id: 'done', label: 'Fait', role: 'checkbox', type: 'checkbox' });
     this.setStaticChild('done', this.#doneCheckbox);
-    focusManager.addFocusable(this.#doneCheckbox);
+    focusManager.addComponent(this.#doneCheckbox);
 
     this.#titleInput = new TextInput();
     this.setStaticChild('title', this.#titleInput);
-    focusManager.addFocusable(this.#titleInput);
+    focusManager.addComponent(this.#titleInput);
 
     this.#textInput = new TextInput();
     this.setStaticChild('text', this.#textInput);
-    focusManager.addFocusable(this.#textInput);
+    focusManager.addComponent(this.#textInput);
 
     const rights = data.rights;
     if (rights.includes(RIGHT.create) || rights.includes(RIGHT.delete)) {
-      const toolbar = new Toolbar();
+      this.#toolbar = new Toolbar();
       if (rights.includes(RIGHT.create)) {
-        const addAction = new ActionButton({ id: 'addNewChild', label: 'Ajouter un item', icon: '+', role: 'button', type: 'icon' });
-        addAction.setDoActionCallback(this.doAdd.bind(this, 'Nouvel item'));
-        toolbar.addChild(addAction);
+        this.#addAction = new ActionButton({ id: 'addNewChild', label: 'Ajouter un item', icon: '+', role: 'button', type: 'icon' });
+        this.#addAction.setDoActionCallback(this.doAdd.bind(this, 'Nouvel item'));
+        this.#toolbar.addChild(this.#addAction);
       }
       if (rights.includes(RIGHT.delete)) {
-        const deleteAction = new ActionButton({ id: 'markToDelete', label: 'Marquer à supprimer', icon: '-', role: 'button', type: 'icon' });
-        deleteAction.setDoActionCallback(this.markToDelete.bind(this));
-        const undoToDeleteAction = new ActionButton({ id: 'undoToDelete', label: 'Annuler la suppression', icon: '+', role: 'button', type: 'icon' });
-        undoToDeleteAction.setDoActionCallback(this.undoToDelete.bind(this));
-        toolbar.addChild(deleteAction);
-        toolbar.addChild(undoToDeleteAction);
+        this.#deleteAction = new ActionButton({ id: 'markToDelete', label: 'Marquer à supprimer', icon: '-', role: 'button', type: 'icon' });
+        this.#deleteAction.setDoActionCallback(this.markToDelete.bind(this));
+        this.#undoToDeleteAction = new ActionButton({ id: 'undoToDelete', label: 'Annuler la suppression', icon: '+', role: 'button', type: 'icon' });
+        this.#undoToDeleteAction.setDoActionCallback(this.undoToDelete.bind(this));
+        this.#undoToDeleteAction.setHidden();
+        this.#toolbar.addChild(this.#deleteAction);
+        this.#toolbar.addChild(this.#undoToDeleteAction);
       }
-      this.setStaticChild('toolbar', toolbar);
-      focusManager.addFocusable(toolbar);
+      this.setStaticChild('toolbar', this.#toolbar);
+      focusManager.addComponent(this.#toolbar);
     }
 
     if (rights.includes(RIGHT.update)) {
@@ -193,28 +202,59 @@ class Item extends Component {
   }
 
   setToDelete() {
-    // NOTE : Ne pas rendre la toolbar inaccessible car elle est utile même si l'item est supprimé
-    this.setDisabled();
+    /*
+     * NOTE : Ne pas rendre la toolbar inaccessible car elle est utile même si l'item est supprimé
+     */
+    this.#doneCheckbox.setDisabled();
+    this.#titleInput.setDisabled();
+    this.#textInput.setDisabled();
+    if (this.#toolbar) {
+      // Cacher tous les enfants dont le bouton de drag&drop sauf l'annulation de suppression
+      this.#toolbar.getChildren()
+        .forEach(btn => {
+          if (btn === this.#undoToDeleteAction) {
+            this.#undoToDeleteAction.setVisible();
+          } else {
+            btn.setHidden();
+          }
+        });
+      this.#toolbar.getFocusManager()
+        .refreshCurrent();
+    }
+    this.getFocusManager()
+      .refreshCurrent();
 
     this.getView()
       .setToDelete();
   }
 
   setUndoToDelete() {
-    this.setEnabled();
+    // NOTE : Ne pas rendre la toolbar inaccessible car elle est utile même si l'item est supprimé (donc pas de super.setDisabled())
+    this.#doneCheckbox.setEnabled();
+    this.#titleInput.setEnabled();
+    this.#textInput.setEnabled();
+    if (this.#toolbar) {
+      // Afficher tous les enfants dont le bouton de drag&drop sauf l'annulation de suppression
+      this.#toolbar.getChildren()
+        .forEach(btn => {
+          if (btn === this.#undoToDeleteAction) {
+            this.#undoToDeleteAction.setHidden();
+          } else {
+            btn.setVisible();
+          }
+        });
+      this.#toolbar.getFocusManager()
+        .refreshCurrent();
+    }
     if (this.#readOnly) {
       this.setReadOnly();
     }
+
+    this.getFocusManager()
+      .refreshCurrent();
+
     this.getView()
       .undoToDelete();
-  }
-
-  /** @override */
-  setDisabled() {
-    // NOTE : Ne pas rendre la toolbar inaccessible car elle est utile même si l'item est supprimé (donc pas de super.setDisabled())
-    this.#doneCheckbox.setDisabled();
-    this.#titleInput.setDisabled();
-    this.#textInput.setDisabled();
   }
 
   setReadOnly() {

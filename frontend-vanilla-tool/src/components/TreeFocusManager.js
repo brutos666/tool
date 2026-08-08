@@ -5,6 +5,8 @@ import FocusManager from './FocusManager.js';
 
 class TreeFocusManager extends FocusManager {
 
+  name = 'TreeFocusManager';
+
   /**
    * @constructor
    * @param {HTMLElement} container : conteneur des listes d'arbre
@@ -24,45 +26,84 @@ class TreeFocusManager extends FocusManager {
   }
 
   /*
+   * Prise de focus
+   * ---------------------------------------------------
+   */
+  giveFocusToFirst() {
+    const rootFocusManager = this.getRootFocusManager();
+    this.giveControlToFocusManager(rootFocusManager);
+    rootFocusManager.giveFocusToFirstNode();
+  }
+  giveFocusToLast() {
+    const rootFocusManager = this.getRootFocusManager();
+    this.giveControlToFocusManager(rootFocusManager);
+    rootFocusManager.giveFocusToLastLeaf();
+  }
+
+  giveFocusToFirstNode() {
+    const firstFocusable = this.getFirstFocusable();
+    if (!firstFocusable) {
+      return;
+    }
+    this.setCurrent(firstFocusable);
+    this.giveFocus();
+  }
+  /**
+   * Parcours la totalité de l'arbre pour donner le focus au dernier élément de l'arbre
+   */
+  giveFocusToLastLeaf() {
+    const lastFocusable = this.getLastFocusable();
+    if (!lastFocusable) {
+      return;
+    }
+    this.setCurrent(lastFocusable);
+    const childFocusManager = this.giveControlToChild(this.getCurrent());
+    if (childFocusManager) {
+      childFocusManager.giveFocusToLastLeaf();
+    } else {
+      // Si, pour le noeud courant, rien est accessible, on se positionne sur le noeud courant
+      this.giveFocus();
+    }
+  }
+
+  giveFocusToPrevTree() {
+    const rootFocusManager = this.getRootFocusManager();
+    if (!rootFocusManager.isHorizontal()) {
+      return;
+    }
+    const indexCurrent = rootFocusManager.getIndexCurrent();
+    const nextFocusable = rootFocusManager.getLastFocusableBefore(indexCurrent);
+    if (!nextFocusable) {
+      return;
+    }
+    this.giveControlToFocusManager(rootFocusManager);
+    // Se positionner sur le premier accessible après le noeud courant
+    rootFocusManager.setCurrent(nextFocusable);
+    rootFocusManager.giveFocus();
+  }
+  giveFocusToNextTree() {
+    const rootFocusManager = this.getRootFocusManager();
+    if (!rootFocusManager.isHorizontal()) {
+      return;
+    }
+    const indexCurrent = rootFocusManager.getIndexCurrent();
+    const nextFocusable = rootFocusManager.getFirstFocusableAfter(indexCurrent);
+    if (!nextFocusable) {
+      return;
+    }
+    this.giveControlToFocusManager(rootFocusManager);
+    // Se positionner sur le premier accessible après le noeud courant
+    rootFocusManager.setCurrent(nextFocusable);
+    rootFocusManager.giveFocus();
+  }
+  /*
    * Vues et élément pouvant prendre le focus par les touches du clavier ou un clic de la souris
    * -------------------------------------------------------------------------------------------
    */
-  removeAllFocusable() {
+  removeAllComponents() {
     this.giveControlToFocusManager(this.getRootFocusManager());
 
-    super.removeAllFocusable();
-  }
-
-  /*
-   * Prise de focus
-   * ---------------
-   */
-  giveFocusTo(tree) {
-    this.setCurrentWithIndex(this.getFocusableComponents()
-      .indexOf(tree));
-    super.giveFocus();
-  }
-  giveFocusToLast() {
-    this.setCurrentWithIndex(this.getFocusableComponents().length - 1);
-    super.giveFocus();
-  }
-  giveFocusToFirst() {
-    this.setCurrentWithIndex(0);
-    super.giveFocus();
-  }
-  giveFocusToNext() {
-    const index = this.getIndexCurrent() + 1;
-    if (index < this.getFocusableComponents().length) {
-      this.setCurrentWithIndex(index);
-      super.giveFocus();
-    }
-  }
-  giveFocusToPrev() {
-    const index = this.getIndexCurrent() - 1;
-    if (index > -1) {
-      this.setCurrentWithIndex(index);
-      super.giveFocus();
-    }
+    super.removeAllComponents();
   }
 
   /*
@@ -70,9 +111,6 @@ class TreeFocusManager extends FocusManager {
    * ---------------------
    */
   interceptKeys() {
-    if (DOMUtilities.isHidden(this.getCurrentElement())) {
-      return [];
-    }
     const keys = [ 'Home', 'End', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown' ];
     if (super.canEnter()) {
       keys.push('Enter');
@@ -105,22 +143,17 @@ class TreeFocusManager extends FocusManager {
 
     if (current.isClosed()) {
       current.setOpen(true);
-    } else if (current.isLeaf()) {
-      // Pour une navigation verticale, la possibilité d'aller à droite peut être donné par la racine à condition que cette dernière est une navigation horizontale
-      if (this.isHorizontal()) {
-        super.focusToDirection('Right');
-      } else {
-        const rootFocusManager = this.getRootFocusManager();
-        if (rootFocusManager?.isHorizontal()) {
-          this.giveControlToFocusManager(rootFocusManager);
-          rootFocusManager.giveFocusToNext();
-        }
-      }
-    } else if (current.isOpened()) {
-      // Donne la gestion du focus sur la liste des arbres/feuilles enfants du noeud
-      const childFocusManager = this.giveControlToChild(current);
-      childFocusManager.giveFocusToFirst();
+      return;
     }
+    // S'il y a des éléments enfants accessibles, on se positionne sur le 1er accessible
+    const childFocusManager = this.giveControlToChild(current);
+    if (childFocusManager) {
+      childFocusManager.giveFocusToFirstNode();
+      return;
+    }
+
+    // Pour une navigation verticale, la possibilité d'aller à droite peut être donné par la racine à condition que cette dernière soit une navigation horizontale
+    this.giveFocusToNextTree();
   }
 
   /**
@@ -138,75 +171,70 @@ class TreeFocusManager extends FocusManager {
 
     if (current.isOpened()) {
       current.setOpen(false);
-    } else if (this.hasParentTree()) {
+      return;
+    }
+    if (this.hasParentTree()) {
       const parentFocusManager = this.giveControlToParentTree();
       parentFocusManager.giveFocus();
-    } else {
-      super.focusToDirection('Left');
+      return;
     }
+    // Pour une navigation verticale, la possibilité d'aller à gauche peut être donné par la racine à condition que cette dernière soit une navigation horizontale
+    this.giveFocusToPrevTree();
   }
 
   reactToDown() {
     /**  @type {Tree} */
     const current = this.getCurrent();
-    // Si le noeud courant est ouvert, on doit aller au 1er enfant
-    if (current.isOpened()) {
-      const childFocusManager = this.giveControlToChild(current);
-      childFocusManager.giveFocusToFirst();
+    const childFocusManager = this.giveControlToChild(current);
+    if (childFocusManager) {
+      // Se positionner sur le 1er accessible à l'intérieur du noeud courant
+      childFocusManager.giveFocusToFirstNode();
       return;
     }
-    // Si on est sur le dernier élément de la liste, on doit donner le contrôle au parent
     const indexCurrent = this.getIndexCurrent();
-    if (indexCurrent === this.getFocusableComponents().length - 1 && this.hasParentTree()) {
-      const parentFocusManager = this.giveControlToParentTree();
-      parentFocusManager.giveFocus();
-      parentFocusManager.moveVertically('Down');
+    const nextFocusable = this.getFirstFocusableAfter(indexCurrent);
+    if (nextFocusable) {
+      // Se positionner sur le premier accessible après le noeud courant
+      this.setCurrent(nextFocusable);
+      this.giveFocus();
       return;
     }
-    super.focusToDirection('Down');
+
+    // Si on est sur le dernier élément accessible de la liste, on doit donner le contrôle au parent
+    if (!this.hasParentTree()) {
+      return;
+    }
+    // Se positionner sur le parent du noeud courant puis sur le 1er suivant accessible
+    const parentFocusManager = this.getParentTreeFocusManager();
+    const nextParentFocusable = parentFocusManager.getFirstFocusableAfter(parentFocusManager.getIndexCurrent());
+    if (!nextParentFocusable) {
+      return;
+    }
+    // Se positionner sur le premier accessible après le noeud courant
+    this.giveControlToFocusManager(parentFocusManager);
+    parentFocusManager.setCurrent(nextParentFocusable);
+    parentFocusManager.giveFocus();
   }
 
   reactToUp() {
-    // Si on est sur le dernier élément de la liste, on doit donner le contrôle au parent
     const indexCurrent = this.getIndexCurrent();
-    if (indexCurrent === 0 && this.hasParentTree()) {
+    const lastFocusableBefore = this.getLastFocusableBefore(indexCurrent);
+    if (lastFocusableBefore) {
+      this.setCurrent(lastFocusableBefore);
+      const childFocusManager = this.giveControlToChild(this.getCurrent());
+      if (childFocusManager) {
+        childFocusManager.giveFocusToLastLeaf();
+      } else {
+        // Si, pour le noeud courant, rien est accessible, on se positionne sur le noeud courant
+        this.giveFocus();
+      }
+      return;
+    }
+    // Si on est sur le dernier élément de la liste, on doit donner le contrôle au parent
+    if (this.hasParentTree()) {
       const parentFocusManager = this.giveControlToParentTree();
       parentFocusManager.giveFocus();
-      return;
     }
-
-    super.focusToDirection('Up');
-
-    /**  @type {Tree} */
-    const current = this.getCurrent();
-    // Si le nouveau noeud courant est ouvert, on doit aller au dernier enfant
-    if (!current.isOpened()) {
-      return;
-    }
-
-    const childFocusManager = this.giveControlToChild(current);
-    childFocusManager.giveFocusToLast();
-  }
-
-  /**
-   * Le déplacement verticale est un déplacement proche en proche qui prend en compte les noeuds ouverts.
-   * Il faut s'appliquer à trouver le bon focusManager qui prend la main lorsque l'on quitte la liste courante
-   * @param {'Up'|'Down'} direction
-   */
-  moveVertically(direction) {
-    if (!this.hasParentTree()) {
-      super.focusToDirection(direction);
-      return;
-    }
-    const indexCurrent = this.getIndexCurrent() + (direction === 'Up' ? -1 : 1);
-    if (indexCurrent >= 0 && indexCurrent < this.getFocusableComponents().length) {
-      super.focusToDirection(direction);
-      return;
-    }
-    // Dans tous les cas, la liste parente doit reprendre le contrôle
-    const parentFocusManager = this.giveControlToParentTree();
-    parentFocusManager.giveFocus();
-    parentFocusManager.focusToDirection(direction);
   }
 
   /*
@@ -216,12 +244,12 @@ class TreeFocusManager extends FocusManager {
   disableNavigationForAll() {
     this.disableKeyNavigation();
 
-    if (DOMUtilities.isHidden(this.getContainer()) || this.getFocusableComponents().length === 0) {
-      return;
-    }
-
     /**  @type {Tree} */
     const current = this.getCurrent();
+
+    if (DOMUtilities.isHidden(this.getContainer()) || this.getAllComponents().length === 0 || !current) {
+      return;
+    }
     // Element de l'arbre
     let childFocusManager = current.getFocusManager();
     childFocusManager?.disableNavigationForAll();
@@ -238,15 +266,17 @@ class TreeFocusManager extends FocusManager {
    * ---------------------------------------------------
    */
   /**
-   * Donne le contrôle au focusManager enfant d'une vue
+   * Donne le contrôle au focusManager enfant d'une vue à condition qu'il y ait des composants pouvant prendre le focus
    * @param {Tree} component : vue ayant le focus
-   * @returns {TreeFocusManager} focusManager enfant
+   * @returns {TreeFocusManager} focusManager enfant ou null si pas de composants pouvant avoir le focus
    */
   giveControlToChild(component) {
     const childFocusManager = component.getStaticChild('treeList')
       .getFocusManager();
+    if (!childFocusManager.getFirstFocusable()) {
+      return null;
+    }
     this.giveControlToFocusManager(childFocusManager);
-    childFocusManager.giveFocus();
     return childFocusManager;
   }
 

@@ -100,7 +100,7 @@ class NodeElement {
   }
 
   giveFocus() {
-    if (this.#focusManager) {
+    if (this.#focusManager?.hasFocusable()) {
       this.getFocusManager()
         .giveFocus();
     } else {
@@ -166,6 +166,10 @@ class NodeElement {
   setHidden() {
     this.getView()
       .setHidden();
+  }
+  isHidden() {
+    return this.getView()
+      .isHidden();
   }
 
   setVisible() {

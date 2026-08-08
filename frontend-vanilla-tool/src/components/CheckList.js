@@ -57,28 +57,29 @@ class CheckList extends Items {
   addItemView(itemComponent) {
     super.addItemView(itemComponent);
     super.getFocusManager()
-      .addFocusable(itemComponent.getDecoratedElementByName('Tree'));
+      .addComponent(itemComponent.getDecoratedElementByName('Tree'));
   }
 
   /** @override */
   addItemViewAt(itemComponent, index) {
     super.addItemViewAt(itemComponent, index);
     super.getFocusManager()
-      .addFocusable(itemComponent.getDecoratedElementByName('Tree'));
+      .addComponent(itemComponent.getDecoratedElementByName('Tree'));
   }
 
   /** @override */
   removeItemView(index) {
-    super.removeItemView(index);
+    // NOTE : avertir le focusManager avant la suppression effective pour donner le focus à un autre élément que si le focus était dans la vue supprimée
     super.getFocusManager()
-      .removeFocusable(index);
+      .removeComponent(index);
+    super.removeItemView(index);
   }
 
   /** @override */
   removeAllItemsViews() {
-    super.removeAllItemsViews();
     super.getFocusManager()
-      .removeAllFocusable();
+      .removeAllComponents();
+    super.removeAllItemsViews();
   }
 
   /** @override */
