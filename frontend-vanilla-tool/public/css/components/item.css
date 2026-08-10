@@ -191,3 +191,8 @@
   display: none;
 }
 
+/* Encadrer le noeud de l'arbre dont un enfant a le focus ou du drag&drop */
+.item:has(*:focus) {
+  outline: 1px solid var(--color-border-focus);
+}
+

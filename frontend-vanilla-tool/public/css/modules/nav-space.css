@@ -40,10 +40,9 @@
   flex: 1;
 }
 
-/* Encadrer la navigation si un element de la navigation a le focus */
-.nav-tree__content:has(> .focus-manager--decorator > .placeholder),
-.nav-tree__content:has(> .focus-manager--decorator > .tree > .tree__item > .tree__content:focus),
-.nav-tree__content:has(> .list__element > .item-like-button:focus) {
+/* Encadrer la navigation si un element de la navigation a le focus ou du drag&drop  */
+.nav-tree__content:has(.drag-over),
+.nav-tree__content:has(*:focus) {
   outline: 1px solid var(--color-border-focus);
 }
 

@@ -72,9 +72,10 @@
   border-left: none;
   outline: none;
 }
-/* Encadrer le noeud de l'arbre dont un enfant a le focus */
-.tree:has(> .tree__item > .tree__list > .focus-manager--decorator > .placeholder),
-.tree:has(> .tree__item > .tree__list > .focus-manager--decorator > .tree > .tree__item > .tree__content:focus) {
+/* Encadrer le noeud de l'arbre dont un enfant a le focus ou du drag&drop
+.tree:has(> .tree__item > .tree__list > .drag-drop--decorator > .drag-over),
+.tree:has(> .tree__item > .tree__list > .drag-drop--decorator > .tree:focus) {
   outline: 1px solid var(--color-border-focus);
 }
+*/
 

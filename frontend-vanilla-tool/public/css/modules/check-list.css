@@ -47,10 +47,9 @@
   min-height: 40px;
 }
 
-/* Encadrer la check-list si un element de la check-list a le focus */
-.check-list__space > .items__space:has(> .focus-manager--decorator > .placeholder),
-.check-list__space > .items__space:has(> .focus-manager--decorator > .tree > .tree__item > .tree__content:focus),
-.check-list__space > .items__space:has(> .list__element > .item-like-button:focus) {
+/* Encadrer la check-list si un element de la check-list a le focus ou du drag&drop */
+.check-list__space > .items__space:has(.drag-over),
+.check-list__space > .items__space:has(*:focus) {
   outline: 1px solid var(--color-border-focus);
 }
 .check-list:has(> .check-list__header .item:focus) {
