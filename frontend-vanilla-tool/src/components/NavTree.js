@@ -10,6 +10,9 @@ import NavTreeView from './views/NavTreeView.js';
 class NavTree extends Component {
 
   name = 'NavTree';
+
+  #currentTree = null;
+
   constructor() {
     super(new NavTreeView());
 
@@ -21,7 +24,28 @@ class NavTree extends Component {
 
     /** @type {TreeFocusManager} */
     const treeFocusManager = items.getFocusManager();
-    treeFocusManager.mustPilotCurrentTree();
+    treeFocusManager.setCallbackBeforeEnter(this.onEnterIn.bind(this));
+  }
+
+  getCurrentTree() {
+    return this.#currentTree;
+  }
+  setCurrentTree(currentTree) {
+    this.#currentTree?.removeCurrent();
+    this.#currentTree = currentTree;
+    currentTree.setCurrent();
+  }
+  /**
+   * Lorsque l'utilisateur entre dans le composant avec la touche Entrée ou la souris
+   * @param {Component} component
+   * @returns true l'entrée dans le composant doit se faire, false si elle ne doit pas se faire
+   */
+  onEnterIn(component) {
+    if (component.getName() !== 'Tree' || component.isCurrent()) {
+      return true;
+    }
+    this.setCurrentTree(component);
+    return false;
   }
 
 }

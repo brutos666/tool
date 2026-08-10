@@ -17,10 +17,10 @@ class TreeFocusManager extends FocusManager {
     super(container, orientation, false, enterToAccess);
   }
 
-  hasParentTree() {
+  hasFocusableParent() {
     const parent = this.getParentComponent();
     if (parent instanceof Tree) {
-      return parent;
+      return parent.getParent();
     }
     return false;
   }
@@ -173,7 +173,7 @@ class TreeFocusManager extends FocusManager {
       current.setOpen(false);
       return;
     }
-    if (this.hasParentTree()) {
+    if (this.hasFocusableParent()) {
       const parentFocusManager = this.giveControlToParentTree();
       parentFocusManager.giveFocus();
       return;
@@ -201,7 +201,7 @@ class TreeFocusManager extends FocusManager {
     }
 
     // Si on est sur le dernier élément accessible de la liste, on doit donner le contrôle au parent
-    if (!this.hasParentTree()) {
+    if (!this.hasFocusableParent()) {
       return;
     }
     // Se positionner sur le parent du noeud courant puis sur le 1er suivant accessible
@@ -231,7 +231,7 @@ class TreeFocusManager extends FocusManager {
       return;
     }
     // Si on est sur le dernier élément de la liste, on doit donner le contrôle au parent
-    if (this.hasParentTree()) {
+    if (this.hasFocusableParent()) {
       const parentFocusManager = this.giveControlToParentTree();
       parentFocusManager.giveFocus();
     }
@@ -285,7 +285,7 @@ class TreeFocusManager extends FocusManager {
    * @returns {TreeFocusManager} focusManager parent
    */
   getParentTreeFocusManager() {
-    if (!this.hasParentTree()) {
+    if (!this.hasFocusableParent()) {
       return null;
     }
     return this.getParentComponent()
