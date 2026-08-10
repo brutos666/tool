@@ -4,6 +4,8 @@ import AddItemButton from './AddItemButton.js';
 import Component from './Component.js';
 import TreeList from './TreeList.js';
 import NavTreeView from './views/NavTreeView.js';
+/** @import TreeFocusManager from './TreeFocusManager.js'; */
+/** @import Tree from './decorators/Tree.js'; */
 
 class NavTree extends Component {
 
@@ -15,8 +17,11 @@ class NavTree extends Component {
     const addButton = new AddItemButton({ id: 'addNewItem', label: 'Ajouter un espace', layout: ITEM_LAYOUT.Title });
     addButton.setDoActionCallback(items.addNewItem.bind(items, 'Saisir un espace'));
     items.setStaticChild('addItemAction', addButton);
-
     this.setStaticChild('treeItems', items);
+
+    /** @type {TreeFocusManager} */
+    const treeFocusManager = items.getFocusManager();
+    treeFocusManager.mustPilotCurrentTree();
   }
 
 }

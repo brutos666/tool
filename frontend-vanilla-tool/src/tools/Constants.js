@@ -53,6 +53,12 @@ const ITEM_LAYOUT = {
   isPostIt(layout) {
     return [ ITEM_LAYOUT.PostIt, ITEM_LAYOUT.Story, ITEM_LAYOUT.Rules, ITEM_LAYOUT.Sample, ITEM_LAYOUT.Question ].includes(layout);
   },
+  hasDone(layout) {
+    return ITEM_LAYOUT.isPostIt(layout) || [ITEM_LAYOUT.Todo].includes(layout);
+  },
+  hasText(layout) {
+    return ITEM_LAYOUT.isPostIt(layout);
+  },
   getRights(layout) {
     if (ITEM_LAYOUT.isPostIt(layout)) {
       if (layout === ITEM_LAYOUT.Story) {

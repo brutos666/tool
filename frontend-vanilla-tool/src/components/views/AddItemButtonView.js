@@ -5,8 +5,6 @@ class AddItemButtonView extends ActionView {
 
   name = 'AddItemButtonView';
 
-  #onFocusCallback = () => {};
-
   /**
    * @param {Object} data - Données à utiliser pour créer la vue
    * @param {string} data.id - Identifiant du bouton
@@ -19,18 +17,6 @@ class AddItemButtonView extends ActionView {
     this.getElementView().classList.add(getClassForViewChoice(data.layout));
 
     this.setTabIndex(0);
-
-    this.getElementView()
-      .addEventListener('focus', this.onFocus.bind(this), true);
-  }
-  setOnFocusCallback(onFocusCallback) {
-    this.#onFocusCallback = onFocusCallback;
-  }
-  onFocus(event) {
-    if (event.relatedTarget === null || (!this.getElementView()
-      .contains(event.relatedTarget))) {
-      this.#onFocusCallback();
-    }
   }
 
 }

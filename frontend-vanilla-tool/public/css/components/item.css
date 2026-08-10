@@ -53,12 +53,6 @@
   color: var(--status-color);
 }
 
-/* -- Affichage item avec que le titre */
-.item--title .item__checkbox,
-.item--title .item__text {
-  display: none;
-}
-
 /* -- Affichage item comme un post-it -- */
 /* Aspect général */
 .item--post-it {
@@ -184,11 +178,6 @@
   .item--post-it .item__text {
     display: none;
   }
-}
-
-/* -- Affichage comme un todo -- */
-.item--todo .item__text {
-  display: none;
 }
 
 /* Encadrer le noeud de l'arbre dont un enfant a le focus ou du drag&drop */

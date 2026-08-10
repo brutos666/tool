@@ -10,8 +10,6 @@ class ItemView extends View {
   #currentStatusClass;
   #currentCRUDModeClass;
 
-  #onFocusCallback = () => {};
-
   /**
    * @param {Object} data - Données à utiliser pour créer la vue
    * @param {TreeItem} data.treeItem - Informations sur la tache
@@ -20,9 +18,6 @@ class ItemView extends View {
    */
   constructor(data) {
     super(data);
-    this.getElementView()
-      .addEventListener('focus', this.onFocus.bind(this), true);
-
     this.viewAdded(data);
   }
 
@@ -74,20 +69,6 @@ class ItemView extends View {
   refreshView(data) {
     super.refreshView(data);
     this.viewAdded(data);
-  }
-
-  setOnFocusCallback(onFocusCallback) {
-    this.#onFocusCallback = onFocusCallback;
-  }
-  onFocus(event) {
-    // Exclure les boutons de la barre d'outils de la prise de focus
-    if (event.target.closest('.toolbar')) {
-      return;
-    }
-    if (event.relatedTarget === null || (!this.getElementView()
-      .contains(event.relatedTarget))) {
-      this.#onFocusCallback();
-    }
   }
 
   /**

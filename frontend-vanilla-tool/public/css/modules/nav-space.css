@@ -34,10 +34,10 @@
 }
 .nav-tree__content .list__element {
   display: flex;
-  min-height: 40px;
 }
 .nav-tree__content .list__element > .item-like-button {
   flex: 1;
+  min-height: 40px;
 }
 
 /* Encadrer la navigation si un element de la navigation a le focus ou du drag&drop  */

@@ -1,3 +1,4 @@
+import StoreData from '../data/StoreData.js';
 import DOMUtilities from '../tools/DOMUtilities.js';
 import TabFocusManager from './TabFocusManager.js';
 /** @import Component from './Component.js'; */
@@ -42,6 +43,10 @@ class FocusManager {
   #canTab = false;
   #enterToAccess = false;
   #isInside = false;
+
+  // Lorsque le système de navigation pilote le courant, il s'occupe de l'affichage de la vue courante à droite lors de l'appui sur la touche en entrée ou du click dans un arbre
+  #pilotCurrent = false;
+  #currentTree = null;
 
   /**
    * @constructor
@@ -357,6 +362,7 @@ class FocusManager {
       const element = component.getElementView();
       if (element === target || element.contains(target)) {
         this.setCurrent(component);
+        this.pilotCurrentTree();
         break;
       }
     }
@@ -435,6 +441,11 @@ class FocusManager {
    * @param {Event} event - Event de clavier
    */
   #onKeyDown(event) {
+    const dragDropMode = StoreData.getDragDropCenter()
+      .isDragDropMode();
+    if (dragDropMode) {
+      return;
+    }
     if (!this.getCurrent()) {
       return;
     }
@@ -458,7 +469,11 @@ class FocusManager {
   }
   /** Entrée et sortie dans un autre système de navigation **/
   #onKeyEnter() {
-    this.#enter();
+    // Si la touche Entrée s'est occupé de rendre la vue courante, on ne rentre pas dans le composant
+    const enterPilotCurrent = this.pilotCurrentTree();
+    if (!enterPilotCurrent) {
+      this.#enter();
+    }
   }
   #onKeyEscape() {
     this.exit();
@@ -562,6 +577,43 @@ class FocusManager {
       return parent.getRootFocusManager();
     }
     return this;
+  }
+
+  /*
+   * Pilote de la vue courante affichée à droite
+   * ---------------------------------------------------
+   */
+  /**
+   * Indique que la vue courante affichée à droite est pilotée par ce système de navigation (via la touche entrée)
+   */
+  mustPilotCurrentTree() {
+    this.#pilotCurrent = true;
+  }
+  isPilotCurrentTree() {
+    const parentFocusManager = this.getParentFocusManager();
+    if (parentFocusManager) {
+      return parentFocusManager.isPilotCurrentTree();
+    }
+    return this.#pilotCurrent;
+  }
+  pilotCurrentTree() {
+    const tree = this.getCurrent();
+    if (tree.getName() !== 'Tree' || tree.isCurrent() || !this.isPilotCurrentTree()) {
+      return false;
+    }
+
+    const rootFocusManager = this.getRootFocusManager();
+    rootFocusManager.getCurrentTree()
+      ?.removeCurrent();
+    rootFocusManager.setCurrentTree(tree);
+    return true;
+  }
+  getCurrentTree() {
+    return this.#currentTree;
+  }
+  setCurrentTree(currentTree) {
+    this.#currentTree = currentTree;
+    currentTree.setCurrent();
   }
 
 }

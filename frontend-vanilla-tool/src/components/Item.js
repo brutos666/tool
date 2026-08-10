@@ -1,6 +1,6 @@
 'use strict';
 
-import { RIGHT } from '../tools/Constants.js';
+import { ITEM_LAYOUT, RIGHT } from '../tools/Constants.js';
 import ActionButton from './ActionButton.js';
 import CheckBox from './CheckBox.js';
 import Component from './Component.js';
@@ -9,13 +9,12 @@ import TextInput from './TextInput.js';
 import Toolbar from './Toolbar.js';
 import ItemView from './views/ItemView.js';
 /** @import TreeItem from '../data/TreeItem.js' */
-/** @import { ITEM_LAYOUT } from '../tools/Constants.js' */
 /** @import Items from './Items.js' */
 
 class Item extends Component {
 
   name = 'Item';
-  static EVENTS = { focus: 'itemFocus', current: 'itemCurrent' };
+  static EVENTS = { current: 'itemCurrent' };
 
   /** @type {TreeItem} */
   #treeItem = null;
@@ -45,56 +44,91 @@ class Item extends Component {
    */
   constructor(data) {
     super(new ItemView(data));
+
     const focusManager = new TabFocusManager(this.getElementView(), 'horizontal', true);
     super.setFocusManager(focusManager);
 
-    this.#doneCheckbox = new CheckBox({ id: 'done', label: 'Fait', role: 'checkbox', type: 'checkbox' });
-    this.setStaticChild('done', this.#doneCheckbox);
-    focusManager.addComponent(this.#doneCheckbox);
+    const rights = data.rights;
+    const layout = data.layout;
+    const updateRight = rights.includes(RIGHT.update);
 
-    this.#titleInput = new TextInput();
+    this.#doneCheckbox = this.initDone(layout, updateRight);
+    if (this.#doneCheckbox) {
+      this.setStaticChild('done', this.#doneCheckbox);
+      focusManager.addComponent(this.#doneCheckbox);
+    }
+
+    this.#titleInput = this.initTitle();
     this.setStaticChild('title', this.#titleInput);
     focusManager.addComponent(this.#titleInput);
 
-    this.#textInput = new TextInput();
-    this.setStaticChild('text', this.#textInput);
-    focusManager.addComponent(this.#textInput);
+    this.#textInput = this.initText();
+    if (this.#textInput) {
+      this.setStaticChild('text', this.#textInput);
+      focusManager.addComponent(this.#textInput);
+    }
 
-    const rights = data.rights;
-    if (rights.includes(RIGHT.create) || rights.includes(RIGHT.delete)) {
-      this.#toolbar = new Toolbar();
-      if (rights.includes(RIGHT.create)) {
-        this.#addAction = new ActionButton({ id: 'addNewChild', label: 'Ajouter un item', icon: '+', role: 'button', type: 'icon' });
-        this.#addAction.setDoActionCallback(this.doAdd.bind(this, 'Nouvel item'));
-        this.#toolbar.addChild(this.#addAction);
-      }
-      if (rights.includes(RIGHT.delete)) {
-        this.#deleteAction = new ActionButton({ id: 'markToDelete', label: 'Marquer à supprimer', icon: '-', role: 'button', type: 'icon' });
-        this.#deleteAction.setDoActionCallback(this.markToDelete.bind(this));
-        this.#undoToDeleteAction = new ActionButton({ id: 'undoToDelete', label: 'Annuler la suppression', icon: '+', role: 'button', type: 'icon' });
-        this.#undoToDeleteAction.setDoActionCallback(this.undoToDelete.bind(this));
-        this.#undoToDeleteAction.setHidden();
-        this.#toolbar.addChild(this.#deleteAction);
-        this.#toolbar.addChild(this.#undoToDeleteAction);
-      }
+    this.#toolbar = this.initToolbar(rights);
+    if (this.#toolbar) {
       this.setStaticChild('toolbar', this.#toolbar);
       focusManager.addComponent(this.#toolbar);
     }
 
-    if (rights.includes(RIGHT.update)) {
-      this.#doneCheckbox.setToggleCallback(this.toggleDone.bind(this));
-      this.#titleInput.setOnChangeCallback(this.onChange.bind(this, this.#titleInput, 'title'));
-      this.#textInput.setOnChangeCallback(this.onChange.bind(this, this.#textInput, 'text'));
-    } else {
+    if (!updateRight) {
       this.setReadOnly();
     }
-    this.getView()
-      .setOnFocusCallback(() => {
-        this.getView()
-          .dispatchEvent(new CustomEvent(Item.EVENTS.focus, { bubbles: true, detail: this }));
-      });
-
     this.setTreeItem(data.treeItem);
+  }
+
+  initDone(layout, updateRight) {
+    if (!ITEM_LAYOUT.hasDone(layout)) {
+      return null;
+    }
+    const done = new CheckBox({ id: 'done', label: 'Fait', role: 'checkbox', type: 'checkbox' });
+    if (updateRight) {
+      done.setToggleCallback(this.toggleDone.bind(this));
+    }
+    return done;
+  }
+  initTitle(updateRight) {
+    const title = new TextInput();
+    if (updateRight) {
+      title.setOnChangeCallback(this.onChange.bind(this, this.#titleInput, 'title'));
+    }
+    return title;
+  }
+  initText(layout, updateRight) {
+    if (!ITEM_LAYOUT.hasText(layout)) {
+      return null;
+    }
+    const text = new TextInput();
+    if (updateRight) {
+      text.setOnChangeCallback(this.onChange.bind(this, this.#textInput, 'text'));
+    }
+    return text;
+  }
+  initToolbar(rights) {
+    const createRight = rights.includes(RIGHT.create);
+    const deleteRight = rights.includes(RIGHT.delete);
+    if (!createRight && !deleteRight) {
+      return null;
+    }
+    const toolbar = new Toolbar();
+    if (createRight) {
+      this.#addAction = new ActionButton({ id: 'addNewChild', label: 'Ajouter un item', icon: '+', role: 'button', type: 'icon' });
+      this.#addAction.setDoActionCallback(this.doAdd.bind(this, 'Nouvel item'));
+      toolbar.addChild(this.#addAction);
+    }
+    if (deleteRight) {
+      this.#deleteAction = new ActionButton({ id: 'markToDelete', label: 'Marquer à supprimer', icon: '-', role: 'button', type: 'icon' });
+      this.#deleteAction.setDoActionCallback(this.markToDelete.bind(this));
+      this.#undoToDeleteAction = new ActionButton({ id: 'undoToDelete', label: 'Annuler la suppression', icon: '+', role: 'button', type: 'icon' });
+      this.#undoToDeleteAction.setDoActionCallback(this.undoToDelete.bind(this));
+      this.#undoToDeleteAction.setHidden();
+      toolbar.addChild(this.#deleteAction);
+      toolbar.addChild(this.#undoToDeleteAction);
+    }
+    return toolbar;
   }
 
   setCurrent() {
@@ -195,19 +229,19 @@ class Item extends Component {
     this.getView()
       .setItemValues(itemInfos);
     if (itemInfos.state) {
-      this.#doneCheckbox.setChecked(itemInfos.state === 'DONE');
+      this.#doneCheckbox?.setChecked(itemInfos.state === 'DONE');
     }
     this.#titleInput.setValue(itemInfos.title);
-    this.#textInput.setValue(itemInfos.text);
+    this.#textInput?.setValue(itemInfos.text);
   }
 
   setToDelete() {
     /*
      * NOTE : Ne pas rendre la toolbar inaccessible car elle est utile même si l'item est supprimé
      */
-    this.#doneCheckbox.setDisabled();
+    this.#doneCheckbox?.setDisabled();
     this.#titleInput.setDisabled();
-    this.#textInput.setDisabled();
+    this.#textInput?.setDisabled();
     if (this.#toolbar) {
       // Cacher tous les enfants dont le bouton de drag&drop sauf l'annulation de suppression
       this.#toolbar.getChildren()
@@ -230,9 +264,9 @@ class Item extends Component {
 
   setUndoToDelete() {
     // NOTE : Ne pas rendre la toolbar inaccessible car elle est utile même si l'item est supprimé (donc pas de super.setDisabled())
-    this.#doneCheckbox.setEnabled();
+    this.#doneCheckbox?.setEnabled();
     this.#titleInput.setEnabled();
-    this.#textInput.setEnabled();
+    this.#textInput?.setEnabled();
     if (this.#toolbar) {
       // Afficher tous les enfants dont le bouton de drag&drop sauf l'annulation de suppression
       this.#toolbar.getChildren()

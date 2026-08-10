@@ -52,6 +52,9 @@ class Decorator extends Component {
   removeCurrent() {
     this.#decoratedElement.removeCurrent();
   }
+  isCurrent() {
+    return this.#decoratedElement.isCurrent();
+  }
 
   destroy() {
     super.destroy();
