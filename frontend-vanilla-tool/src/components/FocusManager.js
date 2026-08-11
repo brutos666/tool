@@ -35,7 +35,7 @@ class FocusManager {
   /** @type {Array<Component>} */
   #components = [];
   /** @type {boolean} */
-  #listened = false;
+  #navigationActive = false;
 
   /** @type {'horizontal'|'vertical'} */
   #orientation = 'horizontal';
@@ -192,7 +192,7 @@ class FocusManager {
    * Active la navigation via le clavier. La tabulation pourra accéder à la zone.
    */
   enableKeyNavigation() {
-    this.#listened = true;
+    this.#navigationActive = true;
     this.getCurrent()
       ?.setTabIndex(0);
     setTimeout(() => {
@@ -209,7 +209,7 @@ class FocusManager {
    * Désactive la navigation. La tabulation ne pourra jamais accéder aux composants gérés par le focusManager
    */
   disableKeyNavigation() {
-    this.#listened = false;
+    this.#navigationActive = false;
     this.getCurrent()
       ?.setTabIndex(-1);
     this.#container.removeEventListener('keydown', this.#onKeyDownEvent);
@@ -219,8 +219,12 @@ class FocusManager {
     const childFocusManager = this.getChildFocusManager();
     childFocusManager?.disableNavigationForAll();
   }
-  isListened() {
-    return this.#listened;
+  isNavigationActive() {
+    return this.#navigationActive;
+  }
+  hasNavigationActive() {
+    return this.#navigationActive || this.getChildFocusManager()
+      ?.hasNavigationActive();
   }
 
   /*
@@ -311,7 +315,7 @@ class FocusManager {
   setCurrent(component) {
     this.removeCurrent();
     // Ne permettre la prise de focus que si le focusManager est à l'écoute
-    component.setTabIndex(this.isListened() ? 0 : -1);
+    component.setTabIndex(this.isNavigationActive() ? 0 : -1);
     this.#current = component;
   }
   setCurrentWithIndex(index) {
@@ -375,12 +379,15 @@ class FocusManager {
     if (DOMUtilities.isHidden(this.getContainer())) {
       return;
     }
+    // Si plus rien n'est accessible, un système de navigation parent doit prendre le main, à condition qu'un système de navigation était en cours
     const currentWasFocused = this.isCurrentHasFocused();
+    const childFocusManager = this.getChildFocusManager();
+    const navigationActive = childFocusManager?.hasNavigationActive();
 
     const focusManagerWithCurrent = this.updateCurrent(currentIndexBeforeRemove || this.getIndexCurrent());
     // Donner le contrôle au premier ancêtre avec un courant
-    if (focusManagerWithCurrent) {
-      this.giveControlToFocusManager(focusManagerWithCurrent);
+    if (focusManagerWithCurrent && navigationActive) {
+      focusManagerWithCurrent.enableKeyNavigation();
       if (currentWasFocused) {
         focusManagerWithCurrent.giveFocus();
       }
@@ -393,14 +400,21 @@ class FocusManager {
    */
   updateCurrent(currentIndex) {
     const current = this.getCurrent();
+    if (current && this.isFocusable(current)) {
+      return this;
+    }
+
     let found;
     if (current) {
-      found = this.isFocusable(current) ? true : this.setCurrentNextFocusable(currentIndex);
+      // Si le courant avait une navigation active, il faut la désactiver
+      current.getFocusManager()
+        ?.disableNavigationForAll();
+      found = this.setCurrentNextFocusable(currentIndex);
     } else {
       found = this.setCurrentFirstFocusable();
     }
-    const parentFocusManager = this.getParentFocusManager();
     if (!found) {
+      const parentFocusManager = this.getParentFocusManager();
       if (!parentFocusManager) {
         return null;
       }
@@ -487,7 +501,7 @@ class FocusManager {
       return;
     }
     // Exclure le bouton de drag&drop et le bouton d'ouverture d'un noeud
-    if (event.target.closest('.drag-button') || event.target.closest('.tree__toggle')) {
+    if (event.target.closest('button')) {
       return;
     }
     const rootFocusManager = this.getRootFocusManager();

@@ -8,8 +8,6 @@ class TabFocusManager extends FocusManager {
 
   name = 'TabFocusManager';
 
-  #navigateInChild = false;
-
   /**
    * @constructor
    * @param {HTMLElement} container : conteneur des listes d'arbre
@@ -27,35 +25,29 @@ class TabFocusManager extends FocusManager {
     // Sortie avec Escape
     super.exit();
 
-    if (this.#navigateInChild) {
-      const focusManager = this.getChildFocusManager();
-      focusManager.disableKeyNavigation();
-    }
+    this.getChildFocusManager()
+      ?.disableKeyNavigation();
   }
 
   /*
-   * Prise de focus et positionnement du courant
-   * ---------------------------------------------------
+   * Positionnement du courant : gestion du système de navigation de l'enfant courant
+   * --------------------------------------------------------------------------------
    */
   setCurrent(component) {
     super.setCurrent(component);
 
-    if (!this.getChildFocusManager()) {
+    const childFocusManager = this.getChildFocusManager();
+    if (!this.isNavigationActive() || !childFocusManager) {
       return;
     }
-    // Si on arrive sur un composant qui gère la navigation, on laisse la navigation opérer à l'intérieur mais on garde le contrôle pour la tabulation
-    const focusManager = this.getChildFocusManager();
-    focusManager.enableKeyNavigation();
-    focusManager.giveFocus();
-    this.#navigateInChild = true;
+    // Le courant gère son propre système de navigation. Il faut l'activer si le système de navigation courant est actif. On ne désactive pas le système de navigation via la tabulation pour pouvoir sortir de l'enfant avec la touche Tab
+    childFocusManager.enableKeyNavigation();
+    childFocusManager.giveFocus();
   }
   removeCurrent() {
-    if (this.#navigateInChild) {
-      // Si le composant que l'on quitte gère la navigation, on la désactive et on écoute à nouveau toutes les touches de navigation
-      const focusManager = this.getChildFocusManager();
-      focusManager.disableKeyNavigation();
-      this.#navigateInChild = false;
-    }
+    // Le composant que l'on quitte ne doit plus avoir son propre système de navigation actif s'il l'était
+    this.getChildFocusManager()
+      ?.disableKeyNavigation();
 
     super.removeCurrent();
   }
@@ -69,7 +61,7 @@ class TabFocusManager extends FocusManager {
     if (super.canExit()) {
       keys.push('Escape');
     }
-    if (this.#navigateInChild) {
+    if (this.getChildFocusManager()) {
       return keys;
     }
     keys.push('Home');
@@ -87,10 +79,17 @@ class TabFocusManager extends FocusManager {
   enableKeyNavigation() {
     super.enableKeyNavigation();
 
-    if (this.#navigateInChild) {
-      const focusManager = this.getChildFocusManager();
-      focusManager.enableKeyNavigation();
-    }
+    this.getChildFocusManager()
+      ?.enableKeyNavigation();
+  }
+  /**
+   * Désactive la navigation. La tabulation ne pourra jamais accéder aux composants gérés par le focusManager
+   */
+  disableKeyNavigation() {
+    super.disableKeyNavigation();
+
+    this.getChildFocusManager()
+      ?.disableKeyNavigation();
   }
 
 }
