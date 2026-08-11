@@ -1,5 +1,4 @@
 import TreeUtilities from '../../../tools/TreeUtilities.js';
-import ActionButtonView from '../../views/ActionButtonView.js';
 import DecoratorView from './DecoratorView.js';
 /** @import View from '../../views/View.js'; */
 
@@ -8,7 +7,6 @@ class TreeView extends DecoratorView {
   name = 'TreeView';
 
   #treeItem;
-  #toggleActionButton;
 
   /**
    * @constructor
@@ -16,11 +14,6 @@ class TreeView extends DecoratorView {
    */
   constructor(view) {
     super(view);
-    this.#toggleActionButton = new ActionButtonView({ id: 'toggle', label: 'Ouvrir/Fermer le noeud', type: 'icon', icon: '', role: 'none' });
-    this.#toggleActionButton.setDoActionCallback(() => {
-      this.toggleTree();
-    });
-    this.setStaticView('toggle', this.#toggleActionButton);
     this.#treeItem = this.getElementView()
       .querySelector('.tree__item');
   }
@@ -50,10 +43,6 @@ class TreeView extends DecoratorView {
     return !this.isLeaf() && TreeUtilities.isOpened(this.#treeItem);
   }
 
-  toggleTree() {
-    this.setOpen(TreeUtilities.isClosed(this.#treeItem));
-  }
-
   setRoot() {
     this.getElementView().classList.add('tree--root');
   }
@@ -62,13 +51,11 @@ class TreeView extends DecoratorView {
       const classList = this.getElementView().classList;
       classList.remove('tree--node');
       classList.add('tree--leaf');
-      this.#toggleActionButton.getElementView().disabled = true;
       return;
     }
     const classList = this.getElementView().classList;
     classList.remove('tree--leaf');
     classList.add('tree--node');
-    this.#toggleActionButton.getElementView().disabled = false;
   }
   isLeaf() {
     return this.getElementView().classList.contains('tree--leaf');

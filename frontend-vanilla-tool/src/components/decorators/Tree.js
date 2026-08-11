@@ -1,9 +1,11 @@
 import { RIGHT } from '../../tools/Constants.js';
+import ActionButton from '../ActionButton.js';
 import TreeList from '../TreeList.js';
 import ItemDecorator from './ItemDecorator.js';
 import TreeView from './views/TreeView.js';
 /** @import Component from '../Component.js'; */
 /** @import TreeItem from '../../data/TreeItem.js'; */
+/** @import TreeFocusManager from '../TreeFocusManager.js'; */
 
 class Tree extends ItemDecorator {
 
@@ -11,6 +13,11 @@ class Tree extends ItemDecorator {
 
   /** @type {TreeItem} */
   #treeItem;
+
+  /** @type {TreeList} */
+  #treeList = null;
+  /** @type {ActionButton} */
+  #toggleButton = null;
 
   /**
    * @constructor
@@ -30,8 +37,14 @@ class Tree extends ItemDecorator {
       this.setReadOnly();
     }
 
-    const treeList = new TreeList(false, data.treeItem, data.layout);
-    this.setStaticChild('treeList', treeList);
+    this.#toggleButton = new ActionButton({ id: 'toggle', label: 'Ouvrir/Fermer le noeud', type: 'icon', icon: '', role: 'none' });
+    this.#toggleButton.setDoActionCallback(() => {
+      this.setOpen(!this.isOpened());
+    });
+    this.setStaticChild('toggle', this.#toggleButton);
+
+    this.#treeList = new TreeList(false, data.treeItem, data.layout);
+    this.setStaticChild('treeList', this.#treeList);
 
     this.setLeaf(this.#treeItem.isLeaf());
     this.setOpen(false);
@@ -60,6 +73,11 @@ class Tree extends ItemDecorator {
     /** @type {TreeView} */
     const view = this.getView();
     view.setLeaf(leaf);
+    if (leaf) {
+      this.#toggleButton.setDisabled();
+    } else {
+      this.#toggleButton.setEnabled();
+    }
   }
   isLeaf() {
     /** @type {TreeView} */
