@@ -9,6 +9,9 @@ class DOMUtilities {
     if (!element) {
       return false;
     }
+    if (element.closest('.hidden')) {
+      return true;
+    }
     const style = window.getComputedStyle(element);
     if (style.display === 'none' || style.visibility === 'hidden') {
       return true;

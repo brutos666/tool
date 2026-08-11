@@ -1,13 +1,13 @@
-import View from './View.js';
+import ItemsView from './ItemsView.js';
 
-class NavTreeView extends View {
+class NavTreeView extends ItemsView {
 
   name = 'NavTreeView';
 
-  getHtmlView() {
-    return String.raw`<section>
-      <template class="nav-tree__content" id="treeItems" role="tree" ></template>
-    </section>`;
+  constructor() {
+    super({ addButton: true });
+    this.getElementView()
+      .classList.add('nav-tree__content');
   }
 
 }

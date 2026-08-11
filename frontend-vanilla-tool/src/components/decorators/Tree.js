@@ -43,7 +43,7 @@ class Tree extends ItemDecorator {
     });
     this.setStaticChild('toggle', this.#toggleButton);
 
-    this.#treeList = new TreeList(false, data.treeItem, data.layout);
+    this.#treeList = new TreeList(data.treeItem, data.layout);
     this.setStaticChild('treeList', this.#treeList);
 
     this.setLeaf(this.#treeItem.isLeaf());
@@ -57,6 +57,11 @@ class Tree extends ItemDecorator {
     /** @type {TreeView} */
     const view = this.getView();
     view.setOpen(open);
+    if (open) {
+      this.#treeList.setVisible();
+    } else {
+      this.#treeList.setHidden();
+    }
   }
   isOpened() {
     /** @type {TreeView} */

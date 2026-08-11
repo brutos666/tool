@@ -21,7 +21,6 @@
 }
 
 .nav-tree__content > * {
-  flex: 1;
   padding: var(--medium-padding);
 }
 
