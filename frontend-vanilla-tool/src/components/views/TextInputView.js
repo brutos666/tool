@@ -8,6 +8,10 @@ class TextInputView extends View {
     super();
     this.getElementView()
       .addEventListener('input', this.callOnChangeCallback.bind(this));
+    this.getElementView()
+      .addEventListener('focus', this.enter.bind(this), true);
+    this.getElementView()
+      .addEventListener('blur', this.exit.bind(this), false);
   }
 
   /**
@@ -29,8 +33,15 @@ class TextInputView extends View {
     this.#onChangeCallback(event);
   }
 
+  enter() {
+    this.getElementView().textContent = this.getElementView().innerHTML;
+  }
+  exit() {
+    this.getElementView().innerHTML = this.getElementView().textContent;
+  }
+
   getValue() {
-    return this.getElementView().innerHTML;
+    return this.getElementView().textContent;
   }
 
   setValue(value) {
