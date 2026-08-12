@@ -58,11 +58,11 @@ class Item extends Component {
       focusManager.addComponent(this.#doneCheckbox);
     }
 
-    this.#titleInput = this.initTitle();
+    this.#titleInput = this.initTitle(updateRight);
     this.setStaticChild('title', this.#titleInput);
     focusManager.addComponent(this.#titleInput);
 
-    this.#textInput = this.initText();
+    this.#textInput = this.initText(updateRight);
     if (this.#textInput) {
       this.setStaticChild('text', this.#textInput);
       focusManager.addComponent(this.#textInput);
@@ -93,7 +93,7 @@ class Item extends Component {
   initTitle(updateRight) {
     const title = new TextInput();
     if (updateRight) {
-      title.setOnChangeCallback(this.onChange.bind(this, this.#titleInput, 'title'));
+      title.setOnChangeCallback(this.onChange.bind(this, title, 'title'));
     }
     return title;
   }
@@ -103,7 +103,7 @@ class Item extends Component {
     }
     const text = new TextInput();
     if (updateRight) {
-      text.setOnChangeCallback(this.onChange.bind(this, this.#textInput, 'text'));
+      text.setOnChangeCallback(this.onChange.bind(this, text, 'text'));
     }
     return text;
   }
@@ -163,6 +163,12 @@ class Item extends Component {
     }
     this.#treeItem = treeItem;
     this.#treeItem.addObserver(this);
+    if (this.#treeItem.isDeleted()) {
+      this.setToDelete();
+    } else {
+      this.setUndoToDelete();
+    }
+
     this.setItemValues(this.#treeItem.getItemInfos());
     this.setTreeItemId(treeItem.getTreeItemId());
   }
@@ -236,6 +242,8 @@ class Item extends Component {
   }
 
   setToDelete() {
+    const parentIsToDelete = this.#treeItem.getParentItem()
+      ?.isDeleted();
     /*
      * NOTE : Ne pas rendre la toolbar inaccessible car elle est utile même si l'item est supprimé
      */
@@ -246,14 +254,12 @@ class Item extends Component {
       // Cacher tous les enfants dont le bouton de drag&drop sauf l'annulation de suppression
       this.#toolbar.getChildren()
         .forEach(btn => {
-          if (btn === this.#undoToDeleteAction) {
+          if (!parentIsToDelete && btn === this.#undoToDeleteAction) {
             this.#undoToDeleteAction.setVisible();
           } else {
             btn.setHidden();
           }
         });
-      this.#toolbar.getFocusManager()
-        .refreshCurrent();
     }
     this.getFocusManager()
       .refreshCurrent();
@@ -277,8 +283,6 @@ class Item extends Component {
             btn.setVisible();
           }
         });
-      this.#toolbar.getFocusManager()
-        .refreshCurrent();
     }
     if (this.#readOnly) {
       this.setReadOnly();
