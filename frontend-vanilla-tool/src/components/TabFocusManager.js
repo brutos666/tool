@@ -51,6 +51,17 @@ class TabFocusManager extends FocusManager {
 
     super.removeCurrent();
   }
+  changeCurrent() {
+    this.getAllComponents()
+      .forEach(component => {
+        const focusManager = component.getFocusManager();
+        if (focusManager) {
+          focusManager.updateCurrent(focusManager.getIndexCurrent());
+        }
+      });
+
+    super.changeCurrent();
+  }
 
   /*
    * Navigation au clavier

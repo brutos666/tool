@@ -25,6 +25,17 @@ class TreeFocusManager extends FocusManager {
     return false;
   }
 
+  isCurrentHasFocused() {
+    const isFocused = super.isCurrentHasFocused();
+    if (isFocused) {
+      return true;
+    }
+    const childFocusManager = this.getCurrent()
+      ?.getStaticChild('treeList')
+      .getFocusManager();
+    return childFocusManager?.isCurrentHasFocused();
+  }
+
   /*
    * Prise de focus
    * ---------------------------------------------------
@@ -96,6 +107,11 @@ class TreeFocusManager extends FocusManager {
     rootFocusManager.setCurrent(nextFocusable);
     rootFocusManager.giveFocus();
   }
+  isFocusable(component) {
+    // Le choix a été fait de pouvoir naviguer dans un arbre inaccessible
+    return !component.isHidden() && !DOMUtilities.isHidden(component.getElementView()) && this.getAllComponents()
+      .includes(component);
+  }
   /*
    * Vues et élément pouvant prendre le focus par les touches du clavier ou un clic de la souris
    * -------------------------------------------------------------------------------------------
@@ -142,7 +158,7 @@ class TreeFocusManager extends FocusManager {
     const current = this.getCurrent();
 
     if (current.isClosed()) {
-      current.setOpen(true);
+      current.openNode();
       return;
     }
     // S'il y a des éléments enfants accessibles, on se positionne sur le 1er accessible
@@ -170,7 +186,7 @@ class TreeFocusManager extends FocusManager {
     const current = this.getCurrent();
 
     if (current.isOpened()) {
-      current.setOpen(false);
+      current.closeNode();
       return;
     }
     if (this.hasFocusableParent()) {
@@ -261,6 +277,15 @@ class TreeFocusManager extends FocusManager {
       childFocusManager.disableNavigationForAll();
     }
   }
+  hasNavigationActive() {
+    if (super.hasNavigationActive()) {
+      return true;
+    }
+    const childFocusManager = this.getCurrent()
+      ?.getStaticChild('treeList')
+      .getFocusManager();
+    return childFocusManager?.hasNavigationActive();
+  }
   /*
    * Gestion du contrôle de la navigation
    * ---------------------------------------------------
@@ -294,6 +319,16 @@ class TreeFocusManager extends FocusManager {
   }
   getParentFocusManager() {
     return this.getParentTreeFocusManager();
+  }
+  getActiveFocusManager() {
+    const activeFocusManager = super.getActiveFocusManager();
+    if (activeFocusManager) {
+      return activeFocusManager;
+    }
+    const treeChildFocusManager = this.getCurrent()
+      ?.getStaticChild('treeList')
+      .getFocusManager();
+    return treeChildFocusManager?.getActiveFocusManager();
   }
 
   /**

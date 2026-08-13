@@ -38,13 +38,18 @@ class Tree extends ItemDecorator {
     }
 
     this.#toggleButton = new ActionButton({ id: 'toggle', label: 'Ouvrir/Fermer le noeud', type: 'icon', icon: '', role: 'none' });
-    this.#toggleButton.setDoActionCallback(() => {
-      this.setOpen(!this.isOpened());
-    });
+
     this.setStaticChild('toggle', this.#toggleButton);
 
     this.#treeList = new TreeList(data.treeItem, data.layout);
     this.setStaticChild('treeList', this.#treeList);
+    this.#toggleButton.setDoActionCallback(() => {
+      if (this.isOpened()) {
+        this.closeNode();
+      } else {
+        this.openNode();
+      }
+    });
 
     this.setLeaf(this.#treeItem.isLeaf());
     this.setOpen(false);
@@ -53,6 +58,14 @@ class Tree extends ItemDecorator {
     }
   }
 
+  openNode() {
+    this.setOpen(true);
+  }
+  closeNode() {
+    this.setOpen(false);
+    this.#treeList.getFocusManager()
+      .changeCurrent();
+  }
   setOpen(open) {
     /** @type {TreeView} */
     const view = this.getView();

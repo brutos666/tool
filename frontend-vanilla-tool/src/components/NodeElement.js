@@ -110,12 +110,11 @@ class NodeElement {
   }
   isFocused() {
     if (this.#focusManager) {
-      this.getFocusManager()
+      return this.getFocusManager()
         .isCurrentFocused();
-    } else {
-      this.getView()
-        .isFocused();
     }
+    return this.getView()
+      .isFocused();
   }
   setTabIndex(value) {
     this.getView()

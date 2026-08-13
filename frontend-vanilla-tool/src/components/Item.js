@@ -226,8 +226,12 @@ class Item extends Component {
       this.setItemValues(treeItem.getItemInfos());
     } else if (action === 'toDelete') {
       this.setToDelete();
+      this.getFocusManager()
+        .refreshCurrent();
     } else if (action === 'undoToDelete') {
       this.setUndoToDelete();
+      this.getFocusManager()
+        .refreshCurrent();
     }
   }
 
@@ -261,9 +265,6 @@ class Item extends Component {
           }
         });
     }
-    this.getFocusManager()
-      .refreshCurrent();
-
     this.getView()
       .setToDelete();
   }
@@ -287,10 +288,6 @@ class Item extends Component {
     if (this.#readOnly) {
       this.setReadOnly();
     }
-
-    this.getFocusManager()
-      .refreshCurrent();
-
     this.getView()
       .undoToDelete();
   }

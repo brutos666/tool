@@ -142,11 +142,19 @@ class FocusManager {
     component.getView()
       .removeEventListener('mousedown', this.#onMouseDownEvent);
     this.#components.splice(index, 1);
-    if (this.getCurrent() === component) {
-      this.refreshCurrent(index);
+    if (this.getCurrent() !== component) {
+      return;
+    }
+    // Mettre à jour le nouveau courant
+    const found = this.changeCurrent(index);
+    if (!found) {
+    // Si plus rien n'est accessible, un système de navigation parent doit prendre le main, à condition qu'un système de navigation était en cours
+      this.#updateCurrentParents();
     }
   }
   removeAllComponents() {
+    // Le courant n'est plus accessible : désactiver le système de navigation courant
+    this.changeCurrent();
     this.removeCurrent();
     for (const component of this.#components) {
       component.getView()
@@ -261,9 +269,10 @@ class FocusManager {
     if (!current) {
       return false;
     }
-    return current?.isFocused() || current.getElementView()
-      .contains(document.activeElement);
+    return current.isFocused() || current.getFocusManager()
+      ?.isCurrentHasFocused();
   }
+
   giveFocusToFirst() {
     const firstFocusable = this.getFirstFocusable();
     if (firstFocusable) {
@@ -298,14 +307,14 @@ class FocusManager {
   isFocusable(component) {
     // Si le composant contient un focusManager, alors ce dernier est accessible s'il existe un courant accessible
     const childFocusManager = component.getFocusManager();
-    if (childFocusManager && !childFocusManager.getCurrent()) {
+    if (childFocusManager && !childFocusManager.hasFocusable()) {
       return false;
     }
     return !component.isHidden() && !component.isDisabled() && !DOMUtilities.isHidden(component.getElementView()) && this.#components.includes(component);
   }
   hasFocusable() {
     // Le fait d'avoir un courant doit indiquer que
-    return this.getCurrent();
+    return this.#components.find(component => this.isFocusable(component));
   }
 
   /*
@@ -327,7 +336,6 @@ class FocusManager {
       this.setCurrent(firstFocusable);
       return true;
     }
-    this.removeCurrent();
     return false;
   }
   setCurrentNextFocusable(index) {
@@ -339,7 +347,6 @@ class FocusManager {
       this.setCurrent(nextFocusable);
       return true;
     }
-    this.removeCurrent();
     return false;
   }
   /**
@@ -375,52 +382,61 @@ class FocusManager {
    * Met à jour le courant lorsque un composant devient accessible ou inaccessible
    * @param currentIndexBeforeRemove - Index du courant avant sa suppression de la liste des composants. Lorsqu'il n'est pas fourni, c'est que le courant est toujours présent et sa position sera recherchée si besoin
    */
-  refreshCurrent(currentIndexBeforeRemove) {
+  refreshCurrent() {
     if (DOMUtilities.isHidden(this.getContainer())) {
       return;
     }
-    // Si plus rien n'est accessible, un système de navigation parent doit prendre le main, à condition qu'un système de navigation était en cours
-    const currentWasFocused = this.isCurrentHasFocused();
-    const childFocusManager = this.getChildFocusManager();
-    const navigationActive = childFocusManager?.hasNavigationActive();
-
-    const focusManagerWithCurrent = this.updateCurrent(currentIndexBeforeRemove || this.getIndexCurrent());
-    // Donner le contrôle au premier ancêtre avec un courant
-    if (focusManagerWithCurrent && navigationActive) {
-      focusManagerWithCurrent.enableKeyNavigation();
-      if (currentWasFocused) {
-        focusManagerWithCurrent.giveFocus();
-      }
+    this.changeCurrent();
+  }
+  changeCurrent(index) {
+    let newFocusManager = this;
+    const activeFocusManager = this.getActiveFocusManager();
+    const activeWasFocused = activeFocusManager?.isCurrentHasFocused();
+    const found = this.updateCurrent(index || this.getIndexCurrent());
+    if (!found) {
+      // Si plus rien n'est accessible, on voit le plus proche accessible en remontant les parents
+      newFocusManager = this.#updateCurrentParents();
     }
+    if (!activeWasFocused) {
+      return;
+    }
+    if (activeFocusManager !== newFocusManager) {
+      if (activeFocusManager.canExit()) {
+        activeFocusManager.setOut();
+      }
+      activeFocusManager.giveControlToFocusManager(newFocusManager);
+    }
+    newFocusManager.giveFocus();
   }
   /**
-   * Mise à jour du courant. Si pas de courant, on met à jour le courant du parent
-   * @param currentIndex - position du courant dans la liste (avant suppression si ce dernier est supprimé des composants)
-   * @returns le focusManager pour lequel le courant a pu être trouvé
+   * Mise à jour du courant dans le système de navigation
+   * @param currentIndex - position du courant dans la liste
+   * @returns true si un courant accessible a pu être trouvé
    */
   updateCurrent(currentIndex) {
     const current = this.getCurrent();
-    if (current && this.isFocusable(current)) {
-      return this;
-    }
-
-    let found;
     if (current) {
-      // Si le courant avait une navigation active, il faut la désactiver
-      current.getFocusManager()
-        ?.disableNavigationForAll();
-      found = this.setCurrentNextFocusable(currentIndex);
-    } else {
-      found = this.setCurrentFirstFocusable();
-    }
-    if (!found) {
-      const parentFocusManager = this.getParentFocusManager();
-      if (!parentFocusManager) {
-        return null;
+      if (this.isFocusable(current)) {
+        return true;
       }
-      return parentFocusManager.updateCurrent(parentFocusManager.getIndexCurrent());
+      // Recherche du plus proche courant accessible
+      return this.setCurrentNextFocusable(currentIndex);
     }
-    return this;
+    return this.setCurrentFirstFocusable();
+  }
+  /**
+   * Mise à jour du courant des parents jusqu'à trouver un courant accessible
+   */
+  #updateCurrentParents() {
+    const parentFocusManager = this.getParentFocusManager();
+    if (!parentFocusManager) {
+      return;
+    }
+    const found = parentFocusManager.updateCurrent(parentFocusManager.getIndexCurrent());
+    if (found) {
+      return parentFocusManager;
+    }
+    return parentFocusManager.#updateCurrentParents();
   }
 
   /*
@@ -481,6 +497,10 @@ class FocusManager {
   }
   /** Entrée et sortie dans un autre système de navigation **/
   #onKeyEnter() {
+    if (!this.getChildFocusManager()
+      ?.hasFocusable()) {
+      return;
+    }
     // Alerte le composant si besoin et ne fait pas la suite si le composant empêche l'entrée
     const doEnter = this.getRootFocusManager()
       .callBeforeEnter(this.getCurrent());
@@ -558,6 +578,20 @@ class FocusManager {
       }
     }
     return null;
+  }
+  /**
+   * Fournit le système de navigation enfant qui est actif
+   * @returns {FocusManager}
+   */
+  getActiveFocusManager() {
+    if (this.isNavigationActive()) {
+      return this;
+    }
+    const childFocusManager = this.getChildFocusManager();
+    if (!childFocusManager) {
+      return null;
+    }
+    return childFocusManager.getActiveFocusManager();
   }
 
   /**
