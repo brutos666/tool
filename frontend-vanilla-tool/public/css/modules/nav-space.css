@@ -15,7 +15,7 @@
 }
 .nav-tree__content {
   margin: var(--small-margin);
-  overflow: visible;
+  overflow: auto;
   display: flex;
   flex-direction: column;
 }

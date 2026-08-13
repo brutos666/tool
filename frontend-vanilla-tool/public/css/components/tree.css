@@ -63,13 +63,17 @@
 .tree__content {
   outline: none;
 }
-.tree__item:has(> .tree__content:focus) > .tree__toggle {
+.tree--node > .tree__item:has(> .tree__content:focus) > .tree__toggle {
   border: var(--color-border-focus) solid 2px;
   border-right: none;
 }
-.tree__content:focus {
+.tree--node > .tree__item > .tree__content:focus {
   border: var(--color-border-focus) solid 2px;
   border-left: none;
+  outline: none;
+}
+.tree--leaf .tree__item > .tree__content:focus {
+  border: var(--color-border-focus) solid 2px;
   outline: none;
 }
 /* Encadrer le noeud de l'arbre dont un enfant a le focus ou du drag&drop
