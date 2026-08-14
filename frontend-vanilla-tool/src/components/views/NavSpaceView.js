@@ -10,10 +10,10 @@ class NavSpaceView extends SpaceView {
   }
 
   getHtmlView() {
-    return String.raw`<nav id="navSpace" class="nav-space">
-    <div class="nav-space__header">Navigation</div>
+    return String.raw`<aside id="navSpace" class="nav-space">
+    <header class="nav-space__header"><h1 class="nav-space__title">Navigation</h1></header>
     <template id="navTree" class="nav-space__tree"></template>
-  </nav>`;
+  </aside>`;
   }
 
 }

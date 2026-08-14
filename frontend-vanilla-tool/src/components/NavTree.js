@@ -15,14 +15,6 @@ class NavTree extends TreeItems {
   constructor() {
     super(new NavTreeView(), StoreData.getTreeItem(), ITEM_LAYOUT.Title);
 
-    /*
-     *const items = new TreeList(true, StoreData.getTreeItem(), ITEM_LAYOUT.Title);
-     *const addButton = new AddItemButton({ id: 'addNewItem', label: 'Ajouter un espace', layout: ITEM_LAYOUT.Title });
-     *addButton.setDoActionCallback(items.addNewItem.bind(items, 'Saisir un espace'));
-     *items.setStaticChild('addItemAction', addButton);
-     *this.setStaticChild('treeItems', items);
-     */
-
     const addButton = new AddItemButton({ id: 'addNewItem', label: 'Ajouter un élément', layout: ITEM_LAYOUT.Title });
     addButton.setDoActionCallback(this.addNewItem.bind(this, 'Saisir un espace'));
     this.setStaticChild('addItemAction', addButton);

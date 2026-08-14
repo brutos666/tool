@@ -8,40 +8,53 @@
   height: 100%;
 }
 .nav-space__header {
-  font-weight: bold;
-  font-size: 1.5em;
-  margin: var(--global-margin);
   min-height: 0;
+}
+.nav-space__title {
+  margin: var(--global-margin);
+  font-size: 1.5em;
 }
 .nav-tree__content {
   margin: var(--small-margin);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.nav-tree__items {
   overflow: auto;
   display: flex;
   flex-direction: column;
 }
-
-.nav-tree__content > * {
+.nav-tree__items > * {
+  padding: var(--medium-padding);
+}
+.nav-tree__footer {
+  display: flex;
+  flex-direction: column;
   padding: var(--medium-padding);
 }
 
-.nav-tree__content .list__element.tree--root > .tree__item,
-.nav-tree__content .list__element > .item-like-button {
+.nav-tree__items .list__element.tree--root > .tree__item,
+.nav-tree__footer > .item-like-button {
   background: var(--color-bg-surface);
   border-radius: var(--border-radius);
   box-shadow: 3px 3px 4px var(--color-box-shadow);
   padding: var(--medium-padding);
 }
-.nav-tree__content .list__element {
+.nav-tree__items .list__element {
   display: flex;
 }
-.nav-tree__content .list__element > .item-like-button {
+.nav-tree__footer > .item-like-button {
   flex: 1;
   min-height: 40px;
 }
 
 /* Encadrer la navigation si un element de la navigation a le focus ou du drag&drop  */
-.nav-tree__content:has(.drag-over),
-.nav-tree__content:has(*:focus) {
-  outline: 1px solid var(--color-border-focus);
+.nav-tree__items:has(.drag-over),
+.nav-tree__items:has(*:focus) {
+  border: 1px solid var(--color-border-focus);
+}
+.nav-tree__items:focus-visible {
+  border: 2px solid var(--color-border-focus);
 }
 

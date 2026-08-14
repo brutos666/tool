@@ -30,8 +30,6 @@
   width: 20em;
   height: calc(100% - 4px);
   overflow: hidden;
-  left: 2px;
-  position: relative;
 }
 .working-space__splitter {
   grid-row: 2;
