@@ -1,24 +1,20 @@
 .check-list {
-  display: grid;
-  grid-template-rows: min-content 1fr;
-  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 .check-list__header {
   display: flex;
   justify-content: center;
 }
-.check-list__header-title {
+.check-list__title {
   font-weight: bold;
   font-size: 1.5em;
   margin: var(--global-margin);
 }
 /* min-height: 0 empêche de déborder et force la contrainte de hauteur vers le bas. Utilisé pour l'affichage en colonne */
-.check-list__space {
-  min-height: 0; /* important */
-  overflow: visible;
-}
-.check-list__space > .items__space {
-  overflow: visible;
+.check-list__items {
+  overflow: auto;
   min-height: 0; /* important */
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(400px, max-content));
@@ -28,31 +24,38 @@
   align-content: start;
 }
 
-.check-list__space > .items__space > * {
+.check-list__items > * {
   flex: 1;
   padding: var(--medium-padding);
 }
-.check-list__space > .items__space .tree--root,
-.check-list__space > .items__space .item-like-button {
+.check-list__items .tree--root,
+.check-list__footer > .item-like-button {
   background: var(--color-bg-surface);
   border-radius: var(--border-radius);
   box-shadow: 3px 3px 4px var(--color-box-shadow);
   padding: var(--medium-padding);
 }
-.check-list__space > .items__space .list__element {
+.check-list__items .list__element {
   display: flex;
 }
-.check-list__space > .items__space .item-like-button {
+.check-list__footer {
+  padding: var(--medium-padding);
+  display: flex;
+  align-items: center;
+  min-width: min-content;
+  max-width: 400px;
+}
+.check-list__footer > .item-like-button {
   flex: 1;
   min-height: 40px;
 }
 
-/* Encadrer la check-list si un element de la check-list a le focus ou du drag&drop */
-.check-list__space > .items__space:has(.drag-over),
-.check-list__space > .items__space:has(*:focus) {
-  outline: 1px solid var(--color-border-focus);
+/* Encadrer la navigation si un element de la navigation a le focus ou du drag&drop  */
+.check-list__items:has(.drag-over),
+.check-list__items:has(*:focus) {
+  border: 1px solid var(--color-border-focus);
 }
-.check-list:has(> .check-list__header .item:focus) {
-  outline: 1px solid var(--color-border-focus);
+.check-list__items:focus-visible {
+  border: 2px solid var(--color-border-focus);
 }
 
