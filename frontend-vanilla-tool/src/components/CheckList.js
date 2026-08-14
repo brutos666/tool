@@ -1,13 +1,12 @@
 import { ITEM_LAYOUT, RIGHT } from '../tools/Constants.js';
 import AddItemButton from './AddItemButton.js';
 import Item from './Item.js';
-import Items from './Items.js';
 import TreeFocusManager from './TreeFocusManager.js';
+import TreeItems from './TreeItems.js';
 import DragDropDecorator from './decorators/DragDropDecorator.js';
-import Tree from './decorators/Tree.js';
 import CheckListView from './views/CheckListView.js';
 
-class CheckList extends Items {
+class CheckList extends TreeItems {
 
   name = 'CheckList';
 
@@ -44,42 +43,12 @@ class CheckList extends Items {
    * @returns {Component} composant
    */
   getItemComponent(treeItem) {
-    const layout = this.getLayout();
-    const rights = ITEM_LAYOUT.getRights(layout);
-    const item = new Item({ treeItem, layout, rights });
-    const itemComponent = new Tree(item, { treeItem, layout, rights });
+    /** @type {DragDropDecorator} */
+    const component = super.getItemComponent(treeItem);
+    const itemComponent = component.getDecoratedElementByName('Tree');
     itemComponent.setRoot();
     itemComponent.setOpen(true);
-    return new DragDropDecorator(itemComponent);
-  }
-
-  /** @override */
-  addItemView(itemComponent) {
-    super.addItemView(itemComponent);
-    super.getFocusManager()
-      .addComponent(itemComponent.getDecoratedElementByName('Tree'));
-  }
-
-  /** @override */
-  addItemViewAt(itemComponent, index) {
-    super.addItemViewAt(itemComponent, index);
-    super.getFocusManager()
-      .addComponent(itemComponent.getDecoratedElementByName('Tree'));
-  }
-
-  /** @override */
-  removeItemView(index) {
-    // NOTE : avertir le focusManager avant la suppression effective pour donner le focus à un autre élément que si le focus était dans la vue supprimée
-    super.getFocusManager()
-      .removeComponent(index);
-    super.removeItemView(index);
-  }
-
-  /** @override */
-  removeAllItemsViews() {
-    super.getFocusManager()
-      .removeAllComponents();
-    super.removeAllItemsViews();
+    return component;
   }
 
   /** @override */
