@@ -45,13 +45,3 @@
   overflow: hidden;
 }
 
-/* Espaces dédiées à la navigation dans les items */
-.manager-items--decorator {
-  height: calc(100% - 4px);
-  width: calc(100% - 4px);
-  position: relative;
-  left: 2px;
-  overflow-y: auto;
-  scrollbar-gutter: stable;
-}
-

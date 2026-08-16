@@ -37,17 +37,10 @@ class TreeItems extends Items {
   }
 
   /** @override */
-  addItemView(itemComponent) {
-    super.addItemView(itemComponent);
-    super.getFocusManager()
-      .addComponent(itemComponent.getDecoratedElementByName('Tree'));
-  }
-
-  /** @override */
   addItemViewAt(itemComponent, index) {
     super.addItemViewAt(itemComponent, index);
     super.getFocusManager()
-      .addComponent(itemComponent.getDecoratedElementByName('Tree'));
+      .addComponentAt(index, itemComponent.getDecoratedElementByName('Tree'));
   }
 
   /** @override */

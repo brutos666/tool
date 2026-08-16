@@ -5,7 +5,7 @@ class TreeListView extends ItemsView {
   name = 'TreeListView';
 
   constructor() {
-    super({ addButton: false });
+    super();
     this.getElementView()
       .classList.add('tree-list__space');
   }

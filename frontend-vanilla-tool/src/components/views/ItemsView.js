@@ -5,26 +5,9 @@ class ItemsView extends View {
   name = 'ItemsView';
 
   #itemViews = [];
-  #addButton = true;
 
-  /**
-   *
-   * @param {Object} data
-   * @param {boolean} data.addButton : Indique si il faut ajouter le bouton d'ajout
-   */
   constructor(data) {
     super(data);
-    this.#addButton = data.addButton;
-  }
-
-  addItemView(itemView) {
-    const itemsSpace = getItemsSpace(this.getElementView());
-    if (this.#addButton) {
-      itemsSpace.insertBefore(itemView.getElementView(), itemsSpace.lastChild);
-    } else {
-      itemsSpace.appendChild(itemView.getElementView());
-    }
-    this.#itemViews.push(itemView);
   }
 
   addItemViewAt(itemView, index) {
@@ -48,15 +31,7 @@ class ItemsView extends View {
     this.#itemViews = [];
   }
 
-  /**
-   *
-   * @param {Object} data
-   * @param {boolean} data.addButton : Indique si il faut ajouter le bouton d'ajout
-   */
-  getHtmlView(data) {
-    if (data.addButton) {
-      return String.raw`<ol id="itemsSpace" class="items__space" aria-orientation="vertical"><li class="list__element"><template id="addItemAction" tabindex="0"></template></li></ol>`;
-    }
+  getHtmlView() {
     return String.raw`<ol id="itemsSpace" class="items__space" aria-orientation="vertical"></ol>`;
   }
 

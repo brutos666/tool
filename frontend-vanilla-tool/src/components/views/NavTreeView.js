@@ -5,7 +5,7 @@ class NavTreeView extends ItemsView {
   name = 'NavTreeView';
 
   constructor() {
-    super({ addButton: false });
+    super();
     this.getElementView()
       .classList.add('nav-tree__content');
   }

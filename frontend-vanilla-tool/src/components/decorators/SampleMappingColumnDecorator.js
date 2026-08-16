@@ -14,7 +14,6 @@ class SampleMappingColumnDecorator extends ItemDecorator {
     super(new View(), decoratedElement);
     this.#ruleItem = decoratedElement;
     this.#sampleItems = sampleItems;
-    sampleItems.added(this);
   }
 
   getRuleItem() {

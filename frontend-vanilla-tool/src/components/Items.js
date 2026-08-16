@@ -99,13 +99,9 @@ class Items extends Composite {
   addItems(treeItemArray, index) {
     treeItemArray.forEach(treeItem => {
       const itemComponent = this.getItemComponent(treeItem);
-      if (index !== undefined) {
-        this.addItemViewAt(itemComponent, index);
-        this.addChildAt(itemComponent, index);
-        return;
-      }
-      this.addItemView(itemComponent);
-      this.addChild(itemComponent);
+      const position = index === undefined ? this.getChildren().length : index;
+      this.addItemViewAt(itemComponent, position);
+      this.addChildAt(itemComponent, position);
     });
   }
 
@@ -171,12 +167,8 @@ class Items extends Composite {
   /**
    * Ajout d'un item
    * @param {Component} itemComponent - composant ajouté
+   * @param {number} index - position d'insertion
    */
-  addItemView(itemComponent) {
-    /** @type {ItemsView} */
-    const view = this.getView();
-    view.addItemView(itemComponent.getView());
-  }
   addItemViewAt(itemComponent, index) {
     /** @type {ItemsView} */
     const view = this.getView();

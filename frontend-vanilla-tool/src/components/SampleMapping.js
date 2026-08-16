@@ -1,12 +1,13 @@
 import { ITEM_LAYOUT } from '../tools/Constants.js';
+import AddItemButton from './AddItemButton.js';
+import ColumnFocusManager from './ColumnFocusManager.js';
+import DragDropDecorator from './decorators/DragDropDecorator.js';
+import ListItemDecorator from './decorators/ListItemDecorator.js';
+import SampleMappingColumnDecorator from './decorators/SampleMappingColumnDecorator.js';
 import Item from './Item.js';
 import Items from './Items.js';
 import SampleMappingSamples from './SampleMappingSamples.js';
-import AddItemButton from './AddItemButton.js';
 import SampleMappingView from './views/SampleMappingView.js';
-import SampleMappingColumnDecorator from './decorators/SampleMappingColumnDecorator.js';
-import DragDropDecorator from './decorators/DragDropDecorator.js';
-import ListItemDecorator from './decorators/ListItemDecorator.js';
 /** @import TreeItem from '../data/TreeItem.js'; */
 
 class SampleMapping extends Items {
@@ -14,6 +15,8 @@ class SampleMapping extends Items {
   name = 'SampleMapping';
 
   #item;
+  /** @type {AddItemButton} */
+  #addRuleButton;
 
   constructor(treeItem) {
     super(new SampleMappingView(), treeItem, ITEM_LAYOUT.Rules);
@@ -22,9 +25,17 @@ class SampleMapping extends Items {
     this.#item = new DragDropDecorator(new ListItemDecorator(new Item({ treeItem, layout: ITEM_LAYOUT.Story, rights })));
     this.setStaticChild('storyItem', this.#item);
 
-    const buttonAddRule = new AddItemButton({ id: 'addRule', label: 'Ajouter une règle', layout: ITEM_LAYOUT.Rules });
-    buttonAddRule.setDoActionCallback(this.addNewItem.bind(this, 'Saisir une règle'));
-    this.setStaticChild('addItemAction', buttonAddRule);
+    this.#addRuleButton = new AddItemButton({ id: 'addRule', label: 'Ajouter une règle', layout: ITEM_LAYOUT.Rules });
+    this.#addRuleButton.setDoActionCallback(this.addNewItem.bind(this, 'Saisir une règle'));
+    this.setStaticChild('addItemAction', this.#addRuleButton);
+
+    super.getFocusManager()
+      .addColumn(this.#addRuleButton);
+  }
+
+  /** @override */
+  initFocusManager() {
+    super.setFocusManager(new ColumnFocusManager(this.getElementView()));
   }
 
   setTreeItem(treeItem) {
@@ -44,35 +55,73 @@ class SampleMapping extends Items {
     return new SampleMappingColumnDecorator(new DragDropDecorator(new ListItemDecorator(item)), sampleItems);
   }
 
+  /** @override */
+  addChildAt(element, index) {
+    super.addChildAt(element, index);
+
+    const ruleItem = element.getRuleItem();
+    const sampleItems = element.getSampleItems();
+    ruleItem.added(this);
+    sampleItems.added(this);
+  }
+  /** @override */
+  removeChild(element) {
+    super.removeChild(element);
+
+    const ruleItem = element.getRuleItem();
+    const sampleItems = element.getSampleItems();
+    ruleItem.removed();
+    sampleItems.removed();
+  }
+
   /**
    * @override
    * @param {SampleMappingColumnDecorator} component
+   * @param {number} index
    */
-  addItemView(component) {
-    /** @type {SampleMappingView} */
-    const tableView = this.getView();
-    tableView.addColumn(component.getRuleItem()
-      .getView(), component.getSampleItems()
-      .getView());
-  }
   addItemViewAt(component, index) {
     /** @type {SampleMappingView} */
     const tableView = this.getView();
-    tableView.addColumnAt(component.getRuleItem()
-      .getView(), component.getSampleItems()
-      .getView(), index);
+    const ruleItem = component.getRuleItem();
+    const sampleItems = component.getSampleItems();
+    tableView.addColumnAt(ruleItem.getView(), sampleItems.getView(), index);
+
+    super.getFocusManager()
+      .addColumnAt(index, ruleItem.getDecoratedElementByName('ListItemDecorator'), sampleItems);
   }
   removeAllItemsViews() {
+    super.getFocusManager()
+      .removeAllColumns();
+    super.getFocusManager()
+      .addColumn(this.#addRuleButton);
+
     /** @type {SampleMappingView} */
     const tableView = this.getView();
     tableView.removeAllColumns();
   }
 
   removeItemView(index) {
+    // NOTE : avertir le focusManager avant la suppression effective pour donner le focus à un autre élément que si le focus était dans la vue supprimée
+    super.getFocusManager()
+      .removeColumn(index);
+
     /** @type {SampleMappingView} */
     const tableView = this.getView();
     tableView.removeColumn(index);
   }
+
+  /** @override */
+  added(parent) {
+    super.added(parent);
+
+    this.getStaticChild('storyItem')
+      .getDecoratedElementByName('Item')
+      .setTabIndex(0);
+
+    super.getFocusManager()
+      .enableKeyNavigation();
+  }
+
   zoomMinus() {
     /** @type {SampleMappingView} */
     const tableView = this.getView();

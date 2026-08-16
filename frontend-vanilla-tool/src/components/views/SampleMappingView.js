@@ -56,8 +56,6 @@ class SampleMappingView extends View {
     }
     this.#storySpace.colSpan = this.#ruleHeaders.length + 1;
     this.#sampleTable.style.setProperty('--number-of-columns', this.#ruleHeaders.length + 1);
-    ruleView.added(this);
-    samplesView.added(this);
   }
 
   removeAllColumns() {

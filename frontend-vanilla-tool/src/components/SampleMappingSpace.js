@@ -1,7 +1,6 @@
 import ActionButton from './ActionButton.js';
 import CheckBox from './CheckBox.js';
 import Component from './Component.js';
-import ItemsKeyboardNavDecorator from './decorators/ItemsKeyboardNavDecorator.js';
 import SampleMapping from './SampleMapping.js';
 import Toolbar from './Toolbar.js';
 import SampleMappingSpaceView from './views/SampleMappingSpaceView.js';
@@ -35,7 +34,7 @@ class SampleMappingSpace extends Component {
     toolbar.getFocusManager()
       .enableKeyNavigation();
 
-    this.setStaticChild('sampleMappingTable', new ItemsKeyboardNavDecorator(this.#sampleMapping));
+    this.setStaticChild('sampleMappingTable', this.#sampleMapping);
   }
 
   setTreeItem(treeItem) {

@@ -1,6 +1,6 @@
 import StoreData from '../data/StoreData.js';
 import DOMUtilities from '../tools/DOMUtilities.js';
-import TabFocusManager from './TabFocusManager.js';
+import CompositeFocusManager from './CompositeFocusManager.js';
 /** @import Component from './Component.js'; */
 
 class FocusManager {
@@ -67,6 +67,9 @@ class FocusManager {
   getContainer() {
     return this.#container;
   }
+  setContainer(container) {
+    this.#container = container;
+  }
 
   /**
    * Positionne le parent si besoin
@@ -105,7 +108,7 @@ class FocusManager {
     return this.#isInside;
   }
 
-  #enter() {
+  enter() {
     if (!this.getChildFocusManager()) {
       return;
     }
@@ -128,7 +131,10 @@ class FocusManager {
    * @param {Component} component
    */
   addComponent(component) {
-    this.#components.push(component);
+    this.addComponentAt(this.#components.length, component);
+  }
+  addComponentAt(index, component) {
+    this.#components.splice(index, 0, component);
     component.setTabIndex(-1);
     component.getView()
       .addEventListener('mousedown', this.#onMouseDownEvent);
@@ -151,6 +157,14 @@ class FocusManager {
     // Si plus rien n'est accessible, un système de navigation parent doit prendre le main, à condition qu'un système de navigation était en cours
       this.#updateCurrentParents();
     }
+  }
+  removeGivenComponent(component) {
+    const index = this.getAllComponents()
+      .findIndex(comp => comp === component);
+    if (index === -1) {
+      return;
+    }
+    this.removeComponent(index);
   }
   removeAllComponents() {
     // Le courant n'est plus accessible : désactiver le système de navigation courant
@@ -203,15 +217,19 @@ class FocusManager {
     this.#navigationActive = true;
     this.getCurrent()
       ?.setTabIndex(0);
-    setTimeout(() => {
-      // Astuce pour que l'écoute ne soit pas prise en compte lorsque l'appui sur une touche est en cours
-      this.#container.addEventListener('keydown', this.#onKeyDownEvent);
-    }, 0);
 
     // Si on clique dans une zone accessible par la touche entrée, on doit pouvoir la quitter avec la touche Escape
     if (this.pressEnterToAccess()) {
       this.setIn();
     }
+    if (this.isParentControlNavigation()) {
+      return;
+    }
+
+    setTimeout(() => {
+      // Astuce pour que l'écoute ne soit pas prise en compte lorsque l'appui sur une touche est en cours
+      this.#container.addEventListener('keydown', this.#onKeyDownEvent);
+    }, 0);
   }
   /**
    * Désactive la navigation. La tabulation ne pourra jamais accéder aux composants gérés par le focusManager
@@ -233,6 +251,16 @@ class FocusManager {
   hasNavigationActive() {
     return this.#navigationActive || this.getChildFocusManager()
       ?.hasNavigationActive();
+  }
+  isParentControlNavigation() {
+    if (this.pressEnterToAccess()) {
+      return false;
+    }
+    const parentFocusManager = this.getParentFocusManager();
+    return parentFocusManager?.isControlChildNavigation();
+  }
+  isControlChildNavigation() {
+    return false;
   }
 
   /*
@@ -269,7 +297,18 @@ class FocusManager {
     if (!current) {
       return false;
     }
-    return current.isFocused() || current.getFocusManager()
+    if (current.isFocused()) {
+      return true;
+    }
+    const childFocusManager = current.getFocusManager();
+    if (!childFocusManager) {
+      return false;
+    }
+    if (childFocusManager.getAllComponents()
+      .find(component => component.isFocused())) {
+      return true;
+    }
+    return childFocusManager
       ?.isCurrentHasFocused();
   }
 
@@ -451,6 +490,7 @@ class FocusManager {
     if (this.canEnter()) {
       keys.push('Enter');
     }
+
     if (this.#canTab) {
       keys.push('Tab');
     }
@@ -505,7 +545,7 @@ class FocusManager {
     const doEnter = this.getRootFocusManager()
       .callBeforeEnter(this.getCurrent());
     if (doEnter) {
-      this.#enter();
+      this.enter();
     }
   }
   #onKeyEscape() {
@@ -536,7 +576,7 @@ class FocusManager {
   }
   enableNavigationForChosen() {
     // NOTE : Des systèmes de navigation via des flèches peuvent être pilotés par un système plus global via tabulation. Ainsi, on naviguera d'un composant à l'autre via Tab et à l'intérieur du composant via les flèches. Ainsi, pour un enfant d'un TabFocusManager, c'est le TabFocusManager qui pilote.
-    const focusManagerToEnable = this.getParentFocusManager() instanceof TabFocusManager ? this.getParentFocusManager() : this;
+    const focusManagerToEnable = this.getParentFocusManager() instanceof CompositeFocusManager ? this.getParentFocusManager() : this;
     if (focusManagerToEnable.pressEnterToAccess()) {
       // Clic directement sur le composant pouvant être accéder par la touche Entrée. On alerte via la fonction a appeler avant l'entrée dans le composant. Pour éviter des surprises, on autorise l'entrée dans l'élément cliqué : il ne faut pas frustrer l'utilisateur en l'empêchant d'aller là où il le souhaite
       this.getRootFocusManager()

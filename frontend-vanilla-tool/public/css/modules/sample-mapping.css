@@ -2,6 +2,7 @@
   --number-of-columns: 1;
   container-type: inline-size;
 }
+
 .sample-mapping__row {
   --space-for-all-post-it: calc(100cqi - 46px);
   --space-table-default-border: 1px;
@@ -41,7 +42,14 @@
 }
 .sample-mapping__table {
   display: block;
-  height: 100%;
+  width: calc(100% - 4px);
+  height: calc(100% - 4px);
+}
+.sample-mapping__table {
+  position: relative;
+  left: 2px;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
 }
 .sample-mapping__rule,
 .sample-mapping__samples {
@@ -51,7 +59,8 @@
   margin: 0 auto;
   width: var(--post-it-width);
 }
-.sample-mapping .list__element {
+.sample-mapping .list__element,
+.sample-mapping__samples__footer {
   padding: var(--global-padding);
 }
 .sample-mapping__story-item .item,
@@ -94,6 +103,6 @@
 /* Encadrer la table si un element a le focus ou du drag&drop */
 .sample-mapping__table:has(.drag-over),
 .sample-mapping__table:has(*:focus) {
-  outline: 1px solid var(--color-border-focus);
+  border: 1px solid var(--color-border-focus);
 }
 

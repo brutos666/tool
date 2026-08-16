@@ -5,7 +5,7 @@ class CheckListView extends ItemsView {
   name = 'CheckListView';
 
   constructor() {
-    super({ addButton: false });
+    super();
   }
 
   getHtmlView() {
