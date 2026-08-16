@@ -144,10 +144,6 @@ class SampleMapping extends Items {
     tableView.magnifyFocused();
   }
 
-  giveFocus() {
-    this.#item.giveFocus();
-  }
-
 }
 
 export default SampleMapping;

@@ -32,8 +32,16 @@ class ColumnFocusManager extends CompositeFocusManager {
     this.#columns.push(components);
   }
   addColumnAt(index, ...components) {
+    if (this.#columns.length === index) {
+      this.addColumn(...components);
+      return;
+    }
+    const column = this.#columns[index];
+    let componentIndex = this.getAllComponents()
+      .findIndex(component => component === column[0]);
     for (const component of components) {
-      this.addComponent(component);
+      this.addComponentAt(componentIndex, component);
+      componentIndex++;
     }
     this.#columns.splice(index, 0, components);
   }

@@ -62,7 +62,7 @@ class Item extends Component {
     this.setStaticChild('title', this.#titleInput);
     focusManager.addComponent(this.#titleInput);
 
-    this.#textInput = this.initText(updateRight);
+    this.#textInput = this.initText(layout, updateRight);
     if (this.#textInput) {
       this.setStaticChild('text', this.#textInput);
       focusManager.addComponent(this.#textInput);

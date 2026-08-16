@@ -28,7 +28,8 @@
   overflow: auto;
   resize: both;
 }
-.sample-mapping__table.current--magnify .item.current {
+.sample-mapping__table.current--magnify .item:has(*:focus),
+.sample-mapping__table.current--magnify .list__element:focus .item {
   min-width: max(var(--default-post-it-width), calc(var(--post-it-width) * 1.2));
   min-height: max(var(--default-post-it-height), calc(var(--post-it-height) * 1.2));
 }

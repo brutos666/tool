@@ -42,7 +42,7 @@ class CompositeFocusManager extends FocusManager {
     super.removeCurrent();
   }
   /** @override */
-  changeCurrent() {
+  changeCurrent(index) {
     this.getAllComponents()
       .forEach(component => {
         const focusManager = component.getFocusManager();
@@ -51,7 +51,7 @@ class CompositeFocusManager extends FocusManager {
         }
       });
 
-    super.changeCurrent();
+    super.changeCurrent(index);
   }
 
   /*
