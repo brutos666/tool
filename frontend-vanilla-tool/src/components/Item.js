@@ -242,7 +242,9 @@ class Item extends Component {
       this.#doneCheckbox?.setChecked(itemInfos.state === 'DONE');
     }
     this.#titleInput.setValue(itemInfos.title);
-    this.#textInput?.setValue(itemInfos.text);
+    if (itemInfos.text) {
+      this.#textInput?.setValue(itemInfos.text);
+    }
   }
 
   setToDelete() {
