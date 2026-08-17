@@ -218,12 +218,16 @@ class FocusManager {
    */
   enableKeyNavigation() {
     this.#navigationActive = true;
-    this.getCurrent()
-      ?.setTabIndex(0);
+    const current = this.getCurrent();
+    if (!current) {
+      return;
+    }
 
+    current.setTabIndex(0);
     setTimeout(() => {
       // Astuce pour que l'écoute ne soit pas prise en compte lorsque l'appui sur une touche est en cours
-      this.#container.addEventListener('keydown', this.#onKeyDownEvent);
+      current.getView()
+        .addEventListener('keydown', this.#onKeyDownEvent);
     }, 0);
   }
   /**
@@ -231,9 +235,14 @@ class FocusManager {
    */
   disableKeyNavigation() {
     this.#navigationActive = false;
-    this.getCurrent()
-      ?.setTabIndex(-1);
-    this.#container.removeEventListener('keydown', this.#onKeyDownEvent);
+    const current = this.getCurrent();
+    if (!current) {
+      return;
+    }
+
+    current.setTabIndex(-1);
+    current.getView()
+      .removeEventListener('keydown', this.#onKeyDownEvent);
   }
   disableNavigationForAll() {
     this.disableKeyNavigation();
@@ -248,6 +257,9 @@ class FocusManager {
       ?.hasNavigationActive();
   }
   isParentControlNavigation() {
+    if (this.pressEnterToAccess()) {
+      return false;
+    }
     const parentFocusManager = this.getParentFocusManager();
     return parentFocusManager?.isControlChildNavigation();
   }
@@ -354,9 +366,35 @@ class FocusManager {
    */
   setCurrent(component) {
     this.removeCurrent();
-    // Ne permettre la prise de focus que si le focusManager est à l'écoute
-    component.setTabIndex(this.isNavigationActive() ? 0 : -1);
+    const isNavigationActive = this.isNavigationActive();
+    if (isNavigationActive) {
+      component.setTabIndex(0);
+      component.getView()
+        .addEventListener('keydown', this.#onKeyDownEvent);
+    } else {
+      component.setTabIndex(-1);
+    }
     this.#current = component;
+  }
+  removeCurrent() {
+    const current = this.getCurrent();
+    if (!current) {
+      return;
+    }
+    current.setTabIndex(-1);
+    current.getView()
+      .removeEventListener('keydown', this.#onKeyDownEvent);
+    this.#current = null;
+  }
+  /**
+   * Retourne le composant courant
+   * @returns {Component}
+   */
+  getCurrent() {
+    return this.#current;
+  }
+  getIndexCurrent() {
+    return this.#components.indexOf(this.getCurrent());
   }
   setCurrentWithIndex(index) {
     this.setCurrent(this.#components[index]);
@@ -379,24 +417,6 @@ class FocusManager {
       return true;
     }
     return false;
-  }
-  /**
-   * Retourne le composant courant
-   * @returns {Component}
-   */
-  getCurrent() {
-    return this.#current;
-  }
-  getIndexCurrent() {
-    return this.#components.indexOf(this.getCurrent());
-  }
-  removeCurrent() {
-    if (!this.#current) {
-      return;
-    }
-    this.getCurrent()
-      .setTabIndex(-1);
-    this.#current = null;
   }
   setCurrentBranch(target) {
     for (const component of this.#components) {
@@ -577,7 +597,8 @@ class FocusManager {
       // Si clic sur le parent qui contient la zone, alors on entre que si le before accepte d'entrer dans la zone
       const doEnter = rootFocusManager.callBeforeEnter(this.getCurrent());
       if (doEnter) {
-        this.setIn();
+        this.getChildFocusManager()
+          .setIn();
       }
     }
   }
@@ -643,9 +664,6 @@ class FocusManager {
     if (!parentFocusManager) {
       return null;
     }
-    if (parentFocusManager.isParentControlNavigation()) {
-      parentFocusManager = parentFocusManager.getParentFocusManager();
-    }
     this.giveControlToFocusManager(parentFocusManager);
     return parentFocusManager;
   }
@@ -667,7 +685,12 @@ class FocusManager {
       this.setOut();
     }
     this.disableKeyNavigation();
-    focusManager.enableKeyNavigation();
+    if (focusManager.isParentControlNavigation()) {
+      focusManager.getParentFocusManager()
+        .enableKeyNavigation();
+    } else {
+      focusManager.enableKeyNavigation();
+    }
   }
 
   /**

@@ -181,10 +181,11 @@ class ColumnFocusManager extends CompositeFocusManager {
       const childFocusManager = this.getAccessibleFocusManager(component);
       if (childFocusManager?.getAllComponents()
         .includes(nextComponent)) {
-        childFocusManager.setCurrent(nextComponent);
         this.setCurrent(component);
+        childFocusManager.setCurrent(nextComponent);
         // Il ne peut y avoir qu'un seul tabindex
         component.setTabIndex(-1);
+        nextComponent.setTabIndex(0);
         break;
       }
     }

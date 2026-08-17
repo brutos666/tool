@@ -106,4 +106,7 @@
 .sample-mapping__table:has(*:focus) {
   border: 1px solid var(--color-border-focus);
 }
+.sample-mapping__table:focus-visible {
+  border: 2px solid var(--color-border-focus);
+}
 
