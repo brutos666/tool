@@ -71,7 +71,7 @@
     visibility 0.2s;
 }
 .item--post-it.item:hover .item__toolbar,
-.item--post-it.item:focus-within .item__toolbar {
+.list__element:focus-within .item--post-it.item .item__toolbar {
   visibility: visible;
   opacity: 1;
 }
