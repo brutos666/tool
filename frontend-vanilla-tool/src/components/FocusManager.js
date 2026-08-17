@@ -109,17 +109,14 @@ class FocusManager {
   }
 
   enter() {
-    if (!this.getChildFocusManager()) {
-      return;
-    }
     const focusManager = this.giveControlToCurrent();
-    focusManager.setParentFocusManager(this);
+    focusManager.giveFocus();
     focusManager.setIn();
   }
   exit() {
+    this.setOut();
     const parentFocusManager = this.giveControlToParent();
     parentFocusManager.giveFocus();
-    this.setOut();
   }
 
   /*
@@ -138,15 +135,15 @@ class FocusManager {
     component.setTabIndex(-1);
     component.getView()
       .addEventListener('mousedown', this.#onMouseDownEvent);
+    component.getFocusManager()
+      ?.setParentFocusManager(this);
     if (!this.getCurrent()) {
       this.setCurrentFirstFocusable();
     }
   }
   removeComponent(index) {
     const component = this.#components[index];
-    component.setTabIndex(null);
-    component.getView()
-      .removeEventListener('mousedown', this.#onMouseDownEvent);
+    this.disableComponentFocus(component);
     this.#components.splice(index, 1);
     if (this.getCurrent() !== component) {
       return;
@@ -171,10 +168,16 @@ class FocusManager {
     this.changeCurrent();
     this.removeCurrent();
     for (const component of this.#components) {
-      component.getView()
-        .removeEventListener('mousedown', this.#onMouseDownEvent);
+      this.disableComponentFocus(component);
     }
     this.#components = [];
+  }
+  disableComponentFocus(component) {
+    component.setTabIndex(null);
+    component.getView()
+      .removeEventListener('mousedown', this.#onMouseDownEvent);
+    component.getFocusManager()
+      ?.setParentFocusManager(null);
   }
   getAllComponents() {
     return this.#components;
@@ -218,14 +221,6 @@ class FocusManager {
     this.getCurrent()
       ?.setTabIndex(0);
 
-    // Si on clique dans une zone accessible par la touche entrée, on doit pouvoir la quitter avec la touche Escape
-    if (this.pressEnterToAccess()) {
-      this.setIn();
-    }
-    if (this.isParentControlNavigation()) {
-      return;
-    }
-
     setTimeout(() => {
       // Astuce pour que l'écoute ne soit pas prise en compte lorsque l'appui sur une touche est en cours
       this.#container.addEventListener('keydown', this.#onKeyDownEvent);
@@ -253,9 +248,6 @@ class FocusManager {
       ?.hasNavigationActive();
   }
   isParentControlNavigation() {
-    if (this.pressEnterToAccess()) {
-      return false;
-    }
     const parentFocusManager = this.getParentFocusManager();
     return parentFocusManager?.isControlChildNavigation();
   }
@@ -414,9 +406,10 @@ class FocusManager {
         break;
       }
     }
-    this.getParentFocusManager()
-      ?.setCurrentBranch(target);
+    const parentFocusManager = this.getParentFocusManager();
+    parentFocusManager?.setCurrentBranch(target);
   }
+
   /**
    * Met à jour le courant lorsque un composant devient accessible ou inaccessible
    * @param currentIndexBeforeRemove - Index du courant avant sa suppression de la liste des composants. Lorsqu'il n'est pas fourni, c'est que le courant est toujours présent et sa position sera recherchée si besoin
@@ -440,9 +433,6 @@ class FocusManager {
       return;
     }
     if (activeFocusManager !== newFocusManager) {
-      if (activeFocusManager.canExit()) {
-        activeFocusManager.setOut();
-      }
       activeFocusManager.giveControlToFocusManager(newFocusManager);
     }
     newFocusManager.giveFocus();
@@ -567,27 +557,37 @@ class FocusManager {
     const rootFocusManager = this.getRootFocusManager();
     // Si nous sommes dans un arbre de focusManager, il faut désactiver les autres focusManager des vues courantes avant de positionner le nouvel élément courant
     rootFocusManager.disableNavigationForAll();
-    // Positionner le courant pour chaque noeud de l'arbre
+    // Positionner le courant pour chaque noeud de l'arbre. S'il s'agit d'une zone dans laquelle on peut entrée et sortie (Entrée/Escape), on appelle la fonction avant Entrée.
     this.setCurrentBranch(event.currentTarget);
-    // Activer le système de navigation correspondant à l'endroit cliqué. S'il s'agit d'une zone dans laquelle on peut entrée et sortie (Entrée/Escape), on appelle la fonction avant Entrée, si le système parent est une navigation via Tab, on active cette dernière.
+    // Si on accède à une zone accessible par la touche entrée, on doit indiquer que l'on est entré afin de pouvoir la quitter avec la touche Escape
+    this.enterIn();
+    // Activer le système de navigation correspondant à l'endroit cliqué. Si le système parent est une navigation via Tab, on active cette dernière.
     this.enableNavigationForChosen();
 
     event.stopPropagation();
   }
+  enterIn() {
+    const rootFocusManager = this.getRootFocusManager();
+    if (this.pressEnterToAccess()) {
+      // Si clic dans la zone alors on entre dedans.
+      rootFocusManager.callBeforeEnter(this.getParentFocusManager()
+        .getCurrent());
+      this.setIn();
+    } else if (this.canEnter()) {
+      // Si clic sur le parent qui contient la zone, alors on entre que si le before accepte d'entrer dans la zone
+      const doEnter = rootFocusManager.callBeforeEnter(this.getCurrent());
+      if (doEnter) {
+        this.setIn();
+      }
+    }
+  }
   enableNavigationForChosen() {
+    if (this.canExit()) {
+      this.enableKeyNavigation();
+      return;
+    }
     // NOTE : Des systèmes de navigation via des flèches peuvent être pilotés par un système plus global via tabulation. Ainsi, on naviguera d'un composant à l'autre via Tab et à l'intérieur du composant via les flèches. Ainsi, pour un enfant d'un TabFocusManager, c'est le TabFocusManager qui pilote.
     const focusManagerToEnable = this.getParentFocusManager() instanceof CompositeFocusManager ? this.getParentFocusManager() : this;
-    if (focusManagerToEnable.pressEnterToAccess()) {
-      // Clic directement sur le composant pouvant être accéder par la touche Entrée. On alerte via la fonction a appeler avant l'entrée dans le composant. Pour éviter des surprises, on autorise l'entrée dans l'élément cliqué : il ne faut pas frustrer l'utilisateur en l'empêchant d'aller là où il le souhaite
-      this.getRootFocusManager()
-        .callBeforeEnter(focusManagerToEnable.getParentFocusManager()
-          .getCurrent());
-    } else if (focusManagerToEnable.getChildFocusManager()
-      ?.pressEnterToAccess()) {
-      // Clic sur le parent du composant pouvant être accéder par la touche Entrée
-      this.getRootFocusManager()
-        .callBeforeEnter(focusManagerToEnable.getCurrent());
-    }
     focusManagerToEnable.enableKeyNavigation();
   }
 
@@ -635,27 +635,27 @@ class FocusManager {
   }
 
   /**
-   * Donne le contrôle au focusManager de la vue courante
-   * @returns {FocusManager} focusManager de la vue
-   */
-  giveControlToCurrent() {
-    const focusManager = this.getChildFocusManager();
-    this.giveControlToFocusManager(focusManager);
-    focusManager.giveFocus();
-    return focusManager;
-  }
-
-  /**
    * Donne le contrôle au focusManager parent
    * @returns {FocusManager} focusManager parent
    */
   giveControlToParent() {
-    const parentFocusManager = this.getParentFocusManager();
+    let parentFocusManager = this.getParentFocusManager();
     if (!parentFocusManager) {
       return null;
     }
+    if (parentFocusManager.isParentControlNavigation()) {
+      parentFocusManager = parentFocusManager.getParentFocusManager();
+    }
     this.giveControlToFocusManager(parentFocusManager);
     return parentFocusManager;
+  }
+  giveControlToCurrent() {
+    if (!this.getChildFocusManager()) {
+      return;
+    }
+    const childFocusManager = this.getChildFocusManager();
+    this.giveControlToFocusManager(childFocusManager);
+    return childFocusManager;
   }
 
   /**
@@ -663,6 +663,9 @@ class FocusManager {
    * @param {FocusManager} focusManager
    */
   giveControlToFocusManager(focusManager) {
+    if (this.canExit()) {
+      this.setOut();
+    }
     this.disableKeyNavigation();
     focusManager.enableKeyNavigation();
   }

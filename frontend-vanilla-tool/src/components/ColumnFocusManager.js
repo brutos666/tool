@@ -112,11 +112,12 @@ class ColumnFocusManager extends CompositeFocusManager {
   enter() {
     const accessibleFocusManager = this.getAccessibleChildFocusManager();
     if (accessibleFocusManager) {
-      const childFocusManager = accessibleFocusManager.getChildFocusManager();
-      this.giveControlToFocusManager(childFocusManager);
-      childFocusManager.giveFocus();
-      childFocusManager.setParentFocusManager(this);
-      childFocusManager.setIn();
+      const doEnter = this.getRootFocusManager()
+        .callBeforeEnter(accessibleFocusManager.getCurrent());
+      if (doEnter) {
+        this.disableKeyNavigation();
+        accessibleFocusManager.enter();
+      }
       return;
     }
     super.enter();

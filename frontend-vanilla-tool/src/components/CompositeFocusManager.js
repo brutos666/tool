@@ -4,38 +4,35 @@ import FocusManager from './FocusManager.js';
 class CompositeFocusManager extends FocusManager {
 
   name = 'CompositeFocusManager';
-  /*
-   * Entrée et sortie d'un système de navigation par les touches Entrée/Escape
-   * -------------------------------------------------------------------------
-   */
-  /** @override */
-  exit() {
-    // Sortie avec Escape
-    super.exit();
-
-    this.getAccessibleChildFocusManager()
-      ?.disableKeyNavigation();
-  }
 
   /*
-   * Positionnement du courant : gestion du système de navigation de l'enfant courant
+   * Positionnement du courant : gérer le système de navigation de l'enfant courant
    * --------------------------------------------------------------------------------
    */
   /** @override */
   setCurrent(component) {
     super.setCurrent(component);
 
-    const childFocusManager = this.getAccessibleChildFocusManager();
-    if (!this.isNavigationActive() || !childFocusManager) {
+    if (!this.isNavigationActive() || this.isControlChildNavigation()) {
+      // Ne rien fait si la navigation n'est pas active ou si le parent contrôle la navigation de l'enfant
       return;
     }
-    // Le courant gère son propre système de navigation. Il faut l'activer si le système de navigation courant est actif. On ne désactive pas le système de navigation via la tabulation pour pouvoir sortir de l'enfant avec la touche Tab
-    childFocusManager.enableKeyNavigation();
-    childFocusManager.giveFocus();
+
+    const childFocusManager = this.getAccessibleChildFocusManager();
+    if (childFocusManager) {
+      // Lorsque l'on arrive sur un composant enfant, son système de navigation doit être activé. Cela permet de naviguer dans le composant. Pour pouvoir quitter le composant, il faut que le système de navigation parent reste actif. Ainsi, une navigation parente avec Tab s'occupera de passer d'un composant à l'autre, les flèches permettront de naviguer dans le composant
+      childFocusManager.enableKeyNavigation();
+      childFocusManager.giveFocus();
+    }
   }
   /** @override */
   removeCurrent() {
-    // Le composant que l'on quitte ne doit plus avoir son propre système de navigation actif s'il l'était
+    if (!this.isNavigationActive() || this.isControlChildNavigation()) {
+      super.removeCurrent();
+      return;
+    }
+
+    // Lorsque l'on quitte le composant enfant, son système de navigation doit être désactivé
     this.getAccessibleChildFocusManager()
       ?.disableKeyNavigation();
 
@@ -43,6 +40,7 @@ class CompositeFocusManager extends FocusManager {
   }
   /** @override */
   changeCurrent(index) {
+    // Bien penser à mettre à jour les enfants au cas où une activation/désactivation/visibilité ait changé
     this.getAllComponents()
       .forEach(component => {
         const focusManager = component.getFocusManager();
@@ -59,13 +57,26 @@ class CompositeFocusManager extends FocusManager {
    * --------------------------------------------------
    */
   /**
-   * Active la navigation via le clavier. La tabulation pourra accéder à la zone.
+   * Active la navigation via le clavier. La tabulation pourra accéder à la zone et les touches du clavier seront écoutées
    */
   enableKeyNavigation() {
     super.enableKeyNavigation();
 
-    this.getAccessibleChildFocusManager()
-      ?.enableKeyNavigation();
+    const childFocusManager = this.getAccessibleChildFocusManager();
+    if (!childFocusManager) {
+      return;
+    }
+    // lorsque l'on est positionné sur un enfant qui gère son propre système de navigation, le focus doit aller sur le courat de cet enfant et non pas sur le courant du parent
+    this.getCurrent()
+      .setTabIndex(-1);
+
+    if (this.isControlChildNavigation()) {
+      // Le parent gère la navigation, mais la tabulation doit se positionner sur le courant de l'enfant
+      childFocusManager.getCurrent()
+        ?.setTabIndex(0);
+    } else {
+      childFocusManager.enableKeyNavigation();
+    }
   }
   /**
    * Désactive la navigation. La tabulation ne pourra jamais accéder aux composants gérés par le focusManager
@@ -73,8 +84,10 @@ class CompositeFocusManager extends FocusManager {
   disableKeyNavigation() {
     super.disableKeyNavigation();
 
-    this.getAccessibleChildFocusManager()
-      ?.disableKeyNavigation();
+    if (!this.isControlChildNavigation()) {
+      this.getAccessibleChildFocusManager()
+        ?.disableKeyNavigation();
+    }
   }
 
   /**
@@ -85,6 +98,7 @@ class CompositeFocusManager extends FocusManager {
     if (!childFocusManager) {
       return null;
     }
+    // Si on doit taper la touche Entrée pour entrer dans le composant enfant alors la navigation de ce dernier n'est pas géré par son parent
     if (childFocusManager.pressEnterToAccess()) {
       return null;
     }
