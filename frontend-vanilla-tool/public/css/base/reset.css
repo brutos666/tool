@@ -28,6 +28,10 @@ li {
   padding: 0;
 }
 
+th {
+  font-weight: inherit;
+}
+
 button {
   border: none;
   background: transparent;
