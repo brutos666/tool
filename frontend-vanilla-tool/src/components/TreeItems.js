@@ -39,22 +39,41 @@ class TreeItems extends Items {
   /** @override */
   addItemViewAt(itemComponent, index) {
     super.addItemViewAt(itemComponent, index);
-    super.getFocusManager()
-      .addComponentAt(index, itemComponent.getDecoratedElementByName('Tree'));
+
+    /** @type {TreeFocusManager} */
+    const focusManager = super.getFocusManager();
+    focusManager.addComponentAt(index, itemComponent.getDecoratedElementByName('Tree'));
   }
 
   /** @override */
   removeItemView(index) {
     // NOTE : avertir le focusManager avant la suppression effective pour donner le focus à un autre élément que si le focus était dans la vue supprimée
-    super.getFocusManager()
-      .removeComponent(index);
+    /** @type {TreeFocusManager} */
+    const focusManager = super.getFocusManager();
+    focusManager.removeComponent(index);
+
     super.removeItemView(index);
   }
 
   /** @override */
+  replaceAllItems(treeItemArray) {
+    /** @type {TreeFocusManager} */
+    const focusManager = super.getFocusManager();
+    const hasFocus = focusManager.isCurrentHasFocused();
+
+    super.replaceAllItems(treeItemArray);
+
+    if (hasFocus) {
+      focusManager.giveFocus();
+    }
+  }
+
+  /** @override */
   removeAllItemsViews() {
-    super.getFocusManager()
-      .removeAllComponents();
+    /** @type {TreeFocusManager} */
+    const focusManager = super.getFocusManager();
+    focusManager.removeAllComponents();
+
     super.removeAllItemsViews();
   }
 

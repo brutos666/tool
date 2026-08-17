@@ -28,9 +28,6 @@ class SampleMapping extends Items {
     this.#addRuleButton = new AddItemButton({ id: 'addRule', label: 'Ajouter une règle', layout: ITEM_LAYOUT.Rules });
     this.#addRuleButton.setDoActionCallback(this.addNewItem.bind(this, 'Saisir une règle'));
     this.setStaticChild('addItemAction', this.#addRuleButton);
-
-    super.getFocusManager()
-      .addColumn(this.#addRuleButton);
   }
 
   /** @override */
@@ -86,24 +83,40 @@ class SampleMapping extends Items {
     const sampleItems = component.getSampleItems();
     tableView.addColumnAt(ruleItem.getView(), sampleItems.getView(), index);
 
-    super.getFocusManager()
-      .addColumnAt(index, ruleItem.getDecoratedElementByName('ListItemDecorator'), sampleItems);
+    /** @type {ColumnFocusManager} */
+    const focusManager = super.getFocusManager();
+    focusManager.addColumnAt(index, ruleItem.getDecoratedElementByName('ListItemDecorator'), sampleItems);
   }
+  /** @override */
+  replaceAllItems(treeItemArray) {
+    /** @type {ColumnFocusManager} */
+    const focusManager = super.getFocusManager();
+    const hasFocus = focusManager.isCurrentHasFocused();
+
+    super.replaceAllItems(treeItemArray);
+
+    focusManager.addColumn(this.#addRuleButton);
+    if (hasFocus) {
+      focusManager.giveFocus();
+    }
+  }
+  /** @override */
   removeAllItemsViews() {
-    super.getFocusManager()
-      .removeAllColumns();
-    super.getFocusManager()
-      .addColumn(this.#addRuleButton);
+    /** @type {ColumnFocusManager} */
+    const focusManager = super.getFocusManager();
+    focusManager.removeAllColumns();
 
     /** @type {SampleMappingView} */
     const tableView = this.getView();
     tableView.removeAllColumns();
   }
 
+  /** @override */
   removeItemView(index) {
     // NOTE : avertir le focusManager avant la suppression effective pour donner le focus à un autre élément que si le focus était dans la vue supprimée
-    super.getFocusManager()
-      .removeColumn(index);
+    /** @type {ColumnFocusManager} */
+    const focusManager = super.getFocusManager();
+    focusManager.removeColumn(index);
 
     /** @type {SampleMappingView} */
     const tableView = this.getView();
@@ -118,8 +131,10 @@ class SampleMapping extends Items {
       .getDecoratedElementByName('Item')
       .setTabIndex(0);
 
-    super.getFocusManager()
-      .enableKeyNavigation();
+    /** @type {ColumnFocusManager} */
+    const focusManager = super.getFocusManager();
+    focusManager.addColumn(this.#addRuleButton);
+    focusManager.enableKeyNavigation();
   }
 
   zoomMinus() {

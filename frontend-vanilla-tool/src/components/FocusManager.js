@@ -149,11 +149,7 @@ class FocusManager {
       return;
     }
     // Mettre à jour le nouveau courant
-    const found = this.changeCurrent(index);
-    if (!found) {
-    // Si plus rien n'est accessible, un système de navigation parent doit prendre le main, à condition qu'un système de navigation était en cours
-      this.#updateCurrentParents();
-    }
+    this.changeCurrent(index);
   }
   removeGivenComponent(component) {
     const index = this.getAllComponents()
@@ -165,7 +161,7 @@ class FocusManager {
   }
   removeAllComponents() {
     // Le courant n'est plus accessible : désactiver le système de navigation courant
-    this.changeCurrent();
+    this.changeParentCurrent();
     this.removeCurrent();
     for (const component of this.#components) {
       this.disableComponentFocus(component);
@@ -457,6 +453,17 @@ class FocusManager {
     }
     newFocusManager.giveFocus();
   }
+  changeParentCurrent() {
+    const activeFocusManager = this.getActiveFocusManager();
+    const activeWasFocused = activeFocusManager?.isCurrentHasFocused();
+    const newFocusManager = this.#updateCurrentParents();
+    if (!activeWasFocused) {
+      return;
+    }
+    activeFocusManager.giveControlToFocusManager(newFocusManager);
+    newFocusManager.giveFocus();
+  }
+
   /**
    * Mise à jour du courant dans le système de navigation
    * @param currentIndex - position du courant dans la liste
@@ -479,7 +486,7 @@ class FocusManager {
   #updateCurrentParents() {
     const parentFocusManager = this.getParentFocusManager();
     if (!parentFocusManager) {
-      return;
+      return this;
     }
     const found = parentFocusManager.updateCurrent(parentFocusManager.getIndexCurrent());
     if (found) {

@@ -81,15 +81,8 @@ class Items extends Composite {
    * @param {Array<TreeItem>} treeItemArray
    */
   replaceAllItems(treeItemArray) {
-    const currentItemId = this.getCurrentItem()
-      ?.getTreeItem()
-      .getItemId();
     this.removeAllItems();
     this.addItems(treeItemArray);
-    if (currentItemId) {
-      const newCurrentItem = this.findItemById(currentItemId);
-      newCurrentItem?.setCurrent();
-    }
   }
   /**
    * Ajout d'un ou plusieurs items
@@ -122,29 +115,6 @@ class Items extends Composite {
   removeAllItems() {
     this.removeAllItemsViews();
     this.removeAllChildren();
-  }
-
-  /**
-   * Recherche l'item par rapport à son numéro d'identifiant
-   * @param {number} itemId - Numéro d'identifiant
-   * @returns {Component} composant
-   */
-  findItemById(itemId) {
-    return this.getChildren()
-      .find(child => {
-        const item = child.isDecorator() ? child.getDecoratedElement() : child;
-        return item.getTreeItem()
-          .getItemId() === itemId;
-      });
-  }
-
-  getCurrentItem() {
-    return this.getChildren()
-      .map(child => (child.isDecorator() ? child.getDecoratedElement() : child))
-      .find(child => {
-        const item = child.isDecorator() ? child.getDecoratedElement() : child;
-        return item.isCurrent();
-      });
   }
 
   /**

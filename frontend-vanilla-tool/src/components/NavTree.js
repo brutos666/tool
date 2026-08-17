@@ -10,6 +10,7 @@ class NavTree extends TreeItems {
 
   name = 'NavTree';
 
+  /** @type {Tree} */
   #currentTree = null;
 
   constructor() {
@@ -32,16 +33,56 @@ class NavTree extends TreeItems {
     this.#currentTree = currentTree;
     currentTree.setCurrent();
   }
-  removeChild(child) {
-    if (this.#currentTree === child) {
+
+  /** @override */
+  removeChild(element) {
+    super.removeChild(element);
+
+    if (this.#currentTree === element) {
       this.#currentTree.removeCurrent();
       this.#currentTree = null;
     }
   }
+
+  /** @override */
   removeAllChildren() {
+    super.removeAllChildren();
+
     this.#currentTree?.removeCurrent();
     this.#currentTree = null;
   }
+  /** @override */
+  replaceAllItems(treeItemArray) {
+    const currentItemId = this.#currentTree?.getDecoratedElementByName('Item')
+      .getTreeItem()
+      .getItemId();
+
+    super.replaceAllItems(treeItemArray);
+
+    if (currentItemId) {
+      const currentTree = this.findTreeByItemId(currentItemId);
+      if (currentTree) {
+        this.setCurrentTree(currentTree);
+      }
+    }
+  }
+  /**
+   * Recherche l'arbre par rapport à son numéro d'identifiant
+   * @param {number} itemId - Numéro d'identifiant
+   * @returns {Tree} arbre
+   */
+  findTreeByItemId(itemId) {
+    const child = this.getChildren()
+      .find(child => {
+        const item = child.getDecoratedElementByName('Item');
+        return item.getTreeItem()
+          .getItemId() === itemId;
+      });
+    if (child) {
+      return child.getDecoratedElementByName('Tree');
+    }
+  }
+
   /**
    * Lorsque l'utilisateur entre dans le composant avec la touche Entrée ou la souris
    * @param {Component} component
