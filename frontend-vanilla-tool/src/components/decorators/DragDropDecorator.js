@@ -1,4 +1,5 @@
 import StoreData from '../../data/StoreData.js';
+import { ITEM_LAYOUT } from '../../tools/Constants.js';
 import DragButton from '../DragButton.js';
 import ItemDecorator from './ItemDecorator.js';
 import DragDropDecoratorView from './views/DragDropDecoratorView.js';
@@ -20,16 +21,18 @@ class DragDropDecorator extends ItemDecorator {
 
   constructor(decoratedElement) {
     super(new DragDropDecoratorView(decoratedElement.getView()), decoratedElement);
-    const treeItem = this.getDecoratedElement()
-      .getTreeItem();
-
-    const dragAction = new DragButton(decoratedElement);
-    dragAction.setDoActionCallback(this.startDragDrop.bind(this));
-    // Ajout à la barre d'outil de l'item décoré
     /** @type {Item} */
-    const item = this.getDecoratedElement();
-    item.getStaticChild('toolbar')
-      ?.addChild(dragAction);
+    const item = this.getDecoratedElementByName('Item');
+    const itemLayout = item.getLayout();
+    const isPostIt = ITEM_LAYOUT.isPostIt(itemLayout);
+    const footerToolbar = item.getStaticChild('footerToolbar');
+    const treeItem = item.getTreeItem();
+
+    const dragAction = new DragButton(decoratedElement, isPostIt ? 'move' : 'reorder');
+    dragAction.setDoActionCallback(this.startDragDrop.bind(this));
+    if (footerToolbar) {
+      footerToolbar.addChild(dragAction);
+    }
 
     /** @type {DragDropDecoratorView} */
     const view = this.getView();

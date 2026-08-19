@@ -40,23 +40,15 @@ class ItemView extends View {
    * @override {@link View.getHtmlView}
    * @returns {string} - Code HTML de l'item
    */
-  getHtmlView(data) {
-    const layout = data.layout;
-    if (ITEM_LAYOUT.isPostIt(layout)) {
-      return String.raw`<section class="item" tabindex="-1">
-      <template id="toolbar" aria-controls="itemArticle" class="item__toolbar" ></template>
-      ${ this.getHtmlArticle() }</section>`;
-    }
-    return String.raw`<section class="item" tabindex="-1">${ this.getHtmlArticle() }
-      <template id="toolbar" aria-controls="itemArticle" class="item__toolbar" ></template>
-      </section>`;
-  }
-
-  getHtmlArticle() {
-    return String.raw`<article id="itemArticle" class="item__article" aria-label="Item">
-          <template id="done" class="item__checkbox" aria-label="Effectué/non effectué" aria-description="Cliquez pour marquer comme effectué"></template>
-          <template id="title" class="item__title" aria-label="Titre de l'item"></template>
+  getHtmlView() {
+    return String.raw`<article id="itemArticle" class="item" aria-label="Item">
+          <header class="item__header" tabindex="-1" >
+            <template id="done" class="item__checkbox" aria-label="Effectué/non effectué" aria-description="Cliquez pour marquer comme effectué"></template>
+            <template id="title" class="item__title" aria-label="Titre de l'item"></template>
+            <template id="toolbar" aria-controls="itemArticle" class="item__toolbar" ></template>
+          </header>
           <template id="text" class="item__text" aria-label="Détail de l'item"></template>
+          <footer class="item__footer"><template id="footerToolbar" aria-controls="itemArticle" class="item__footer-toolbar" ></template></footer>
       </article>`;
   }
 

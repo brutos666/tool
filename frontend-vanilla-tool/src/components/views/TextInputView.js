@@ -11,7 +11,7 @@ class TextInputView extends View {
     this.getElementView()
       .addEventListener('focus', this.enter.bind(this), true);
     this.getElementView()
-      .addEventListener('blur', this.exit.bind(this), false);
+      .addEventListener('blur', this.exit.bind(this), true);
   }
 
   /**
@@ -34,14 +34,14 @@ class TextInputView extends View {
   }
 
   enter() {
-    this.getElementView().textContent = this.getElementView().innerHTML;
+    this.getElementView().innerText = this.getElementView().innerHTML;
   }
   exit() {
-    this.getElementView().innerHTML = this.getElementView().textContent;
+    this.getElementView().innerHTML = this.getElementView().innerText;
   }
 
   getValue() {
-    return this.getElementView().textContent;
+    return this.getElementView().innerText;
   }
 
   setValue(value) {

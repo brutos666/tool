@@ -19,6 +19,8 @@ class Item extends Component {
   /** @type {TreeItem} */
   #treeItem = null;
   #readOnly = false;
+  /** @type {ITEM_LAYOUT} */
+  #layout = null;
 
   /** @type {CheckBox} */
   #doneCheckbox = null;
@@ -44,15 +46,15 @@ class Item extends Component {
    */
   constructor(data) {
     super(new ItemView(data));
+    this.#layout = data.layout;
 
     const focusManager = new TabFocusManager(this.getElementView(), 'horizontal', true);
     super.setFocusManager(focusManager);
 
     const rights = data.rights;
-    const layout = data.layout;
     const updateRight = rights.includes(RIGHT.update);
 
-    this.#doneCheckbox = this.initDone(layout, updateRight);
+    this.#doneCheckbox = this.initDone(updateRight);
     if (this.#doneCheckbox) {
       this.setStaticChild('done', this.#doneCheckbox);
       focusManager.addComponent(this.#doneCheckbox);
@@ -62,17 +64,21 @@ class Item extends Component {
     this.setStaticChild('title', this.#titleInput);
     focusManager.addComponent(this.#titleInput);
 
-    this.#textInput = this.initText(layout, updateRight);
-    if (this.#textInput) {
-      this.setStaticChild('text', this.#textInput);
-      focusManager.addComponent(this.#textInput);
-    }
-
     this.#toolbar = this.initToolbar(rights);
     if (this.#toolbar) {
       this.setStaticChild('toolbar', this.#toolbar);
       focusManager.addComponent(this.#toolbar);
     }
+
+    this.#textInput = this.initText(updateRight);
+    if (this.#textInput) {
+      this.setStaticChild('text', this.#textInput);
+      focusManager.addComponent(this.#textInput);
+    }
+    // Cette barre d'outils servira pour le drag and drop
+    const footerToolbar = new Toolbar();
+    this.setStaticChild('footerToolbar', footerToolbar);
+    focusManager.addComponent(footerToolbar);
 
     if (!updateRight) {
       this.setReadOnly();
@@ -80,8 +86,12 @@ class Item extends Component {
     this.setTreeItem(data.treeItem);
   }
 
-  initDone(layout, updateRight) {
-    if (!ITEM_LAYOUT.hasDone(layout)) {
+  getLayout() {
+    return this.#layout;
+  }
+
+  initDone(updateRight) {
+    if (!ITEM_LAYOUT.hasDone(this.getLayout())) {
       return null;
     }
     const done = new CheckBox({ id: 'done', label: 'Fait', role: 'checkbox', type: 'checkbox' });
@@ -97,8 +107,8 @@ class Item extends Component {
     }
     return title;
   }
-  initText(layout, updateRight) {
-    if (!ITEM_LAYOUT.hasText(layout)) {
+  initText(updateRight) {
+    if (!ITEM_LAYOUT.hasText(this.getLayout())) {
       return null;
     }
     const text = new TextInput();

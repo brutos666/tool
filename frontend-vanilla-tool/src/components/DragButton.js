@@ -8,9 +8,10 @@ class DragButton extends Action {
   /**
    * @constructor
    * @param {Component} dragElement - Element sur lequel se produit le drag&drop
+   * @param {'move'|'reorder'} icon - Icône
    */
-  constructor(dragElement) {
-    super(new DragButtonView());
+  constructor(dragElement, icon) {
+    super(new DragButtonView(icon));
 
     this.getView()
       .setDragElementView(dragElement.getView());

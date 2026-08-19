@@ -1,3 +1,4 @@
+import SvgUtilities from '../../tools/SvgUtilities.js';
 import View from './View.js';
 
 class DragButtonView extends View {
@@ -8,8 +9,12 @@ class DragButtonView extends View {
   #onMouseUpEvent = () => {};
   #focusBefore = null;
 
-  constructor() {
-    super();
+  /**
+   * @constructor. Crée la vue à partir des données passées en paramètre
+   * @param {'move'|'reorder'} icon - Icône
+   */
+  constructor(icon) {
+    super(icon);
 
     this.getElementView()
       .addEventListener('keydown', () => {
@@ -52,18 +57,11 @@ class DragButtonView extends View {
 
   /**
    * @override {@link View.getHtmlView}
+   * @param {'move'|'reorder'} icon - Icône
    */
-  getHtmlView() {
+  getHtmlView(icon) {
     return String.raw`<button class="draggable drag-button" role="button" tabindex="-1">
-      <span class="button__icon">
-        <svg viewBox="0 0 16 10" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
-          <circle cx="3" cy="3" r="1"/>
-          <circle cx="8" cy="3" r="1"/>
-          <circle cx="13" cy="3" r="1"/>
-          <circle cx="3" cy="8" r="1"/>
-          <circle cx="8" cy="8" r="1"/>
-          <circle cx="13" cy="8" r="1"/>
-        </svg></span>
+      <span class="button__icon">${ SvgUtilities.getIcon(icon) }</span>
       <span class="button__label">Déplacer</span></button>`;
   }
 

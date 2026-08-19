@@ -1,5 +1,6 @@
 .label-button,
 .primary-button,
+.drag-button,
 .icon-button,
 .item-like-button {
   text-align: center;
@@ -7,6 +8,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+.button__icon {
+  display: flex;
 }
 .label-button {
   background-color: var(--color-bg-surface);
@@ -58,16 +62,5 @@
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
-}
-
-.drag-button {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
-}
-.drag-button .button__icon {
-  display: flex;
-  height: 80%;
 }
 
