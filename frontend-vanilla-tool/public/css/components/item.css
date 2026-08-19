@@ -21,10 +21,12 @@
   text-align: left;
 }
 .item__toolbar .icon-button {
-  font-weight: bold;
-  font-size: var(--medium-font-size);
   min-width: 20px;
-  aspect-ratio: 1 / 1;
+  min-height: 24px;
+}
+.item__footer .drag-button {
+  min-width: 24px;
+  min-height: 24px;
 }
 
 .item--status-orphan,
@@ -50,9 +52,14 @@
   flex: 1;
   gap: var(--medium-gap);
 }
-.item--todo .item__footer-toolbar,
-.item--title .item__footer-toolbar {
-  border-left: solid 1px var(--color-border);
+.item--todo .item__footer-toolbar::before,
+.item--title .item__footer-toolbar::before {
+  content: "";
+  display: inline-block;
+  width: 1px;
+  height: 1.2em;
+  background: var(--color-border);
+  vertical-align: middle;
 }
 
 /* -- Affichage item comme un post-it -- */
@@ -79,9 +86,8 @@
 .item--post-it .item__footer {
   color: var(--color-text);
   position: absolute;
-  top: 0px;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -70%);
   visibility: hidden;
   opacity: 0;
 }
@@ -107,11 +113,13 @@
   container-type: inline-size;
 }
 .item--post-it .icon-button {
-  font-size: clamp(0.4rem, 15cqi, 2rem);
-  line-height: clamp(0.4rem, 10cqi, 2rem);
   margin: min(1cqi, 2rem);
-  min-width: 10cqi;
-  aspect-ratio: 2 / 1;
+  min-width: max(12cqi, 1rem);
+  min-height: max(12cqi, 1rem);
+}
+.item--post-it .drag-button {
+  min-width: max(12cqi, 1rem);
+  min-height: max(12cqi, 1rem);
 }
 .item--post-it .item__checkbox .checkbox__input {
   --checkbox-width: clamp(0.5rem, 8cqi, 2rem);

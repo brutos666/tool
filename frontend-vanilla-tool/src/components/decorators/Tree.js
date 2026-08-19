@@ -37,7 +37,7 @@ class Tree extends ItemDecorator {
       this.setReadOnly();
     }
 
-    this.#toggleButton = new ActionButton({ id: 'toggle', label: 'Ouvrir/Fermer le noeud', type: 'icon', icon: '', role: 'none' });
+    this.#toggleButton = new ActionButton({ id: 'toggle', label: 'Ouvrir/Fermer le noeud', type: 'icon', icon: 'node', role: 'none' });
 
     this.setStaticChild('toggle', this.#toggleButton);
 

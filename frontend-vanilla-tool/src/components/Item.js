@@ -125,14 +125,14 @@ class Item extends Component {
     }
     const toolbar = new Toolbar();
     if (createRight) {
-      this.#addAction = new ActionButton({ id: 'addNewChild', label: 'Ajouter un item', icon: '+', role: 'button', type: 'icon' });
+      this.#addAction = new ActionButton({ id: 'addNewChild', label: 'Ajouter un item', icon: 'plus', role: 'button', type: 'icon' });
       this.#addAction.setDoActionCallback(this.doAdd.bind(this, 'Nouvel item'));
       toolbar.addChild(this.#addAction);
     }
     if (deleteRight) {
-      this.#deleteAction = new ActionButton({ id: 'markToDelete', label: 'Marquer à supprimer', icon: '-', role: 'button', type: 'icon' });
+      this.#deleteAction = new ActionButton({ id: 'markToDelete', label: 'Marquer à supprimer', icon: 'cross', role: 'button', type: 'icon' });
       this.#deleteAction.setDoActionCallback(this.markToDelete.bind(this));
-      this.#undoToDeleteAction = new ActionButton({ id: 'undoToDelete', label: 'Annuler la suppression', icon: '+', role: 'button', type: 'icon' });
+      this.#undoToDeleteAction = new ActionButton({ id: 'undoToDelete', label: 'Annuler la suppression', icon: 'plus', role: 'button', type: 'icon' });
       this.#undoToDeleteAction.setDoActionCallback(this.undoToDelete.bind(this));
       this.#undoToDeleteAction.setHidden();
       toolbar.addChild(this.#deleteAction);

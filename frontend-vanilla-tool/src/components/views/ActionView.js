@@ -1,3 +1,4 @@
+import SvgUtilities from '../../tools/SvgUtilities.js';
 import View from './View.js';
 
 class ActionView extends View {
@@ -32,7 +33,7 @@ class ActionView extends View {
    * @returns {string} - Code HTML du bouton
    */
   getHtmlView(data) {
-    const icon = data.icon ? `<span class="button__icon">${ data.icon }</span>` : '';
+    const icon = data.icon ? `<span class="button__icon">${ SvgUtilities.getIcon(data.icon) }</span>` : '';
     return String.raw`<button id="${ data.id }" class="clickable" role="${ data.role }">
       ${ icon }
       <span class="button__label">${ data.label }</span></button>`;
