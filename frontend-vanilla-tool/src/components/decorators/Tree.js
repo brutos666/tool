@@ -5,7 +5,6 @@ import ItemDecorator from './ItemDecorator.js';
 import TreeView from './views/TreeView.js';
 /** @import Component from '../Component.js'; */
 /** @import TreeItem from '../../data/TreeItem.js'; */
-/** @import TreeFocusManager from '../TreeFocusManager.js'; */
 
 class Tree extends ItemDecorator {
 

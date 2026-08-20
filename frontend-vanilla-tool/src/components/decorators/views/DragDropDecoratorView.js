@@ -194,7 +194,7 @@ class DragDropDecoratorView extends DecoratorView {
       this.#dragOverElement.classList.add('pending');
       this.#timeoutID = setTimeout(() => {
         if (this.#dragOverElement.classList.contains('drag-over')) {
-          treeView.openNode();
+          treeView.setOpen(true);
         }
         this.resetTimeout();
       }, 2000);

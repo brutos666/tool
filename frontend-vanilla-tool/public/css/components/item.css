@@ -93,7 +93,6 @@
 }
 .item--post-it .item__footer .drag-button {
   border-radius: 99px;
-  background-color: var(--color-bg);
 }
 .item--post-it:hover .item__footer,
 .list__element:focus-within .item--post-it .item__footer {
