@@ -22,8 +22,10 @@ class Component extends NodeElement {
    */
   added(parent) {
     this.#parent = parent;
-    this.getFocusManager()
-      ?.setParentComponent(parent);
+    const focusManager = this.getFocusManager();
+    if (focusManager) {
+      focusManager.setParentComponent(parent);
+    }
     this.getView()
       .added(parent.getView());
   }

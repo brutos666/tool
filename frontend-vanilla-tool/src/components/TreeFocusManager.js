@@ -1,9 +1,10 @@
 
 import DOMUtilities from '../tools/DOMUtilities.js';
 import Tree from './decorators/Tree.js';
-import FocusManager from './FocusManager.js';
+import DragDropFocusManager from './DragDropFocusManager.js';
+/** @import Component from './Component.js'; */
 
-class TreeFocusManager extends FocusManager {
+class TreeFocusManager extends DragDropFocusManager {
 
   name = 'TreeFocusManager';
 
@@ -15,6 +16,10 @@ class TreeFocusManager extends FocusManager {
    */
   constructor(container, orientation, enterToAccess) {
     super(container, orientation, false, enterToAccess);
+  }
+  /** @override */
+  allowFocusToDisabled() {
+    return true;
   }
 
   hasFocusableParent() {
@@ -30,10 +35,17 @@ class TreeFocusManager extends FocusManager {
     if (isFocused) {
       return true;
     }
-    const childFocusManager = this.getCurrent()
-      ?.getStaticChild('treeList')
-      .getFocusManager();
+    const childFocusManager = getTreeListFocusManager(this.getCurrentTree());
     return childFocusManager?.isCurrentHasFocused();
+  }
+
+  /**
+   * Retourne l'arbre même si on est sur un placeholder
+   * @returns {Tree}
+   */
+  getCurrentTree() {
+    const current = this.getCurrent();
+    return super.isPlaceholder(current) ? this.getComponentWithPlaceholder(current) : current;
   }
 
   /*
@@ -107,11 +119,7 @@ class TreeFocusManager extends FocusManager {
     rootFocusManager.setCurrent(nextFocusable);
     rootFocusManager.giveFocus();
   }
-  isFocusable(component) {
-    // Le choix a été fait de pouvoir naviguer dans un arbre inaccessible
-    return !component.isHidden() && !DOMUtilities.isHidden(component.getElementView()) && this.getAllComponents()
-      .includes(component);
-  }
+
   /*
    * Vues et élément pouvant prendre le focus par les touches du clavier ou un clic de la souris
    * -------------------------------------------------------------------------------------------
@@ -154,15 +162,13 @@ class TreeFocusManager extends FocusManager {
    * > la gestion du focus se faisant liste d'arbre par liste d'arbre, le passage sur l'enfant se fait en désactivant l'écoute des touches du clavier et en activant celle de la liste enfant
    */
   reactToRightKey() {
-    /**  @type {Tree} */
     const current = this.getCurrent();
-
-    if (current.isClosed()) {
+    if (isTree(current) && current.isClosed()) {
       current.openNode();
       return;
     }
     // S'il y a des éléments enfants accessibles, on se positionne sur le 1er accessible
-    const childFocusManager = this.giveControlToChild(current);
+    const childFocusManager = this.giveControlToChild(this.getCurrentTree());
     if (childFocusManager) {
       childFocusManager.giveFocusToFirstNode();
       return;
@@ -182,13 +188,12 @@ class TreeFocusManager extends FocusManager {
    * > la gestion du focus se faisant liste d'arbre par liste d'arbre, le passage sur le parent se fait en désactivant l'écoute des touches du clavier et en activant celle de la liste parente
    */
   reactToLeftKey() {
-    /**  @type {Tree} */
     const current = this.getCurrent();
-
-    if (current.isOpened()) {
+    if (isTree(current) && current.isOpened()) {
       current.closeNode();
       return;
     }
+
     if (this.hasFocusableParent()) {
       const parentFocusManager = this.giveControlToParentTree();
       parentFocusManager.giveFocus();
@@ -199,8 +204,9 @@ class TreeFocusManager extends FocusManager {
   }
 
   reactToDown() {
-    /**  @type {Tree} */
+    /**  @type {Tree | DragDropPlaceholder} */
     const current = this.getCurrent();
+
     const childFocusManager = this.giveControlToChild(current);
     if (childFocusManager) {
       // Se positionner sur le 1er accessible à l'intérieur du noeud courant
@@ -220,14 +226,19 @@ class TreeFocusManager extends FocusManager {
     if (!this.hasFocusableParent()) {
       return;
     }
-    // Se positionner sur le parent du noeud courant puis sur le 1er suivant accessible
-    const parentFocusManager = this.getParentTreeFocusManager();
+    /*
+     * Se positionner sur le parent du noeud courant puis sur le 1er suivant accessible
+     * NOTE : donner le contrôle à un focusManager ajoute les placeholder en cas de drag&drop.
+     * Si on veut bien se placer sur le placeholder suivant, il faut donner le contrôle.
+     */
+    const parentFocusManager = this.giveControlToParentTree();
     const nextParentFocusable = parentFocusManager.getFirstFocusableAfter(parentFocusManager.getIndexCurrent());
     if (!nextParentFocusable) {
+      parentFocusManager.giveControlToFocusManager(this);
       return;
     }
+
     // Se positionner sur le premier accessible après le noeud courant
-    this.giveControlToFocusManager(parentFocusManager);
     parentFocusManager.setCurrent(nextParentFocusable);
     parentFocusManager.giveFocus();
   }
@@ -261,18 +272,17 @@ class TreeFocusManager extends FocusManager {
     this.disableKeyNavigation();
 
     /**  @type {Tree} */
-    const current = this.getCurrent();
+    const currentTree = this.getCurrentTree();
 
-    if (DOMUtilities.isHidden(this.getContainer()) || this.getAllComponents().length === 0 || !current) {
+    if (DOMUtilities.isHidden(this.getContainer()) || this.getAllComponents().length === 0 || !currentTree) {
       return;
     }
     // Element de l'arbre
-    let childFocusManager = current.getFocusManager();
+    let childFocusManager = currentTree.getFocusManager();
     childFocusManager?.disableNavigationForAll();
 
     // Liste des enfants
-    childFocusManager = current.getStaticChild('treeList')
-      .getFocusManager();
+    childFocusManager = getTreeListFocusManager(currentTree);
     if (childFocusManager && childFocusManager !== this) {
       childFocusManager.disableNavigationForAll();
     }
@@ -281,9 +291,7 @@ class TreeFocusManager extends FocusManager {
     if (super.hasNavigationActive()) {
       return true;
     }
-    const childFocusManager = this.getCurrent()
-      ?.getStaticChild('treeList')
-      .getFocusManager();
+    const childFocusManager = getTreeListFocusManager(this.getCurrentTree());
     return childFocusManager?.hasNavigationActive();
   }
   /*
@@ -296,9 +304,8 @@ class TreeFocusManager extends FocusManager {
    * @returns {TreeFocusManager} focusManager enfant ou null si pas de composants pouvant avoir le focus
    */
   giveControlToChild(component) {
-    const childFocusManager = component.getStaticChild('treeList')
-      .getFocusManager();
-    if (!childFocusManager.getFirstFocusable()) {
+    const childFocusManager = getTreeListFocusManager(component);
+    if (!childFocusManager || !childFocusManager.getFirstFocusable()) {
       return null;
     }
     this.giveControlToFocusManager(childFocusManager);
@@ -325,9 +332,7 @@ class TreeFocusManager extends FocusManager {
     if (activeFocusManager) {
       return activeFocusManager;
     }
-    const treeChildFocusManager = this.getCurrent()
-      ?.getStaticChild('treeList')
-      .getFocusManager();
+    const treeChildFocusManager = getTreeListFocusManager(this.getCurrentTree());
     return treeChildFocusManager?.getActiveFocusManager();
   }
 
@@ -342,5 +347,26 @@ class TreeFocusManager extends FocusManager {
   }
 
 }
-
+/**
+ * Indique si le composant est un arbre (Tree)
+ * @param {Component} component - Composant
+ */
+function isTree(component) {
+  return component.getName() === 'Tree';
+}
+/**
+ * Récupère le système de navigation de la liste des enfants de l'arbre
+ * @param {Component} component - Composant
+ * @returns {FocusManager} système de navigation dans les enfants de l'arbre
+ */
+function getTreeListFocusManager(component) {
+  if (!component) {
+    return null;
+  }
+  const treeListChild = component.getStaticChild('treeList');
+  if (!treeListChild) {
+    return null;
+  }
+  return treeListChild.getFocusManager();
+}
 export default TreeFocusManager;

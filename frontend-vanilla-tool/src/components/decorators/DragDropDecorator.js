@@ -18,15 +18,16 @@ class DragDropDecorator extends ItemDecorator {
   };
 
   #treeItemId;
+  #item;
 
   constructor(decoratedElement) {
     super(new DragDropDecoratorView(decoratedElement.getView()), decoratedElement);
     /** @type {Item} */
-    const item = this.getDecoratedElementByName('Item');
-    const itemLayout = item.getLayout();
+    this.#item = this.getDecoratedElementByName('Item');
+    const itemLayout = this.#item.getLayout();
     const isPostIt = ITEM_LAYOUT.isPostIt(itemLayout);
-    const footerToolbar = item.getStaticChild('footerToolbar');
-    const treeItem = item.getTreeItem();
+    const footerToolbar = this.#item.getStaticChild('footerToolbar');
+    const treeItem = this.#item.getTreeItem();
 
     const dragAction = new DragButton(decoratedElement, isPostIt ? 'move' : 'reorder');
     dragAction.setDoActionCallback(this.startDragDrop.bind(this));
@@ -48,12 +49,11 @@ class DragDropDecorator extends ItemDecorator {
         this.removeOver();
       }
     });
-    view.addEventListener(DragDropDecorator.EVENTS.dragDrop, event => {
-      this.dropOver(event.detail);
-    });
-    view.addEventListener(DragDropDecorator.EVENTS.dragEnd, () => {
-      this.getView()
-        .endDragDrop();
+    view.addEventListener(DragDropDecorator.EVENTS.dragDrop, () => {
+      const draggedId = StoreData.getDragDropCenter()
+        .getDraggedId();
+
+      this.dropOver(draggedId);
     });
     view.addEventListener(DragDropDecorator.EVENTS.dragOn, event => {
       const draggedId = event.detail;
@@ -76,9 +76,12 @@ class DragDropDecorator extends ItemDecorator {
     this.#treeItemId = treeItem.getTreeItemId();
   }
 
+  /**
+   * Début du dragDrop soit par le clavier
+   */
   startDragDrop() {
-    this.getView()
-      .startDragDrop('keyboard');
+    const focusManager = this.getFocusManager();
+    focusManager.enterDragDropMode(this.#treeItemId);
   }
 
   dropOver(draggedId) {

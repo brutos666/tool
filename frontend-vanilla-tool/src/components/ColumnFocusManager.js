@@ -1,14 +1,18 @@
-import DOMUtilities from '../tools/DOMUtilities.js';
-import CompositeFocusManager from './CompositeFocusManager.js';
+import DragDropFocusManager from './DragDropFocusManager.js';
 /** @import Component from './Component.js'; */
 
-class ColumnFocusManager extends CompositeFocusManager {
+class ColumnFocusManager extends DragDropFocusManager {
 
   name = 'ColumnFocusManager';
   /**
    * @typedef {Object} Position - Informations sur l'item
    * @property {number} columnIndex - Index de la colonne
    * @property {number} rowIndex - Index du composant dans la colonne (prise en compte des composants enfants)
+   */
+  /**
+   * @typedef {Object} Cell - Informations sur l'item
+   * @property {Component} component - Composant
+   * @property {boolean} focusable - Est-ce que le composant peut avoir le focus
    */
 
   /** @type {Array<Array<Component>>} */
@@ -21,36 +25,41 @@ class ColumnFocusManager extends CompositeFocusManager {
     // Navigation horizontal pour aller d'une colonne à l'autre, verticale dans la colonne
     super(container, 'horizontal', false, false);
   }
+  /** @override */
+  allowFocusToDisabled() {
+    return true;
+  }
+  /** @override */
+  isControlChildNavigation() {
+    // Indique que le système de navigation des enfants (hors accès avec touche Entrée) est géré ici
+    return true;
+  }
   /*
    * Colonnes contenant les composants pouvant prendre le focus par les touches du clavier ou un clic de la souris
    * -------------------------------------------------------------------------------------------
    */
   addColumn(...components) {
-    for (const component of components) {
-      this.addComponent(component);
-    }
     this.#columns.push(components);
+    this.addComponent(components[0]);
   }
   addColumnAt(index, ...components) {
     if (this.#columns.length === index) {
       this.addColumn(...components);
       return;
     }
-    const column = this.#columns[index];
-    let componentIndex = this.getAllComponents()
-      .findIndex(component => component === column[0]);
-    for (const component of components) {
-      this.addComponentAt(componentIndex, component);
-      componentIndex++;
-    }
     this.#columns.splice(index, 0, components);
+    this.addComponentAt(index, components[0]);
   }
   removeColumn(index) {
-    const column = this.#columns[index];
-    for (const component of column) {
-      this.removeGivenComponent(component);
-    }
+    this.removeComponent(index);
     this.#columns.splice(index, 1);
+  }
+  removeColumns(components) {
+    for (const component of components) {
+      const index = this.#columns.findIndex(column => column[0] === component);
+      this.#columns.splice(index, 1);
+    }
+    this.removeComponents(components);
   }
   removeAllColumns() {
     super.removeAllComponents();
@@ -76,9 +85,35 @@ class ColumnFocusManager extends CompositeFocusManager {
    * Démarrage/Arrêt de la navigation au clavier
    * --------------------------------------------------
    */
-  isControlChildNavigation() {
-    // Indique que le système de navigation des enfants (hors accès avec touche Entrée) est géré ici
-    return true;
+  enableKeyNavigation() {
+    super.enableKeyNavigation();
+
+    const childFocusManager = this.getAccessibleChildFocusManager();
+    if (!childFocusManager) {
+      return;
+    }
+    // lorsque l'on est positionné sur un enfant qui gère son propre système de navigation, le focus doit aller sur le courant de cet enfant et non pas sur le courant du parent
+    this.getCurrent()
+      .setTabIndex(-1);
+
+    // Le parent gère la navigation, mais la tabulation doit se positionner sur le courant de l'enfant
+    childFocusManager.getCurrent()
+      ?.setTabIndex(0);
+  }
+
+  /**
+   * Récupère l'enfant dont le système de focus doit être également actif en même temps que son parent
+   */
+  getAccessibleChildFocusManager() {
+    const childFocusManager = this.getChildFocusManager();
+    if (!childFocusManager) {
+      return null;
+    }
+    // Si on doit taper la touche Entrée pour entrer dans le composant enfant alors la navigation de ce dernier n'est pas géré par son parent
+    if (childFocusManager.pressEnterToAccess()) {
+      return null;
+    }
+    return childFocusManager;
   }
 
   /*
@@ -87,7 +122,7 @@ class ColumnFocusManager extends CompositeFocusManager {
    */
   interceptKeys() {
     const keys = [ 'Home', 'End', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown' ];
-    if (super.canExit()) {
+    if (super.isInside()) {
       keys.push('Escape');
     }
     if (this.canEnter()) {
@@ -102,9 +137,9 @@ class ColumnFocusManager extends CompositeFocusManager {
    */
   /** @override */
   canEnter() {
-    const childFocusManager = this.getAccessibleChildFocusManager();
-    if (childFocusManager) {
-      return childFocusManager.canEnter();
+    const accessibleFocusManager = this.getAccessibleChildFocusManager();
+    if (accessibleFocusManager) {
+      return accessibleFocusManager.canEnter();
     }
     return super.canEnter();
   }
@@ -133,69 +168,116 @@ class ColumnFocusManager extends CompositeFocusManager {
     if (!position) {
       return;
     }
+    let nextFocusable = null;
     if ([ 'Up', 'Down' ].includes(direction)) {
-      this.giveFocusToNextRow(direction, position);
+      nextFocusable = this.getFocusableNextRow(direction, position);
     } else if ([ 'Left', 'Right' ].includes(direction)) {
-      this.giveFocusToNextColumn(direction, position);
+      nextFocusable = this.getFocusableNextColumn(direction, position);
+    }
+    if (nextFocusable) {
+      this.setCurrent(nextFocusable);
+      this.giveFocus();
     }
   }
   /**
    * Donne le focus au composant suivant à partir d'une position et en allant vers le haut ou vers le bas
    * @param {'Up'|'Down'} direction - direction vers laquelle se déplacer
    * @param {Position} position - colonne et ligne
-   * @returns composant trouvé
+   * @returns {Component|null} Composant suivant
    */
-  giveFocusToNextRow(direction, position) {
+  getFocusableNextRow(direction, position) {
     const searchPosition = getSearchPosition(direction, position);
-    const components = this.getAllComponentsColumn(position.columnIndex);
-    const nextComponent = components[searchPosition.rowIndex] || components[position.rowIndex];
-    this.giveFocusToComponent(searchPosition.columnIndex, nextComponent);
+    const nextCell = this.getCell(searchPosition);
+    if (!nextCell) {
+      return null;
+    }
+    if (nextCell.component && nextCell.focusable) {
+      return nextCell.component;
+    }
+    return this.getFocusableNextRow(direction, searchPosition);
   }
+
   /**
    * Donne le focus au composant suivant à partir d'une position et en allant vers la droite ou vers la gauche
    * @param {'Left'|'Right'} direction - direction vers laquelle se déplacer
    * @param {Position} position - colonne et ligne
-   * @returns composant trouvé
+   * @returns {Component|null} Composant suivant
    */
-  giveFocusToNextColumn(direction, position) {
+  getFocusableNextColumn(direction, position) {
     const searchPosition = getSearchPosition(direction, position);
     if ([ -1, this.#columns.length ].includes(searchPosition.columnIndex)) {
-      return;
+      return null;
     }
-    const components = this.getAllComponentsColumn(searchPosition.columnIndex);
-    if (!components.length) {
-      this.giveFocusToNextColumn(direction, searchPosition);
-      return;
+    const nextCell = this.getCell(searchPosition);
+    if (nextCell) {
+      if (nextCell.focusable) {
+        return nextCell.component;
+      }
+      return this.getFocusableNextColumn(direction, searchPosition);
     }
-    const nextComponent = components[searchPosition.rowIndex] || components[components.length - 1];
-    this.giveFocusToComponent(searchPosition.columnIndex, nextComponent);
-  }
-  giveFocusToComponent(columnIndex, nextComponent) {
-    const column = this.#columns[columnIndex];
-    if (column.includes(nextComponent)) {
-      this.setCurrent(nextComponent);
-      this.giveFocus();
-      return;
-    }
-    for (const component of column) {
-      const childFocusManager = this.getAccessibleFocusManager(component);
-      if (childFocusManager?.getAllComponents()
-        .includes(nextComponent)) {
-        this.setCurrent(component);
-        childFocusManager.setCurrent(nextComponent);
-        // Il ne peut y avoir qu'un seul tabindex
-        component.setTabIndex(-1);
-        nextComponent.setTabIndex(0);
-        break;
+    // Cellules pouvant avoir le focus pour la colonne
+    const focusableCells = this.getFocusableCells(searchPosition.columnIndex);
+    if (focusableCells.length) {
+      const nextComponent = focusableCells[focusableCells.length - 1];
+      // En mode drag&drop, on ne souhaite se positionner sur les placeholder entre 2 colonnes que si on navigue sur la 1ere ligne
+      if (!this.isPlaceholder(nextComponent) || position.rowIndex === 0) {
+        return nextComponent;
       }
     }
-    this.giveFocus();
+    return this.getFocusableNextColumn(direction, searchPosition);
   }
-  /** @override */
-  isFocusable(component) {
-    // Le choix a été fait de pouvoir naviguer dans des composants inaccessible
-    return !component.isHidden() && !DOMUtilities.isHidden(component.getElementView()) && this.getAllComponents()
-      .includes(component);
+  /**
+   * Fournit le composant à la position demandée
+   * @param {Position} position - position
+   * @returns {Cell} composant à la position donnée + booléen indiquant s'il peut prendre le focus
+   */
+  getCell(position) {
+    if ([ -1, this.#columns.length ].includes(position.columnIndex) || position.rowIndex < 0) {
+      return null;
+    }
+    const column = this.#columns[position.columnIndex];
+    let index = 0;
+    for (const columnComponent of column) {
+      const focusManager = this.getAccessibleFocusManager(columnComponent);
+      if (!focusManager) {
+        if (index === position.rowIndex) {
+          return { component: columnComponent, focusable: this.isFocusable(columnComponent) };
+        }
+        index++;
+        continue;
+      }
+      const len = focusManager.getAllComponents().length;
+      const indexChild = position.rowIndex - index;
+      if (indexChild < len) {
+        const childComponent = focusManager.getComponentAt(indexChild);
+        return { component: childComponent, focusable: focusManager.isFocusable(childComponent) };
+      }
+      index += len;
+    }
+    return null;
+  }
+  getFocusableCells(columnIndex) {
+    if ([ -1, this.#columns.length ].includes(columnIndex)) {
+      return null;
+    }
+    const column = this.#columns[columnIndex];
+    const cells = [];
+    for (const columnComponent of column) {
+      const focusManager = this.getAccessibleFocusManager(columnComponent);
+      if (!focusManager) {
+        if (this.isFocusable(columnComponent)) {
+          cells.push(columnComponent);
+        }
+        continue;
+      }
+      focusManager.getAllComponents()
+        .forEach(component => {
+          if (focusManager.isFocusable(component)) {
+            cells.push(component);
+          }
+        });
+    }
+    return cells;
   }
   getAccessibleFocusManager(component) {
     const childFocusManager = component.getFocusManager();
@@ -204,11 +286,42 @@ class ColumnFocusManager extends CompositeFocusManager {
     }
     return null;
   }
+  /** @override */
+  getCurrentFocusManager() {
+    return this.getAccessibleChildFocusManager() || this;
+  }
 
   /*
    * Positionnement du courant
    * ---------------------------------------------------
    */
+  /** @override */
+  setCurrent(current) {
+    for (const column of this.#columns) {
+      for (const component of column) {
+        if (component === current) {
+          super.setCurrent(current);
+          return;
+        }
+        const childFocusManager = this.getAccessibleFocusManager(component);
+        if (!childFocusManager || !childFocusManager.getAllComponents()
+          .includes(current)) {
+          continue;
+        }
+        super.setCurrent(component);
+        childFocusManager.setCurrent(current);
+        // Il ne peut y avoir qu'un seul tabindex
+        component.setTabIndex(-1);
+        current.setTabIndex(0);
+        return;
+      }
+    }
+  }
+  /** @override */
+  removeCurrent() {
+    super.removeCurrent();
+  }
+
   /**
    * Donne le position du composant courant
    * @returns {Position} - colonne et ligne du composant
@@ -218,9 +331,8 @@ class ColumnFocusManager extends CompositeFocusManager {
     if (!current) {
       return null;
     }
-
-    const childFocusManager = this.getAccessibleChildFocusManager();
-    const componentToFind = childFocusManager ? childFocusManager.getCurrent() : current;
+    const currentFocusManager = this.getCurrentFocusManager();
+    const componentToFind = currentFocusManager.getCurrent();
 
     let columnIndex = 0;
     for (const column of this.#columns) {
@@ -236,6 +348,82 @@ class ColumnFocusManager extends CompositeFocusManager {
     return null;
   }
 
+  /** Drag& drop **/
+
+  /** @override */
+  enterDragDrop() {
+    if (this.isDragDropReady()) {
+      return true;
+    }
+    if (!super.enterDragDrop()) {
+      return false;
+    }
+
+    for (const column of this.#columns) {
+      for (const component of column) {
+        const childFocusManager = this.getAccessibleFocusManager(component);
+        if (childFocusManager) {
+          childFocusManager.enterDragDrop();
+        }
+      }
+    }
+    return true;
+  }
+  /** @override */
+  exitDragDrop() {
+    if (!this.isDragDropReady()) {
+      return false;
+    }
+
+    for (const column of this.#columns) {
+      for (const component of column) {
+        const childFocusManager = this.getAccessibleFocusManager(component);
+        if (childFocusManager) {
+          childFocusManager.exitDragDrop();
+        }
+      }
+    }
+
+    super.exitDragDrop();
+  }
+
+  /** @override */
+  addPlaceholders() {
+    const columns = [].concat(this.#columns);
+    let lastColumn = null;
+    for (const column of columns) {
+      if (this.addColumnPlaceholder(column, 'before')) {
+        lastColumn = column;
+      }
+    }
+    if (lastColumn) {
+      // Pour le dernier composant concerné par le drag&drop, ajouter un placeholder après
+      this.addColumnPlaceholder(lastColumn, 'after');
+      return true;
+    }
+    return false;
+  }
+  /** @override */
+  removePlaceHolders() {
+    const placeholders = this.getAllComponents()
+      .filter(component => this.isPlaceholder(component));
+    this.destroyPlaceHolders(placeholders);
+    this.removeColumns(placeholders);
+  }
+  addColumnPlaceholder(column, position) {
+    const placeholder = super.createPlaceholder(column[0], position);
+    if (!placeholder) {
+      return false;
+    }
+    const indexColumn = this.#columns.findIndex(col => col === column);
+    if (position === 'before') {
+      this.addColumnAt(indexColumn, placeholder);
+    } else {
+      this.addColumnAt(indexColumn + 1, placeholder);
+    }
+    return true;
+  }
+
 }
 /**
  * Donne les positions à rechercher selon la direction vers laquelle aller par rapport à la position initiale
@@ -244,6 +432,7 @@ class ColumnFocusManager extends CompositeFocusManager {
  * @returns {Position} colonne et ligne recherchée
  */
 function getSearchPosition(direction, position) {
+  // Les placeholders horizontaux ne sont accessibles que lorsque l'on navigue sur la 1ere ligne. Ainsi, sur les autres lignes, le déplacement est de 2 colonnes pour ne pas se positionner sur une colonne qui ne contient que le placeholder horizontal
   const searchColumnIndex = position.columnIndex + (direction === 'Left' ? -1 : (direction === 'Right' ? 1 : 0));
   const searchRowIndex = position.rowIndex + (direction === 'Up' ? -1 : (direction === 'Down' ? 1 : 0));
   return { columnIndex: searchColumnIndex, rowIndex: searchRowIndex };

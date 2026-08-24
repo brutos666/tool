@@ -10,6 +10,7 @@ class DragDropDecoratorView extends DecoratorView {
 
   #dragOverElement = null;
   #timeoutID = null;
+  #treeItemId = null;
 
   /**
    * @constructor
@@ -31,6 +32,11 @@ class DragDropDecoratorView extends DecoratorView {
 
   setTreeItemId(treeItemId) {
     this.#dragOverElement.setAttribute('data-over-id', treeItemId);
+    this.#treeItemId = treeItemId;
+  }
+
+  getTreeItemId() {
+    return this.#treeItemId;
   }
 
   getHtmlView() {
@@ -66,10 +72,10 @@ class DragDropDecoratorView extends DecoratorView {
     if (event.target.closest('.drag-drop--decorator') !== this.getElementView()) {
       return;
     }
-    const draggedId = this.#dragOverElement.getAttribute('data-over-id');
+    const draggedId = this.getTreeItemId();
     event.dataTransfer.effectAllowed = 'move';
     event.dataTransfer.setData('decorated-element', draggedId);
-    this.startDragDrop('mouse');
+    this.startDragDrop();
   }
   onDragEnd() {
     this.endDragDrop();
@@ -124,13 +130,13 @@ class DragDropDecoratorView extends DecoratorView {
   }
 
   addOverBefore() {
-    const draggedOverId = this.#dragOverElement.getAttribute('data-over-id');
+    const draggedOverId = this.getTreeItemId();
     addPlaceholder(this, 'before', draggedOverId);
     this.removeInsideOver();
   }
 
   addOverAfter() {
-    const draggedOverId = this.#dragOverElement.getAttribute('data-over-id');
+    const draggedOverId = this.getTreeItemId();
     addPlaceholder(this, 'after', draggedOverId);
     this.removeInsideOver();
   }
@@ -169,17 +175,15 @@ class DragDropDecoratorView extends DecoratorView {
 
   /**
    * Début du dragDrop soit par la souris soit par le clavier
-   * @param {'keyboard'|'mouse'} dragDropType - Clavier ou souris
    */
-  startDragDrop(dragDropType) {
-    this.getElementView().classList.add('drag-start');
+  startDragDrop() {
+    const draggedId = this.getTreeItemId();
     StoreData.getDragDropCenter()
-      .enterDragDropMode(this, dragDropType);
+      .enterDragDropMode('mouse', draggedId);
   }
 
   endDragDrop() {
     this.removeOver();
-    this.getElementView().classList.remove('drag-start');
     StoreData.getDragDropCenter()
       .exitDragDropMode();
   }
@@ -199,10 +203,6 @@ class DragDropDecoratorView extends DecoratorView {
         this.resetTimeout();
       }, 2000);
     }
-  }
-
-  getDragDropId() {
-    return this.#dragOverElement.getAttribute('data-over-id');
   }
 
 }

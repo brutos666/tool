@@ -50,7 +50,6 @@
 }
 
 /* Encadrer la navigation si un element de la navigation a le focus ou du drag&drop  */
-.nav-tree__items:has(.drag-over),
 .nav-tree__items:has(*:focus) {
   border: 1px solid var(--color-border-focus);
 }

@@ -2,6 +2,7 @@ import StoreData from '../data/StoreData.js';
 import Component from './Component.js';
 import DragDropCenterView from './views/DragDropCenterView.js';
 /** @import DragDropDecoratorView from './decorators/views/DragDropDecoratorView.js'*/
+/** @import FocusManager from './FocusManager.js'; */
 
 /**
  * Cette classe s'occupe de la gestion clavier du drag and drop
@@ -14,22 +15,29 @@ class DragDropCenter extends Component {
   static help_message_mouse = 'Vous êtes en mode drag&drop. Veuillez sélectionner le nouvel emplacement en déplaçant la souris puis relâcher la souris à l\'endroit désiré ou appuyer sur Escape pour annuler.';
 
   #notification = null;
+  #draggedId;
 
   constructor() {
     super(new DragDropCenterView());
   }
 
+  getDraggedId() {
+    return this.#draggedId;
+  }
+
   /**
    * Entrer en mode dragDrop soit par la souris soit par le clavier
-   * @param {DragDropDecoratorView} dragDropDecoratorView
    * @param {'keyboard'|'mouse'} dragDropType - Clavier ou souris
+   * @param {number} draggedId - Identifiant du composant déplacé
    */
-  enterDragDropMode(dragDropDecoratorView, dragDropType) {
+  enterDragDropMode(dragDropType, draggedId) {
+    this.#draggedId = draggedId;
+
     this.#notification = StoreData.getNotificationCenter()
       .displayInformation(dragDropType === 'keyboard' ? DragDropCenter.help_message_keyboard : DragDropCenter.help_message_mouse);
 
     this.getView()
-      .enterDragDropMode(dragDropDecoratorView, dragDropType);
+      .enterDragDropMode(dragDropType, draggedId);
   }
 
   exitDragDropMode() {

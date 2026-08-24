@@ -2,7 +2,7 @@ import { ITEM_LAYOUT } from '../tools/Constants.js';
 import AddItemButton from './AddItemButton.js';
 import DragDropDecorator from './decorators/DragDropDecorator.js';
 import ListItemDecorator from './decorators/ListItemDecorator.js';
-import FocusManager from './FocusManager.js';
+import DragDropFocusManager from './DragDropFocusManager.js';
 import Item from './Item.js';
 import Items from './Items.js';
 import SampleMappingSamplesView from './views/SampleMappingSamplesView.js';
@@ -25,7 +25,7 @@ class SampleMappingSamples extends Items {
   /** @override */
   initFocusManager() {
     // NOTE : le système de focus est positionné mais l'écoute des touches de navigation ne doit pas être effective au départ. C'est le composant qui contient les racines des arbres qui doit piloter au départ
-    super.setFocusManager(new FocusManager(this.getElementView(), 'vertical', false));
+    super.setFocusManager(new DragDropFocusManager(this.getElementView(), 'vertical', false));
   }
 
   /**

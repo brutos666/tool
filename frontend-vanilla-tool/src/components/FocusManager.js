@@ -1,4 +1,3 @@
-import StoreData from '../data/StoreData.js';
 import DOMUtilities from '../tools/DOMUtilities.js';
 import CompositeFocusManager from './CompositeFocusManager.js';
 /** @import Component from './Component.js'; */
@@ -21,7 +20,7 @@ class FocusManager {
     Home: this.giveFocusToFirst.bind(this),
     End: this.giveFocusToLast.bind(this)
   };
-  #onKeyDownEvent = this.#onKeyDown.bind(this);
+  #onKeyDownEvent = this.onKeyDown.bind(this);
   #onMouseDownEvent = this.#onMouseDown.bind(this);
 
   /** @type {FocusManager} */
@@ -63,6 +62,13 @@ class FocusManager {
       this.setOut();
     }
   }
+  /** Paramétrages par défaut */
+  allowFocusToDisabled() {
+    return false;
+  }
+  isControlChildNavigation() {
+    return false;
+  }
 
   getContainer() {
     return this.#container;
@@ -77,6 +83,7 @@ class FocusManager {
    */
   setParentComponent(parent) {
     this.#parent = parent;
+    this.setCurrentFirstFocusable();
   }
   getParentComponent() {
     return this.#parent;
@@ -104,7 +111,7 @@ class FocusManager {
     this.getContainer()
       .setAttribute('aria-description', 'Entrée pour activer la navigation.');
   }
-  canExit() {
+  isInside() {
     return this.#isInside;
   }
 
@@ -137,8 +144,9 @@ class FocusManager {
       .addEventListener('mousedown', this.#onMouseDownEvent);
     component.getFocusManager()
       ?.setParentFocusManager(this);
-    if (!this.getCurrent()) {
-      this.setCurrentFirstFocusable();
+
+    if (this.#parent && !this.#current) {
+      this.setCurrent(component);
     }
   }
   removeComponent(index) {
@@ -159,6 +167,13 @@ class FocusManager {
     }
     this.removeComponent(index);
   }
+  removeComponents(components) {
+    for (const component of components) {
+      const index = this.#components.findIndex(comp => comp === component);
+      this.disableComponentFocus(component);
+      this.#components.splice(index, 1);
+    }
+  }
   removeAllComponents() {
     // Le courant n'est plus accessible : désactiver le système de navigation courant
     this.changeParentCurrent();
@@ -177,6 +192,9 @@ class FocusManager {
   }
   getAllComponents() {
     return this.#components;
+  }
+  getComponentAt(index) {
+    return this.#components[index];
   }
   getFirstFocusable() {
     return this.#components.find(component => this.isFocusable(component));
@@ -258,9 +276,6 @@ class FocusManager {
     }
     const parentFocusManager = this.getParentFocusManager();
     return parentFocusManager?.isControlChildNavigation();
-  }
-  isControlChildNavigation() {
-    return false;
   }
 
   /*
@@ -344,12 +359,13 @@ class FocusManager {
     return false;
   }
   isFocusable(component) {
-    // Si le composant contient un focusManager, alors ce dernier est accessible s'il existe un courant accessible
-    const childFocusManager = component.getFocusManager();
-    if (childFocusManager && !childFocusManager.hasFocusable()) {
+    if (!this.allowFocusToDisabled() && component.isDisabled()) {
       return false;
     }
-    return !component.isHidden() && !component.isDisabled() && !DOMUtilities.isHidden(component.getElementView()) && this.#components.includes(component);
+    if (!this.#components.includes(component)) {
+      return false;
+    }
+    return !component.isHidden() && !DOMUtilities.isHidden(component.getElementView());
   }
   hasFocusable() {
     // Le fait d'avoir un courant doit indiquer que
@@ -501,7 +517,7 @@ class FocusManager {
    */
   interceptKeys() {
     const keys = [ 'Home', 'End' ];
-    if (this.canExit()) {
+    if (this.isInside()) {
       keys.push('Escape');
     }
     if (this.canEnter()) {
@@ -525,15 +541,11 @@ class FocusManager {
    * Méthode appelée lors de l'appui sur une touche de clavier
    * @param {Event} event - Event de clavier
    */
-  #onKeyDown(event) {
-    const dragDropMode = StoreData.getDragDropCenter()
-      .isDragDropMode();
-    if (dragDropMode) {
-      return;
-    }
+  onKeyDown(event) {
     if (!this.getCurrent()) {
       return;
     }
+
     if (!this.interceptKeys()
       .includes(event.key)) {
       return;
@@ -610,7 +622,7 @@ class FocusManager {
     }
   }
   enableNavigationForChosen() {
-    if (this.canExit()) {
+    if (this.isInside()) {
       this.enableKeyNavigation();
       return;
     }
@@ -667,7 +679,7 @@ class FocusManager {
    * @returns {FocusManager} focusManager parent
    */
   giveControlToParent() {
-    let parentFocusManager = this.getParentFocusManager();
+    const parentFocusManager = this.getParentFocusManager();
     if (!parentFocusManager) {
       return null;
     }
@@ -688,7 +700,7 @@ class FocusManager {
    * @param {FocusManager} focusManager
    */
   giveControlToFocusManager(focusManager) {
-    if (this.canExit()) {
+    if (this.isInside()) {
       this.setOut();
     }
     this.disableKeyNavigation();
@@ -724,4 +736,5 @@ class FocusManager {
   }
 
 }
+
 export default FocusManager;

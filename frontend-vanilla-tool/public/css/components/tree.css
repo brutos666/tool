@@ -71,21 +71,28 @@
 .tree__content {
   outline: none;
 }
-.tree--node > .tree__item:has(> .tree__content:focus) > .tree__toggle {
-  border: var(--color-border-focus) solid 2px;
-  border-right: none;
+/* Encadrer tree__toggle et tree__content lorsque tree a le focus ou est survolée par drag&drop de la souris */
+.tree.drag-over,
+.tree:focus {
+  outline: none;
 }
-.tree--node > .tree__item > .tree__content:focus {
-  border: var(--color-border-focus) solid 2px;
+.tree--node.drag-over > .tree__item > .tree__toggle,
+.tree--node:focus > .tree__item > .tree__toggle {
+  border: var(--color-border-focus-item) solid 2px;
+  border-right: none;
+  outline: none;
+}
+.tree--node.drag-over > .tree__item > .tree__content,
+.tree--node:focus > .tree__item > .tree__content {
+  border: var(--color-border-focus-item) solid 2px;
   border-left: none;
   outline: none;
 }
-.tree--leaf .tree__item > .tree__content:focus {
-  border: var(--color-border-focus) solid 2px;
-  outline: none;
+.tree--leaf.drag-over > .tree__item > .tree__content,
+.tree--leaf:focus > .tree__item > .tree__content {
+  outline: var(--color-border-focus-item) solid 2px;
 }
 /* Encadrer le noeud de l'arbre dont un enfant a le focus ou du drag&drop
-.tree:has(> .tree__item > .tree__list > .drag-drop--decorator > .drag-over),
 .tree:has(> .tree__item > .tree__list > .drag-drop--decorator > .tree:focus) {
   outline: 1px solid var(--color-border-focus);
 }
