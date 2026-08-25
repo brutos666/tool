@@ -24,9 +24,10 @@ class DragDropDecorator extends ItemDecorator {
     super(new DragDropDecoratorView(decoratedElement.getView()), decoratedElement);
     /** @type {Item} */
     this.#item = this.getDecoratedElementByName('Item');
+    const listItem = this.getDecoratedElementByName('ListItemDecorator');
     const itemLayout = this.#item.getLayout();
     const isPostIt = ITEM_LAYOUT.isPostIt(itemLayout);
-    const footerToolbar = this.#item.getStaticChild('footerToolbar');
+    const footerToolbar = listItem ? listItem.getStaticChild('footerToolbar') : this.#item.getStaticChild('footerToolbar');
     const treeItem = this.#item.getTreeItem();
 
     const dragAction = new DragButton(decoratedElement, isPostIt ? 'move' : 'reorder');
@@ -81,7 +82,8 @@ class DragDropDecorator extends ItemDecorator {
    */
   startDragDrop() {
     const focusManager = this.getFocusManager();
-    focusManager.enterDragDropMode(this.#treeItemId);
+    const parentFocusManager = focusManager.giveControlToParent();
+    parentFocusManager.enterDragDropMode(this.#treeItemId);
   }
 
   dropOver(draggedId) {

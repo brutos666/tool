@@ -8,7 +8,9 @@ class ListItemDecoratorView extends DecoratorView {
   }
 
   getHtmlView() {
-    return String.raw`<li class="list__element">${ super.getTemplateDecoratorHTML() }</li>`;
+    return String.raw`<li class="list__item">${ super.getTemplateDecoratorHTML() }
+    <footer class="list__item__footer"><template id="footerToolbar" aria-controls="itemArticle" class="list__item__footer-toolbar" ></template></footer>
+    </li>`;
   }
 
 }

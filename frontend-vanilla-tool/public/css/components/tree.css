@@ -29,17 +29,6 @@
 .tree--leaf > .tree__item > .tree__toggle {
   pointer-events: none;
 }
-/*
-.tree--leaf > .tree__item > .tree__toggle::before {
-  content: "";
-}
-.tree--node > .tree__item[aria-expanded="false"] > .tree__toggle::before {
-  content: "►";
-}
-.tree--node > .tree__item[aria-expanded="true"] > .tree__toggle::before {
-  content: "▼";
-}
-*/
 .tree--leaf > .tree__item > .tree__toggle {
   display: none;
 }

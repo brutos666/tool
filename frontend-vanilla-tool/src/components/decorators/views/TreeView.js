@@ -19,7 +19,7 @@ class TreeView extends DecoratorView {
   }
 
   getHtmlView() {
-    return String.raw`<li role="none" class="tree list__element">
+    return String.raw`<li role="none" class="tree">
       <div class="tree__item" role="treeitem">
         <template id="toggle" class="tree__toggle icon-button clickable" tabindex="-1" ></template>
         <template id="decoratedSpace" class="tree__content"></template>

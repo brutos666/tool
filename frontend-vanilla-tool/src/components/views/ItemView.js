@@ -42,7 +42,7 @@ class ItemView extends View {
    */
   getHtmlView() {
     return String.raw`<article id="itemArticle" class="item" aria-label="Item">
-          <header class="item__header" tabindex="-1" >
+          <header class="item__header">
             <template id="done" class="item__checkbox" aria-label="Effectué/non effectué" aria-description="Cliquez pour marquer comme effectué"></template>
             <template id="title" class="item__title" aria-label="Titre de l'item"></template>
             <template id="toolbar" aria-controls="itemArticle" class="item__toolbar" ></template>

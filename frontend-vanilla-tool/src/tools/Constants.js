@@ -59,6 +59,9 @@ const ITEM_LAYOUT = {
   hasText(layout) {
     return ITEM_LAYOUT.isPostIt(layout);
   },
+  hasFooterToolbar(layout) {
+    return layout === ITEM_LAYOUT.Title || layout === ITEM_LAYOUT.Todo;
+  },
   getRights(layout) {
     if (ITEM_LAYOUT.isPostIt(layout)) {
       if (layout === ITEM_LAYOUT.Story) {

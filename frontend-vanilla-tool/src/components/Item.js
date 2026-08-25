@@ -74,10 +74,12 @@ class Item extends Component {
       this.setStaticChild('text', this.#textInput);
       focusManager.addComponent(this.#textInput);
     }
-    // Cette barre d'outils servira pour le drag and drop
-    const footerToolbar = new Toolbar();
-    this.setStaticChild('footerToolbar', footerToolbar);
-    focusManager.addComponent(footerToolbar);
+    if (ITEM_LAYOUT.hasFooterToolbar(this.#layout)) {
+      // Cette barre d'outils servira pour le drag and drop
+      const footerToolbar = new Toolbar();
+      this.setStaticChild('footerToolbar', footerToolbar);
+      focusManager.addComponent(footerToolbar);
+    }
 
     if (!updateRight) {
       this.setReadOnly();

@@ -8,7 +8,7 @@ class MenuElementView extends DecoratorView {
   }
 
   getHtmlView() {
-    return String.raw`<li class="menu__element list__element">${ super.getTemplateDecoratorHTML() }</li>`;
+    return String.raw`<li class="menu__element">${ super.getTemplateDecoratorHTML() }</li>`;
   }
 
 }

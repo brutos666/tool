@@ -90,16 +90,6 @@ class DragDropFocusManager extends FocusManager {
 
     super.removeCurrent();
   }
-
-  /** @override */
-  giveControlToFocusManager(focusManager) {
-    super.giveControlToFocusManager(focusManager);
-
-    if (!this.isParentControlNavigation()) {
-      this.exitDragDrop();
-    }
-    focusManager.enterDragDrop();
-  }
   /**
    * Récupère le système de navigation qui gère les composants et le courant
    * Pour des compositions de système de navigation, un système parent peut s'occuper du déplacement tandis que le positionnement du courant se fera par le système enfant
@@ -109,15 +99,32 @@ class DragDropFocusManager extends FocusManager {
     return this;
   }
   /*
+   * Démarrage/Arrêt de la navigation au clavier
+   * --------------------------------------------------
+   */
+  /** @override */
+  disableKeyNavigation() {
+    super.disableKeyNavigation();
+
+    if (!this.isParentControlNavigation()) {
+      this.exitDragDrop();
+    }
+  }
+  /** @override */
+  enableKeyNavigation() {
+    super.enableKeyNavigation();
+
+    this.enterDragDrop();
+  }
+  /*
    * Drag&drop
    * ----------
    */
   enterDragDropMode(draggedId) {
     const dragDropCenter = StoreData.getDragDropCenter();
     dragDropCenter.enterDragDropMode('keyboard', draggedId);
-    // Donner le contrôle au focusManager qui gère le déplacement
-    const parentFocusManager = this.giveControlToParent();
-    parentFocusManager.giveFocus();
+    this.enterDragDrop();
+    this.giveFocus();
   }
   exitDragDropMode() {
     const dragDropCenter = StoreData.getDragDropCenter();
@@ -190,10 +197,8 @@ class DragDropFocusManager extends FocusManager {
 
     const placeholder = new DragDropPlaceholder({ overId, position });
     placeholder.setHidden();
-    const placeholderNode = placeholder.getView()
-      .getElementView();
-    const componentNode = component.getView()
-      .getElementView();
+    const placeholderNode = placeholder.getElementView();
+    const componentNode = component.getElementView();
     if (position === 'before') {
       componentNode.insertAdjacentElement('beforebegin', placeholderNode);
     } else {

@@ -20,6 +20,9 @@ class CompositeFocusManager extends FocusManager {
 
     const childFocusManager = this.getAccessibleChildFocusManager();
     if (childFocusManager) {
+      // lorsque l'on est positionné sur un enfant qui gère son propre système de navigation, le focus doit aller sur le courant de cet enfant et non pas sur le courant du parent
+      this.getCurrent()
+        .removeTabIndex();
       // Lorsque l'on arrive sur un composant enfant, son système de navigation doit être activé. Cela permet de naviguer dans le composant. Pour pouvoir quitter le composant, il faut que le système de navigation parent reste actif. Ainsi, une navigation parente avec Tab s'occupera de passer d'un composant à l'autre, les flèches permettront de naviguer dans le composant
       childFocusManager.enableKeyNavigation();
     }
@@ -87,7 +90,7 @@ class CompositeFocusManager extends FocusManager {
     }
     // lorsque l'on est positionné sur un enfant qui gère son propre système de navigation, le focus doit aller sur le courant de cet enfant et non pas sur le courant du parent
     this.getCurrent()
-      .setTabIndex(-1);
+      .removeTabIndex();
 
     childFocusManager.enableKeyNavigation();
   }

@@ -49,7 +49,7 @@ class FocusManager {
   /**
    * @constructor
    * @param {HTMLElement} container : conteneur des éléments
-   * @param {'horizontal'|'vertical'|'tree'} orientation : déplacement horizontal ou vertical ou arbre
+   * @param {'horizontal'|'vertical'} orientation : déplacement horizontal ou vertical
    * @param {boolean} canTab : traite la tabulation en plus des flèches et garde la navigation à l'intérieur du conteneur
    * @param {boolean} enterToAccess : indique si la navigation peut-être activée en tapant sur la touche Entrée
    */
@@ -105,11 +105,19 @@ class FocusManager {
     this.#isInside = true;
     this.getContainer()
       .setAttribute('aria-description', 'Navigation active. Échap pour quitter.');
+    this.getContainer()
+      .classList.add('inside');
+    this.getContainer()
+      .classList.remove('outside');
   }
   setOut() {
     this.#isInside = false;
     this.getContainer()
       .setAttribute('aria-description', 'Entrée pour activer la navigation.');
+    this.getContainer()
+      .classList.remove('inside');
+    this.getContainer()
+      .classList.add('outside');
   }
   isInside() {
     return this.#isInside;
@@ -184,7 +192,7 @@ class FocusManager {
     this.#components = [];
   }
   disableComponentFocus(component) {
-    component.setTabIndex(null);
+    component.removeTabIndex();
     component.getView()
       .removeEventListener('mousedown', this.#onMouseDownEvent);
     component.getFocusManager()
@@ -331,16 +339,14 @@ class FocusManager {
     const firstFocusable = this.getFirstFocusable();
     if (firstFocusable) {
       this.setCurrent(firstFocusable);
-      this.getCurrent()
-        .giveFocus();
+      this.giveFocus();
     }
   }
   giveFocusToLast() {
     const lastFocusable = this.getLastFocusable();
     if (lastFocusable) {
       this.setCurrent(lastFocusable);
-      this.getCurrent()
-        .giveFocus();
+      this.giveFocus();
     }
   }
   focusToDirection(direction) {
@@ -365,8 +371,7 @@ class FocusManager {
     if (!this.#components.includes(component)) {
       return false;
     }
-    return !DOMUtilities.hasHiddenClass(component.getView()
-      .getElementView());
+    return !DOMUtilities.hasHiddenClass(component.getElementView());
   }
   hasFocusable() {
     // Le fait d'avoir un courant doit indiquer que
@@ -598,20 +603,22 @@ class FocusManager {
     if (!this.hasFocusable()) {
       return;
     }
-    // Exclure le bouton de drag&drop et le bouton d'ouverture d'un noeud
+    // Exclure les boutons notamment l'ouverture des noeuds
     if (event.target.closest('button')) {
+      event.stopPropagation();
       return;
     }
-    const rootFocusManager = this.getRootFocusManager();
-    // Si nous sommes dans un arbre de focusManager, il faut désactiver les autres focusManager des vues courantes avant de positionner le nouvel élément courant
-    rootFocusManager.disableNavigationForAll();
-    // Positionner le courant pour chaque noeud de l'arbre. S'il s'agit d'une zone dans laquelle on peut entrée et sortie (Entrée/Escape), on appelle la fonction avant Entrée.
-    this.setCurrentBranch(event.currentTarget);
-    this.enableNavigationForChosen();
-
+    this.changeFocus(event.currentTarget);
     event.stopPropagation();
   }
-  enableNavigationForChosen() {
+  changeFocus(component) {
+    // Si nous sommes dans un arbre de focusManager, il faut désactiver les autres focusManager des vues courantes avant de positionner le nouvel élément courant
+    const rootFocusManager = this.getRootFocusManager();
+    rootFocusManager.disableNavigationForAll();
+    // Positionner le courant pour chaque noeud de l'arbre. S'il s'agit d'une zone dans laquelle on peut entrée et sortie (Entrée/Escape), on appelle la fonction avant Entrée.
+    this.setCurrentBranch(component);
+
+    // Activer le système de navigation
     if (this.isInside()) {
       this.enableKeyNavigation();
       return;

@@ -1,5 +1,6 @@
 class SvgUtilities {
 
+  // eslint-disable-next-line complexity
   static getIcon(name) {
     let svgHtml;
     switch (name) {
@@ -17,6 +18,9 @@ class SvgUtilities {
         break;
       case 'node':
         svgHtml = getNodeIcon();
+        break;
+      case 'pencil':
+        svgHtml = getPencilIcon();
         break;
       default:
         break;
@@ -66,6 +70,11 @@ function getNodeIcon() {
   // Pour un triangle complet, on peut faire ça  : <polygon points="6 7 18 12 6 17 6 7"></polygon>
 
   // ou ça : <path d="M9 17l7-5-7-5+0+10"/>
+}
+
+/** crayon de passage en mode édition */
+function getPencilIcon() {
+  return String.raw`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="passer en mode édition"><path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34"></path><polygon points="18 2 22 6 12 16 8 16 8 12 18 2"></polygon></svg>`;
 }
 
 export default SvgUtilities;

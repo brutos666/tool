@@ -128,12 +128,12 @@ class View {
     return document.activeElement === this.getElementView();
   }
   setTabIndex(value) {
-    if (value === null) {
-      this.getElementView()
-        .removeAttribute('tabindex');
-    }
     this.getElementView()
       .setAttribute('tabindex', value);
+  }
+  removeTabIndex() {
+    this.getElementView()
+      .removeAttribute('tabindex');
   }
 
   setCurrent() {

@@ -24,10 +24,6 @@
   min-width: 20px;
   min-height: 24px;
 }
-.item__footer .drag-button {
-  min-width: 24px;
-  min-height: 24px;
-}
 
 .item--status-orphan,
 .item--status-next-not-found,
@@ -52,8 +48,8 @@
   flex: 1;
   gap: var(--medium-gap);
 }
-.item--todo .item__footer-toolbar::before,
-.item--title .item__footer-toolbar::before {
+.item__footer-toolbar::before,
+.item__footer-toolbar::before {
   content: "";
   display: inline-block;
   width: 1px;
@@ -78,26 +74,19 @@
 .item--post-it .item__header {
   background-color: oklch(from var(--color-post-it) calc(l * 0.5) c h / 0.2);
 }
-.item--post-it .icon-button:hover,
-.item--post-it .icon-button:focus {
-  background-color: light-dark(oklch(from var(--color-post-it) calc(l - 0.05) c h), oklch(from var(--color-post-it) calc(l + 0.05) c h));
-}
-
-.item--post-it .item__footer {
-  color: var(--color-text);
-  position: absolute;
-  left: 50%;
-  transform: translate(-50%, -70%);
-  visibility: hidden;
-  opacity: 0;
-}
-.item--post-it .item__footer .drag-button {
+.list__item__footer .icon-button,
+.list__item__footer .drag-button {
+  background-color: var(--color-bg-surface);
+  border-color: var(--color-border);
   border-radius: 99px;
 }
-.item--post-it:hover .item__footer,
-.list__element:focus-within .item--post-it .item__footer {
-  visibility: visible;
-  opacity: 1;
+.list__item__footer .icon-button:hover,
+.list__item__footer .icon-button:focus {
+  background-color: var(--color-bg-hover);
+  border-color: var(--color-border-hover);
+}
+.list__item__footer .button__icon {
+  padding: var(--medium-padding);
 }
 
 /* Positionnement */
@@ -111,14 +100,12 @@
 .add-item--post-it {
   container-type: inline-size;
 }
-.item--post-it .icon-button {
-  margin: min(1cqi, 2rem);
-  min-width: max(12cqi, 1rem);
-  min-height: max(12cqi, 1rem);
+.list__item__footer-toolbar {
+  width: 40%;
 }
-.item--post-it .drag-button {
-  min-width: max(12cqi, 1rem);
-  min-height: max(12cqi, 1rem);
+.list__item__footer-toolbar .icon-button,
+.list__item__footer-toolbar .drag-button {
+  width: 50%;
 }
 .item--post-it .item__checkbox .checkbox__input {
   --checkbox-width: clamp(0.5rem, 8cqi, 2rem);

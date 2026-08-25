@@ -115,6 +115,10 @@ class NodeElement {
     this.getView()
       .setTabIndex(value);
   }
+  removeTabIndex(value) {
+    this.getView()
+      .removeTabIndex(value);
+  }
   setCurrent() {
     this.getView()
       .setCurrent();

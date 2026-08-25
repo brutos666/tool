@@ -29,7 +29,7 @@
   resize: both;
 }
 .sample-mapping__table.current--magnify .item:has(*:focus),
-.sample-mapping__table.current--magnify .list__element:focus .item {
+.sample-mapping__table.current--magnify .list__item:focus .item {
   min-width: max(var(--default-post-it-width), calc(var(--post-it-width) * 1.2));
   min-height: max(var(--default-post-it-height), calc(var(--post-it-height) * 1.2));
 }
@@ -60,7 +60,7 @@
   margin: 0 auto;
   width: var(--post-it-width);
 }
-.sample-mapping .list__element,
+.sample-mapping .list__item,
 .sample-mapping__samples__footer {
   padding: var(--global-padding);
 }
@@ -101,7 +101,7 @@
   cursor: default;
 }
 
-.sample-mapping__table .list__element:focus {
+.sample-mapping__table .list__item:focus {
   outline: 2px solid var(--color-border-focus-item);
 }
 /* Encadrer la table si un element a le focus ou du drag&drop */

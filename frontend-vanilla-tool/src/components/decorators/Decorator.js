@@ -50,16 +50,6 @@ class Decorator extends Component {
     return this.#decoratedElement.getFocusManager();
   }
 
-  setCurrent() {
-    this.#decoratedElement.setCurrent();
-  }
-  removeCurrent() {
-    this.#decoratedElement.removeCurrent();
-  }
-  isCurrent() {
-    return this.#decoratedElement.isCurrent();
-  }
-
   destroy() {
     super.destroy();
     this.#decoratedElement.destroy();

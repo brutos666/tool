@@ -94,7 +94,7 @@ class ColumnFocusManager extends DragDropFocusManager {
     }
     // lorsque l'on est positionné sur un enfant qui gère son propre système de navigation, le focus doit aller sur le courant de cet enfant et non pas sur le courant du parent
     this.getCurrent()
-      .setTabIndex(-1);
+      .removeTabIndex();
 
     // Le parent gère la navigation, mais la tabulation doit se positionner sur le courant de l'enfant
     childFocusManager.getCurrent()
@@ -320,7 +320,7 @@ class ColumnFocusManager extends DragDropFocusManager {
         super.setCurrent(component);
         childFocusManager.setCurrent(current);
         // Il ne peut y avoir qu'un seul tabindex
-        component.setTabIndex(-1);
+        component.removeTabIndex();
         current.setTabIndex(0);
         return;
       }
@@ -328,6 +328,15 @@ class ColumnFocusManager extends DragDropFocusManager {
   }
   /** @override */
   removeCurrent() {
+    if (!this.isNavigationActive()) {
+      super.removeCurrent();
+      return;
+    }
+
+    // Lorsque l'on quitte le composant enfant, son système de navigation doit être désactivé
+    this.getAccessibleChildFocusManager()
+      ?.disableKeyNavigation();
+
     super.removeCurrent();
   }
   /** @override */

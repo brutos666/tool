@@ -34,14 +34,14 @@
   padding: var(--medium-padding);
 }
 
-.nav-tree__items .list__element.tree--root > .tree__item,
+.nav-tree__items .tree--root > .tree__item,
 .nav-tree__footer > .item-like-button {
   background: var(--color-bg-surface);
   border-radius: var(--border-radius);
   box-shadow: 3px 3px 4px var(--color-box-shadow);
   padding: var(--medium-padding);
 }
-.nav-tree__items .list__element {
+.nav-tree__items .tree {
   display: flex;
 }
 .nav-tree__footer > .item-like-button {

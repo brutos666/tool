@@ -35,7 +35,7 @@
   box-shadow: 3px 3px 4px var(--color-box-shadow);
   padding: var(--medium-padding);
 }
-.check-list__items .list__element {
+.check-list__items .tree {
   display: flex;
 }
 .check-list__footer {
