@@ -20,7 +20,8 @@ class WorkingSpace extends Component {
 
     this.#currentTreeItem = StoreData.getTreeItem();
     this.#menu = new Menu();
-    const decorateNavSpace = new CommandItemsDecorator(new NavSpace(), { treeItem: this.#currentTreeItem });
+    const navSpace = new NavSpace();
+    const decorateNavSpace = new CommandItemsDecorator(navSpace, { treeItem: this.#currentTreeItem });
     const decorateMainSpace = new CommandItemsDecorator(new MainSpace(), { treeItem: this.#currentTreeItem });
 
     const reloadAction = new ActionButton({ id: 'reload', label: 'Actualiser', role: 'menuitem', type: 'menu' });
@@ -58,7 +59,8 @@ class WorkingSpace extends Component {
         decorateMainSpace.setTreeItem(treeItem);
       });
 
-    decorateNavSpace.loadItems();
+    decorateNavSpace.loadItems()
+      .then(() => navSpace.giveFocus());
   }
 
 }

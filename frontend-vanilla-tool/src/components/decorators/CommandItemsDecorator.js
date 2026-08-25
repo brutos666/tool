@@ -29,7 +29,7 @@ class CommandItemsDecorator extends CommandDecorator {
   }
 
   loadItems() {
-    new LoadItems(this)
+    return new LoadItems(this)
       .execute();
   }
 

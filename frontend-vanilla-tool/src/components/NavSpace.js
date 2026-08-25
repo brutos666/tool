@@ -5,10 +5,20 @@ import NavSpaceView from './views/NavSpaceView.js';
 class NavSpace extends Component {
 
   name = 'NavSpace';
+
+  /** @type {NavTree} */
+  #navTree;
+
   constructor() {
     super(new NavSpaceView());
 
-    this.setStaticChild('navTree', new NavTree());
+    this.#navTree = new NavTree();
+    this.setStaticChild('navTree', this.#navTree);
+  }
+
+  /** @override */
+  giveFocus() {
+    this.#navTree.giveFocus();
   }
 
 }
