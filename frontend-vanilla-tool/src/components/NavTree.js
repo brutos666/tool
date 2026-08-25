@@ -10,6 +10,8 @@ class NavTree extends TreeItems {
 
   name = 'NavTree';
 
+  static EVENTS = { current: 'itemCurrent' };
+
   /** @type {Tree} */
   #currentTree = null;
 
@@ -29,9 +31,20 @@ class NavTree extends TreeItems {
     return this.#currentTree;
   }
   setCurrentTree(currentTree) {
-    this.#currentTree?.removeCurrent();
+    this.#currentTree?.removeCurrentTree();
     this.#currentTree = currentTree;
-    currentTree.setCurrent();
+    currentTree.setCurrentTree();
+    const treeItem = this.#currentTree.getTreeItem();
+    this.getView()
+      .dispatchEvent(new CustomEvent(NavTree.EVENTS.current, { bubbles: true, detail: treeItem }));
+  }
+  removeCurrentTree() {
+    if (this.#currentTree) {
+      this.#currentTree.removeCurrentTree();
+      this.#currentTree = null;
+    }
+    this.getView()
+      .dispatchEvent(new CustomEvent(NavTree.EVENTS.current, { bubbles: true, detail: null }));
   }
 
   /** @override */
@@ -39,8 +52,7 @@ class NavTree extends TreeItems {
     super.removeChild(element);
 
     if (this.#currentTree === element) {
-      this.#currentTree.removeCurrent();
-      this.#currentTree = null;
+      this.removeCurrentTree();
     }
   }
 
@@ -48,8 +60,7 @@ class NavTree extends TreeItems {
   removeAllChildren() {
     super.removeAllChildren();
 
-    this.#currentTree?.removeCurrent();
-    this.#currentTree = null;
+    this.removeCurrentTree();
   }
   /** @override */
   replaceAllItems(treeItemArray) {

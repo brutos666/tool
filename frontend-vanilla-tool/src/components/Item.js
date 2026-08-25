@@ -14,7 +14,6 @@ import ItemView from './views/ItemView.js';
 class Item extends Component {
 
   name = 'Item';
-  static EVENTS = { current: 'itemCurrent' };
 
   /** @type {TreeItem} */
   #treeItem = null;
@@ -141,18 +140,8 @@ class Item extends Component {
     return toolbar;
   }
 
-  setCurrent() {
-    super.setCurrent();
-    this.getView()
-      .dispatchEvent(new CustomEvent(Item.EVENTS.current, { bubbles: true, detail: this }));
-  }
-
   destroy() {
     this.#treeItem.removeObserver(this);
-    if (this.isCurrent()) {
-      this.getView()
-        .dispatchEvent(new CustomEvent(Item.EVENTS.current, { bubbles: true, detail: null }));
-    }
     super.destroy();
   }
 

@@ -4,10 +4,10 @@ import Component from './Component.js';
 import ButtonDialog from './decorators/ButtonDialog.js';
 import CommandItemsDecorator from './decorators/CommandItemsDecorator.js';
 import FileUpload from './FileUpload.js';
-import Item from './Item.js';
 import MainSpace from './MainSpace.js';
 import Menu from './Menu.js';
 import NavSpace from './NavSpace.js';
+import NavTree from './NavTree.js';
 import WorkingSpaceView from './views/WorkingSpaceView.js';
 
 class WorkingSpace extends Component {
@@ -48,8 +48,8 @@ class WorkingSpace extends Component {
     this.setStaticChild('main', decorateMainSpace);
 
     decorateNavSpace.getView()
-      .addEventListener(Item.EVENTS.current, event => {
-        const treeItem = event.detail.getTreeItem();
+      .addEventListener(NavTree.EVENTS.current, event => {
+        const treeItem = event.detail;
         if (this.#currentTreeItem === treeItem) {
           return;
         }

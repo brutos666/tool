@@ -65,6 +65,13 @@ class TreeView extends DecoratorView {
       .setAttribute('data-tree-item-id', treeItemId);
   }
 
+  setCurrentTree() {
+    this.getElementView().classList.add('current-tree');
+  }
+  removeCurrentTree() {
+    this.getElementView().classList.remove('current-tree');
+  }
+
 }
 
 export default TreeView;

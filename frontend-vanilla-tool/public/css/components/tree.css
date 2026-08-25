@@ -55,12 +55,12 @@
 }
 
 /* -- Apparence -- */
-.tree__item > .current,
-.tree__item:has(> .current) > .tree__toggle {
+.current-tree > .tree__item > .tree__content,
+.current-tree > .tree__item > .tree__toggle {
   background-color: var(--color-bg-current);
 }
-.current .tree__item > .current,
-.current .tree__item:has(> .current) > .tree__toggle {
+.current .current-tree > .tree__item > .tree__content,
+.current .current-tree > .tree__item > .tree__toggle {
   background-color: var(--color-bg-focus);
 }
 

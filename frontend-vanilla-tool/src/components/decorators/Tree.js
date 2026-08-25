@@ -112,6 +112,9 @@ class Tree extends ItemDecorator {
     const view = this.getView();
     view.setTreeItemId(treeItemId);
   }
+  getTreeItem() {
+    return this.#treeItem;
+  }
   /**
    * Modification du modèle
    * @param {'modify'|'added'|'updated'|'toDelete'|'undoToDelete'|'removed'|'addChildItem'|'removeChildItem'} action
@@ -125,6 +128,14 @@ class Tree extends ItemDecorator {
     } else if (action === 'removeChildItem') {
       this.setLeaf(treeItem.isLeaf());
     }
+  }
+  setCurrentTree() {
+    this.getView()
+      .setCurrentTree();
+  }
+  removeCurrentTree() {
+    this.getView()
+      .removeCurrentTree();
   }
 
 }
