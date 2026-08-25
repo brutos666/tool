@@ -84,7 +84,7 @@ class DragDropFocusManager extends FocusManager {
   removeCurrent() {
     const currentFocusManager = this.getCurrentFocusManager();
     const current = currentFocusManager.getCurrent();
-    if (currentFocusManager.isPlaceholder(current)) {
+    if (this.isPlaceholder(current)) {
       current.setHidden();
     }
 

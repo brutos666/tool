@@ -20,6 +20,18 @@ class DOMUtilities {
     return DOMUtilities.isHidden(element.parentElement);
   }
 
+  /**
+   * Recherche si l'élément est caché avec la classe hidden
+   * @param {HTMLElement} element : Element
+   * @returns {boolean} true si l'élément est caché
+   */
+  static hasHiddenClass(element) {
+    if (element.classList.contains('hidden')) {
+      return true;
+    }
+    return element.closest('.hidden');
+  }
+
 }
 
 export default DOMUtilities;

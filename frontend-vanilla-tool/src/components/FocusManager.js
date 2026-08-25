@@ -365,7 +365,8 @@ class FocusManager {
     if (!this.#components.includes(component)) {
       return false;
     }
-    return !component.isHidden() && !DOMUtilities.isHidden(component.getElementView());
+    return !DOMUtilities.hasHiddenClass(component.getView()
+      .getElementView());
   }
   hasFocusable() {
     // Le fait d'avoir un courant doit indiquer que
@@ -440,6 +441,14 @@ class FocusManager {
     }
     const parentFocusManager = this.getParentFocusManager();
     parentFocusManager?.setCurrentBranch(target);
+
+    if (!this.pressEnterToAccess()) {
+      return;
+    }
+    // Si clic dans la zone alors on entre dedans.
+    const rootFocusManager = this.getRootFocusManager();
+    rootFocusManager.callBeforeEnter(parentFocusManager.getCurrent());
+    this.setIn();
   }
 
   /**
@@ -447,7 +456,7 @@ class FocusManager {
    * @param currentIndexBeforeRemove - Index du courant avant sa suppression de la liste des composants. Lorsqu'il n'est pas fourni, c'est que le courant est toujours présent et sa position sera recherchée si besoin
    */
   refreshCurrent() {
-    if (DOMUtilities.isHidden(this.getContainer())) {
+    if (DOMUtilities.hasHiddenClass(this.getContainer())) {
       return;
     }
     this.changeCurrent();
@@ -598,28 +607,9 @@ class FocusManager {
     rootFocusManager.disableNavigationForAll();
     // Positionner le courant pour chaque noeud de l'arbre. S'il s'agit d'une zone dans laquelle on peut entrée et sortie (Entrée/Escape), on appelle la fonction avant Entrée.
     this.setCurrentBranch(event.currentTarget);
-    // Si on accède à une zone accessible par la touche entrée, on doit indiquer que l'on est entré afin de pouvoir la quitter avec la touche Escape
-    this.enterIn();
-    // Activer le système de navigation correspondant à l'endroit cliqué. Si le système parent est une navigation via Tab, on active cette dernière.
     this.enableNavigationForChosen();
 
     event.stopPropagation();
-  }
-  enterIn() {
-    const rootFocusManager = this.getRootFocusManager();
-    if (this.pressEnterToAccess()) {
-      // Si clic dans la zone alors on entre dedans.
-      rootFocusManager.callBeforeEnter(this.getParentFocusManager()
-        .getCurrent());
-      this.setIn();
-    } else if (this.canEnter()) {
-      // Si clic sur le parent qui contient la zone, alors on entre que si le before accepte d'entrer dans la zone
-      const doEnter = rootFocusManager.callBeforeEnter(this.getCurrent());
-      if (doEnter) {
-        this.getChildFocusManager()
-          .setIn();
-      }
-    }
   }
   enableNavigationForChosen() {
     if (this.isInside()) {
@@ -700,7 +690,7 @@ class FocusManager {
    * @param {FocusManager} focusManager
    */
   giveControlToFocusManager(focusManager) {
-    if (this.isInside()) {
+    if (this.isInside() && focusManager.getParentFocusManager() !== this) {
       this.setOut();
     }
     this.disableKeyNavigation();

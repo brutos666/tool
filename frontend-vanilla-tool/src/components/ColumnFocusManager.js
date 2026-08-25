@@ -162,6 +162,15 @@ class ColumnFocusManager extends DragDropFocusManager {
    * Prise de focus
    * ---------------------------------------------------
    */
+  giveFocus() {
+    const childFocusManager = this.getAccessibleChildFocusManager();
+    if (childFocusManager) {
+      childFocusManager.giveFocus();
+    } else {
+      this.getCurrent()
+        .giveFocus();
+    }
+  }
   /** @override */
   focusToDirection(direction) {
     const position = this.getCurrentPosition();
@@ -320,6 +329,21 @@ class ColumnFocusManager extends DragDropFocusManager {
   /** @override */
   removeCurrent() {
     super.removeCurrent();
+  }
+  /** @override */
+  setCurrentBranch(target) {
+    for (const column of this.#columns) {
+      for (const component of column) {
+        const element = component.getElementView();
+        if (element === target || element.contains(target)) {
+          this.setCurrent(component);
+          break;
+        }
+      }
+    }
+
+    const parentFocusManager = this.getParentFocusManager();
+    parentFocusManager?.setCurrentBranch(target);
   }
 
   /**

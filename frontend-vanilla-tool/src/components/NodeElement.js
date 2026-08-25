@@ -100,12 +100,8 @@ class NodeElement {
   }
 
   giveFocus() {
-    if (this.#focusManager?.hasFocusable()) {
-      this.#focusManager.giveFocus();
-    } else {
-      this.getView()
-        .giveFocus();
-    }
+    this.getView()
+      .giveFocus();
   }
   isFocused() {
     if (this.#focusManager) {

@@ -24,8 +24,11 @@ class TabFocusManager extends CompositeFocusManager {
    */
   interceptKeys() {
     const keys = ['Tab'];
-    if (super.isInside()) {
+    if (this.isInside()) {
       keys.push('Escape');
+    }
+    if (super.canEnter()) {
+      keys.push('Enter');
     }
     if (this.getChildFocusManager()) {
       return keys;

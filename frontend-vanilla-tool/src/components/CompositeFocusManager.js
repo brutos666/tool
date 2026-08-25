@@ -1,7 +1,7 @@
-import DragDropFocusManager from './DragDropFocusManager.js';
+import FocusManager from './FocusManager.js';
 
 /** Désigne des systèmes de navigation composés d'autre système de navigation. Par exemple, on peut naviguer d'un composant à l'autre avec la tabulation et dans un composant avec les flèches */
-class CompositeFocusManager extends DragDropFocusManager {
+class CompositeFocusManager extends FocusManager {
 
   name = 'CompositeFocusManager';
 
@@ -54,17 +54,20 @@ class CompositeFocusManager extends DragDropFocusManager {
    * Prise de focus
    * ---------------------------------------------------
    */
+  giveFocus() {
+    const childFocusManager = this.getAccessibleChildFocusManager();
+    if (childFocusManager) {
+      childFocusManager.giveFocus();
+    } else {
+      this.getCurrent()
+        .giveFocus();
+    }
+  }
   isFocusable(component) {
-    /*
-     * if (!this.allowFocusToDisabled()) {
-     *  Si le composant contient un focusManager, alors ce dernier est accessible s'il existe un courant accessible
-     */
     const childFocusManager = component.getFocusManager();
     if (childFocusManager && !childFocusManager.hasFocusable()) {
       return false;
     }
-    // }
-
     return super.isFocusable(component);
   }
 

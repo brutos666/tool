@@ -43,6 +43,10 @@ class Decorator extends Component {
   }
 
   getFocusManager() {
+    const focusManager = super.getFocusManager();
+    if (focusManager) {
+      return focusManager;
+    }
     return this.#decoratedElement.getFocusManager();
   }
 
