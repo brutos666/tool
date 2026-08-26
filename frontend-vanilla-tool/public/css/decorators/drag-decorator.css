@@ -4,16 +4,10 @@
   min-height: 24px;
 }
 
-.drag-drop--decorator > .tree .tree__item:has(> .item .drag-button:hover),
-.drag-drop--decorator > .tree .tree__item:has(> .item .drag-button:focus) {
+.drag-drop--decorator > .tree .tree__item:has(> .item .drag-button:hover, > .item .drag-button:focus) {
   background: light-dark(oklch(from var(--color-bg-surface) calc(l - 0.05) c h), oklch(from var(--color-bg-surface) calc(l + 0.05) c h));
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  outline: 1px solid var(--color-border-hover);
-}
-
-.drag-drop--decorator .list__item__footer:has(.drag-button:hover) {
-  background: rgba(0, 0, 0, 0.2);
-  outline: 1px solid var(--color-border-hover);
+  outline: 1px solid var(--color-border-drag-over);
 }
 
 /** Indicateur de placement **/

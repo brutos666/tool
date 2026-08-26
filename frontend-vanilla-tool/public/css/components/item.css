@@ -74,20 +74,6 @@
 .item--post-it .item__header {
   background-color: oklch(from var(--color-post-it) calc(l * 0.5) c h / 0.2);
 }
-.list__item__footer .icon-button,
-.list__item__footer .drag-button {
-  background-color: var(--color-bg-surface);
-  border-color: var(--color-border);
-  border-radius: 99px;
-}
-.list__item__footer .icon-button:hover,
-.list__item__footer .icon-button:focus {
-  background-color: var(--color-bg-hover);
-  border-color: var(--color-border-hover);
-}
-.list__item__footer .button__icon {
-  padding: var(--medium-padding);
-}
 
 /* Positionnement */
 .item--post-it {
@@ -99,13 +85,6 @@
 .item--post-it,
 .add-item--post-it {
   container-type: inline-size;
-}
-.list__item__footer-toolbar {
-  width: 40%;
-}
-.list__item__footer-toolbar .icon-button,
-.list__item__footer-toolbar .drag-button {
-  width: 50%;
 }
 .item--post-it .item__checkbox .checkbox__input {
   --checkbox-width: clamp(0.5rem, 8cqi, 2rem);
