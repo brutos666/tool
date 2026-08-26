@@ -13,7 +13,7 @@ class Menu extends Composite {
 
   constructor() {
     super(new MenuView());
-    super.setFocusManager(new FocusManager(this.getElementView(), 'horizontal', false, false));
+    super.setFocusManager(new FocusManager(this.getElementView(), 'horizontal', false));
 
     this.#burgerButton = new BurgerMenuButton();
     this.setStaticChild('burgerButton', this.#burgerButton);

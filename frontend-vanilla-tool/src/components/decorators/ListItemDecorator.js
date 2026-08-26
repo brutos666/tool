@@ -25,7 +25,7 @@ class ListItemDecorator extends ItemDecorator {
     footerToolbar.addChild(enterButton);
     this.setStaticChild('footerToolbar', footerToolbar);
 
-    const focusManager = new PopupFocusManager(this.getElementView(), 'vertical', false, true);
+    const focusManager = new PopupFocusManager(this.getElementView(), 'vertical', true);
     super.setFocusManager(focusManager);
     focusManager.setComponentToAccess(decoratedElement);
     focusManager.addComponent(footerToolbar);

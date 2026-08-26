@@ -15,7 +15,7 @@ class TreeFocusManager extends DragDropFocusManager {
    * @param {boolean} enterToAccess : traite la possibilité d'entrer dans un élément pour naviguer à l'intérieur
    */
   constructor(container, orientation, enterToAccess) {
-    super(container, orientation, false, enterToAccess);
+    super(container, orientation, enterToAccess);
   }
   /** @override */
   allowFocusToDisabled() {

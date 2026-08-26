@@ -25,7 +25,7 @@ class ColumnFocusManager extends DragDropFocusManager {
    */
   constructor(container) {
     // Navigation horizontal pour aller d'une colonne à l'autre, verticale dans la colonne
-    super(container, 'horizontal', false, false);
+    super(container, 'horizontal', false);
   }
   /** @override */
   allowFocusToDisabled() {

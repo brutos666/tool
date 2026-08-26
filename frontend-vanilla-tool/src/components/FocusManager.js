@@ -50,13 +50,11 @@ class FocusManager {
    * @constructor
    * @param {HTMLElement} container : conteneur des éléments
    * @param {'horizontal'|'vertical'} orientation : déplacement horizontal ou vertical
-   * @param {boolean} canTab : traite la tabulation en plus des flèches et garde la navigation à l'intérieur du conteneur
    * @param {boolean} enterToAccess : indique si la navigation peut-être activée en tapant sur la touche Entrée
    */
-  constructor(container, orientation, canTab, enterToAccess) {
+  constructor(container, orientation, enterToAccess) {
     this.#container = container;
     this.#orientation = orientation;
-    this.#canTab = canTab;
     this.#enterToAccess = enterToAccess;
     if (enterToAccess) {
       this.setOut();
