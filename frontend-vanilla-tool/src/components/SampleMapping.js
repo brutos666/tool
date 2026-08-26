@@ -22,8 +22,12 @@ class SampleMapping extends Items {
     super(new SampleMappingView(), treeItem, ITEM_LAYOUT.Rules);
 
     const rights = ITEM_LAYOUT.getRights(ITEM_LAYOUT.Story);
-    this.#item = new DragDropDecorator(new ListItemDecorator(new Item({ treeItem, layout: ITEM_LAYOUT.Story, rights })));
+    const storyListItem = new ListItemDecorator(new Item({ treeItem, layout: ITEM_LAYOUT.Story, rights }));
+    this.#item = new DragDropDecorator(storyListItem);
     this.setStaticChild('storyItem', this.#item);
+
+    super.getFocusManager()
+      .setHeader(storyListItem);
 
     this.#addRuleButton = new AddItemButton({ id: 'addRule', label: 'Ajouter une règle', layout: ITEM_LAYOUT.Rules });
     this.#addRuleButton.setDoActionCallback(this.addNewItem.bind(this, 'Saisir une règle'));
@@ -32,7 +36,8 @@ class SampleMapping extends Items {
 
   /** @override */
   initFocusManager() {
-    super.setFocusManager(new ColumnFocusManager(this.getElementView()));
+    const focusManager = new ColumnFocusManager(this.getElementView());
+    super.setFocusManager(focusManager);
   }
 
   setTreeItem(treeItem) {
@@ -126,10 +131,6 @@ class SampleMapping extends Items {
   /** @override */
   added(parent) {
     super.added(parent);
-
-    this.getStaticChild('storyItem')
-      .getDecoratedElementByName('Item')
-      .setTabIndex(0);
 
     /** @type {ColumnFocusManager} */
     const focusManager = super.getFocusManager();

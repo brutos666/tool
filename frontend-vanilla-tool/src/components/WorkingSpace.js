@@ -54,9 +54,11 @@ class WorkingSpace extends Component {
           return;
         }
         this.#currentTreeItem = treeItem;
-        decorateMainSpace.getDecoratedElement()
-          .setTreeItem(treeItem);
-        decorateMainSpace.setTreeItem(treeItem);
+        if (treeItem) {
+          decorateMainSpace.getDecoratedElement()
+            .setTreeItem(treeItem);
+          decorateMainSpace.setTreeItem(treeItem);
+        }
       });
 
     decorateNavSpace.loadItems()

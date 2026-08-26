@@ -15,6 +15,8 @@ class ColumnFocusManager extends DragDropFocusManager {
    * @property {boolean} focusable - Est-ce que le composant peut avoir le focus
    */
 
+  /** @type {Component} */
+  #header;
   /** @type {Array<Array<Component>>} */
   #columns = [];
   /**
@@ -34,6 +36,15 @@ class ColumnFocusManager extends DragDropFocusManager {
     // Indique que le système de navigation des enfants (hors accès avec touche Entrée) est géré ici
     return true;
   }
+  /*
+   * Titre ou header
+   * -------------------------------------------------------------------------------------------
+   */
+  setHeader(component) {
+    this.#header = component;
+    this.addComponent(this.#header);
+  }
+
   /*
    * Colonnes contenant les composants pouvant prendre le focus par les touches du clavier ou un clic de la souris
    * -------------------------------------------------------------------------------------------
@@ -62,7 +73,12 @@ class ColumnFocusManager extends DragDropFocusManager {
     this.removeComponents(components);
   }
   removeAllColumns() {
-    super.removeAllComponents();
+    const components = [];
+    for (const column of this.#columns) {
+      components.push(column[0]);
+    }
+    this.setCurrent(this.#header);
+    this.removeComponents(components);
     this.#columns = [];
   }
   getAllComponentsColumn(columnIndex) {
@@ -195,6 +211,9 @@ class ColumnFocusManager extends DragDropFocusManager {
    * @returns {Component|null} Composant suivant
    */
   getFocusableNextRow(direction, position) {
+    if (position.rowIndex === 0 && direction === 'Up') {
+      return this.isFocusable(this.#header) ? this.#header : null;
+    }
     const searchPosition = getSearchPosition(direction, position);
     const nextCell = this.getCell(searchPosition);
     if (!nextCell) {
@@ -241,7 +260,7 @@ class ColumnFocusManager extends DragDropFocusManager {
    * @returns {Cell} composant à la position donnée + booléen indiquant s'il peut prendre le focus
    */
   getCell(position) {
-    if ([ -1, this.#columns.length ].includes(position.columnIndex) || position.rowIndex < 0) {
+    if ([ -1, this.#columns.length ].includes(position.columnIndex)) {
       return null;
     }
     const column = this.#columns[position.columnIndex];
@@ -306,6 +325,10 @@ class ColumnFocusManager extends DragDropFocusManager {
    */
   /** @override */
   setCurrent(current) {
+    if (this.#header === current) {
+      super.setCurrent(current);
+      return;
+    }
     for (const column of this.#columns) {
       for (const component of column) {
         if (component === current) {
@@ -341,18 +364,34 @@ class ColumnFocusManager extends DragDropFocusManager {
   }
   /** @override */
   setCurrentBranch(target) {
-    for (const column of this.#columns) {
-      for (const component of column) {
-        const element = component.getElementView();
-        if (element === target || element.contains(target)) {
-          this.setCurrent(component);
-          break;
-        }
-      }
+    const component = this.getComponentWithTarget(target);
+    if (component) {
+      this.setCurrent(component);
     }
 
     const parentFocusManager = this.getParentFocusManager();
     parentFocusManager?.setCurrentBranch(target);
+  }
+  getComponentWithTarget(target) {
+    const element = this.#header.getElementView();
+    if (element === target || element.contains(target)) {
+      return this.#header;
+    }
+    for (const column of this.#columns) {
+      for (const component of column) {
+        const element = component.getElementView();
+        if (element === target || element.contains(target)) {
+          return component;
+        }
+      }
+    }
+    return null;
+  }
+  getFirstFocusable() {
+    if (this.isFocusable(this.#header)) {
+      return this.#header;
+    }
+    return super.getFirstFocusable();
   }
 
   /**
@@ -366,6 +405,10 @@ class ColumnFocusManager extends DragDropFocusManager {
     }
     const currentFocusManager = this.getCurrentFocusManager();
     const componentToFind = currentFocusManager.getCurrent();
+
+    if (this.#header === current) {
+      return getHeaderPosition();
+    }
 
     let columnIndex = 0;
     for (const column of this.#columns) {
@@ -459,12 +502,34 @@ class ColumnFocusManager extends DragDropFocusManager {
 
 }
 /**
+ * Indique si la position est sur le header
+ * @param {Position} position - Position
+ * @returns true si la position représente le header
+ */
+function isHeaderPosition(position) {
+  return position.columnIndex === undefined && position.rowIndex === undefined;
+}
+/**
+ * Retourne la position pour le header
+ * @returns {Position}
+ */
+function getHeaderPosition() {
+  return {};
+}
+/**
  * Donne les positions à rechercher selon la direction vers laquelle aller par rapport à la position initiale
  * @param {'Left'|'Right'|'Up'|'Down'} direction - direction vers laquelle se déplacer
  * @param {Position} position - colonne et ligne
  * @returns {Position} colonne et ligne recherchée
  */
 function getSearchPosition(direction, position) {
+  if (isHeaderPosition(position)) {
+    if (direction === 'Down') {
+      return { columnIndex: 0, rowIndex: 0 };
+    }
+    // Ne pas changer de position si droite, gauche ou haut en fournissant des positions hors limite
+    return { columnIndex: -1, rowIndex: -1 };
+  }
   // Les placeholders horizontaux ne sont accessibles que lorsque l'on navigue sur la 1ere ligne. Ainsi, sur les autres lignes, le déplacement est de 2 colonnes pour ne pas se positionner sur une colonne qui ne contient que le placeholder horizontal
   const searchColumnIndex = position.columnIndex + (direction === 'Left' ? -1 : (direction === 'Right' ? 1 : 0));
   const searchRowIndex = position.rowIndex + (direction === 'Up' ? -1 : (direction === 'Down' ? 1 : 0));
