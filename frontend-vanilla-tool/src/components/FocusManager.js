@@ -124,9 +124,15 @@ class FocusManager {
   }
 
   enter() {
+    const wasInside = this.isInside();
+
     const focusManager = this.giveControlToCurrent();
     focusManager.giveFocus();
     focusManager.setIn();
+
+    if (wasInside) {
+      this.setIn();
+    }
   }
   exit() {
     this.setOut();
@@ -257,6 +263,9 @@ class FocusManager {
    */
   disableKeyNavigation() {
     this.#navigationActive = false;
+    if (this.isInside()) {
+      this.setOut();
+    }
     const current = this.getCurrent();
     if (!current) {
       return;
@@ -697,9 +706,6 @@ class FocusManager {
    * @param {FocusManager} focusManager
    */
   giveControlToFocusManager(focusManager) {
-    if (this.isInside() && focusManager.getParentFocusManager() !== this) {
-      this.setOut();
-    }
     this.disableKeyNavigation();
     if (focusManager.isParentControlNavigation()) {
       focusManager.getParentFocusManager()
