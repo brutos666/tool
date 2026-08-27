@@ -81,9 +81,12 @@ class DragDropDecorator extends ItemDecorator {
    * Début du dragDrop soit par le clavier
    */
   startDragDrop() {
-    const focusManager = this.getFocusManager();
-    const parentFocusManager = focusManager.giveControlToParent();
-    parentFocusManager.enterDragDropMode(this.#treeItemId);
+    const dragDropCenter = StoreData.getDragDropCenter();
+    dragDropCenter.enterDragDropMode('keyboard', this.#treeItemId);
+    // NOTE : le fait de donner le contrôle à un système de navigation met en place les placeholders permettant de relâcher un composant entre 2 autres
+    const parentFocusManager = this.getFocusManager()
+      .giveControlToParent();
+    parentFocusManager.giveFocus();
   }
 
   dropOver(draggedId) {

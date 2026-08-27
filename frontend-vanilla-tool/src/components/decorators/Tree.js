@@ -130,12 +130,14 @@ class Tree extends ItemDecorator {
     }
   }
   setCurrentTree() {
-    this.getView()
-      .setCurrentTree();
+    /** @type {TreeView} */
+    const view = this.getView();
+    view.setCurrentTree();
   }
   removeCurrentTree() {
-    this.getView()
-      .removeCurrentTree();
+    /** @type {TreeView} */
+    const view = this.getView();
+    view.removeCurrentTree();
   }
 
 }

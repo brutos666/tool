@@ -37,38 +37,19 @@ class DragDropFocusManager extends FocusManager {
     if (!this.getCurrent()) {
       return;
     }
-    if (this.enterDragDrop()) {
-      if (event.key === 'Enter') {
-        const currentFocusManager = this.getCurrentFocusManager();
-        const overComponent = currentFocusManager.getCurrent();
-        const position = getPosition(overComponent);
-        if ([ 'before', 'after' ].includes(position)) {
-          // Astuce pour que le courant devienne le nouveau ajouté par le déplacement
-          currentFocusManager.removeCurrent();
-        }
-        this.exitDragDropMode();
-
-        const dragDropCenter = StoreData.getDragDropCenter();
-        const draggedId = dragDropCenter.getDraggedId();
-        const draggedOverId = getDragOverId(overComponent);
-        StoreData.getTreeItem()
-          .moveItem(draggedId, draggedOverId, position);
-
-        currentFocusManager.giveFocus();
-        return;
-      }
-      if (event.key === 'Escape') {
-        const currentFocusManager = this.getCurrentFocusManager();
-        const overComponent = currentFocusManager.getCurrent();
-        if (currentFocusManager.isPlaceholder(overComponent)) {
-          currentFocusManager.setCurrent(currentFocusManager.getComponentWithPlaceholder(overComponent));
-        }
-        this.exitDragDropMode();
-        this.giveFocus();
-        return;
-      }
+    if ([ 'Home', 'End', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown' ].includes(event.key)) {
+      StoreData.getDragDropCenter()
+        .startKeyboardDragDrop(this);
     }
 
+    if (this.#isDragDropReady && event.key === 'Enter') {
+      const currentFocusManager = this.getCurrentFocusManager();
+      const overElement = currentFocusManager.getCurrent()
+        .getElementView();
+      StoreData.getDragDropCenter()
+        .dropOverElement(overElement);
+      return;
+    }
     super.onKeyDown(event);
   }
 
@@ -103,34 +84,16 @@ class DragDropFocusManager extends FocusManager {
    * --------------------------------------------------
    */
   /** @override */
-  disableKeyNavigation() {
-    super.disableKeyNavigation();
-
-    if (!this.isParentControlNavigation()) {
-      this.exitDragDrop();
-    }
-  }
-  /** @override */
   enableKeyNavigation() {
     super.enableKeyNavigation();
 
-    this.enterDragDrop();
+    const dragDropCenter = StoreData.getDragDropCenter();
+    dragDropCenter.startKeyboardDragDrop(this);
   }
   /*
    * Drag&drop
    * ----------
    */
-  enterDragDropMode(draggedId) {
-    const dragDropCenter = StoreData.getDragDropCenter();
-    dragDropCenter.enterDragDropMode('keyboard', draggedId);
-    this.enterDragDrop();
-    this.giveFocus();
-  }
-  exitDragDropMode() {
-    const dragDropCenter = StoreData.getDragDropCenter();
-    dragDropCenter.exitDragDropMode();
-    this.exitDragDrop();
-  }
   enterDragDrop() {
     if (!isDragDropMode()) {
       return false;
@@ -144,6 +107,11 @@ class DragDropFocusManager extends FocusManager {
   exitDragDrop() {
     if (!this.#isDragDropReady) {
       return;
+    }
+    const currentFocusManager = this.getCurrentFocusManager();
+    const overComponent = currentFocusManager.getCurrent();
+    if (currentFocusManager.isPlaceholder(overComponent)) {
+      currentFocusManager.setCurrent(currentFocusManager.getComponentWithPlaceholder(overComponent));
     }
     this.removePlaceHolders();
     this.#isDragDropReady = false;
@@ -248,15 +216,6 @@ function getDragOverId(component) {
   return component.getView()
     .getElementView()
     .getAttribute('data-over-id');
-}
-/**
- * Donner l'identifiant du drag over
- * @param {Component} component - Composant
- */
-function getPosition(component) {
-  return component.getView()
-    .getElementView()
-    .getAttribute('position');
 }
 /**
  * Indique si le relâchement est interdit à l'intérieur du composant

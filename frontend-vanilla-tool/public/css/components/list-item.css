@@ -10,9 +10,8 @@
   opacity: 0;
   position: absolute;
   inset: 0;
-  z-index: 10;
 }
-.list__item__footer:has(*[tabindex="0"]),
+.current .list__item__footer:has(*[tabindex="0"]),
 .list__item:hover:has(.item.outside) .list__item__footer {
   visibility: visible;
   opacity: 1;
@@ -23,7 +22,6 @@
   top: 50%;
   width: 40%;
   transform: translate(-50%, -50%);
-  z-index: 20;
 }
 /** boutons de la barre d'outils **/
 .list__item__footer-toolbar button {
