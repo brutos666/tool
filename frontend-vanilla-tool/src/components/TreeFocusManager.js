@@ -333,11 +333,11 @@ class TreeFocusManager extends DragDropFocusManager {
   }
   /** @override */
   getInsideFocusManager() {
-    const currentTree = this.getCurrentTree();
-    if (!currentTree) {
+    const current = this.getCurrent();
+    if (!current || this.isPlaceholder(current)) {
       return null;
     }
-    const treeListChild = currentTree.getStaticChild('treeList');
+    const treeListChild = current.getStaticChild('treeList');
     if (!treeListChild) {
       return null;
     }
