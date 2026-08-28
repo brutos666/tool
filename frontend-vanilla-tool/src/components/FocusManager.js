@@ -344,11 +344,8 @@ class FocusManager {
       // Les touches du claviers sont écoutées par le parent
       return;
     }
-    setTimeout(() => {
-      // Astuce pour que l'écoute ne soit pas prise en compte lorsque l'appui sur une touche est en cours
-      component.getView()
-        .addEventListener('keydown', this.#onKeyDownEvent);
-    }, 0);
+    component.getView()
+      .addEventListener('keydown', this.#onKeyDownEvent);
   }
   stopListenKeys(component) {
     if (this.isParentControlNavigation()) {
@@ -650,6 +647,7 @@ class FocusManager {
       return;
     }
     event.preventDefault();
+    event.stopImmediatePropagation();
     this.#keyEvent[event.key]?.(event);
   }
 
