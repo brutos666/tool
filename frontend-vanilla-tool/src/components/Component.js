@@ -35,8 +35,6 @@ class Component extends NodeElement {
    */
   removed() {
     this.#parent = null;
-    this.getFocusManager()
-      ?.disableKeyNavigation();
     this.getView()
       .removed();
     this.destroy();

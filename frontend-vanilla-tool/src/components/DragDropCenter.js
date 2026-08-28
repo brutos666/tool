@@ -32,13 +32,12 @@ class DragDropCenter extends Component {
     if (!focusManager || !this.isDragDropMode()) {
       return;
     }
-    if (this.#currentFocusManager === focusManager) {
+    const focusManagerInControl = focusManager.isParentControlNavigation() ? focusManager.getParentFocusManager() : focusManager;
+    if (this.#currentFocusManager === focusManagerInControl) {
       return;
     }
-    if (this.#currentFocusManager && !this.#currentFocusManager.isParentControlNavigation()) {
-      this.#currentFocusManager.exitDragDrop();
-    }
-    this.#currentFocusManager = focusManager;
+    this.#currentFocusManager?.exitDragDrop();
+    this.#currentFocusManager = focusManagerInControl;
     if (this.isDragDropMode()) {
       this.#currentFocusManager.enterDragDrop();
     }
@@ -47,12 +46,7 @@ class DragDropCenter extends Component {
     if (!this.#currentFocusManager) {
       return;
     }
-    if (this.#currentFocusManager.isParentControlNavigation()) {
-      this.#currentFocusManager.getParentFocusManager()
-        .exitDragDrop();
-    } else {
-      this.#currentFocusManager.exitDragDrop();
-    }
+    this.#currentFocusManager?.exitDragDrop();
     this.#currentFocusManager = null;
   }
 
@@ -65,7 +59,6 @@ class DragDropCenter extends Component {
     if (dragDropType === 'keyboard') {
       document.addEventListener('keydown', this.#onKeyDownEvent);
     }
-
     this.#draggedId = draggedId;
 
     this.#notification = StoreData.getNotificationCenter()
@@ -107,7 +100,7 @@ class DragDropCenter extends Component {
 
   dropOverElement(overElement) {
     const position = overElement.getAttribute('position');
-    const currentFocusManager = this.#currentFocusManager?.getCurrentFocusManager();
+    const currentFocusManager = this.#currentFocusManager?.getControlCurrentFocusManager();
     if (currentFocusManager && [ 'before', 'after' ].includes(position)) {
       // Astuce pour que le courant devienne le nouveau ajouté par le déplacement
       currentFocusManager.removeCurrent();

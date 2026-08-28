@@ -101,36 +101,6 @@ class ColumnFocusManager extends DragDropFocusManager {
    * Démarrage/Arrêt de la navigation au clavier
    * --------------------------------------------------
    */
-  enableKeyNavigation() {
-    super.enableKeyNavigation();
-
-    const childFocusManager = this.getAccessibleChildFocusManager();
-    if (!childFocusManager) {
-      return;
-    }
-    // lorsque l'on est positionné sur un enfant qui gère son propre système de navigation, le focus doit aller sur le courant de cet enfant et non pas sur le courant du parent
-    this.getCurrent()
-      .removeTabIndex();
-
-    // Le parent gère la navigation, mais la tabulation doit se positionner sur le courant de l'enfant
-    childFocusManager.getCurrent()
-      ?.setTabIndex(0);
-  }
-
-  /**
-   * Récupère l'enfant dont le système de focus doit être également actif en même temps que son parent
-   */
-  getAccessibleChildFocusManager() {
-    const childFocusManager = this.getChildFocusManager();
-    if (!childFocusManager) {
-      return null;
-    }
-    // Si on doit taper la touche Entrée pour entrer dans le composant enfant alors la navigation de ce dernier n'est pas géré par son parent
-    if (childFocusManager.pressEnterToAccess()) {
-      return null;
-    }
-    return childFocusManager;
-  }
 
   /*
    * Navigation au clavier
@@ -151,42 +121,12 @@ class ColumnFocusManager extends DragDropFocusManager {
    * Entrée et sortie d'un système de navigation par les touches Entrée/Escape
    * -------------------------------------------------------------------------
    */
-  /** @override */
-  canEnter() {
-    const accessibleFocusManager = this.getAccessibleChildFocusManager();
-    if (accessibleFocusManager) {
-      return accessibleFocusManager.canEnter();
-    }
-    return super.canEnter();
-  }
-  /** @override */
-  enter() {
-    const accessibleFocusManager = this.getAccessibleChildFocusManager();
-    if (accessibleFocusManager) {
-      const doEnter = this.getRootFocusManager()
-        .callBeforeEnter(accessibleFocusManager.getCurrent());
-      if (doEnter) {
-        this.disableKeyNavigation();
-        accessibleFocusManager.enter();
-      }
-      return;
-    }
-    super.enter();
-  }
 
   /*
    * Prise de focus
    * ---------------------------------------------------
    */
-  giveFocus() {
-    const childFocusManager = this.getAccessibleChildFocusManager();
-    if (childFocusManager) {
-      childFocusManager.giveFocus();
-    } else {
-      this.getCurrent()
-        .giveFocus();
-    }
-  }
+
   /** @override */
   focusToDirection(direction) {
     const position = this.getCurrentPosition();
@@ -200,8 +140,7 @@ class ColumnFocusManager extends DragDropFocusManager {
       nextFocusable = this.getFocusableNextColumn(direction, position);
     }
     if (nextFocusable) {
-      this.setCurrent(nextFocusable);
-      this.giveFocus();
+      this.giveFocusTo(nextFocusable);
     }
   }
   /**
@@ -314,10 +253,6 @@ class ColumnFocusManager extends DragDropFocusManager {
     }
     return null;
   }
-  /** @override */
-  getCurrentFocusManager() {
-    return this.getAccessibleChildFocusManager() || this;
-  }
 
   /*
    * Positionnement du courant
@@ -340,27 +275,11 @@ class ColumnFocusManager extends DragDropFocusManager {
           .includes(current)) {
           continue;
         }
-        super.setCurrent(component);
         childFocusManager.setCurrent(current);
-        // Il ne peut y avoir qu'un seul tabindex
-        component.removeTabIndex();
-        current.setTabIndex(0);
+        super.setCurrent(component);
         return;
       }
     }
-  }
-  /** @override */
-  removeCurrent() {
-    if (!this.isNavigationActive()) {
-      super.removeCurrent();
-      return;
-    }
-
-    // Lorsque l'on quitte le composant enfant, son système de navigation doit être désactivé
-    this.getAccessibleChildFocusManager()
-      ?.disableKeyNavigation();
-
-    super.removeCurrent();
   }
   /** @override */
   setCurrentBranch(target) {
@@ -403,8 +322,7 @@ class ColumnFocusManager extends DragDropFocusManager {
     if (!current) {
       return null;
     }
-    const currentFocusManager = this.getCurrentFocusManager();
-    const componentToFind = currentFocusManager.getCurrent();
+    const componentToFind = this.getCurrentLeaf();
 
     if (this.#header === current) {
       return getHeaderPosition();

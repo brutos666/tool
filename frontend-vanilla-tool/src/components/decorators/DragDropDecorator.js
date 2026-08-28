@@ -19,15 +19,16 @@ class DragDropDecorator extends ItemDecorator {
 
   #treeItemId;
   #item;
+  #listItem;
 
   constructor(decoratedElement) {
     super(new DragDropDecoratorView(decoratedElement.getView()), decoratedElement);
     /** @type {Item} */
     this.#item = this.getDecoratedElementByName('Item');
-    const listItem = this.getDecoratedElementByName('ListItemDecorator');
+    this.#listItem = this.getDecoratedElementByName('ListItemDecorator');
     const itemLayout = this.#item.getLayout();
     const isPostIt = ITEM_LAYOUT.isPostIt(itemLayout);
-    const footerToolbar = listItem ? listItem.getStaticChild('footerToolbar') : this.#item.getStaticChild('footerToolbar');
+    const footerToolbar = this.#listItem ? this.#listItem.getStaticChild('footerToolbar') : this.#item.getStaticChild('footerToolbar');
     const treeItem = this.#item.getTreeItem();
 
     const dragAction = new DragButton(decoratedElement, isPostIt ? 'move' : 'reorder');
@@ -84,9 +85,13 @@ class DragDropDecorator extends ItemDecorator {
     const dragDropCenter = StoreData.getDragDropCenter();
     dragDropCenter.enterDragDropMode('keyboard', this.#treeItemId);
     // NOTE : le fait de donner le contrôle à un système de navigation met en place les placeholders permettant de relâcher un composant entre 2 autres
-    const parentFocusManager = this.getFocusManager()
-      .giveControlToParent();
+    const focusManager = this.getFocusManagerWithToolbar();
+    const parentFocusManager = focusManager.giveControlToParent();
     parentFocusManager.giveFocus();
+  }
+
+  getFocusManagerWithToolbar() {
+    return this.#listItem ? this.#listItem.getFocusManager() : this.#item.getFocusManager();
   }
 
   dropOver(draggedId) {

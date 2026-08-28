@@ -35,7 +35,7 @@ class DragDropCenterView extends View {
 
     this.#draggedId = draggedId;
     document.querySelector('.working-space').classList.add('drag-drop-mode');
-    document.querySelectorAll('button:not([tabindex]), input:not([tabindex]), select:not([tabindex])')
+    document.querySelectorAll('button[tabindex="0"], input[tabindex="0"], select[tabindex="0"]')
       .forEach(element => {
         this.#tabindexElements.push(element);
         element.setAttribute('tabindex', '-1');
@@ -55,7 +55,7 @@ class DragDropCenterView extends View {
     document.querySelector('.working-space').classList.remove('drag-drop-mode-keyboard');
     document.querySelector('.working-space').classList.remove('drag-drop-mode');
     this.#tabindexElements.forEach(element => {
-      element.removeAttribute('tabindex');
+      element.setAttribute('tabindex', '0');
     });
     getAllDragDropElements()
       .forEach(element => {

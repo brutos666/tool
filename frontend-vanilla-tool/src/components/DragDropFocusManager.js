@@ -43,8 +43,8 @@ class DragDropFocusManager extends FocusManager {
     }
 
     if (this.#isDragDropReady && event.key === 'Enter') {
-      const currentFocusManager = this.getCurrentFocusManager();
-      const overElement = currentFocusManager.getCurrent()
+      const leafFocusManager = this.getControlCurrentFocusManager();
+      const overElement = leafFocusManager.getCurrent()
         .getElementView();
       StoreData.getDragDropCenter()
         .dropOverElement(overElement);
@@ -63,22 +63,14 @@ class DragDropFocusManager extends FocusManager {
   }
   /** @override */
   removeCurrent() {
-    const currentFocusManager = this.getCurrentFocusManager();
-    const current = currentFocusManager.getCurrent();
+    const current = this.getCurrentLeaf();
     if (this.isPlaceholder(current)) {
       current.setHidden();
     }
 
     super.removeCurrent();
   }
-  /**
-   * Récupère le système de navigation qui gère les composants et le courant
-   * Pour des compositions de système de navigation, un système parent peut s'occuper du déplacement tandis que le positionnement du courant se fera par le système enfant
-   * @returns {FocusManager} système de gestion du focus qui s'occupe du courant
-   */
-  getCurrentFocusManager() {
-    return this;
-  }
+
   /*
    * Démarrage/Arrêt de la navigation au clavier
    * --------------------------------------------------
@@ -108,7 +100,7 @@ class DragDropFocusManager extends FocusManager {
     if (!this.#isDragDropReady) {
       return;
     }
-    const currentFocusManager = this.getCurrentFocusManager();
+    const currentFocusManager = this.getControlCurrentFocusManager();
     const overComponent = currentFocusManager.getCurrent();
     if (currentFocusManager.isPlaceholder(overComponent)) {
       currentFocusManager.setCurrent(currentFocusManager.getComponentWithPlaceholder(overComponent));

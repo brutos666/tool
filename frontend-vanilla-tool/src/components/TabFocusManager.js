@@ -30,7 +30,7 @@ class TabFocusManager extends CompositeFocusManager {
     if (super.canEnter()) {
       keys.push('Enter');
     }
-    if (this.getChildFocusManager()) {
+    if (this.getCurrentFocusManager()) {
       return keys;
     }
     keys.push('Home');

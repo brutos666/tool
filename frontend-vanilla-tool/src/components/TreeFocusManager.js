@@ -68,8 +68,7 @@ class TreeFocusManager extends DragDropFocusManager {
     if (!firstFocusable) {
       return;
     }
-    this.setCurrent(firstFocusable);
-    this.giveFocus();
+    this.giveFocusTo(firstFocusable);
   }
   /**
    * Parcours la totalité de l'arbre pour donner le focus au dernier élément de l'arbre
@@ -101,8 +100,7 @@ class TreeFocusManager extends DragDropFocusManager {
     }
     this.giveControlToFocusManager(rootFocusManager);
     // Se positionner sur le premier accessible après le noeud courant
-    rootFocusManager.setCurrent(nextFocusable);
-    rootFocusManager.giveFocus();
+    rootFocusManager.giveFocusTo(nextFocusable);
   }
   giveFocusToNextTree() {
     const rootFocusManager = this.getRootFocusManager();
@@ -116,8 +114,7 @@ class TreeFocusManager extends DragDropFocusManager {
     }
     this.giveControlToFocusManager(rootFocusManager);
     // Se positionner sur le premier accessible après le noeud courant
-    rootFocusManager.setCurrent(nextFocusable);
-    rootFocusManager.giveFocus();
+    rootFocusManager.giveFocusTo(nextFocusable);
   }
 
   /*
@@ -217,8 +214,7 @@ class TreeFocusManager extends DragDropFocusManager {
     const nextFocusable = this.getFirstFocusableAfter(indexCurrent);
     if (nextFocusable) {
       // Se positionner sur le premier accessible après le noeud courant
-      this.setCurrent(nextFocusable);
-      this.giveFocus();
+      this.giveFocusTo(nextFocusable);
       return;
     }
 
@@ -239,8 +235,7 @@ class TreeFocusManager extends DragDropFocusManager {
     }
 
     // Se positionner sur le premier accessible après le noeud courant
-    parentFocusManager.setCurrent(nextParentFocusable);
-    parentFocusManager.giveFocus();
+    parentFocusManager.giveFocusTo(nextParentFocusable);
   }
 
   reactToUp() {
@@ -269,7 +264,7 @@ class TreeFocusManager extends DragDropFocusManager {
    * --------------------------------------------------
    */
   disableNavigationForAll() {
-    this.disableKeyNavigation();
+    super.disableNavigationForAll();
 
     /**  @type {Tree} */
     const currentTree = this.getCurrentTree();
@@ -277,12 +272,9 @@ class TreeFocusManager extends DragDropFocusManager {
     if (DOMUtilities.isHidden(this.getContainer()) || this.getAllComponents().length === 0 || !currentTree) {
       return;
     }
-    // Element de l'arbre
-    let childFocusManager = currentTree.getFocusManager();
-    childFocusManager?.disableNavigationForAll();
 
     // Liste des enfants
-    childFocusManager = getTreeListFocusManager(currentTree);
+    const childFocusManager = getTreeListFocusManager(currentTree);
     if (childFocusManager && childFocusManager !== this) {
       childFocusManager.disableNavigationForAll();
     }

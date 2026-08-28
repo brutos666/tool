@@ -50,7 +50,6 @@ class NodeElement {
   }
 
   destroy() {
-    this.#focusManager?.disableKeyNavigation();
     // destroy de tous les staticChild
     Object.values(this.#staticChildren)
       .forEach(child => child.destroy());
