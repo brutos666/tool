@@ -154,6 +154,18 @@ class Composite extends Component {
       .forEach(child => child.setEnabled());
   }
 
+  enterDragDropMode() {
+    super.enterDragDropMode();
+    this.getChildren()
+      .forEach(child => child.enterDragDropMode());
+  }
+
+  exitDragDropMode() {
+    super.exitDragDropMode();
+    this.getChildren()
+      .forEach(child => child.exitDragDropMode());
+  }
+
 }
 
 export default Composite;

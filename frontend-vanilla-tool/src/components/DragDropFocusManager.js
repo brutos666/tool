@@ -37,17 +37,9 @@ class DragDropFocusManager extends FocusManager {
     if (!this.getCurrent()) {
       return;
     }
-    if ([ 'Home', 'End', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown' ].includes(event.key)) {
-      StoreData.getDragDropCenter()
-        .startKeyboardDragDrop(this);
-    }
 
     if (this.#isDragDropReady && event.key === 'Enter') {
-      const leafFocusManager = this.getControlCurrentFocusManager();
-      const overElement = leafFocusManager.getCurrent()
-        .getElementView();
-      StoreData.getDragDropCenter()
-        .dropOverElement(overElement);
+      this.dropComponent();
       return;
     }
     super.onKeyDown(event);
@@ -79,22 +71,46 @@ class DragDropFocusManager extends FocusManager {
   enableKeyNavigation() {
     super.enableKeyNavigation();
 
-    const dragDropCenter = StoreData.getDragDropCenter();
-    dragDropCenter.startKeyboardDragDrop(this);
+    if (isDragDropMode()) {
+      this.enterDragDrop();
+    }
+  }
+  /** @override */
+  disableKeyNavigation() {
+    super.disableKeyNavigation();
+
+    if (isDragDropMode()) {
+      this.exitDragDrop();
+    }
   }
   /*
    * Drag&drop
    * ----------
    */
-  enterDragDrop() {
-    if (!isDragDropMode()) {
-      return false;
+  /*
+   * Passage en mode drag&drop
+   * -----------------------------------------------------------------------------------------
+   */
+  enterDragDropMode() {
+    if (this.isNavigationActive()) {
+      this.enterDragDrop();
     }
+  }
+  exitDragDropMode() {
+    if (!this.isNavigationActive()) {
+      return;
+    }
+    const wasFocused = this.isCurrentHasFocused();
+    this.exitDragDrop();
+    if (wasFocused) {
+      this.giveFocus();
+    }
+  }
+  enterDragDrop() {
     if (this.#isDragDropReady) {
-      return true;
+      return;
     }
     this.#isDragDropReady = this.addPlaceholders();
-    return this.#isDragDropReady;
   }
   exitDragDrop() {
     if (!this.#isDragDropReady) {
@@ -107,6 +123,21 @@ class DragDropFocusManager extends FocusManager {
     }
     this.removePlaceHolders();
     this.#isDragDropReady = false;
+  }
+  dropComponent() {
+    const leafFocusManager = this.getControlCurrentFocusManager();
+    const overElement = leafFocusManager.getCurrent()
+      .getElementView();
+    const position = overElement.getAttribute('position');
+
+    const newFocusManager = position === 'inside' ? leafFocusManager.getInsideFocusManager() : leafFocusManager;
+    // Astuce pour que le courant devienne le nouveau ajouté par le déplacement
+    newFocusManager?.removeCurrent();
+
+    StoreData.getDragDropCenter()
+      .dropOverElement(overElement);
+
+    newFocusManager?.giveFocus();
   }
   isDragDropReady() {
     return this.#isDragDropReady;

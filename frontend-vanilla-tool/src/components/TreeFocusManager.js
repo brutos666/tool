@@ -30,12 +30,13 @@ class TreeFocusManager extends DragDropFocusManager {
     return false;
   }
 
+  /** @override */
   isCurrentHasFocused() {
     const isFocused = super.isCurrentHasFocused();
     if (isFocused) {
       return true;
     }
-    const childFocusManager = getTreeListFocusManager(this.getCurrentTree());
+    const childFocusManager = this.getInsideFocusManager();
     return childFocusManager?.isCurrentHasFocused();
   }
 
@@ -79,7 +80,7 @@ class TreeFocusManager extends DragDropFocusManager {
       return;
     }
     this.setCurrent(lastFocusable);
-    const childFocusManager = this.giveControlToChild(this.getCurrent());
+    const childFocusManager = this.giveControlToChild();
     if (childFocusManager) {
       childFocusManager.giveFocusToLastLeaf();
     } else {
@@ -121,6 +122,7 @@ class TreeFocusManager extends DragDropFocusManager {
    * Vues et élément pouvant prendre le focus par les touches du clavier ou un clic de la souris
    * -------------------------------------------------------------------------------------------
    */
+  /** @override */
   removeAllComponents() {
     this.giveControlToFocusManager(this.getRootFocusManager());
 
@@ -131,6 +133,7 @@ class TreeFocusManager extends DragDropFocusManager {
    * Navigation au clavier
    * ---------------------
    */
+  /** @override */
   interceptKeys() {
     const keys = [ 'Home', 'End', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown' ];
     if (super.canEnter()) {
@@ -139,6 +142,7 @@ class TreeFocusManager extends DragDropFocusManager {
     return keys;
   }
 
+  /** @override */
   focusToDirection(direction) {
     if (direction === 'Right') {
       this.reactToRightKey();
@@ -165,7 +169,7 @@ class TreeFocusManager extends DragDropFocusManager {
       return;
     }
     // S'il y a des éléments enfants accessibles, on se positionne sur le 1er accessible
-    const childFocusManager = this.giveControlToChild(this.getCurrentTree());
+    const childFocusManager = this.giveControlToChild();
     if (childFocusManager) {
       childFocusManager.giveFocusToFirstNode();
       return;
@@ -201,10 +205,7 @@ class TreeFocusManager extends DragDropFocusManager {
   }
 
   reactToDown() {
-    /**  @type {Tree | DragDropPlaceholder} */
-    const current = this.getCurrent();
-
-    const childFocusManager = this.giveControlToChild(current);
+    const childFocusManager = this.giveControlToChild();
     if (childFocusManager) {
       // Se positionner sur le 1er accessible à l'intérieur du noeud courant
       childFocusManager.giveFocusToFirstNode();
@@ -243,7 +244,7 @@ class TreeFocusManager extends DragDropFocusManager {
     const lastFocusableBefore = this.getLastFocusableBefore(indexCurrent);
     if (lastFocusableBefore) {
       this.setCurrent(lastFocusableBefore);
-      const childFocusManager = this.giveControlToChild(this.getCurrent());
+      const childFocusManager = this.giveControlToChild();
       if (childFocusManager) {
         childFocusManager.giveFocusToLastLeaf();
       } else {
@@ -263,6 +264,7 @@ class TreeFocusManager extends DragDropFocusManager {
    * Démarrage/Arrêt de la navigation au clavier
    * --------------------------------------------------
    */
+  /** @override */
   disableNavigationForAll() {
     super.disableNavigationForAll();
 
@@ -274,16 +276,17 @@ class TreeFocusManager extends DragDropFocusManager {
     }
 
     // Liste des enfants
-    const childFocusManager = getTreeListFocusManager(currentTree);
+    const childFocusManager = this.getInsideFocusManager();
     if (childFocusManager && childFocusManager !== this) {
       childFocusManager.disableNavigationForAll();
     }
   }
+  /** @override */
   hasNavigationActive() {
     if (super.hasNavigationActive()) {
       return true;
     }
-    const childFocusManager = getTreeListFocusManager(this.getCurrentTree());
+    const childFocusManager = this.getInsideFocusManager();
     return childFocusManager?.hasNavigationActive();
   }
   /*
@@ -292,11 +295,10 @@ class TreeFocusManager extends DragDropFocusManager {
    */
   /**
    * Donne le contrôle au focusManager enfant d'une vue à condition qu'il y ait des composants pouvant prendre le focus
-   * @param {Tree} component : vue ayant le focus
    * @returns {TreeFocusManager} focusManager enfant ou null si pas de composants pouvant avoir le focus
    */
-  giveControlToChild(component) {
-    const childFocusManager = getTreeListFocusManager(component);
+  giveControlToChild() {
+    const childFocusManager = this.getInsideFocusManager();
     if (!childFocusManager || !childFocusManager.getFirstFocusable()) {
       return null;
     }
@@ -316,16 +318,30 @@ class TreeFocusManager extends DragDropFocusManager {
       .getParent()
       .getFocusManager();
   }
+  /** @override */
   getParentFocusManager() {
     return this.getParentTreeFocusManager();
   }
+  /** @override */
   getActiveFocusManager() {
     const activeFocusManager = super.getActiveFocusManager();
     if (activeFocusManager) {
       return activeFocusManager;
     }
-    const treeChildFocusManager = getTreeListFocusManager(this.getCurrentTree());
+    const treeChildFocusManager = this.getInsideFocusManager();
     return treeChildFocusManager?.getActiveFocusManager();
+  }
+  /** @override */
+  getInsideFocusManager() {
+    const currentTree = this.getCurrentTree();
+    if (!currentTree) {
+      return null;
+    }
+    const treeListChild = currentTree.getStaticChild('treeList');
+    if (!treeListChild) {
+      return null;
+    }
+    return treeListChild.getFocusManager();
   }
 
   /**
@@ -346,19 +362,5 @@ class TreeFocusManager extends DragDropFocusManager {
 function isTree(component) {
   return component.getName() === 'Tree';
 }
-/**
- * Récupère le système de navigation de la liste des enfants de l'arbre
- * @param {Component} component - Composant
- * @returns {FocusManager} système de navigation dans les enfants de l'arbre
- */
-function getTreeListFocusManager(component) {
-  if (!component) {
-    return null;
-  }
-  const treeListChild = component.getStaticChild('treeList');
-  if (!treeListChild) {
-    return null;
-  }
-  return treeListChild.getFocusManager();
-}
+
 export default TreeFocusManager;

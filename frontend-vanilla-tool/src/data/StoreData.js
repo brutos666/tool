@@ -7,6 +7,7 @@ import User from './User.js';
 /** @import {ItemInfos} from './TreeItem.js'; */
 /** @import {LoggedUser} from './User.js'; */
 /** @import {SpaceView} from '../components/views/SpaceView.js'; */
+/** @import WorkingSpace from '../components/WorkingSpace.js'; */
 
 class StoreData {
 
@@ -16,7 +17,8 @@ class StoreData {
     treeItemLastId: 0,
     currentSpace: null,
     notificationCenter: null,
-    dragDropCenter: null
+    dragDropCenter: null,
+    workSpace: null
   };
 
   static async init() {
@@ -64,6 +66,15 @@ class StoreData {
       this.state.treeItemLastId = 0;
     }
     return String(this.state.treeItemLastId++);
+  }
+
+  /** @returns {WorkingSpace} */
+  static getWorkingSpace() {
+    return this.state.workSpace;
+  }
+
+  static setWorkingSpace(workingSpace) {
+    this.state.workSpace = workingSpace;
   }
 
   /** @returns {NotificationCenter} */

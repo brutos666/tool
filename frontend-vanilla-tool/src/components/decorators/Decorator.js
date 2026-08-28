@@ -49,6 +49,14 @@ class Decorator extends Component {
     }
     return this.#decoratedElement.getFocusManager();
   }
+  enterDragDropMode() {
+    super.enterDragDropMode();
+    this.#decoratedElement.enterDragDropMode();
+  }
+  exitDragDropMode() {
+    super.exitDragDropMode();
+    this.#decoratedElement.exitDragDropMode();
+  }
 
   destroy() {
     super.destroy();

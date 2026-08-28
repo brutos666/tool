@@ -34,6 +34,7 @@ class FocusManager {
   #components = [];
   /** @type {boolean} */
   #navigationActive = false;
+  #tabAccessBeforeDragDrop = false;
 
   /** @type {'horizontal'|'vertical'} */
   #orientation = 'horizontal';
@@ -758,6 +759,13 @@ class FocusManager {
     return null;
   }
   /**
+   * Retourne le système de navigation qui se trouve à l'intérieur du composant courant lorsqu'une notion d'arborescence entre composant existe (arbre d'item, sample mapping)
+   * @returns {FocusManager} système de navigation
+   */
+  getInsideFocusManager() {
+    return null;
+  }
+  /**
    * Fournit le système de navigation actif dans la branche courante
    * @returns {FocusManager}
    */
@@ -773,7 +781,8 @@ class FocusManager {
     return currentFocusManager.getActiveFocusManager();
   }
   /**
-   * Retourne le système de navigation qui s'occupe de la navigation pour le composant courant
+   * Retourne le système de navigation qui s'occupe de positionner le composant courant.
+   * Lorsque le parent s'occupe de la navigation, il se peut que le composant courant soit donné par un enfant
    * @returns {FocusManager} système de navigation
    */
   getControlCurrentFocusManager() {
@@ -845,6 +854,25 @@ class FocusManager {
   }
   callBeforeEnter(current) {
     return this.#callBeforeEnter(current);
+  }
+
+  /*
+   * Passage en mode drag&drop
+   * -----------------------------------------------------------------------------------------
+   */
+  enterDragDropMode() {
+    this.#tabAccessBeforeDragDrop = this.getCurrent()
+      ?.isTabAccessible();
+    if (this.#tabAccessBeforeDragDrop) {
+      this.getCurrent()
+        ?.setTabIndex(-1);
+    }
+  }
+  exitDragDropMode() {
+    if (this.#tabAccessBeforeDragDrop) {
+      this.getCurrent()
+        ?.setTabIndex(0);
+    }
   }
 
 }

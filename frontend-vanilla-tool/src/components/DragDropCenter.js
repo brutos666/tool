@@ -15,8 +15,8 @@ class DragDropCenter extends Component {
 
   #notification = null;
   #draggedId;
-  /** @type {DragDropFocusManager} */
-  #currentFocusManager;
+  /** @type {boolean} */
+  #dragDropMode = false;
 
   #onKeyDownEvent = this.onKeyDown.bind(this);
 
@@ -28,39 +28,22 @@ class DragDropCenter extends Component {
     return this.#draggedId;
   }
 
-  startKeyboardDragDrop(focusManager) {
-    if (!focusManager || !this.isDragDropMode()) {
-      return;
-    }
-    const focusManagerInControl = focusManager.isParentControlNavigation() ? focusManager.getParentFocusManager() : focusManager;
-    if (this.#currentFocusManager === focusManagerInControl) {
-      return;
-    }
-    this.#currentFocusManager?.exitDragDrop();
-    this.#currentFocusManager = focusManagerInControl;
-    if (this.isDragDropMode()) {
-      this.#currentFocusManager.enterDragDrop();
-    }
-  }
-  stopKeyboardDragDrop() {
-    if (!this.#currentFocusManager) {
-      return;
-    }
-    this.#currentFocusManager?.exitDragDrop();
-    this.#currentFocusManager = null;
-  }
-
   /**
    * Entrer en mode dragDrop soit par la souris soit par le clavier
    * @param {'keyboard'|'mouse'} dragDropType - Clavier ou souris
    * @param {number} draggedId - Identifiant du composant déplacé
    */
   enterDragDropMode(dragDropType, draggedId) {
+    this.#dragDropMode = true;
     if (dragDropType === 'keyboard') {
       document.addEventListener('keydown', this.#onKeyDownEvent);
     }
-    this.#draggedId = draggedId;
 
+    // Désactiver tous les focusManager qui ne concerne pas le drag&drop
+    StoreData.getWorkingSpace()
+      .enterDragDropMode();
+
+    this.#draggedId = draggedId;
     this.#notification = StoreData.getNotificationCenter()
       .displayInformation(dragDropType === 'keyboard' ? DragDropCenter.help_message_keyboard : DragDropCenter.help_message_mouse);
 
@@ -69,7 +52,11 @@ class DragDropCenter extends Component {
   }
 
   exitDragDropMode() {
+    this.#dragDropMode = false;
     document.removeEventListener('keydown', this.#onKeyDownEvent);
+    // Réactiver tous les focusManager qui ne concerne pas le drag&drop
+    StoreData.getWorkingSpace()
+      .exitDragDropMode();
 
     this.getView()
       .exitDragDropMode();
@@ -78,8 +65,7 @@ class DragDropCenter extends Component {
   }
 
   isDragDropMode() {
-    return this.getView()
-      .isDragDropMode();
+    return this.#dragDropMode;
   }
 
   /**
@@ -90,31 +76,18 @@ class DragDropCenter extends Component {
     if (event.key !== 'Escape') {
       return;
     }
-    const currentFocusManager = this.#currentFocusManager;
     this.exitDragDropMode();
-    this.stopKeyboardDragDrop();
-    currentFocusManager.giveFocus();
-
     event.preventDefault();
   }
 
   dropOverElement(overElement) {
-    const position = overElement.getAttribute('position');
-    const currentFocusManager = this.#currentFocusManager?.getControlCurrentFocusManager();
-    if (currentFocusManager && [ 'before', 'after' ].includes(position)) {
-      // Astuce pour que le courant devienne le nouveau ajouté par le déplacement
-      currentFocusManager.removeCurrent();
-    }
-
     this.exitDragDropMode();
-    this.stopKeyboardDragDrop();
 
+    const position = overElement.getAttribute('position');
     const draggedOverId = overElement.getAttribute('data-over-id');
     const draggedId = this.getDraggedId();
     StoreData.getTreeItem()
       .moveItem(draggedId, draggedOverId, position);
-
-    currentFocusManager?.giveFocus();
   }
 
 }

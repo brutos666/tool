@@ -131,6 +131,10 @@ class View {
     this.getElementView()
       .setAttribute('tabindex', value);
   }
+  isTabAccessible() {
+    return this.getElementView()
+      .getAttribute('tabindex') === '0';
+  }
   removeTabIndex() {
     this.getElementView()
       .removeAttribute('tabindex');

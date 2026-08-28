@@ -253,6 +253,25 @@ class ColumnFocusManager extends DragDropFocusManager {
     }
     return null;
   }
+  /** @override */
+  getInsideFocusManager() {
+    // Le système en colonne n'est utilisé que pour le sample mapping. Dans ce cas d'utilisation, le header est le parent des 1er composants des colonnes, et pour chaque colonne, le 1er composant est le parent du composant suivant qui contient tous ses enfants
+    const current = this.getCurrent();
+    if (!current) {
+      return null;
+    }
+    const position = this.getCurrentPosition();
+    if (position === null || position.rowIndex > 0) {
+      // Pas d'enfants visibles pour les composants de la 2eme ligne et après
+      return null;
+    }
+    if (position.columnIndex === undefined) {
+      // Header => retourne le système de navigation entre les colonnes
+      return this;
+    }
+    // retourne le système de navigation du composant sous l'entête de colonne
+    return this.#columns[position.columnIndex][1]?.getFocusManager();
+  }
 
   /*
    * Positionnement du courant
@@ -347,11 +366,9 @@ class ColumnFocusManager extends DragDropFocusManager {
   /** @override */
   enterDragDrop() {
     if (this.isDragDropReady()) {
-      return true;
+      return;
     }
-    if (!super.enterDragDrop()) {
-      return false;
-    }
+    super.enterDragDrop();
 
     for (const column of this.#columns) {
       for (const component of column) {
@@ -361,12 +378,11 @@ class ColumnFocusManager extends DragDropFocusManager {
         }
       }
     }
-    return true;
   }
   /** @override */
   exitDragDrop() {
     if (!this.isDragDropReady()) {
-      return false;
+      return;
     }
 
     for (const column of this.#columns) {

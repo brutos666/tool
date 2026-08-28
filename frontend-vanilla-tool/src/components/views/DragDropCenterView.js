@@ -10,8 +10,6 @@ class DragDropCenterView extends View {
 
   #stopEventFunction = this.stopMouseEvent.bind(this);
   #draggedId = null;
-  /** @type {HTMLElement[]} */
-  #tabindexElements = [];
 
   constructor() {
     super();
@@ -35,11 +33,6 @@ class DragDropCenterView extends View {
 
     this.#draggedId = draggedId;
     document.querySelector('.working-space').classList.add('drag-drop-mode');
-    document.querySelectorAll('button[tabindex="0"], input[tabindex="0"], select[tabindex="0"]')
-      .forEach(element => {
-        this.#tabindexElements.push(element);
-        element.setAttribute('tabindex', '-1');
-      });
 
     getAllDragDropElements()
       .forEach(element => {
@@ -54,15 +47,12 @@ class DragDropCenterView extends View {
     document.removeEventListener('mousedown', this.#stopEventFunction, true);
     document.querySelector('.working-space').classList.remove('drag-drop-mode-keyboard');
     document.querySelector('.working-space').classList.remove('drag-drop-mode');
-    this.#tabindexElements.forEach(element => {
-      element.setAttribute('tabindex', '0');
-    });
+
     getAllDragDropElements()
       .forEach(element => {
         element.dispatchEvent(new CustomEvent(DragDropDecorator.EVENTS.dragOff, { detail: this.#draggedId }));
       });
     this.#draggedId = null;
-    this.#tabindexElements = [];
   }
 
   /**

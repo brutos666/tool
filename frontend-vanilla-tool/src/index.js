@@ -7,12 +7,12 @@ import StoreData from './data/StoreData.js';
  * Chargement de l'application
  */
 function loadApp() {
-  const appRoot = document.getElementById('app-root');
-
   StoreData.init()
     .then(() => {
-      const homePage = new WorkingSpace();
-      appRoot.appendChild(homePage.getElementView());
+      const workingSpace = new WorkingSpace();
+      StoreData.setWorkingSpace(workingSpace);
+      document.getElementById('app-root')
+        .appendChild(workingSpace.getElementView());
     });
 }
 window.addEventListener('load', loadApp);

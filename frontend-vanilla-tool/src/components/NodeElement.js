@@ -97,6 +97,18 @@ class NodeElement {
   getFocusManager() {
     return this.#focusManager;
   }
+  enterDragDropMode() {
+    this.#focusManager?.enterDragDropMode();
+    for (const child in this.#staticChildren) {
+      this.#staticChildren[child].enterDragDropMode();
+    }
+  }
+  exitDragDropMode() {
+    this.#focusManager?.exitDragDropMode();
+    for (const child in this.#staticChildren) {
+      this.#staticChildren[child].exitDragDropMode();
+    }
+  }
 
   giveFocus() {
     this.getView()
@@ -109,6 +121,10 @@ class NodeElement {
   setTabIndex(value) {
     this.getView()
       .setTabIndex(value);
+  }
+  isTabAccessible() {
+    return this.getView()
+      .isTabAccessible();
   }
   removeTabIndex(value) {
     this.getView()
