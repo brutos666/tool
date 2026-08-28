@@ -97,10 +97,6 @@ class ColumnFocusManager extends DragDropFocusManager {
     }
     return components;
   }
-  /*
-   * Démarrage/Arrêt de la navigation au clavier
-   * --------------------------------------------------
-   */
 
   /*
    * Navigation au clavier
@@ -116,11 +112,6 @@ class ColumnFocusManager extends DragDropFocusManager {
     }
     return keys;
   }
-
-  /*
-   * Entrée et sortie d'un système de navigation par les touches Entrée/Escape
-   * -------------------------------------------------------------------------
-   */
 
   /*
    * Prise de focus
@@ -246,6 +237,11 @@ class ColumnFocusManager extends DragDropFocusManager {
     }
     return cells;
   }
+
+  /*
+   * Systèmes de navigation
+   * ---------------------------------------------------
+   */
   getAccessibleFocusManager(component) {
     const childFocusManager = component.getFocusManager();
     if (childFocusManager && !childFocusManager.pressEnterToAccess()) {
@@ -265,7 +261,7 @@ class ColumnFocusManager extends DragDropFocusManager {
       // Pas d'enfants visibles pour les composants de la 2eme ligne et après
       return null;
     }
-    if (position.columnIndex === undefined) {
+    if (isHeaderPosition(position)) {
       // Header => retourne le système de navigation entre les colonnes
       return this;
     }
@@ -325,6 +321,7 @@ class ColumnFocusManager extends DragDropFocusManager {
     }
     return null;
   }
+  /** @override */
   getFirstFocusable() {
     if (this.isFocusable(this.#header)) {
       return this.#header;
@@ -361,7 +358,10 @@ class ColumnFocusManager extends DragDropFocusManager {
     return null;
   }
 
-  /** Drag& drop **/
+  /*
+   * Passage en mode drag&drop
+   * -----------------------------------------------------------------------------------------
+   */
 
   /** @override */
   enterDragDrop() {
