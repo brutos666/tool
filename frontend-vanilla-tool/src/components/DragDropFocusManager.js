@@ -100,11 +100,8 @@ class DragDropFocusManager extends FocusManager {
     if (!this.isNavigationActive()) {
       return;
     }
-    const wasFocused = this.isCurrentHasFocused();
+
     this.exitDragDrop();
-    if (wasFocused) {
-      this.giveFocus();
-    }
   }
   enterDragDrop() {
     if (this.#isDragDropReady) {
@@ -116,28 +113,37 @@ class DragDropFocusManager extends FocusManager {
     if (!this.#isDragDropReady) {
       return;
     }
+
     const currentFocusManager = this.getControlCurrentFocusManager();
     const overComponent = currentFocusManager.getCurrent();
     if (currentFocusManager.isPlaceholder(overComponent)) {
+      const wasFocused = this.isCurrentFocused();
       currentFocusManager.setCurrent(currentFocusManager.getComponentWithPlaceholder(overComponent));
+      if (wasFocused) {
+        this.giveFocus();
+      }
     }
     this.removePlaceHolders();
     this.#isDragDropReady = false;
   }
   dropComponent() {
     const leafFocusManager = this.getControlCurrentFocusManager();
-    const overElement = leafFocusManager.getCurrent()
-      .getElementView();
-    const position = overElement.getAttribute('position');
-
-    const newFocusManager = position === 'inside' ? leafFocusManager.getInsideFocusManager() : leafFocusManager;
+    const overComponent = leafFocusManager.getCurrent();
+    const isPlaceHolder = this.isPlaceholder(overComponent);
+    const newFocusManager = isPlaceHolder ? leafFocusManager : leafFocusManager.getInsideFocusManager();
     // Astuce pour que le courant devienne le nouveau ajouté par le déplacement
     newFocusManager?.removeCurrent();
 
+    const overId = getDragOverId(overComponent);
+    const position = isPlaceHolder ? overComponent.getPosition() : 'inside';
     StoreData.getDragDropCenter()
-      .dropOverElement(overElement);
+      .dropOverComponent(overId, position);
 
-    newFocusManager?.giveFocus();
+    const current = newFocusManager?.getCurrent();
+    if (current) {
+      newFocusManager.changeFocus(current.getElementView());
+      newFocusManager.giveFocus();
+    }
   }
   isDragDropReady() {
     return this.#isDragDropReady;

@@ -1,4 +1,3 @@
-import DragDropDecorator from '../decorators/DragDropDecorator.js';
 import View from './View.js';
 
 /**
@@ -9,7 +8,6 @@ class DragDropCenterView extends View {
   name = 'DragDropCenterView';
 
   #stopEventFunction = this.stopMouseEvent.bind(this);
-  #draggedId = null;
 
   constructor() {
     super();
@@ -22,22 +20,14 @@ class DragDropCenterView extends View {
   /**
    * Entrer en mode dragDrop soit par la souris soit par le clavier
    * @param {'keyboard'|'mouse'} dragDropType - Clavier ou souris
-   * @param {number} draggedId - Identifiant du composant déplacé
    */
-  enterDragDropMode(dragDropType, draggedId) {
+  enterDragDropMode(dragDropType) {
     if (dragDropType === 'keyboard') {
       document.addEventListener('click', this.#stopEventFunction, true);
       document.addEventListener('mousedown', this.#stopEventFunction, true);
       document.querySelector('.working-space').classList.add('drag-drop-mode-keyboard');
     }
-
-    this.#draggedId = draggedId;
     document.querySelector('.working-space').classList.add('drag-drop-mode');
-
-    getAllDragDropElements()
-      .forEach(element => {
-        element.dispatchEvent(new CustomEvent(DragDropDecorator.EVENTS.dragOn, { detail: this.#draggedId }));
-      });
   }
   /**
    * Sortie du mode dragDrop
@@ -47,12 +37,6 @@ class DragDropCenterView extends View {
     document.removeEventListener('mousedown', this.#stopEventFunction, true);
     document.querySelector('.working-space').classList.remove('drag-drop-mode-keyboard');
     document.querySelector('.working-space').classList.remove('drag-drop-mode');
-
-    getAllDragDropElements()
-      .forEach(element => {
-        element.dispatchEvent(new CustomEvent(DragDropDecorator.EVENTS.dragOff, { detail: this.#draggedId }));
-      });
-    this.#draggedId = null;
   }
 
   /**
@@ -74,14 +58,6 @@ class DragDropCenterView extends View {
     event.stopImmediatePropagation();
   }
 
-}
-
-/**
- * Récupérer tous les éléments pouvant être survolés
- * @returns {Array<HTMLElement>}
- */
-function getAllDragDropElements() {
-  return [...document.querySelectorAll('.drag-drop--decorator')];
 }
 
 export default DragDropCenterView;

@@ -4,70 +4,62 @@ import DragButton from '../DragButton.js';
 import ItemDecorator from './ItemDecorator.js';
 import DragDropDecoratorView from './views/DragDropDecoratorView.js';
 /** @import Item from '../Item.js'; */
+/** @import Tree from './Tree.js'; */
 
 class DragDropDecorator extends ItemDecorator {
 
   name = 'DragDropDecorator';
 
   static EVENTS = {
-    dragOver: 'dragOver',
-    dragDrop: 'dragDrop',
+    dragStart: 'dragStart',
     dragEnd: 'dragEnd',
-    dragOn: 'dragOn', // Lorsque le déplacement d'un élément commence
-    dragOff: 'dragOff', // Lorsque le déplacement d'un élément se termine
+    dragOverTree: 'dragOverTree',
+    dragDrop: 'dragDrop',
   };
 
   #treeItemId;
-  #item;
-  #listItem;
+  #overComponent;
 
   constructor(decoratedElement) {
     super(new DragDropDecoratorView(decoratedElement.getView()), decoratedElement);
     /** @type {Item} */
-    this.#item = this.getDecoratedElementByName('Item');
-    this.#listItem = this.getDecoratedElementByName('ListItemDecorator');
-    const itemLayout = this.#item.getLayout();
-    const isPostIt = ITEM_LAYOUT.isPostIt(itemLayout);
-    const footerToolbar = this.#listItem ? this.#listItem.getStaticChild('footerToolbar') : this.#item.getStaticChild('footerToolbar');
-    const treeItem = this.#item.getTreeItem();
+    const item = this.getDecoratedElementByName('Item');
+    const listItem = this.getDecoratedElementByName('ListItemDecorator');
+    this.#overComponent = listItem ? listItem : item;
+    const footerToolbar = this.#overComponent.getStaticChild('footerToolbar');
 
+    const isPostIt = ITEM_LAYOUT.isPostIt(item.getLayout());
     const dragAction = new DragButton(decoratedElement, isPostIt ? 'move' : 'reorder');
-    dragAction.setDoActionCallback(this.startDragDrop.bind(this));
+    dragAction.setDoActionCallback(this.startDragDrop.bind(this, 'keyboard'));
     if (footerToolbar) {
       footerToolbar.addChild(dragAction);
     }
 
     /** @type {DragDropDecoratorView} */
     const view = this.getView();
-    view.addEventListener(DragDropDecorator.EVENTS.dragOver, event => {
+    view.addEventListener(DragDropDecorator.EVENTS.dragStart, () => {
+      this.startDragDrop('mouse');
+    });
+    view.addEventListener(DragDropDecorator.EVENTS.dragEnd, () => {
+      this.stopDragDrop();
+    });
+    view.addEventListener(DragDropDecorator.EVENTS.dragOverTree, () => {
+      /** @type {Tree} */
+      const tree = this.getDecoratedElementByName('Tree');
+      tree.openNode();
+    });
+    view.addEventListener(DragDropDecorator.EVENTS.dragDrop, event => {
       const position = event.detail;
-      if (position === 'before') {
-        this.addOverBefore();
-      } else if (position === 'after') {
-        this.addOverAfter();
-      } else if (position === 'inside') {
-        this.addOverInside();
-      } else if (position === 'outside') {
-        this.removeOver();
-      }
-    });
-    view.addEventListener(DragDropDecorator.EVENTS.dragDrop, () => {
-      const draggedId = StoreData.getDragDropCenter()
-        .getDraggedId();
+      this.dropOver(position);
 
-      this.dropOver(draggedId);
-    });
-    view.addEventListener(DragDropDecorator.EVENTS.dragOn, event => {
-      const draggedId = event.detail;
-      const dragDropId = this.#treeItemId;
-      this.getView()
-        .authorizeDrop(isDropAuthorized(draggedId, dragDropId));
-    });
-    view.addEventListener(DragDropDecorator.EVENTS.dragOff, () => {
-      this.getView()
-        .authorizeDrop(true);
+      // Donner le focus par là
+      const parentFocusManager = this.getFocusManager()
+        .getParentFocusManager();
+      parentFocusManager.setCurrent(decoratedElement);
+      parentFocusManager.giveFocus();
     });
 
+    const treeItem = item.getTreeItem();
     this.setTreeItem(treeItem);
   }
 
@@ -79,43 +71,41 @@ class DragDropDecorator extends ItemDecorator {
   }
 
   /**
-   * Début du dragDrop soit par le clavier
+   * Début du dragDrop
+   * @param {'keyboard'|'mouse'} dragDropType - Clavier ou souris
    */
-  startDragDrop() {
-    const focusManager = this.getFocusManagerWithToolbar();
+  startDragDrop(dragDropType) {
+    const focusManager = this.#overComponent.getFocusManager();
     const parentFocusManager = focusManager.giveControlToParent();
     parentFocusManager.giveFocus();
 
     const dragDropCenter = StoreData.getDragDropCenter();
-    dragDropCenter.enterDragDropMode('keyboard', this.#treeItemId);
+    dragDropCenter.enterDragDropMode(dragDropType, this.#treeItemId);
+  }
+  stopDragDrop() {
+    const dragDropCenter = StoreData.getDragDropCenter();
+    dragDropCenter.exitDragDropMode();
+  }
+  dropOver(position) {
+    const dragDropCenter = StoreData.getDragDropCenter();
+    dragDropCenter.dropOverComponent(this.#treeItemId, position);
+
+    // TODO : donner le contrôle au focusManager dans lequel se trouve le composant relâché
   }
 
-  getFocusManagerWithToolbar() {
-    return this.#listItem ? this.#listItem.getFocusManager() : this.#item.getFocusManager();
-  }
+  /** @override */
+  enterDragDropMode(dragDropType, draggedId) {
+    super.enterDragDropMode(dragDropType, draggedId);
 
-  dropOver(draggedId) {
     this.getView()
-      .dropOver(draggedId);
+      .authorizeDrop(isDropAuthorized(draggedId, this.#treeItemId));
   }
-  addOverInside() {
-    this.getView()
-      .addOverInside();
-  }
+  /** @override */
+  exitDragDropMode(dragDropType) {
+    super.exitDragDropMode(dragDropType);
 
-  addOverBefore() {
     this.getView()
-      .addOverBefore();
-  }
-
-  addOverAfter() {
-    this.getView()
-      .addOverAfter();
-  }
-
-  removeOver() {
-    this.getView()
-      .removeOver();
+      .authorizeDrop(true);
   }
 
 }

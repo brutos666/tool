@@ -43,26 +43,26 @@ class DragDropCenter extends Component {
     let information = DragDropCenter.help_message_mouse;
     if (this.#dragDropType === 'keyboard') {
       document.addEventListener('keydown', this.#onKeyDownEvent);
-      // Désactiver tous les focusManager qui ne concerne pas le drag&drop
-      StoreData.getWorkingSpace()
-        .enterDragDropMode();
       information = DragDropCenter.help_message_keyboard;
     }
+    // Désactiver tous les focusManager qui ne concerne pas le drag&drop
+    StoreData.getWorkingSpace()
+      .enterDragDropMode(this.#dragDropType, this.#draggedId);
 
     this.#notification = StoreData.getNotificationCenter()
       .displayInformation(information);
     this.getView()
-      .enterDragDropMode(this.#dragDropType, draggedId);
+      .enterDragDropMode(this.#dragDropType);
   }
 
   exitDragDropMode() {
     this.#dragDropMode = false;
     if (this.#dragDropType === 'keyboard') {
       document.removeEventListener('keydown', this.#onKeyDownEvent);
-      // Réactiver tous les focusManager qui ne concerne pas le drag&drop
-      StoreData.getWorkingSpace()
-        .exitDragDropMode();
     }
+    // Réactiver tous les focusManager qui ne concerne pas le drag&drop
+    StoreData.getWorkingSpace()
+      .exitDragDropMode(this.#dragDropType);
 
     this.getView()
       .exitDragDropMode();
@@ -86,14 +86,12 @@ class DragDropCenter extends Component {
     event.preventDefault();
   }
 
-  dropOverElement(overElement) {
+  dropOverComponent(overId, position) {
     this.exitDragDropMode();
 
-    const position = overElement.getAttribute('position');
-    const draggedOverId = overElement.getAttribute('data-over-id');
     const draggedId = this.getDraggedId();
     StoreData.getTreeItem()
-      .moveItem(draggedId, draggedOverId, position);
+      .moveItem(draggedId, overId, position);
   }
 
 }

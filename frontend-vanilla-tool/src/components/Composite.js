@@ -154,16 +154,18 @@ class Composite extends Component {
       .forEach(child => child.setEnabled());
   }
 
-  enterDragDropMode() {
-    super.enterDragDropMode();
+  /** @override */
+  enterDragDropMode(dragDropType, draggedId) {
+    super.enterDragDropMode(dragDropType, draggedId);
     this.getChildren()
-      .forEach(child => child.enterDragDropMode());
+      .forEach(child => child.enterDragDropMode(dragDropType, draggedId));
   }
 
-  exitDragDropMode() {
-    super.exitDragDropMode();
+  /** @override */
+  exitDragDropMode(dragDropType) {
+    super.exitDragDropMode(dragDropType);
     this.getChildren()
-      .forEach(child => child.exitDragDropMode());
+      .forEach(child => child.exitDragDropMode(dragDropType));
   }
 
 }

@@ -17,7 +17,7 @@ class DragButtonView extends View {
     super(icon);
 
     this.getElementView()
-      .addEventListener('keydown', () => {
+      .addEventListener('keydown', event => {
         if (event.key !== 'Enter') {
           return;
         }

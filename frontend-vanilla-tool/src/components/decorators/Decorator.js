@@ -49,13 +49,15 @@ class Decorator extends Component {
     }
     return this.#decoratedElement.getFocusManager();
   }
-  enterDragDropMode() {
-    super.enterDragDropMode();
-    this.#decoratedElement.enterDragDropMode();
+  /** @override */
+  enterDragDropMode(dragDropType, draggedId) {
+    super.enterDragDropMode(dragDropType, draggedId);
+    this.#decoratedElement.enterDragDropMode(dragDropType, draggedId);
   }
-  exitDragDropMode() {
-    super.exitDragDropMode();
-    this.#decoratedElement.exitDragDropMode();
+  /** @override */
+  exitDragDropMode(dragDropType) {
+    super.exitDragDropMode(dragDropType);
+    this.#decoratedElement.exitDragDropMode(dragDropType);
   }
 
   destroy() {

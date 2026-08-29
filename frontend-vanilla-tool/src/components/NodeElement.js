@@ -97,16 +97,29 @@ class NodeElement {
   getFocusManager() {
     return this.#focusManager;
   }
-  enterDragDropMode() {
-    this.#focusManager?.enterDragDropMode();
+  /**
+   * Entrer en mode dragDrop soit par la souris soit par le clavier
+   * @param {'keyboard'|'mouse'} dragDropType - Clavier ou souris
+   * @param {number} draggedId - Identifiant du composant déplacé
+   */
+  enterDragDropMode(dragDropType, draggedId) {
+    if (dragDropType === 'keyboard') {
+      this.#focusManager?.enterDragDropMode();
+    }
     for (const child in this.#staticChildren) {
-      this.#staticChildren[child].enterDragDropMode();
+      this.#staticChildren[child].enterDragDropMode(dragDropType, draggedId);
     }
   }
-  exitDragDropMode() {
-    this.#focusManager?.exitDragDropMode();
+  /**
+   * Sortie du mode dragDrop soit par la souris soit par le clavier
+   * @param {'keyboard'|'mouse'} dragDropType - Clavier ou souris
+   */
+  exitDragDropMode(dragDropType) {
+    if (dragDropType === 'keyboard') {
+      this.#focusManager?.exitDragDropMode();
+    }
     for (const child in this.#staticChildren) {
-      this.#staticChildren[child].exitDragDropMode();
+      this.#staticChildren[child].exitDragDropMode(dragDropType);
     }
   }
 
