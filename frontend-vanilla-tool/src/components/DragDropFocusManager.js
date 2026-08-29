@@ -39,7 +39,10 @@ class DragDropFocusManager extends FocusManager {
     }
 
     if (this.#isDragDropReady && event.key === 'Enter') {
-      this.dropComponent();
+      const current = this.getCurrentLeaf();
+      const position = this.isPlaceholder(current) ? current.getPosition() : 'inside';
+      const overId = getDragOverId(current);
+      this.dropComponent(position, overId);
       return;
     }
     super.onKeyDown(event);
@@ -126,16 +129,12 @@ class DragDropFocusManager extends FocusManager {
     this.removePlaceHolders();
     this.#isDragDropReady = false;
   }
-  dropComponent() {
+  dropComponent(position, overId) {
     const leafFocusManager = this.getControlCurrentFocusManager();
-    const overComponent = leafFocusManager.getCurrent();
-    const isPlaceHolder = this.isPlaceholder(overComponent);
-    const newFocusManager = isPlaceHolder ? leafFocusManager : leafFocusManager.getInsideFocusManager();
+    const newFocusManager = position === 'inside' ? leafFocusManager.getInsideFocusManager() : leafFocusManager;
     // Astuce pour que le courant devienne le nouveau ajouté par le déplacement
     newFocusManager?.removeCurrent();
 
-    const overId = getDragOverId(overComponent);
-    const position = isPlaceHolder ? overComponent.getPosition() : 'inside';
     StoreData.getDragDropCenter()
       .dropOverComponent(overId, position);
 

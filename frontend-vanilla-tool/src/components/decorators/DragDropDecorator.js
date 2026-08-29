@@ -5,6 +5,7 @@ import ItemDecorator from './ItemDecorator.js';
 import DragDropDecoratorView from './views/DragDropDecoratorView.js';
 /** @import Item from '../Item.js'; */
 /** @import Tree from './Tree.js'; */
+/** @import DragDropFocusManager from '../DragDropFocusManager.js'; */
 
 class DragDropDecorator extends ItemDecorator {
 
@@ -50,13 +51,10 @@ class DragDropDecorator extends ItemDecorator {
     });
     view.addEventListener(DragDropDecorator.EVENTS.dragDrop, event => {
       const position = event.detail;
-      this.dropOver(position);
-
-      // Donner le focus par là
+      /** @type {DragDropFocusManager} */
       const parentFocusManager = this.getFocusManager()
         .getParentFocusManager();
-      parentFocusManager.setCurrent(decoratedElement);
-      parentFocusManager.giveFocus();
+      parentFocusManager.dropComponent(position, this.#treeItemId);
     });
 
     const treeItem = item.getTreeItem();
@@ -89,8 +87,6 @@ class DragDropDecorator extends ItemDecorator {
   dropOver(position) {
     const dragDropCenter = StoreData.getDragDropCenter();
     dragDropCenter.dropOverComponent(this.#treeItemId, position);
-
-    // TODO : donner le contrôle au focusManager dans lequel se trouve le composant relâché
   }
 
   /** @override */
