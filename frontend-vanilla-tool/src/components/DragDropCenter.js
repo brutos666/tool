@@ -17,6 +17,8 @@ class DragDropCenter extends Component {
   #draggedId;
   /** @type {boolean} */
   #dragDropMode = false;
+  /** @type {'keyboard', 'mouse'} */
+  #dragDropType;
 
   #onKeyDownEvent = this.onKeyDown.bind(this);
 
@@ -34,29 +36,33 @@ class DragDropCenter extends Component {
    * @param {number} draggedId - Identifiant du composant déplacé
    */
   enterDragDropMode(dragDropType, draggedId) {
+    this.#draggedId = draggedId;
+    this.#dragDropType = dragDropType;
     this.#dragDropMode = true;
-    if (dragDropType === 'keyboard') {
+
+    let information = DragDropCenter.help_message_mouse;
+    if (this.#dragDropType === 'keyboard') {
       document.addEventListener('keydown', this.#onKeyDownEvent);
+      // Désactiver tous les focusManager qui ne concerne pas le drag&drop
+      StoreData.getWorkingSpace()
+        .enterDragDropMode();
+      information = DragDropCenter.help_message_keyboard;
     }
 
-    // Désactiver tous les focusManager qui ne concerne pas le drag&drop
-    StoreData.getWorkingSpace()
-      .enterDragDropMode();
-
-    this.#draggedId = draggedId;
     this.#notification = StoreData.getNotificationCenter()
-      .displayInformation(dragDropType === 'keyboard' ? DragDropCenter.help_message_keyboard : DragDropCenter.help_message_mouse);
-
+      .displayInformation(information);
     this.getView()
-      .enterDragDropMode(dragDropType, draggedId);
+      .enterDragDropMode(this.#dragDropType, draggedId);
   }
 
   exitDragDropMode() {
     this.#dragDropMode = false;
-    document.removeEventListener('keydown', this.#onKeyDownEvent);
-    // Réactiver tous les focusManager qui ne concerne pas le drag&drop
-    StoreData.getWorkingSpace()
-      .exitDragDropMode();
+    if (this.#dragDropType === 'keyboard') {
+      document.removeEventListener('keydown', this.#onKeyDownEvent);
+      // Réactiver tous les focusManager qui ne concerne pas le drag&drop
+      StoreData.getWorkingSpace()
+        .exitDragDropMode();
+    }
 
     this.getView()
       .exitDragDropMode();

@@ -166,6 +166,11 @@ class DragDropDecoratorView extends DecoratorView {
     if (!dragOverElement) {
       return;
     }
+    /*
+     * StoreData.getDragDropCenter()
+     *   .dropOverComponent(dragOverElement);
+     */
+
     const position = dragOverElement.getAttribute('position');
     const draggedOverId = dragOverElement.getAttribute('data-over-id');
     StoreData.getTreeItem()
