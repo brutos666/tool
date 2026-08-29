@@ -9,6 +9,7 @@ class PopupFocusManager extends CompositeFocusManager {
   name = 'PopupFocusManager';
 
   #componentToAccess;
+  #isInsideComponent = false;
 
   /**
    * @constructor
@@ -32,14 +33,30 @@ class PopupFocusManager extends CompositeFocusManager {
     focusManager.changeFocus(focusManager.getCurrent()
       .getElementView());
     focusManager.giveFocus();
+    this.#isInsideComponent = true;
+  }
+  /** @override */
+  enableKeyNavigation() {
+    this.#isInsideComponent = false;
+
+    super.enableKeyNavigation();
   }
   /** @override */
   disableKeyNavigation() {
+    this.#isInsideComponent = false;
+
     super.disableKeyNavigation();
 
     /** @type {FocusManager} */
     const focusManager = this.#componentToAccess.getFocusManager();
     focusManager.disableKeyNavigation();
+  }
+  /** @override */
+  getCurrent() {
+    if (this.#isInsideComponent) {
+      return this.#componentToAccess;
+    }
+    return super.getCurrent();
   }
 
 }
