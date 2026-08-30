@@ -4,7 +4,7 @@
   min-height: 24px;
 }
 
-.drag-drop--decorator > .tree .tree__item:has(> .item .drag-button:hover, > .item .drag-button:focus) {
+.drag-drop--decorator > .tree:has(> .item .drag-button:hover, > .item .drag-button:focus) {
   background: light-dark(oklch(from var(--color-bg-surface) calc(l - 0.05) c h), oklch(from var(--color-bg-surface) calc(l + 0.05) c h));
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   outline: 1px solid var(--color-border-drag-over);
@@ -87,7 +87,7 @@
 }
 
 /** ouverture du noeud pendant le survol **/
-.tree--node.drag-over.pending .tree__item {
+.tree--node.drag-over.pending {
   animation: highlight-pulse 3s linear forwards;
 }
 

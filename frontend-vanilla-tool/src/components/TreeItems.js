@@ -4,6 +4,7 @@ import Tree from './decorators/Tree.js';
 import Item from './Item.js';
 import Items from './Items.js';
 import TreeFocusManager from './TreeFocusManager.js';
+/** @import TreeItem from '../data/TreeItem.js'; */
 
 class TreeItems extends Items {
 

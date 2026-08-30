@@ -1,6 +1,7 @@
 import StoreData from '../data/StoreData.js';
 import { ITEM_LAYOUT } from '../tools/Constants.js';
 import AddItemButton from './AddItemButton.js';
+import TreeElement from './decorators/TreeElement.js';
 import TreeItems from './TreeItems.js';
 import NavTreeView from './views/NavTreeView.js';
 /** @import TreeFocusManager from './TreeFocusManager.js'; */
@@ -45,6 +46,13 @@ class NavTree extends TreeItems {
     }
     this.getView()
       .dispatchEvent(new CustomEvent(NavTree.EVENTS.current, { bubbles: true, detail: null }));
+  }
+
+  /** @override */
+  getItemComponent(treeItem) {
+    const itemComponent = super.getItemComponent(treeItem);
+    // Ajout d'un décorateur permettant de mettre du style sur chaque arbre
+    return new TreeElement(itemComponent);
   }
 
   /** @override */

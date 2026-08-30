@@ -26,12 +26,14 @@ class DragDropDecoratorView extends DecoratorView {
     this.addEventListener('dragstart', this.onDragStart.bind(this));
     this.addEventListener('dragend', this.onDragEnd.bind(this));
     this.addEventListener('drop', this.onDrop.bind(this));
-    this.addEventListener('dragover', this.onDragOver.bind(this));
+    this.#dragOverElement.addEventListener('dragover', this.onDragOver.bind(this));
     this.addEventListener('dragleave', this.onDragLeave.bind(this));
   }
 
   setTreeItemId(treeItemId) {
     this.#dragOverElement.setAttribute('data-over-id', treeItemId);
+    this.getElementView()
+      .setAttribute('data-item-id', treeItemId);
     this.#treeItemId = treeItemId;
   }
   getTreeItemId() {
@@ -105,8 +107,9 @@ class DragDropDecoratorView extends DecoratorView {
   }
 
   onDragOver(event) {
+    const dragDropDecorator = event.target.closest('.drag-drop--decorator');
     // Vérifier que l'élément survolé est un élément direct et pas un sous enfant
-    if (event.target.closest('.drag-drop--decorator') !== this.getElementView()) {
+    if (dragDropDecorator !== this.getElementView()) {
       return;
     }
     if (this.isDropForbidden()) {
@@ -120,24 +123,23 @@ class DragDropDecoratorView extends DecoratorView {
       return;
     }
     this.#currentPosition = position;
-
     switch (position) {
       case 'inside':
         this.addOverInside();
         this.openNodeAfterDelay();
-        return;
+        break;
       case 'before':
         this.addOverBefore();
-        return;
+        break;
       case 'after':
         this.addOverAfter();
-        return;
+        break;
     }
   }
 
   addOverInside() {
     this.#currentPosition = 'inside';
-    removePlaceholder();
+    removePlaceholder(this);
     this.#dragOverElement.classList.add('drag-over');
   }
   addOverBefore() {
@@ -157,7 +159,7 @@ class DragDropDecoratorView extends DecoratorView {
   removeOver() {
     this.#currentPosition = 'outside';
     this.removeInsideOver();
-    removePlaceholder();
+    removePlaceholder(this);
   }
 
   openNodeAfterDelay() {
@@ -211,10 +213,15 @@ function addPlaceholder(draggedOverView, position, draggedOverId) {
 }
 /**
  * Suppression du placeholder
+ * @param {DragDropDecoratorView} draggedOverView - décorateur sur lequel l'item est drag-and-drop
  */
-function removePlaceholder() {
+function removePlaceholder(draggedOverView) {
   const placeHolder = document.querySelector('.placeholder');
-  placeHolder?.parentNode?.removeChild(placeHolder);
+  const parentNode = placeHolder?.parentNode;
+  if (parentNode === draggedOverView.getElementView()) {
+    // NOTE : Le place holder est le même pour tout le monde. Ne pas l'enlever s'il est utilisé par un autre composant
+    placeHolder?.parentNode?.removeChild(placeHolder);
+  }
 }
 /**
  * Donne la position où placer le survol de l'item drag-and-drop

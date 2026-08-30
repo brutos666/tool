@@ -24,19 +24,15 @@
   align-content: start;
 }
 
-.check-list__items > * {
-  flex: 1;
+.check-list__items .tree__element {
   padding: var(--medium-padding);
 }
-.check-list__items .tree--root,
+.check-list__items .tree__element > *,
 .check-list__footer > .item-like-button {
   background: var(--color-bg-surface);
   border-radius: var(--border-radius);
   box-shadow: 3px 3px 4px var(--color-box-shadow);
   padding: var(--medium-padding);
-}
-.check-list__items .tree {
-  display: flex;
 }
 .check-list__footer {
   padding: var(--medium-padding);

@@ -4,6 +4,7 @@ import Item from './Item.js';
 import TreeFocusManager from './TreeFocusManager.js';
 import TreeItems from './TreeItems.js';
 import DragDropDecorator from './decorators/DragDropDecorator.js';
+import TreeElement from './decorators/TreeElement.js';
 import CheckListView from './views/CheckListView.js';
 
 class CheckList extends TreeItems {
@@ -37,18 +38,15 @@ class CheckList extends TreeItems {
     this.#decoratedTitleItem.setTreeItem(treeItem);
     super.setTreeItem(treeItem);
   }
-  /**
-   * @override
-   * @param {TreeItem} treeItem - Informations sur la tache
-   * @returns {Component} composant
-   */
+
+  /** @override */
   getItemComponent(treeItem) {
-    /** @type {DragDropDecorator} */
-    const component = super.getItemComponent(treeItem);
-    const itemComponent = component.getDecoratedElementByName('Tree');
-    itemComponent.setRoot();
-    itemComponent.setOpen(true);
-    return component;
+    const itemComponent = super.getItemComponent(treeItem);
+    const treeComponent = itemComponent.getDecoratedElementByName('Tree');
+    treeComponent.setRoot();
+    treeComponent.setOpen(true);
+    // Ajout d'un décorateur permettant de mettre du style sur chaque arbre
+    return new TreeElement(itemComponent);
   }
 
   /** @override */

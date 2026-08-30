@@ -6,41 +6,36 @@ class TreeView extends DecoratorView {
 
   name = 'TreeView';
 
-  #treeItem;
-
   /**
    * @constructor
    * @param {View} view
    */
   constructor(view) {
     super(view);
-    this.#treeItem = this.getElementView()
-      .querySelector('.tree__item');
   }
 
   getHtmlView() {
-    return String.raw`<li role="none" class="tree">
-      <div class="tree__item" role="treeitem">
+    return String.raw`<div class="tree" role="treeitem">
         <template id="toggle" class="tree__toggle icon-button clickable" tabindex="-1" ></template>
         <template id="decoratedSpace" class="tree__content"></template>
         <template id="treeList" class="tree__list" role="group"></template>
-      </div></li>`;
+      </div>`;
   }
 
   setOpen(open) {
     if (!this.isLeaf()) {
       if (open) {
-        TreeUtilities.openNode(this.#treeItem);
+        TreeUtilities.openNode(this.getElementView());
       } else {
-        TreeUtilities.closeNode(this.#treeItem);
+        TreeUtilities.closeNode(this.getElementView());
       }
     }
   }
   isClosed() {
-    return !this.isLeaf() && TreeUtilities.isClosed(this.#treeItem);
+    return !this.isLeaf() && TreeUtilities.isClosed(this.getElementView());
   }
   isOpened() {
-    return !this.isLeaf() && TreeUtilities.isOpened(this.#treeItem);
+    return !this.isLeaf() && TreeUtilities.isOpened(this.getElementView());
   }
 
   setRoot() {
