@@ -7,6 +7,7 @@ import View from './View.js';
 
 class SelectView extends View {
 
+  #onChangeEvent = this.callDoSelectCallback.bind(this);
   #doSelectCallback;
   /**
    * @constructor
@@ -18,7 +19,7 @@ class SelectView extends View {
   constructor(data) {
     super(data);
     this.getElementView()
-      .addEventListener('change', this.callDoSelectCallback.bind(this));
+      .addEventListener('change', this.#onChangeEvent);
     this.getElementView()
       .value = data.value;
   }
@@ -55,6 +56,16 @@ class SelectView extends View {
     }
     htmlText += String.raw`</select>`;
     return htmlText;
+  }
+
+  destroy() {
+    this.getElementView()
+      .removeEventListener('change', this.#onChangeEvent);
+
+    super.destroy();
+
+    this.#doSelectCallback = null;
+    this.#onChangeEvent = null;
   }
 
 }

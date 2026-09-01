@@ -2,16 +2,18 @@ import View from './View.js';
 
 class TextInputView extends View {
 
+  #onInputEvent = this.callOnChangeCallback.bind(this);
+  #onFocusEvent = this.enter.bind(this);
+  #onBlurEvent = this.exit.bind(this);
+
   #onChangeCallback = () => {};
 
   constructor() {
     super();
-    this.getElementView()
-      .addEventListener('input', this.callOnChangeCallback.bind(this));
-    this.getElementView()
-      .addEventListener('focus', this.enter.bind(this), true);
-    this.getElementView()
-      .addEventListener('blur', this.exit.bind(this), true);
+    const elementView = this.getElementView();
+    elementView.addEventListener('input', this.#onInputEvent);
+    elementView.addEventListener('focus', this.#onFocusEvent, true);
+    elementView.addEventListener('blur', this.#onBlurEvent, true);
   }
 
   /**
@@ -57,6 +59,16 @@ class TextInputView extends View {
   setEnabled() {
     super.setEnabled();
     this.getElementView().contentEditable = true;
+  }
+
+  /** @override */
+  destroy() {
+    const elementView = this.getElementView();
+    elementView.removeEventListener('input', this.#onInputEvent);
+    elementView.removeEventListener('focus', this.#onFocusEvent, true);
+    elementView.removeEventListener('blur', this.#onBlurEvent, true);
+
+    super.destroy();
   }
 
 }

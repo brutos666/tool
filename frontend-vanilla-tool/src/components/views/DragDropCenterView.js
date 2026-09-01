@@ -58,6 +58,13 @@ class DragDropCenterView extends View {
     event.stopImmediatePropagation();
   }
 
+  destroy() {
+    document.removeEventListener('click', this.#stopEventFunction, true);
+    document.removeEventListener('mousedown', this.#stopEventFunction, true);
+
+    super.destroy();
+  }
+
 }
 
 export default DragDropCenterView;

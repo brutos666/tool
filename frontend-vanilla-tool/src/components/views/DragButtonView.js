@@ -6,8 +6,10 @@ class DragButtonView extends View {
   name = 'DragButtonView';
 
   #doActionCallback = () => {};
-  #onMouseUpEvent = () => {};
+  #onMouseUpEvent = this.onMouseUp.bind(this);
+  #onKeyDownEvent = this.onKeyDown.bind(this);
   #focusBefore = null;
+  #dragElement = null;
 
   /**
    * @constructor. Crée la vue à partir des données passées en paramètre
@@ -17,15 +19,18 @@ class DragButtonView extends View {
     super(icon);
 
     this.getElementView()
-      .addEventListener('keydown', event => {
-        if (event.key !== 'Enter') {
-          return;
-        }
-        event.preventDefault();
-        event.stopPropagation();
-        this.#doActionCallback();
-      });
+      .addEventListener('keydown', this.#onKeyDownEvent);
   }
+
+  onKeyDown(event) {
+    if (event.key !== 'Enter') {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    this.#doActionCallback();
+  }
+
   setDoActionCallback(callback) {
     this.#doActionCallback = callback;
   }
@@ -35,23 +40,20 @@ class DragButtonView extends View {
   }
 
   setDragElementView(dragElementView) {
-    this.#onMouseUpEvent = this.onMouseUp.bind(this, dragElementView);
+    this.#dragElement = dragElementView.getElementView();
 
     this.addEventListener('mousedown', () => {
       this.#focusBefore = document.activeElement;
-      dragElementView.getElementView()
-        .setAttribute('draggable', 'true');
+      this.#dragElement.setAttribute('draggable', 'true');
       document.addEventListener('mouseup', this.#onMouseUpEvent);
-      dragElementView.getElementView()
-        .addEventListener('dragend', this.#onMouseUpEvent);
+      this.#dragElement.addEventListener('dragend', this.#onMouseUpEvent);
     });
   }
-  onMouseUp(dragElementView) {
+  onMouseUp() {
     if (document.activeElement === this.getElementView()) {
       this.#focusBefore.focus();
     }
-    dragElementView.getElementView()
-      .setAttribute('draggable', 'false');
+    this.#dragElement.setAttribute('draggable', 'false');
     document.removeEventListener('mouseup', this.#onMouseUpEvent);
   }
 
@@ -63,6 +65,21 @@ class DragButtonView extends View {
     return String.raw`<button class="draggable drag-button" role="button" tabindex="-1">
       <span class="button__icon">${ SvgUtilities.getIcon(icon) }</span>
       <span class="button__label">Déplacer</span></button>`;
+  }
+
+  destroy() {
+    this.getElementView()
+      .removeEventListener('keydown', this.#onKeyDownEvent);
+    this.#dragElement.removeEventListener('dragend', this.#onMouseUpEvent);
+    document.removeEventListener('mouseup', this.#onMouseUpEvent);
+
+    super.destroy();
+
+    this.#doActionCallback = null;
+    this.#dragElement = null;
+    this.#focusBefore = null;
+    this.#onKeyDownEvent = null;
+    this.#onMouseUpEvent = null;
   }
 
 }

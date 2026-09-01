@@ -17,6 +17,10 @@ class DragDropDecorator extends ItemDecorator {
     dragOverTree: 'dragOverTree',
     dragDrop: 'dragDrop',
   };
+  #onDragStartEvent = this.startDragDrop.bind(this, 'mouse');
+  #onDragEndEvent = this.stopDragDrop.bind(this);
+  #onDragOverTreeEvent = this.openTreeNode.bind(this);
+  #onDragDropEvent = this.dragDrop.bind(this);
 
   #treeItemId;
   #overComponent;
@@ -38,24 +42,10 @@ class DragDropDecorator extends ItemDecorator {
 
     /** @type {DragDropDecoratorView} */
     const view = this.getView();
-    view.addEventListener(DragDropDecorator.EVENTS.dragStart, () => {
-      this.startDragDrop('mouse');
-    });
-    view.addEventListener(DragDropDecorator.EVENTS.dragEnd, () => {
-      this.stopDragDrop();
-    });
-    view.addEventListener(DragDropDecorator.EVENTS.dragOverTree, () => {
-      /** @type {Tree} */
-      const tree = this.getDecoratedElementByName('Tree');
-      tree.openNode();
-    });
-    view.addEventListener(DragDropDecorator.EVENTS.dragDrop, event => {
-      const position = event.detail;
-      /** @type {DragDropFocusManager} */
-      const parentFocusManager = this.getFocusManager()
-        .getParentFocusManager();
-      parentFocusManager.dropComponent(position, this.#treeItemId);
-    });
+    view.addEventListener(DragDropDecorator.EVENTS.dragStart, this.#onDragStartEvent);
+    view.addEventListener(DragDropDecorator.EVENTS.dragEnd, this.#onDragEndEvent);
+    view.addEventListener(DragDropDecorator.EVENTS.dragOverTree, this.#onDragOverTreeEvent);
+    view.addEventListener(DragDropDecorator.EVENTS.dragDrop, this.#onDragDropEvent);
 
     const treeItem = item.getTreeItem();
     this.setTreeItem(treeItem);
@@ -88,6 +78,18 @@ class DragDropDecorator extends ItemDecorator {
     const dragDropCenter = StoreData.getDragDropCenter();
     dragDropCenter.dropOverComponent(this.#treeItemId, position);
   }
+  openTreeNode() {
+    /** @type {Tree} */
+    const tree = this.getDecoratedElementByName('Tree');
+    tree.openNode();
+  }
+  dragDrop(event) {
+    const position = event.detail;
+    /** @type {DragDropFocusManager} */
+    const parentFocusManager = this.getFocusManager()
+      .getParentFocusManager();
+    parentFocusManager.dropComponent(position, this.#treeItemId);
+  }
 
   /** @override */
   enterDragDropMode(dragDropType, draggedId) {
@@ -102,6 +104,24 @@ class DragDropDecorator extends ItemDecorator {
 
     this.getView()
       .authorizeDrop(true);
+  }
+
+  /** @override */
+  destroy() {
+    const view = this.getView();
+    view.removeEventListener(DragDropDecorator.EVENTS.dragStart, this.#onDragStartEvent);
+    view.removeEventListener(DragDropDecorator.EVENTS.dragEnd, this.#onDragEndEvent);
+    view.removeEventListener(DragDropDecorator.EVENTS.dragOverTree, this.#onDragOverTreeEvent);
+    view.removeEventListener(DragDropDecorator.EVENTS.dragDrop, this.#onDragDropEvent);
+
+    super.destroy();
+
+    this.#onDragDropEvent = null;
+    this.#onDragEndEvent = null;
+    this.#onDragOverTreeEvent = null;
+    this.#onDragStartEvent = null;
+    this.#overComponent = null;
+    this.#treeItemId = null;
   }
 
 }

@@ -5,6 +5,7 @@ class MenuView extends CompositeView {
 
   name = 'MenuView';
 
+  #onToggleEvent = event => this.#menuShowHideCallback(event.newState);
   #menuChangeCallback = () => {};
   #menuShowHideCallback = () => {};
 
@@ -21,9 +22,7 @@ class MenuView extends CompositeView {
     this.#menu_actions = this.getElementView()
       .querySelector('.menu__actions');
 
-    this.#menu_actions.addEventListener('toggle', event => {
-      this.#menuShowHideCallback(event.newState);
-    });
+    this.#menu_actions.addEventListener('toggle', this.#onToggleEvent);
 
     this.#resizeObserver = new ResizeObserver(this.sizeHasChanged.bind(this));
     this.#resizeObserver.observe(this.getElementView(), { box: 'content-box' });
@@ -96,8 +95,18 @@ class MenuView extends CompositeView {
   }
 
   destroy() {
-    super.destroy();
+    this.#menu_actions.removeEventListener('toggle', this.#onToggleEvent);
     this.#resizeObserver.disconnect();
+
+    super.destroy();
+
+    this.#font_size = null;
+    this.#horizontal = null;
+    this.#menuChangeCallback = null;
+    this.#menuShowHideCallback = null;
+    this.#menu_actions = null;
+    this.#onToggleEvent = null;
+    this.#resizeObserver = null;
   }
 
 }

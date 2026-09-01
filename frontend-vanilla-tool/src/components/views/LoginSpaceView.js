@@ -9,6 +9,7 @@ class LoginSpaceView extends View {
   static CONNEXION = 'Se connecter';
   static PASSWORD_MIN_LENGTH = 8;
 
+  #onSubmitEvent = this.callSubmitFormCallback.bind(this);
   #submitFormCallback = () => {};
 
   #title;
@@ -17,7 +18,7 @@ class LoginSpaceView extends View {
     super();
     this.getElementView()
       .querySelector('.form')
-      .addEventListener('submit', this.callSubmitFormCallback.bind(this));
+      .addEventListener('submit', this.#onSubmitEvent);
     this.#title = this.getElementView()
       .querySelector('.login__title');
   }
@@ -125,6 +126,16 @@ class LoginSpaceView extends View {
         </div>
       </form>
     </div>`;
+  }
+
+  destroy() {
+    this.getElementView()
+      .querySelector('.form')
+      .addEventListener('submit', this.#onSubmitEvent);
+
+    super.destroy();
+    this.#onSubmitEvent = null;
+    this.#submitFormCallback = null;
   }
 
 }

@@ -6,6 +6,7 @@ class InputView extends View {
 
   static PASSWORD_ERROR = 'Les mots de passe ne correspondent pas, veuillez les saisir à nouveau.';
 
+  #onInputEvent = this.undoError.bind(this);
   #inputComponent;
   #error;
 
@@ -25,7 +26,7 @@ class InputView extends View {
       .querySelector('.input__component');
     this.#error = this.getElementView()
       .querySelector('.input__error');
-    this.#inputComponent.addEventListener('input', this.undoError.bind(this), false);
+    this.#inputComponent.addEventListener('input', this.#onInputEvent, false);
   }
 
   /**
@@ -92,6 +93,16 @@ class InputView extends View {
 
   clearValue() {
     this.#inputComponent.value = '';
+  }
+
+  destroy() {
+    this.#inputComponent.removeEventListener('input', this.#onInputEvent, false);
+
+    super.destroy();
+
+    this.#error = null;
+    this.#inputComponent = null;
+    this.#onInputEvent = null;
   }
 
 }

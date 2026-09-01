@@ -11,7 +11,7 @@ class DragDropCenter extends Component {
   name = 'DragDropCenter';
 
   static help_message_keyboard = 'Vous êtes en mode drag&drop. Veuillez sélectionner le nouvel emplacement en naviguant avec le clavier puis appuyer sur Entrée ou Escape pour annuler.';
-  static help_message_mouse = 'Vous êtes en mode drag&drop. Veuillez sélectionner le nouvel emplacement en déplaçant la souris puis relâcher la souris à l\'endroit désiré ou appuyer sur Escape pour annuler.';
+  static help_message_mouse = 'Vous êtes en mode drag&drop. Veuillez sélectionner le nouvel emplacement en déplaçant la souris puis relâcher la souris à l\'endroit désiré.';
 
   #notification = null;
   #draggedId;
@@ -45,6 +45,7 @@ class DragDropCenter extends Component {
       document.addEventListener('keydown', this.#onKeyDownEvent);
       information = DragDropCenter.help_message_keyboard;
     }
+
     // Désactiver tous les focusManager qui ne concerne pas le drag&drop
     StoreData.getWorkingSpace()
       .enterDragDropMode(this.#dragDropType, this.#draggedId);

@@ -7,6 +7,7 @@ class CheckBoxView extends View {
 
   name = 'CheckBoxView';
 
+  #onChangeEvent = this.callToggleCallback.bind(this);
   #toggleCallback;
   #checkbox;
 
@@ -14,7 +15,7 @@ class CheckBoxView extends View {
     super(data);
     this.#checkbox = this.getElementView()
       .querySelector('input');
-    this.#checkbox.addEventListener('change', this.callToggleCallback.bind(this));
+    this.#checkbox.addEventListener('change', this.#onChangeEvent);
   }
   /**
    * @param {Object} data - Données à utiliser pour créer la vue
@@ -75,6 +76,16 @@ class CheckBoxView extends View {
 
   setChecked(checked) {
     this.#checkbox.checked = checked;
+  }
+
+  destroy() {
+    this.#checkbox.removeEventListener('change', this.#onChangeEvent);
+
+    super.destroy();
+
+    this.#checkbox = null;
+    this.#onChangeEvent = null;
+    this.#toggleCallback = null;
   }
 
 }

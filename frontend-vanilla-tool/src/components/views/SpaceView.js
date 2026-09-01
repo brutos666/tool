@@ -1,15 +1,18 @@
-import View from './View.js';
 import StoreData from '../../data/StoreData.js';
+import View from './View.js';
 
 class SpaceView extends View {
 
   name = 'SpaceView';
 
+  #onMouseDownEvent = this.onMouseDown.bind(this);
+  #onFocusInEvent = this.onFocusIn.bind(this);
+
   constructor() {
     super();
     const elementView = this.getElementView();
-    elementView.addEventListener('mousedown', this.onMouseDown.bind(this));
-    elementView.addEventListener('focusin', this.onFocusIn.bind(this));
+    elementView.addEventListener('mousedown', this.#onMouseDownEvent);
+    elementView.addEventListener('focusin', this.#onFocusInEvent);
   }
 
   onFocusIn() {
@@ -31,6 +34,13 @@ class SpaceView extends View {
       ?.removeCurrent();
     StoreData.setCurrentSpace(this);
     this.setCurrent();
+  }
+
+  /** @override */
+  destroy() {
+    const elementView = this.getElementView();
+    elementView.removeEventListener('mousedown', this.#onMouseDownEvent);
+    elementView.removeEventListener('focusin', this.#onFocusInEvent);
   }
 
 }

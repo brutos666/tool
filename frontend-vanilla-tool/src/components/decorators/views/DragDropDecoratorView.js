@@ -7,6 +7,12 @@ class DragDropDecoratorView extends DecoratorView {
 
   name = 'DragDropDecoratorView';
 
+  #onDragStartEvent = this.onDragStart.bind(this);
+  #onDragEndEvent = this.onDragEnd.bind(this);
+  #onDropEvent = this.onDrop.bind(this);
+  #onDragOverEvent = this.onDragOver.bind(this);
+  #onDragLeaveEvent = this.onDragLeave.bind(this);
+
   #dragOverElement = null;
   #timeoutID = null;
   #treeItemId = null;
@@ -23,11 +29,11 @@ class DragDropDecoratorView extends DecoratorView {
     this.#dragOverElement = view.getElementView();
     this.#dragOverElement.setAttribute('position', 'inside');
 
-    this.addEventListener('dragstart', this.onDragStart.bind(this));
-    this.addEventListener('dragend', this.onDragEnd.bind(this));
-    this.addEventListener('drop', this.onDrop.bind(this));
-    this.#dragOverElement.addEventListener('dragover', this.onDragOver.bind(this));
-    this.addEventListener('dragleave', this.onDragLeave.bind(this));
+    this.addEventListener('dragstart', this.#onDragStartEvent);
+    this.addEventListener('dragend', this.#onDragEndEvent);
+    this.addEventListener('drop', this.#onDropEvent);
+    this.#dragOverElement.addEventListener('dragover', this.#onDragOverEvent);
+    this.addEventListener('dragleave', this.#onDragLeaveEvent);
   }
 
   setTreeItemId(treeItemId) {
@@ -184,6 +190,27 @@ class DragDropDecoratorView extends DecoratorView {
       clearTimeout(this.#timeoutID);
       this.#timeoutID = null;
     }
+  }
+
+  destroy() {
+    this.#dragOverElement.removeEventListener('dragstart', this.#onDragStartEvent);
+    this.#dragOverElement.removeEventListener('dragend', this.#onDragEndEvent);
+    this.#dragOverElement.removeEventListener('drop', this.#onDropEvent);
+    this.#dragOverElement.addEventListener('dragover', this.#onDragOverEvent);
+    this.#dragOverElement.removeEventListener('dragleave', this.#onDragLeaveEvent);
+    this.resetTimeout();
+
+    super.destroy();
+
+    this.#onDragStartEvent = null;
+    this.#onDragEndEvent = null;
+    this.#onDropEvent = null;
+    this.#onDragOverEvent = null;
+    this.#onDragLeaveEvent = null;
+    this.#dragOverElement = null;
+    this.#timeoutID = null;
+    this.#treeItemId = null;
+    this.#currentPosition = null;
   }
 
 }

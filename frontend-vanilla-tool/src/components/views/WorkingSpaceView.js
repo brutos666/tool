@@ -2,8 +2,15 @@ import View from './View.js';
 
 class WorkingSpaceView extends View {
 
+  #onPointerDownEvent = this.onPointerDown.bind(this);
+  #onPointerMoveEvent = this.onPointerMove.bind(this);
+  #onPointerUpEvent = this.onPointerUp.bind(this);
+
+  #splitter;
   constructor() {
     super();
+    this.#splitter = this.getElementView()
+      .querySelector('#splitter');
 
     this.activateSplitter();
   }
@@ -18,25 +25,34 @@ class WorkingSpaceView extends View {
   }
 
   activateSplitter() {
+    this.#splitter.addEventListener('pointerdown', this.#onPointerDownEvent);
+  }
+
+  onPointerDown(event) {
+    event.preventDefault();
+    const splitter = this.#splitter;
+    splitter.setPointerCapture(event.pointerId);
+    splitter.addEventListener('pointermove', this.#onPointerMoveEvent);
+    splitter.addEventListener('pointerup', this.#onPointerUpEvent, { once: true });
+  }
+
+  onPointerMove(event) {
     const workingSpace = this.getElementView();
+    const navSpace = workingSpace.querySelector('.working-space__nav');
+    const offset = workingSpace.getBoundingClientRect().left;
+    navSpace.style.width = `${ event.clientX - offset }px`;
+  }
+  onPointerUp() {
+    this.#splitter.removeEventListener('pointermove', this.#onPointerMoveEvent);
+  }
 
-    const splitter = this.getElementView()
-      .querySelector('#splitter');
+  /** @override */
+  destroy() {
+    this.#splitter.removeEventListener('pointerdown', this.#onPointerDownEvent);
+    this.#splitter.removeEventListener('pointermove', this.#onPointerMoveEvent);
+    this.#splitter.removeEventListener('pointerup', this.#onPointerUpEvent, { once: true });
 
-    const moveSplitter = event => {
-      const navSpace = this.getElementView()
-        .querySelector('.working-space__nav');
-      const offset = workingSpace.getBoundingClientRect().left;
-      navSpace.style.width = `${ event.clientX - offset }px`;
-    };
-    splitter.addEventListener('pointerdown', event => {
-      event.preventDefault();
-      splitter.setPointerCapture(event.pointerId);
-      splitter.addEventListener('pointermove', moveSplitter);
-      splitter.addEventListener('pointerup', () => {
-        splitter.removeEventListener('pointermove', moveSplitter);
-      }, { once: true });
-    });
+    super.destroy();
   }
 
 }

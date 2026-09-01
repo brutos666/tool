@@ -6,6 +6,8 @@ class ActionView extends View {
   name = 'ActionView';
 
   #doActionCallback = () => {};
+  #onClickEvent = this.callDoActionCallback.bind(this);
+  #onMouseDownEvent = event => event.preventDefault();
 
   /**
    * @param {Object} data - Données à utiliser pour créer la vue
@@ -17,10 +19,10 @@ class ActionView extends View {
   constructor(data) {
     super(data);
     this.getElementView()
-      .addEventListener('click', this.callDoActionCallback.bind(this));
+      .addEventListener('click', this.#onClickEvent);
     // Empêche le comportement par défaut du bouton, soit la perte de focus sur un élément lorsque l'on clique sur un bouton
     this.getElementView()
-      .addEventListener('mousedown', e => e.preventDefault());
+      .addEventListener('mousedown', this.#onMouseDownEvent);
   }
 
   /**
@@ -73,6 +75,20 @@ class ActionView extends View {
     super.setEnabled();
     this.getElementView()
       .disabled = false;
+  }
+
+  /** @override */
+  destroy() {
+    this.getElementView()
+      .removeEventListener('click', this.#onClickEvent);
+    this.getElementView()
+      .removeEventListener('mousedown', this.#onMouseDownEvent);
+
+    super.destroy();
+
+    this.#onClickEvent = null;
+    this.#onMouseDownEvent = null;
+    this.#doActionCallback = null;
   }
 
 }
