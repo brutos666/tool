@@ -57,25 +57,6 @@ class SampleMapping extends Items {
     return new SampleMappingColumnDecorator(new DragDropDecorator(new ListItemDecorator(item)), sampleItems);
   }
 
-  /** @override */
-  addChildAt(element, index) {
-    super.addChildAt(element, index);
-
-    const ruleItem = element.getRuleItem();
-    const sampleItems = element.getSampleItems();
-    ruleItem.added(this);
-    sampleItems.added(this);
-  }
-  /** @override */
-  removeChild(element) {
-    super.removeChild(element);
-
-    const ruleItem = element.getRuleItem();
-    const sampleItems = element.getSampleItems();
-    ruleItem.removed();
-    sampleItems.removed();
-  }
-
   /**
    * @override
    * @param {SampleMappingColumnDecorator} component

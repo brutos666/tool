@@ -12,7 +12,7 @@ class SampleMappingSamplesView extends ItemsView {
 
   getHtmlView() {
     return String.raw`<div class="sample-mapping__samples">
-    <ol id="itemsSpace" class="sample-mapping__samples-items items__space" role="tree" aria-orientation="vertical"></ol>
+    <ul id="itemsSpace" class="sample-mapping__samples-items items__space" role="tree" aria-orientation="vertical"></ul>
     <footer class="sample-mapping__samples__footer"><template id="addItemAction"></template></footer>
     </div>`;
   }

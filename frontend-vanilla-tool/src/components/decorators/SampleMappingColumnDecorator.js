@@ -24,10 +24,26 @@ class SampleMappingColumnDecorator extends ItemDecorator {
     return this.#sampleItems;
   }
 
+  /** @override */
+  added(parent) {
+    super.added(parent);
+
+    this.#sampleItems.added(parent);
+  }
+
+  /** @override */
   removed() {
-    super.removed();
-    this.#ruleItem.removed();
     this.#sampleItems.removed();
+
+    super.removed();
+  }
+
+  /** @override */
+  destroy() {
+    this.#ruleItem = null;
+    this.#sampleItems = null;
+
+    super.destroy();
   }
 
 }

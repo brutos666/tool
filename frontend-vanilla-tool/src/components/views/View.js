@@ -207,7 +207,11 @@ class View {
       .removeEventListener(event, callback, bubble);
   }
 
-  destroy() {}
+  destroy() {
+    this.#elementView = null;
+    this.#staticViews = {};
+    this.#templateNode = {};
+  }
 
 }
 

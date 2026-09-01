@@ -32,7 +32,7 @@ class ItemsView extends View {
   }
 
   getHtmlView() {
-    return String.raw`<ol id="itemsSpace" class="items__space" aria-orientation="vertical"></ol>`;
+    return String.raw`<ul id="itemsSpace" class="items__space" aria-orientation="vertical"></ul>`;
   }
 
 }

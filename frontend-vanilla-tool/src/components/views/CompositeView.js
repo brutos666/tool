@@ -129,6 +129,12 @@ class CompositeView extends View {
     return true;
   }
 
+  destroy() {
+    super.destroy();
+    this.removeAllViews();
+    this.#spaceChildren = null;
+  }
+
 }
 
 export default CompositeView;

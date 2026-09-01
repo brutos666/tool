@@ -60,14 +60,13 @@ class Decorator extends Component {
     this.#decoratedElement.exitDragDropMode(dragDropType);
   }
 
-  destroy() {
-    super.destroy();
-    this.#decoratedElement.destroy();
-  }
-
   added(parent) {
     super.added(parent);
     this.#decoratedElement.added(parent);
+  }
+  removed() {
+    super.removed();
+    this.#decoratedElement.removed();
   }
 
   isDecorator() {

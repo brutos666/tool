@@ -96,8 +96,8 @@ class Composite extends Component {
     this.#children[index] = element;
     if (view.isComposite()) {
       view.replaceView(element.getView(), oldElement.getView());
-      oldElement.removed();
     }
+    oldElement.removed();
     element.added(this);
   }
 
@@ -108,26 +108,25 @@ class Composite extends Component {
     }
     /** @type {CompositeView} */
     const view = this.getView();
-    this.#children.splice(index, 1);
     if (view.isComposite()) {
       view.removeView(element.getView());
     }
+    this.#children.splice(index, 1);
     element.removed();
   }
 
   removeAllChildren() {
     this.#children.forEach((/** @type {Component} */ child) => {
       child.removed();
-      if (child.isComposite()) {
-        child.removeAllChildren();
-      }
     });
-    /** @type {CompositeView} */
-    const view = this.getView();
-    if (view.isComposite()) {
-      view.removeAllViews();
-    }
+
     this.#children = [];
+  }
+
+  removed() {
+    super.removed();
+
+    this.removeAllChildren();
   }
 
   isComposite() {

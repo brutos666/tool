@@ -66,9 +66,8 @@ class NavTree extends TreeItems {
 
   /** @override */
   removeAllChildren() {
-    super.removeAllChildren();
-
     this.removeCurrentTree();
+    super.removeAllChildren();
   }
   /** @override */
   replaceAllItems(treeItemArray) {

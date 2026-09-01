@@ -142,9 +142,9 @@ class Item extends Component {
     return toolbar;
   }
 
-  destroy() {
+  removed() {
     this.#treeItem.removeObserver(this);
-    super.destroy();
+    super.removed();
   }
 
   /**

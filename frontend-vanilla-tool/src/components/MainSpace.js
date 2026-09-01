@@ -51,9 +51,6 @@ class MainSpace extends Component {
     if (!this.#treeItem) {
       return;
     }
-    if (this.#main) {
-      this.#main.destroy();
-    }
 
     switch (value) {
       case LAYOUT.SampleMapping:

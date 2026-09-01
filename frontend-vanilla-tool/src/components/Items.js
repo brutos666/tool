@@ -40,11 +40,12 @@ class Items extends Composite {
   addNewItem(title) {
     this.#treeItem.addChildItem({ title, state: 'TODO', children: [] });
   }
-  destroy() {
+  removed() {
     this.#treeItem.getTreeItemList()
       .removeObserver(this);
-    this.removeAllChildren();
-    super.destroy();
+    this.removeAllItems();
+
+    super.removed();
   }
 
   /**

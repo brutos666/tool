@@ -86,6 +86,9 @@ class FocusManager {
   getParentComponent() {
     return this.#parent;
   }
+  removeParentComponent() {
+    this.#parent = null;
+  }
 
   /*
    * Entrée et sortie d'un système de navigation par les touches Entrée/Escape
@@ -188,6 +191,8 @@ class FocusManager {
     component.removeTabIndex();
     component.getView()
       .removeEventListener('mousedown', this.#onMouseDownEvent);
+    component.getView()
+      .removeEventListener('keydown', this.#onKeyDownEvent);
     component.getFocusManager()
       ?.setParentFocusManager(null);
   }
@@ -871,6 +876,21 @@ class FocusManager {
       this.getCurrent()
         ?.setTabIndex(0);
     }
+  }
+
+  destroy() {
+    this.#components = [];
+
+    this.#keyEvent = null;
+    this.#onKeyDownEvent = null;
+    this.#onMouseDownEvent = null;
+
+    this.#parentFocusManager = null;
+    this.#current = null;
+    this.#container = null;
+    this.#parent = null;
+    // Méthode appelée avant l'entrée dans un composant. Se positionne au système de navigation racine
+    this.#callBeforeEnter = null;
   }
 
 }

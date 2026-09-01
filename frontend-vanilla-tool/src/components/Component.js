@@ -34,10 +34,9 @@ class Component extends NodeElement {
    * Appelé lorsque le composant est retiré du parent
    */
   removed() {
+    super.removed();
+
     this.#parent = null;
-    this.getView()
-      .removed();
-    this.destroy();
   }
 
   /**

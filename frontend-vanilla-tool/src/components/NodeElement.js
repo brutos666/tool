@@ -31,13 +31,12 @@ class NodeElement {
    * @param {Component} child
    */
   setStaticChild(id, child) {
-    if (this.#staticChildren[id]) {
-      this.#staticChildren[id].destroy();
-    }
     this.getView()
       .setStaticView(id, child.getView());
-    this.#staticChildren[id] = child;
 
+    const oldChild = this.#staticChildren[id];
+    oldChild?.removed();
+    this.#staticChildren[id] = child;
     child.added(this);
   }
   /**
@@ -49,12 +48,34 @@ class NodeElement {
     return this.#staticChildren[id];
   }
 
-  destroy() {
-    // destroy de tous les staticChild
+  /**
+   * Appelé lorsque le composant est retiré du parent
+   */
+  removed() {
+    const focusManager = this.#focusManager;
+    if (focusManager) {
+      for (const component of focusManager.getAllComponents()) {
+        focusManager.disableComponentFocus(component);
+      }
+    }
     Object.values(this.#staticChildren)
-      .forEach(child => child.destroy());
+      .forEach(child => child.removed());
+
+    this.getView()
+      .removed();
+
+    // Suppression automatique des objets lorsque le composant est retiré de son parent
+    this.destroy();
+  }
+
+  destroy() {
+    this.#focusManager?.destroy();
+    this.#focusManager = null;
+    this.#staticChildren = [];
+
     this.getView()
       .destroy();
+    this.#view = null;
   }
   /**
    * Donne la vue pour permettre de modifier l'affichage si besoin
