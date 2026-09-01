@@ -3,9 +3,8 @@
   min-width: 24px;
   min-height: 24px;
 }
-
 .drag-drop--decorator > .tree:has(> .item .drag-button:hover, > .item .drag-button:focus) {
-  background: light-dark(oklch(from var(--color-bg-surface) calc(l - 0.05) c h), oklch(from var(--color-bg-surface) calc(l + 0.05) c h));
+  background-color: light-dark(oklch(from var(--color-bg-surface) calc(l - 0.05) c h), oklch(from var(--color-bg-surface) calc(l + 0.05) c h));
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   outline: 1px solid var(--color-border-drag-over);
 }
@@ -17,6 +16,23 @@
   --indicator-round-size: 6px;
   --indicator-thickness: 2px;
 }
+
+.drag-drop--decorator:has(.dragging),
+.drag-drop--decorator:has(.dragging) > *,
+.drag-drop--decorator:has(.dragging) > .tree:has(> .item .drag-button:hover) {
+  background-color: transparent;
+}
+
+.dragging > * {
+  background-color: var(--color-border-drag-over);
+  opacity: 0.7;
+}
+@supports (-moz-appearance: none) {
+  .dragging > * {
+    opacity: 1 !important;
+  }
+}
+
 .drag-drop--decorator > .placeholder {
   background-color: var(--color-border-drag-over);
   position: absolute;

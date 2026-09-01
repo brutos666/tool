@@ -80,9 +80,11 @@ class DragDropDecoratorView extends DecoratorView {
     }
     event.dataTransfer.effectAllowed = 'move';
     event.dataTransfer.setData('decorated-element', this.getTreeItemId());
+    event.target.classList.add('dragging');
     this.dispatchEvent(new CustomEvent(DragDropDecorator.EVENTS.dragStart));
   }
-  onDragEnd() {
+  onDragEnd(event) {
+    event.target.classList.remove('dragging');
     this.dispatchEvent(new CustomEvent(DragDropDecorator.EVENTS.dragEnd));
     this.removeOver();
   }
