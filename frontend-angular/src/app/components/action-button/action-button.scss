@@ -1,0 +1,12 @@
+.menu-button {
+  all: unset; /* ou reset manuel */
+  padding: var(--global-padding);
+  display: flex;
+  align-items: center;
+  width: max-content;
+  text-align: left;
+  border-radius: var(--border-radius);
+}
+.menu-button:focus-visible {
+  outline: var(--color-border-focus) solid 2px;
+}

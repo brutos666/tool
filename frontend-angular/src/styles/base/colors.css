@@ -1,0 +1,14 @@
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  --color-border-focus-item: var(--color-border-focus);
+}
+
+*:focus {
+  outline: var(--color-border-focus) solid 2px;
+}
+
+.drag-drop-mode {
+  --color-border-focus-item: var(--color-border-drag-over);
+}
+

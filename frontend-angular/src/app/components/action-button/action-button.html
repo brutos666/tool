@@ -1,0 +1,9 @@
+<button
+  class="clickable {{ class }} action__button"
+  aria-label="{{ label() }}"
+  [attr.role]="role()"
+  (click)="onClick()"
+>
+  <i class="icon-menu"></i>
+  <span class="button__label">{{ label() }}</span>
+</button>

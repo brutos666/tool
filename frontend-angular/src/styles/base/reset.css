@@ -1,0 +1,40 @@
+body {
+  min-height: 100vh; /* = 100% */
+  line-height: var(--line-height);
+  font-size: var(--font-size);
+  font-family: var(--font-family);
+}
+
+button,
+input,
+textarea,
+select {
+  color: inherit;
+  font: inherit;
+}
+ul,
+ol,
+li,
+body,
+html {
+  margin: 0;
+  padding: 0;
+}
+
+ul,
+ol,
+li {
+  list-style: none;
+  padding: 0;
+}
+
+th {
+  font-weight: inherit;
+}
+
+button {
+  border: none;
+  background: transparent;
+  padding: 0;
+}
+

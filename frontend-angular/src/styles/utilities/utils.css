@@ -1,0 +1,33 @@
+.selected {
+  background-color: var(--color-bg-selected);
+}
+
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  user-select: none;
+}
+
+.clickable:not([disabled]):not(.disabled) {
+  cursor: pointer;
+}
+.draggable:not([disabled]):not(.disabled) {
+  cursor: grab;
+}
+[contenteditable="false"] {
+  cursor: text;
+  user-select: text;
+}
+.readonly {
+  cursor: default;
+  user-select: none;
+  border: none;
+}
+.readonly .action__button {
+  display: none;
+}
+
+.hidden {
+  display: none;
+}
+
