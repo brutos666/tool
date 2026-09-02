@@ -1,3 +1,48 @@
+.label-button,
+.primary-button,
+.drag-button,
+.icon-button,
+.burger-button,
+.item-like-button {
+  text-align: center;
+  border-radius: var(--border-radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.button__icon {
+  display: flex;
+  width: 100%;
+}
+.label-button {
+  background-color: var(--color-bg-surface);
+  border: solid 1px var(--color-border);
+}
+.primary-button {
+  background-color: var(--color-bg-surface);
+  border: solid 1px var(--color-primary);
+  padding: var(--medium-padding);
+}
+.icon-button,
+.drag-button {
+  border-style: none;
+}
+.item-like-button {
+  border: dashed 1px var(--color-border);
+}
+.label-button:hover,
+.icon-button:hover,
+.item-like-button:hover {
+  background-color: var(--color-bg-hover);
+  border-color: var(--color-border-hover);
+}
+.primary-button:hover {
+  background-color: var(--color-primary-hover);
+  border: solid 1px var(--color-primary);
+}
+
+/* Reset indispensable sur button */
+.burger-button,
 .menu-button {
   all: unset; /* ou reset manuel */
   padding: var(--global-padding);
@@ -7,6 +52,19 @@
   text-align: left;
   border-radius: var(--border-radius);
 }
+.burger-button:focus-visible,
 .menu-button:focus-visible {
   outline: var(--color-border-focus) solid 2px;
+}
+
+/** Hide label */
+.icon-button .button__label,
+.burger-button .button__label,
+.drag-button .button__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
 }

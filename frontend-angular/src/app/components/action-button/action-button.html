@@ -1,9 +1,14 @@
 <button
-  class="clickable {{ class }} action__button"
-  aria-label="{{ label() }}"
-  [attr.role]="role()"
-  (click)="onClick()"
+  #buttonId
+  class="clickable {{ button().className }} action__button"
+  aria-label="{{ button().label }}"
+  [attr.role]="button().role"
+  (click)="button().onClick()"
+  (mousedown)="onMouseDown($event)"
+  tabindex="-1"
 >
-  <i class="icon-menu"></i>
-  <span class="button__label">{{ label() }}</span>
+  @if (button().icon) {
+    <span class="button__icon">{{ button().icon }}</span>
+  }
+  <span class="button__label">{{ button().label }}</span>
 </button>

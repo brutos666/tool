@@ -14,7 +14,7 @@
 .draggable:not([disabled]):not(.disabled) {
   cursor: grab;
 }
-[contenteditable="false"] {
+[contenteditable='false'] {
   cursor: text;
   user-select: text;
 }
@@ -28,6 +28,5 @@
 }
 
 .hidden {
-  display: none;
+  display: none !important;
 }
-

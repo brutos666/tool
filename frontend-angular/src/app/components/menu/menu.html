@@ -1,0 +1,22 @@
+<nav #menuBar class="menu" aria-label="Menu des commandes">
+  <li class="menu__element">
+    <app-action-button [button]="burgerItem" />
+  </li>
+  <menu
+    #menu
+    id="menu"
+    class="menu__actions"
+    role="menu"
+    aria-label="Commandes"
+    (toggle)="onMenuShowHide($event.newState)"
+    (keydown)="onKeyDown($event)"
+  >
+    @for (item of menuItems(); track item.label) {
+      <li class="menu__element">
+        <app-action-button [button]="item" />
+      </li>
+    } @empty {
+      No tabs available.
+    }
+  </menu>
+</nav>
