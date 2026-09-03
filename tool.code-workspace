@@ -1,0 +1,24 @@
+{
+	"folders": [
+		{
+			"name": "angular",
+			"path": "frontend-angular"
+		},
+		{
+			"name": "vanilla",
+			"path": "frontend-vanilla-tool"
+		},
+		{
+			"name": "go",
+			"path": "backend-go"
+		},
+		{
+			"name": "java",
+			"path": "backend-tool"
+		},
+		{
+			"name": "root",
+			"path": "."
+		}
+	]
+}
