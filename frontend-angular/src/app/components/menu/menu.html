@@ -1,6 +1,6 @@
 <nav #menuBar class="menu" aria-label="Menu des commandes">
   <li class="menu__element">
-    <app-action-button [button]="burgerItem" />
+    <app-action-button [data]="burgerItem"/>
   </li>
   <menu
     #menu
@@ -13,7 +13,7 @@
   >
     @for (item of menuItems(); track item.label) {
       <li class="menu__element">
-        <app-action-button [button]="item" />
+        <app-action-button [data]="item"/>
       </li>
     } @empty {
       No tabs available.

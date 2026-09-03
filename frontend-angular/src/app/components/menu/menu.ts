@@ -8,9 +8,10 @@ import {
   ViewChild,
   ViewChildren,
 } from '@angular/core';
-import { ActionButton } from '../action-button/action-button.js';
-import { Button } from '../action-button/button.js';
-import { MenuButton } from '../action-button/menu-button.js';
+import { ActionButton } from '../action-button/action-button';
+import { Button } from '../action-button/button';
+import { MenuButton } from '../action-button/menu-button';
+import { NodeElement } from '../common/NodeElement.js';
 
 @Component({
   imports: [ActionButton],
@@ -18,7 +19,7 @@ import { MenuButton } from '../action-button/menu-button.js';
   styleUrl: './menu.scss',
   templateUrl: './menu.html',
 })
-export class Menu implements AfterViewInit, OnDestroy {
+export class Menu extends NodeElement implements AfterViewInit, OnDestroy {
   menuItems = input.required<Array<MenuButton>>();
   burgerItem!: Button;
 
@@ -32,7 +33,10 @@ export class Menu implements AfterViewInit, OnDestroy {
 
   #resizeObserver!: ResizeObserver;
 
+  #menuOpen:Boolean = false;
+
   constructor() {
+    super()
     this.burgerItem = new Button('Ouvrir le menu', '☰', 'button', 'burger');
   }
 
@@ -41,7 +45,7 @@ export class Menu implements AfterViewInit, OnDestroy {
     this.#resizeObserver.observe(this.menuBar.nativeElement, { box: 'content-box' });
 
     const burgerItem = this.getBurgerItem();
-    const burgerElement = burgerItem.buttonElement.nativeElement;
+    const burgerElement = burgerItem.getElement() as HTMLButtonElement;
     burgerElement.ariaHasPopup = 'true';
     burgerElement.popoverTargetAction = 'toggle';
     burgerElement.popoverTargetElement = this.menu.nativeElement;
@@ -83,8 +87,9 @@ export class Menu implements AfterViewInit, OnDestroy {
 
     // Indiquer aux boutons de fermer automatiquement la fenêtre
     this.getMenuItems().forEach((actionButton) => {
-      actionButton.buttonElement.nativeElement.popoverTargetElement = this.menu.nativeElement;
-      actionButton.buttonElement.nativeElement.popoverTargetAction = 'hide';
+      const element = actionButton.getElement() as HTMLButtonElement;
+      element.popoverTargetElement = this.menu.nativeElement;
+      element.popoverTargetAction = 'hide';
     });
   }
 
@@ -126,8 +131,10 @@ export class Menu implements AfterViewInit, OnDestroy {
     const burgerItem = this.getBurgerItem();
     burgerItem.changeTabAccess(state === 'open' ? false : true);
     if (state === 'open') {
+      this.#menuOpen = true;
       this.giveFocusToMenu();
     } else {
+      this.#menuOpen = false;
       this.giveFocusToBurger();
     }
   }
@@ -183,10 +190,17 @@ export class Menu implements AfterViewInit, OnDestroy {
     this.giveFocusToMenu();
   }
 
-  isFocused() {
+  override isFocused() {
     return !!this.actionButtons.find((item) => item.isFocused());
   }
-
+  override giveFocus() {
+    if (this.#horizontal || this.#menuOpen) {
+      this.giveFocusToMenu();
+    } else {
+      this.giveFocusToBurger();
+    }
+  }
+  
   giveFocusToBurger() {
     const burgerItem = this.getBurgerItem();
     burgerItem.giveFocus();

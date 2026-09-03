@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
-import { MenuButton } from './components/action-button/menu-button.js';
-import { Menu } from './components/menu/menu.js';
+import { MenuButton } from './components/action-button/menu-button';
+import { Menu } from './components/menu/menu';
 
 @Component({
   selector: 'app-root',

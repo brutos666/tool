@@ -1,5 +1,6 @@
-import { Component, ElementRef, input, ViewChild } from '@angular/core';
-import { Button } from './button.js';
+import { Component, input } from '@angular/core';
+import { Button } from './button';
+import { NodeElement } from '../common/NodeElement.js';
 
 @Component({
   imports: [],
@@ -7,34 +8,20 @@ import { Button } from './button.js';
   styleUrl: './action-button.scss',
   templateUrl: './action-button.html',
   standalone: true,
+  // TODO : heritage d'un composant classique pour les propriétés disabled, hidden 
+  // inputs: ['disabled'] // https://angular.dev/guide/components/inputs
 })
-export class ActionButton {
-  @ViewChild('buttonId') buttonElement!: ElementRef<HTMLButtonElement>;
+export class ActionButton extends NodeElement {
 
-  button = input.required<Button>();
+  data = input.required<Button>();
+
+  constructor() {
+    super();
+  }
 
   onMouseDown(event: Event) {
     event.preventDefault();
   }
 
-  giveFocus() {
-    this.changeTabAccess(true);
-    this.buttonElement.nativeElement.focus();
-  }
-  isFocused() {
-    return document.activeElement === this.buttonElement.nativeElement;
-  }
-  changeTabAccess(access: Boolean) {
-    this.buttonElement.nativeElement.setAttribute('tabindex', access ? '0' : '-1');
-  }
-  changeVisibility(visible: Boolean) {
-    if (visible) {
-      this.buttonElement.nativeElement.classList.remove('hidden');
-    } else {
-      this.buttonElement.nativeElement.classList.add('hidden');
-    }
-  }
-  isVisible() {
-    return !this.buttonElement.nativeElement.classList.contains('hidden');
-  }
+
 }

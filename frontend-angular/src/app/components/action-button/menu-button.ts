@@ -1,4 +1,4 @@
-import { Button } from './button.js';
+import { Button } from './button';
 
 export class MenuButton extends Button {
   constructor(label: string) {
