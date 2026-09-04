@@ -15,6 +15,7 @@ describe('Menu', () => {
   let component: Menu;
   let fixture: ComponentFixture<Menu>;
   let itemsDataSignal: Signal<Array<MenuButton>>;
+  let labelSignal: Signal<String>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -26,10 +27,12 @@ describe('Menu', () => {
     menuItems.push(new MenuButton('Action 2'));
     menuItems.push(new MenuButton('Action 3'));
     itemsDataSignal = signal<Array<MenuButton>>(menuItems);
+    labelSignal = signal<String>('Menu d\'actions')
 
     fixture = TestBed.createComponent(Menu, {
       bindings: [
-        inputBinding('menuItems', itemsDataSignal)
+        inputBinding('menuItems', itemsDataSignal),
+        inputBinding('label', labelSignal)
       ]
     });
     component = fixture.componentInstance;

@@ -8,7 +8,7 @@ export class NodeElement {
   }
 
   public getElement() : HTMLElement {
-    return this.elementRef.nativeElement.firstChild;
+    return this.elementRef.nativeElement;
   }
 
   public giveFocus() {

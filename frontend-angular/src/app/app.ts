@@ -1,23 +1,14 @@
 import { Component, signal } from '@angular/core';
-import { MenuButton } from './components/action-button/menu-button';
-import { Menu } from './components/menu/menu';
+import { WorkingSpace } from './components/working-space/working-space.js';
 
 @Component({
   selector: 'app-root',
-  imports: [Menu],
+  imports: [WorkingSpace],
   styleUrl: './app.scss',
   templateUrl: './app.html',
 })
 export class App {
   protected readonly title = signal('frontend-angular');
 
-  menuItems: Array<MenuButton> = [];
 
-  constructor() {
-    this.menuItems.push(new MenuButton('Actualiser'));
-    this.menuItems.push(new MenuButton('Sauvegarder tout'));
-    this.menuItems.push(new MenuButton('Sauvegarder la vue courante'));
-    this.menuItems.push(new MenuButton('Exporter tout'));
-    this.menuItems.push(new MenuButton('Importer'));
-  }
 }

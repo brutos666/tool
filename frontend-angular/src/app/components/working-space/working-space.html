@@ -1,0 +1,9 @@
+<nav menu class="working-space__menu" [label]="label" [menuItems]="menuItems"></nav>
+<aside #navSpace class="working-space__nav" aria-current="true">
+  <header class="nav-space__header">
+    <h1 class="nav-space__title">Navigation</h1>
+  </header>
+</aside>
+<div #splitter class="working-space__splitter" (pointerdown)="onPointerDown($event)">&nbsp;</div>
+<main #mainSpace class="working-space__main">
+</main>

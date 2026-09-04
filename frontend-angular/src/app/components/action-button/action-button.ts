@@ -4,12 +4,19 @@ import { NodeElement } from '../common/NodeElement.js';
 
 @Component({
   imports: [],
-  selector: 'app-action-button',
+  selector: 'button[appActionButton]',
   styleUrl: './action-button.scss',
   templateUrl: './action-button.html',
   standalone: true,
-  // TODO : heritage d'un composant classique pour les propriétés disabled, hidden 
-  // inputs: ['disabled'] // https://angular.dev/guide/components/inputs
+  host: {
+    'class': "clickable action__button",
+    '[class]':"data().className",
+    '[aria-label]':"data().label",
+    '[attr.role]':"data().role",
+    'tabindex':"-1",
+    '(click)':"data().onClick()",
+    '(mousedown)':"onMouseDown($event)"
+  }
 })
 export class ActionButton extends NodeElement {
 
@@ -19,9 +26,8 @@ export class ActionButton extends NodeElement {
     super();
   }
 
-  onMouseDown(event: Event) {
+  onMouseDown(event: MouseEvent) {
     event.preventDefault();
   }
-
 
 }

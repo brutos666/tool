@@ -15,15 +15,18 @@ import { NodeElement } from '../common/NodeElement.js';
 
 @Component({
   imports: [ActionButton],
-  selector: 'app-menu',
+  selector: 'nav[menu]',
   styleUrl: './menu.scss',
   templateUrl: './menu.html',
+  host: {
+    '[aria-label]':'label()'
+  }
 })
 export class Menu extends NodeElement implements AfterViewInit, OnDestroy {
   menuItems = input.required<Array<MenuButton>>();
+  label = input.required<String>();
   burgerItem!: Button;
 
-  @ViewChild('menuBar') menuBar!: ElementRef;
   @ViewChild('menu') menu!: ElementRef;
   @ViewChildren(ActionButton) actionButtons!: QueryList<ActionButton>;
 
@@ -42,7 +45,7 @@ export class Menu extends NodeElement implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit() {
     this.#resizeObserver = new ResizeObserver(this.sizeHasChanged.bind(this));
-    this.#resizeObserver.observe(this.menuBar.nativeElement, { box: 'content-box' });
+    this.#resizeObserver.observe(this.getElement(), { box: 'content-box' });
 
     const burgerItem = this.getBurgerItem();
     const burgerElement = burgerItem.getElement() as HTMLButtonElement;
