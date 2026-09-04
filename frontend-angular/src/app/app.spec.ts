@@ -1,14 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { App } from './app';
 
-export class ResizeObserverMock {
-  observe() {}
-  unobserve() {}
-  disconnect() {}
-}
-
-globalThis.ResizeObserver = ResizeObserverMock as any;
-
 let component: App;
 let fixture: ComponentFixture<App>;
 
@@ -27,7 +19,7 @@ describe('App', () => {
   });
 
   it('should render working space', async () => {
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('.working-space')).toBeTruthy();
+    const hostElement = fixture.nativeElement as HTMLElement;
+    expect(hostElement.querySelector('.working-space')).toBeTruthy();
   });
 });
