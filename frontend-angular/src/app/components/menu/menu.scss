@@ -20,12 +20,11 @@
   display: flex;
   flex-direction: row;
   gap: var(--global-gap);
-  flex-wrap: wrap;
   flex-grow: 1;
 }
 .menu__actions-vertical[popover] {
   margin: 0;
-  display: none;
+  visibility: hidden;
   background-color: var(--color-bg-surface);
   position: absolute;
   top: var(--menu-height);

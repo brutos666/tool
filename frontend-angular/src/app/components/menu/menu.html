@@ -1,5 +1,5 @@
 <li class="menu__element">
-  <button appActionButton [data]="burgerItem" (toggle)="onMenuShowHide($event.newState)" ></button>
+  <button actionButton [data]="burgerItem" (toggle)="onMenuShowHide($event.newState)" ></button>
 </li>
 <menu
   #menu
@@ -9,7 +9,7 @@
 >
   @for (item of menuItems(); track item.label) {
     <li class="menu__element">
-      <button appActionButton [data]="item"></button>
+      <button actionButton [data]="item"></button>
     </li>
   } @empty {
     No tabs available.

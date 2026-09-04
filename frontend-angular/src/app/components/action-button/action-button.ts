@@ -4,7 +4,7 @@ import { NodeElement } from '../common/NodeElement.js';
 
 @Component({
   imports: [],
-  selector: 'button[appActionButton]',
+  selector: 'button[actionButton]',
   styleUrl: './action-button.scss',
   templateUrl: './action-button.html',
   standalone: true,

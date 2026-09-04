@@ -31,7 +31,7 @@ export class Menu extends NodeElement implements AfterViewInit, OnDestroy {
   @ViewChildren(ActionButton) actionButtons!: QueryList<ActionButton>;
 
   #horizontal!: Boolean;
-  #font_size!: number;
+  #menuWidth!: number;
   #selectedIndex = -1;
 
   #resizeObserver!: ResizeObserver;
@@ -41,6 +41,13 @@ export class Menu extends NodeElement implements AfterViewInit, OnDestroy {
   constructor() {
     super()
     this.burgerItem = new Button('Ouvrir le menu', '☰', 'button', 'burger');
+  }
+
+  setMenuWidth(width:number) {
+    this.#menuWidth = width;
+  }
+  setHorizontal(horizontal:Boolean) {
+    this.#horizontal = horizontal;
   }
 
   ngAfterViewInit() {
@@ -68,15 +75,19 @@ export class Menu extends NodeElement implements AfterViewInit, OnDestroy {
         continue;
       }
       const boxSize = entry.contentBoxSize[0];
-      if (!this.#font_size) {
-        this.#font_size = parseFloat(getComputedStyle(this.menu.nativeElement).fontSize);
+      if (!this.#menuWidth) {
+        this.#menuWidth = parseFloat(getComputedStyle(this.menu.nativeElement).width);
       }
-      if (boxSize.inlineSize / this.#font_size > 50) {
+      if (boxSize.inlineSize > this.#menuWidth) {
         this.changeToHorizontalMenu();
       } else {
         this.changeToBurgerMenu();
       }
     }
+  }
+
+  isHorizontal() {
+    return this.#horizontal === true;
   }
 
   changeToBurgerMenu() {
