@@ -1,11 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WorkingSpace } from './working-space';
-import { ResizeObserverMock } from '../../app.spec.js';
 
 describe('WorkingSpace', () => {
 
-  globalThis.ResizeObserver = ResizeObserverMock as any;
-  
   let component: WorkingSpace;
   let fixture: ComponentFixture<WorkingSpace>;
 
@@ -24,7 +21,7 @@ describe('WorkingSpace', () => {
   });
 
   it('should render menu bar', async () => {
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('.menu')).toBeTruthy();
+    const hostElement = fixture.nativeElement as HTMLElement;
+    expect(hostElement.querySelector('.working-space__menu')).toBeTruthy();
   });
 });

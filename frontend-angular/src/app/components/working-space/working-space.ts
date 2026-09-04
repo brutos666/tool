@@ -2,9 +2,10 @@ import { Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
 import { MenuButton } from '../action-button/menu-button.js';
 import { Menu } from '../menu/menu.js';
 import { NodeElement } from '../common/NodeElement.js';
+import { AsideSpace } from '../aside-space/aside-space.js';
 
 @Component({
-  imports: [Menu],
+  imports: [Menu, AsideSpace],
   standalone: true,
   selector: 'app-working-space',
   styleUrl: './working-space.scss',
