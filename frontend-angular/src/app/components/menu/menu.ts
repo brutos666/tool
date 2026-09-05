@@ -136,21 +136,21 @@ export class Menu extends NodeElement implements AfterViewInit, OnDestroy {
     }
   }
 
+
   /**
    * Ouverture/fermeture du menu contextuel
-   * @param {'open'|'hide'} state : État ouvert ou fermé
-   * @returns
    */
-  onMenuShowHide(state: string) {
+  onMenuShowHide() {
     const burgerItem = this.getBurgerItem();
-    burgerItem.changeTabAccess(state === 'open' ? false : true);
-    if (state === 'open') {
-      this.#menuOpen = true;
-      this.giveFocusToMenu();
-    } else {
+    if (this.#menuOpen) {
       this.#menuOpen = false;
+      burgerItem.changeTabAccess(true);
       this.giveFocusToBurger();
+      return;
     }
+    this.#menuOpen = true;
+    burgerItem.changeTabAccess(false);
+    this.giveFocusToMenu();
   }
 
   getBurgerItem() {

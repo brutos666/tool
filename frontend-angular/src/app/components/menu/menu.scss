@@ -35,6 +35,7 @@
 .menu__actions-vertical[popover]:popover-open {
   display: flex;
   flex-direction: column;
+  visibility:visible;
 }
 
 .menu__element {

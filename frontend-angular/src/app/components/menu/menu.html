@@ -1,11 +1,13 @@
 <li class="menu__element">
-  <button actionButton [data]="burgerItem" (toggle)="onMenuShowHide($event.newState)" ></button>
+  <button actionButton [data]="burgerItem" ></button>
 </li>
 <menu
   #menu
+  id="menu"
   class="menu__actions"
   role="menu"
   (keydown)="onKeyDown($event)"
+  (toggle)="onMenuShowHide()"
 >
   @for (item of menuItems(); track item.label) {
     <li class="menu__element">
