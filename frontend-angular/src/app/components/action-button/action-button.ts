@@ -1,9 +1,10 @@
 import { Component, input } from '@angular/core';
 import { Button } from './button';
 import { NodeElement } from '../common/NodeElement.js';
+import { Icon } from '../icon/icon.js';
 
 @Component({
-  imports: [],
+  imports: [Icon],
   selector: 'button[actionButton]',
   styleUrl: './action-button.scss',
   templateUrl: './action-button.html',

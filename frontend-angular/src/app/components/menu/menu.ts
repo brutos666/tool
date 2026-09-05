@@ -40,7 +40,7 @@ export class Menu extends NodeElement implements AfterViewInit, OnDestroy {
 
   constructor() {
     super()
-    this.burgerItem = new Button('Ouvrir le menu', '☰', 'button', 'burger');
+    this.burgerItem = new Button('Ouvrir le menu', 'burger', 'button', 'burger');
   }
 
   setMenuWidth(width:number) {
