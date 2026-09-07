@@ -1,0 +1,11 @@
+<div class="tree" [ngClass]="{'tree--node' : treeData().getChildren().length, 'tree--leaf' : treeData().getChildren().length === 0, 'tree--root': isRoot() }" role="treeitem" position="inside" [id]= "treeData().getId()">
+  <button actionButton class="tree__toggle" [data]="toggleIcon" (click)="onOpenClose()"></button>
+  <div class="tree__content">
+    <ng-container *ngTemplateOutlet="contentTemplate();context: {content: treeData().getContent()}"></ng-container>
+  </div>
+  <ul #treeList class="tree__list hidden" aria-orientation="vertical" role="group" aria-expanded="false">
+    @for (child of treeData().getChildren(); track child.getId()) {
+      <tree [treeData]="child" [contentTemplate]="contentTemplate()" />
+    }
+  </ul>
+</div>

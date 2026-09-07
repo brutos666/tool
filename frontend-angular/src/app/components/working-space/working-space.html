@@ -1,6 +1,9 @@
 <nav menu class="working-space__menu" [label]="label" [menuItems]="menuItems"></nav>
 <aside asideSpace #navSpace class="working-space__nav" aria-current="true" title="Navigation">
-  <h4>Espace pour la navigation</h4>
+  <ng-template #itemTemplate let-item="content">
+    <article item [itemData]="item"></article>
+  </ng-template>
+  <ul treeList [dataList]="treeItems" [contentTemplate]="itemTemplate"></ul>
 </aside>
 <div #splitter class="working-space__splitter" (pointerdown)="onPointerDown($event)">&nbsp;</div>
 <main #mainSpace class="working-space__main">

@@ -1,0 +1,8 @@
+@for (treeData of dataList();track treeData.getId()) {
+<tree class="tree__element" [id]="treeData.getId()" [treeData]="treeData" [contentTemplate]="contentTemplate()" [isRoot]=true >
+</tree>
+} @empty {
+No tree available.
+}
+
+

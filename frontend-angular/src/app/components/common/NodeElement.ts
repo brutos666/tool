@@ -1,13 +1,11 @@
-import { ElementRef, inject, Signal } from "@angular/core";
+import { ElementRef, inject, Signal } from '@angular/core';
 
 export class NodeElement {
-
   elementRef = inject(ElementRef);
 
-  constructor() {
-  }
+  constructor() {}
 
-  public getElement() : HTMLElement {
+  public getElement(): HTMLElement {
     return this.elementRef.nativeElement;
   }
 

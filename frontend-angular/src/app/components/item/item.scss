@@ -1,0 +1,148 @@
+.item__header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+:host .checkbox__label {
+  display: none;
+}
+
+.item__title {
+  flex: 1;
+}
+
+.item__text {
+  align-self: stretch;
+  flex: 1;
+}
+
+.item__title,
+.item__text {
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  text-align: left;
+}
+
+.item__toolbar .icon-button {
+  min-width: 20px;
+  min-height: 24px;
+}
+
+.item--status-orphan,
+.item--status-next-not-found,
+.item--status-total-orphan,
+.item--status-loop {
+  border: var(--color-error) solid 1px;
+}
+
+.item--crud-created .item__header::before,
+.item--crud-updated .item__header::before {
+  content: "•";
+  color: var(--status-color);
+}
+
+.item--todo,
+.item--title {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.item--todo .item__header,
+.item--title .item__header {
+  flex: 1;
+  gap: var(--medium-gap);
+}
+
+.item__footer-toolbar::before,
+.item__footer-toolbar::before {
+  content: "";
+  display: inline-block;
+  width: 1px;
+  height: 1.2em;
+  background: var(--color-border);
+  vertical-align: middle;
+}
+
+/* -- Affichage item comme un post-it -- */
+.item--post-it {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Aspect général */
+.item--post-it {
+  background-color: var(--color-post-it);
+  color: var(--color-text-on-post-it);
+}
+
+.item--post-it .item {
+  padding: 1px;
+}
+
+.item--post-it .item__header {
+  background-color: oklch(from var(--color-post-it) calc(l * 0.5) c h / 0.2);
+}
+
+/* Positionnement */
+.item--post-it {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Redimensionnement */
+.item--post-it,
+.add-item--post-it {
+  container-type: inline-size;
+}
+
+.item--post-it .item__checkbox .checkbox__input {
+  --checkbox-width: clamp(0.5rem, 8cqi, 2rem);
+}
+
+.item--post-it .item__checkbox .checkbox__input {
+  margin: min(0.5cqi, 1rem) min(3cqi, 1rem) min(3cqi, 2rem) min(3cqi, 1rem);
+}
+
+.item--post-it .item__title,
+.item--post-it .item__text,
+.add-item--post-it>span {
+  font-size: clamp(0.6rem, 8cqi, 2rem);
+  line-height: clamp(0.7rem, 10cqi, 2.2rem);
+  margin: min(0.5cqi, 1rem) min(3cqi, 1rem) min(3cqi, 2rem) min(3cqi, 1rem);
+}
+
+.item--post-it.item--crud-created .item::before,
+.item--post-it.item--crud-updated .item::before {
+  font-size: clamp(0.4rem, 12cqi, 2rem);
+  line-height: clamp(0.4rem, 15cqi, 2rem);
+}
+
+/** faire disparaître des éléments lorsque le post it devient petit **/
+@container (inline-size < 7cqi) {
+  .item--post-it .item__checkbox .checkbox__input {
+    display: none;
+  }
+}
+
+@container (inline-size < 6cqi) {
+  .item--post-it .item__title {
+    white-space: pre-wrap;
+    word-break: normal;
+    overflow-wrap: normal;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    font-weight: 500;
+  }
+
+  .item--post-it .item__text {
+    display: none;
+  }
+}
+
+/* Encadrer le noeud de l'arbre dont un enfant a le focus ou du drag&drop */
+:host:has(*:focus) {
+  outline: 1px solid var(--color-border-focus);
+}

@@ -25,7 +25,5 @@ export class Button {
     this.role = role;
   }
 
-  onClick() {
-    alert('button Clicked');
-  }
+  onClick() {}
 }
