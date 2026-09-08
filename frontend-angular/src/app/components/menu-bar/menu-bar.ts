@@ -15,14 +15,14 @@ import { NodeElement } from '../common/NodeElement.js';
 
 @Component({
   imports: [ActionButton],
-  selector: 'nav[menu]',
-  styleUrl: './menu.scss',
-  templateUrl: './menu.html',
+  selector: 'menu-bar',
+  styleUrl: './menu-bar.scss',
+  templateUrl: './menu-bar.html',
   host: {
-    '[aria-label]':'label()'
-  }
+    '[aria-label]': 'label()',
+  },
 })
-export class Menu extends NodeElement implements AfterViewInit, OnDestroy {
+export class MenuBar extends NodeElement implements AfterViewInit, OnDestroy {
   menuItems = input.required<Array<MenuButton>>();
   label = input.required<String>();
   burgerItem!: Button;
@@ -36,17 +36,17 @@ export class Menu extends NodeElement implements AfterViewInit, OnDestroy {
 
   #resizeObserver!: ResizeObserver;
 
-  #menuOpen:Boolean = false;
+  #menuOpen: Boolean = false;
 
   constructor() {
-    super()
+    super();
     this.burgerItem = new Button('Ouvrir le menu', 'burger', 'button', 'burger');
   }
 
-  setMenuWidth(width:number) {
+  setMenuWidth(width: number) {
     this.#menuWidth = width;
   }
-  setHorizontal(horizontal:Boolean) {
+  setHorizontal(horizontal: Boolean) {
     this.#horizontal = horizontal;
   }
 
@@ -136,7 +136,6 @@ export class Menu extends NodeElement implements AfterViewInit, OnDestroy {
     }
   }
 
-
   /**
    * Ouverture/fermeture du menu contextuel
    */
@@ -214,7 +213,7 @@ export class Menu extends NodeElement implements AfterViewInit, OnDestroy {
       this.giveFocusToBurger();
     }
   }
-  
+
   giveFocusToBurger() {
     const burgerItem = this.getBurgerItem();
     burgerItem.giveFocus();

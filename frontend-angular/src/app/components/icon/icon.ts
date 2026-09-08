@@ -4,7 +4,7 @@ import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
   imports: [],
-  selector: 'span[icon]',
+  selector: 'icon',
   styleUrl: './icon.scss',
   template: '<span></span>',
   host: {

@@ -1,10 +1,10 @@
-<nav menu class="working-space__menu" [label]="label" [menuItems]="menuItems"></nav>
-<aside asideSpace #navSpace class="working-space__nav" aria-current="true" title="Navigation">
+<menu-bar class="working-space__menu" [label]="label" [menuItems]="menuItems"></menu-bar>
+<aside-space #navSpace class="working-space__nav" aria-current="true" title="Navigation">
   <ng-template #itemTemplate let-item="content">
     <article item [itemData]="item"></article>
   </ng-template>
-  <ul treeList [dataList]="treeItems" [contentTemplate]="itemTemplate"></ul>
-</aside>
+  <tree-list [dataList]="treeItems" [contentTemplate]="itemTemplate"></tree-list>
+</aside-space>
 <div #splitter class="working-space__splitter" (pointerdown)="onPointerDown($event)">&nbsp;</div>
 <main #mainSpace class="working-space__main">
 </main>

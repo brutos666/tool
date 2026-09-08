@@ -5,7 +5,7 @@ import { Tree } from '../tree/tree.js';
 
 @Component({
   imports: [Tree],
-  selector: 'ul[treeList]',
+  selector: 'tree-list',
   styleUrl: './tree-list.scss',
   templateUrl: './tree-list.html',
   host: {

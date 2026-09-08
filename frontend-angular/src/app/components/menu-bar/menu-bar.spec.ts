@@ -1,33 +1,29 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Menu } from './menu';
+import { MenuBar } from './menu-bar';
 import { inputBinding, signal, Signal } from '@angular/core';
 import { MenuButton } from '../action-button/menu-button.js';
 
-
-describe('Menu', () => {
-  let component: Menu;
-  let fixture: ComponentFixture<Menu>;
+describe('MenuBar', () => {
+  let component: MenuBar;
+  let fixture: ComponentFixture<MenuBar>;
   let itemsDataSignal: Signal<Array<MenuButton>>;
   let labelSignal: Signal<String>;
 
-  const menuItems:Array<MenuButton> = [];
-    menuItems.push(new MenuButton('Action 1'));
-    menuItems.push(new MenuButton('Action 2'));
-    menuItems.push(new MenuButton('Action 3'));
+  const menuItems: Array<MenuButton> = [];
+  menuItems.push(new MenuButton('Action 1'));
+  menuItems.push(new MenuButton('Action 2'));
+  menuItems.push(new MenuButton('Action 3'));
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [Menu],
+      imports: [MenuBar],
     }).compileComponents();
 
     itemsDataSignal = signal<Array<MenuButton>>(menuItems);
-    labelSignal = signal<String>('Menu d\'actions')
+    labelSignal = signal<String>("Menu d'actions");
 
-    fixture = TestBed.createComponent(Menu, {
-      bindings: [
-        inputBinding('menuItems', itemsDataSignal),
-        inputBinding('label', labelSignal)
-      ]
+    fixture = TestBed.createComponent(MenuBar, {
+      bindings: [inputBinding('menuItems', itemsDataSignal), inputBinding('label', labelSignal)],
     });
     component = fixture.componentInstance;
     await fixture.whenStable();
@@ -44,7 +40,7 @@ describe('Menu', () => {
 
   it('should render menu actions contains actions', async () => {
     const hostElement = fixture.nativeElement as HTMLElement;
-    const menuInnerHtml = expect(hostElement.querySelector('.menu__actions')?.innerHTML)
+    const menuInnerHtml = expect(hostElement.querySelector('.menu__actions')?.innerHTML);
     menuInnerHtml.toContain('Action 1');
     menuInnerHtml.toContain('Action 2');
     menuInnerHtml.toContain('Action 3');
@@ -52,9 +48,7 @@ describe('Menu', () => {
 
   it('menu should be horizontal when width is big enough', () => {
     const fakeEntry = {
-      contentBoxSize: [
-        { inlineSize: 501, blockSize: 70 } as ResizeObserverSize,
-      ],
+      contentBoxSize: [{ inlineSize: 501, blockSize: 70 } as ResizeObserverSize],
     } as unknown as ResizeObserverEntry;
     component.setMenuWidth(500);
     component.sizeHasChanged([fakeEntry]);
@@ -64,9 +58,7 @@ describe('Menu', () => {
   });
   it('menu should be vertical when width is not big enough', () => {
     const fakeEntry = {
-      contentBoxSize: [
-        { inlineSize: 499, blockSize: 70 } as ResizeObserverSize,
-      ],
+      contentBoxSize: [{ inlineSize: 499, blockSize: 70 } as ResizeObserverSize],
     } as unknown as ResizeObserverEntry;
     component.setMenuWidth(500);
     component.sizeHasChanged([fakeEntry]);
@@ -212,8 +204,7 @@ describe('Menu', () => {
 
     menuActions?.dispatchEvent(event);
     fixture.detectChanges();
-    
+
     expect(menuActions?.querySelector('[aria-label="Action 3"]')).toBe(document.activeElement);
   });
-
 });

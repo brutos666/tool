@@ -2,7 +2,7 @@ import { Component, input } from '@angular/core';
 
 @Component({
   imports: [],
-  selector: 'aside[asideSpace]',
+  selector: 'aside-space',
   styleUrl: './aside-space.scss',
   templateUrl: './aside-space.html',
 })

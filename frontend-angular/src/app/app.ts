@@ -1,14 +1,12 @@
 import { Component, signal } from '@angular/core';
-import { WorkingSpace } from './components/working-space/working-space.js';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
-  imports: [WorkingSpace],
+  imports: [RouterOutlet],
   styleUrl: './app.scss',
   templateUrl: './app.html',
 })
 export class App {
   protected readonly title = signal('frontend-angular');
-
-
 }
