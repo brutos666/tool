@@ -1,20 +1,12 @@
-import {
-  AfterViewInit,
-  Component,
-  ElementRef,
-  input,
-  OnDestroy,
-  QueryList,
-  ViewChild,
-  ViewChildren,
-} from '@angular/core';
+import { AfterViewInit, Component, input, OnDestroy, signal, ViewChild } from '@angular/core';
 import { ActionButton } from '../action-button/action-button';
 import { Button } from '../action-button/button';
 import { MenuButton } from '../action-button/menu-button';
 import { NodeElement } from '../common/NodeElement.js';
+import { Menu } from '../menu/menu.js';
 
 @Component({
-  imports: [ActionButton],
+  imports: [ActionButton, Menu],
   selector: 'menu-bar',
   styleUrl: './menu-bar.scss',
   templateUrl: './menu-bar.html',
@@ -25,44 +17,39 @@ import { NodeElement } from '../common/NodeElement.js';
 export class MenuBar extends NodeElement implements AfterViewInit, OnDestroy {
   menuItems = input.required<Array<MenuButton>>();
   label = input.required<String>();
-  burgerItem!: Button;
+  orientation = signal<'horizontal' | 'vertical'>('horizontal');
+  burgerItemData!: Button;
 
-  @ViewChild('menu') menu!: ElementRef;
-  @ViewChildren(ActionButton) actionButtons!: QueryList<ActionButton>;
-
-  #horizontal!: Boolean;
-  #menuWidth!: number;
-  #selectedIndex = -1;
+  @ViewChild('menu') menu!: Menu;
+  @ViewChild('burgerItem') burgerItem!: ActionButton;
 
   #resizeObserver!: ResizeObserver;
 
   #menuOpen: Boolean = false;
+  #menuOrientation: 'horizontal' | 'vertical' | 'none' = 'none';
 
   constructor() {
     super();
-    this.burgerItem = new Button('Ouvrir le menu', 'burger', 'button', 'burger');
+    this.burgerItemData = new Button('Ouvrir le menu', 'burger', 'button', 'burger');
   }
 
   setMenuWidth(width: number) {
-    this.#menuWidth = width;
+    this.menu.setInitialWidth(width);
   }
-  setHorizontal(horizontal: Boolean) {
-    this.#horizontal = horizontal;
+  setOrientation(orientation: 'horizontal' | 'vertical') {
+    this.orientation.set(orientation);
   }
 
   ngAfterViewInit() {
     this.#resizeObserver = new ResizeObserver(this.sizeHasChanged.bind(this));
     this.#resizeObserver.observe(this.getElement(), { box: 'content-box' });
 
-    const burgerItem = this.getBurgerItem();
-    const burgerElement = burgerItem.getElement() as HTMLButtonElement;
+    const burgerElement = this.burgerItem.getElement() as HTMLButtonElement;
     burgerElement.ariaHasPopup = 'true';
     burgerElement.popoverTargetAction = 'toggle';
-    burgerElement.popoverTargetElement = this.menu.nativeElement;
-    burgerElement.setAttribute('aria-controls', 'menu');
+    burgerElement.popoverTargetElement = this.menu.getElement();
+    burgerElement.setAttribute('aria-controls', 'menuContent');
     burgerElement.classList.add('menu__button');
-
-    this.focusItem(0);
   }
 
   ngOnDestroy() {
@@ -75,10 +62,7 @@ export class MenuBar extends NodeElement implements AfterViewInit, OnDestroy {
         continue;
       }
       const boxSize = entry.contentBoxSize[0];
-      if (!this.#menuWidth) {
-        this.#menuWidth = parseFloat(getComputedStyle(this.menu.nativeElement).width);
-      }
-      if (boxSize.inlineSize > this.#menuWidth) {
+      if (boxSize.inlineSize > this.menu.getInitialWidth()) {
         this.changeToHorizontalMenu();
       } else {
         this.changeToBurgerMenu();
@@ -87,139 +71,64 @@ export class MenuBar extends NodeElement implements AfterViewInit, OnDestroy {
   }
 
   isHorizontal() {
-    return this.#horizontal === true;
+    return this.#menuOrientation === 'horizontal';
   }
 
   changeToBurgerMenu() {
-    if (this.#horizontal === false) {
+    if (this.#menuOrientation === 'vertical') {
       return;
     }
-    this.onMenuChange('vertical');
-    this.#horizontal = false;
-    this.menu.nativeElement.classList.add('menu__actions-vertical');
-    this.menu.nativeElement.popover = 'auto';
+    this.#menuOrientation = 'vertical';
 
-    // Indiquer aux boutons de fermer automatiquement la fenêtre
-    this.getMenuItems().forEach((actionButton) => {
-      const element = actionButton.getElement() as HTMLButtonElement;
-      element.popoverTargetElement = this.menu.nativeElement;
-      element.popoverTargetAction = 'hide';
-    });
+    const wasFocused = this.isFocused();
+    this.menu.setPopup();
+    this.burgerItem.changeVisibility(true);
+    this.burgerItem.changeTabAccess(true);
+    if (wasFocused) {
+      this.burgerItem.giveFocus();
+    }
+    this.orientation.set('vertical');
   }
 
   changeToHorizontalMenu() {
-    if (this.#horizontal) {
+    if (this.#menuOrientation === 'horizontal') {
       return;
     }
-    this.onMenuChange('horizontal');
-    this.#horizontal = true;
+    this.#menuOrientation = 'horizontal';
 
-    this.menu.nativeElement.classList.remove('menu__actions-vertical');
-    this.menu.nativeElement.popover = null;
-  }
-
-  onMenuChange(orientation: 'vertical' | 'horizontal') {
     const wasFocused = this.isFocused();
-    const burgerItem = this.getBurgerItem();
-    if (orientation === 'vertical') {
-      burgerItem.changeVisibility(true);
-      burgerItem.changeTabAccess(true);
-      if (wasFocused) {
-        this.giveFocusToBurger();
-      }
-      return;
-    }
-    burgerItem.changeVisibility(false);
-    burgerItem.changeTabAccess(false);
+    this.menu.undoPopup();
+    this.burgerItem.changeVisibility(false);
+    this.burgerItem.changeTabAccess(false);
     if (wasFocused) {
-      this.giveFocusToMenu();
+      this.menu.giveFocus();
     }
+    this.orientation.set('horizontal');
   }
 
   /**
    * Ouverture/fermeture du menu contextuel
    */
   onMenuShowHide() {
-    const burgerItem = this.getBurgerItem();
     if (this.#menuOpen) {
       this.#menuOpen = false;
-      burgerItem.changeTabAccess(true);
-      this.giveFocusToBurger();
+      this.burgerItem.changeTabAccess(true);
+      this.burgerItem.giveFocus();
       return;
     }
     this.#menuOpen = true;
-    burgerItem.changeTabAccess(false);
-    this.giveFocusToMenu();
-  }
-
-  getBurgerItem() {
-    return this.actionButtons.first;
-  }
-  getMenuItems() {
-    const menuItems = this.actionButtons.toArray();
-    menuItems.shift();
-    return menuItems;
-  }
-
-  onKeyDown(event: KeyboardEvent) {
-    const menuItems = this.getMenuItems();
-    const nbItems = menuItems.length;
-    if (nbItems === 0) {
-      return;
-    }
-    if (this.#horizontal && !['ArrowLeft', 'ArrowRight'].includes(event.key)) {
-      return;
-    }
-    if (!this.#horizontal && !['ArrowUp', 'ArrowDown'].includes(event.key)) {
-      return;
-    }
-
-    let selectedIndex = this.#selectedIndex;
-    switch (event.key) {
-      case 'ArrowRight':
-      case 'ArrowDown':
-        selectedIndex++;
-        event.preventDefault();
-        break;
-      case 'ArrowUp':
-      case 'ArrowLeft':
-        selectedIndex--;
-        event.preventDefault();
-        break;
-    }
-
-    if (selectedIndex === -1 || selectedIndex === nbItems) {
-      return;
-    }
-    this.focusItem(selectedIndex);
-  }
-
-  focusItem(index: number) {
-    const menuItems = this.getMenuItems();
-    if (this.#selectedIndex >= 0 && this.#selectedIndex < menuItems.length) {
-      menuItems[this.#selectedIndex].changeTabAccess(false);
-    }
-    this.#selectedIndex = index;
-    this.giveFocusToMenu();
+    this.burgerItem.changeTabAccess(false);
+    this.menu.giveFocus();
   }
 
   override isFocused() {
-    return !!this.actionButtons.find((item) => item.isFocused());
+    return this.burgerItem.isFocused() || this.menu.isFocused();
   }
   override giveFocus() {
-    if (this.#horizontal || this.#menuOpen) {
-      this.giveFocusToMenu();
+    if (this.orientation() === 'horizontal' || this.#menuOpen) {
+      this.menu.giveFocus();
     } else {
-      this.giveFocusToBurger();
+      this.burgerItem.giveFocus();
     }
-  }
-
-  giveFocusToBurger() {
-    const burgerItem = this.getBurgerItem();
-    burgerItem.giveFocus();
-  }
-  giveFocusToMenu() {
-    const menuItems = this.getMenuItems();
-    menuItems[this.#selectedIndex].giveFocus();
   }
 }

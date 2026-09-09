@@ -1,0 +1,9 @@
+<menu arrow-navigation-directive class="menu" [orientation]="menuOrientation()" role="menu">
+  @for (item of menuItems(); track item.label) {
+    <li class="menu__element">
+      <button actionButton focusable-directive [data]="item"></button>
+    </li>
+  } @empty {
+    No tabs available.
+  }
+</menu>

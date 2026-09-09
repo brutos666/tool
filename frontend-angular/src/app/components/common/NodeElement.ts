@@ -13,7 +13,7 @@ export class NodeElement {
     this.changeTabAccess(true);
     this.getElement().focus();
   }
-  public isFocused() {
+  public isFocused(): boolean {
     return document.activeElement === this.getElement();
   }
   public changeTabAccess(access: Boolean) {

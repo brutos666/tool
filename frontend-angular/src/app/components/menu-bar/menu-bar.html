@@ -1,19 +1,4 @@
 <li class="menu__element">
-  <button actionButton [data]="burgerItem" ></button>
+  <button actionButton #burgerItem [data]="burgerItemData" ></button>
 </li>
-<menu
-  #menu
-  id="menu"
-  class="menu__actions"
-  role="menu"
-  (keydown)="onKeyDown($event)"
-  (toggle)="onMenuShowHide()"
->
-  @for (item of menuItems(); track item.label) {
-    <li class="menu__element">
-      <button actionButton [data]="item"></button>
-    </li>
-  } @empty {
-    No tabs available.
-  }
-</menu>
+<menu-content #menu id="menuContent" class="menu__content" [menuItems]="menuItems()" (toggle)="onMenuShowHide()" [menuOrientation]="orientation()"></menu-content>

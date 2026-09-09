@@ -35,12 +35,12 @@ describe('MenuBar', () => {
 
   it('should render menu actions', async () => {
     const hostElement = fixture.nativeElement as HTMLElement;
-    expect(hostElement.querySelector('.menu__actions')).toBeTruthy();
+    expect(hostElement.querySelector('.menu__content')).toBeTruthy();
   });
 
   it('should render menu actions contains actions', async () => {
     const hostElement = fixture.nativeElement as HTMLElement;
-    const menuInnerHtml = expect(hostElement.querySelector('.menu__actions')?.innerHTML);
+    const menuInnerHtml = expect(hostElement.querySelector('.menu__content')?.innerHTML);
     menuInnerHtml.toContain('Action 1');
     menuInnerHtml.toContain('Action 2');
     menuInnerHtml.toContain('Action 3');
@@ -65,146 +65,5 @@ describe('MenuBar', () => {
     fixture.detectChanges();
 
     expect(component.isHorizontal()).toBe(false);
-  });
-
-  it('should navigate to the right when right arrow key is down when menu is horizontal', async () => {
-    const hostElement = fixture.nativeElement as HTMLElement;
-    const menuActions = hostElement.querySelector('.menu__actions');
-    const event = new KeyboardEvent('keydown', { key: 'ArrowRight' });
-    component.setHorizontal(true);
-    component.focusItem(0);
-
-    menuActions?.dispatchEvent(event);
-    fixture.detectChanges();
-
-    expect(menuActions?.querySelector('[aria-label="Action 2"]')).toBe(document.activeElement);
-
-    menuActions?.dispatchEvent(event);
-    fixture.detectChanges();
-
-    expect(menuActions?.querySelector('[aria-label="Action 3"]')).toBe(document.activeElement);
-
-    menuActions?.dispatchEvent(event);
-    fixture.detectChanges();
-
-    expect(menuActions?.querySelector('[aria-label="Action 3"]')).toBe(document.activeElement);
-  });
-  it('should not change focus when right arrow key is down when menu is vertical', async () => {
-    const hostElement = fixture.nativeElement as HTMLElement;
-    const menuActions = hostElement.querySelector('.menu__actions');
-    const event = new KeyboardEvent('keydown', { key: 'ArrowRight' });
-    component.setHorizontal(false);
-    component.focusItem(0);
-
-    menuActions?.dispatchEvent(event);
-    fixture.detectChanges();
-
-    expect(menuActions?.querySelector('[aria-label="Action 1"]')).toBe(document.activeElement);
-  });
-
-  it('should navigate to the left when left arrow key is down and menu is horizontal and current focus on last item', async () => {
-    const hostElement = fixture.nativeElement as HTMLElement;
-    const menuActions = hostElement.querySelector('.menu__actions');
-    const event = new KeyboardEvent('keydown', { key: 'ArrowLeft' });
-    component.setHorizontal(true);
-    component.focusItem(2);
-
-    menuActions?.dispatchEvent(event);
-    fixture.detectChanges();
-
-    expect(menuActions?.querySelector('[aria-label="Action 2"]')).toBe(document.activeElement);
-
-    menuActions?.dispatchEvent(event);
-    fixture.detectChanges();
-
-    expect(menuActions?.querySelector('[aria-label="Action 1"]')).toBe(document.activeElement);
-
-    menuActions?.dispatchEvent(event);
-    fixture.detectChanges();
-
-    expect(menuActions?.querySelector('[aria-label="Action 1"]')).toBe(document.activeElement);
-  });
-
-  it('should not change focus when left arrow key is down and menu is vertical and current focus on last item', async () => {
-    const hostElement = fixture.nativeElement as HTMLElement;
-    const menuActions = hostElement.querySelector('.menu__actions');
-    const event = new KeyboardEvent('keydown', { key: 'ArrowLeft' });
-    component.setHorizontal(false);
-    component.focusItem(2);
-    menuActions?.dispatchEvent(event);
-    fixture.detectChanges();
-    expect(menuActions?.querySelector('[aria-label="Action 3"]')).toBe(document.activeElement);
-  });
-
-  it('should navigate to the down when down arrow key is down when menu is vertical', async () => {
-    const hostElement = fixture.nativeElement as HTMLElement;
-    const menuActions = hostElement.querySelector('.menu__actions');
-    const event = new KeyboardEvent('keydown', { key: 'ArrowDown' });
-    component.setHorizontal(false);
-    component.focusItem(0);
-
-    menuActions?.dispatchEvent(event);
-    fixture.detectChanges();
-
-    expect(menuActions?.querySelector('[aria-label="Action 2"]')).toBe(document.activeElement);
-
-    menuActions?.dispatchEvent(event);
-    fixture.detectChanges();
-
-    expect(menuActions?.querySelector('[aria-label="Action 3"]')).toBe(document.activeElement);
-
-    menuActions?.dispatchEvent(event);
-    fixture.detectChanges();
-
-    expect(menuActions?.querySelector('[aria-label="Action 3"]')).toBe(document.activeElement);
-  });
-
-  it('should not change focus when down arrow key is down and menu is horizontal', async () => {
-    const hostElement = fixture.nativeElement as HTMLElement;
-    const menuActions = hostElement.querySelector('.menu__actions');
-    const event = new KeyboardEvent('keydown', { key: 'ArrowDown' });
-    component.setHorizontal(true);
-    component.focusItem(0);
-
-    menuActions?.dispatchEvent(event);
-    fixture.detectChanges();
-
-    expect(menuActions?.querySelector('[aria-label="Action 1"]')).toBe(document.activeElement);
-  });
-
-  it('should navigate to up when up arrow key is down and menu is vertical and current focus on last item', async () => {
-    const hostElement = fixture.nativeElement as HTMLElement;
-    const menuActions = hostElement.querySelector('.menu__actions');
-    const event = new KeyboardEvent('keydown', { key: 'ArrowUp' });
-    component.setHorizontal(false);
-    component.focusItem(2);
-
-    menuActions?.dispatchEvent(event);
-    fixture.detectChanges();
-
-    expect(menuActions?.querySelector('[aria-label="Action 2"]')).toBe(document.activeElement);
-
-    menuActions?.dispatchEvent(event);
-    fixture.detectChanges();
-
-    expect(menuActions?.querySelector('[aria-label="Action 1"]')).toBe(document.activeElement);
-
-    menuActions?.dispatchEvent(event);
-    fixture.detectChanges();
-
-    expect(menuActions?.querySelector('[aria-label="Action 1"]')).toBe(document.activeElement);
-  });
-
-  it('should not change focus when up arrow key is down and menu is horizontal and current focus on last item', async () => {
-    const hostElement = fixture.nativeElement as HTMLElement;
-    const menuActions = hostElement.querySelector('.menu__actions');
-    const event = new KeyboardEvent('keydown', { key: 'ArrowUp' });
-    component.setHorizontal(true);
-    component.focusItem(2);
-
-    menuActions?.dispatchEvent(event);
-    fixture.detectChanges();
-
-    expect(menuActions?.querySelector('[aria-label="Action 3"]')).toBe(document.activeElement);
   });
 });
