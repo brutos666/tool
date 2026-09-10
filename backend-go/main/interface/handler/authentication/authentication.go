@@ -2,10 +2,12 @@
 package authentication
 
 import (
+	"log"
 	"net/http"
 	"slices"
 	"strings"
 
+	"goTool/config"
 	"goTool/domain"
 	"goTool/interface/handler/route"
 )
@@ -34,6 +36,10 @@ var noAuthentication = []string{
 func Authenticate(request *http.Request) (*domain.ConnectedUser, error) {
 	requestPath := request.URL.Path
 	if slices.Contains(noAuthentication, requestPath) {
+		return nil, nil
+	}
+	if !config.MustAuthenticate() {
+		log.Println("Environnement sans authentification")
 		return nil, nil
 	}
 	authHeader := request.Header.Get(AUTH_HEADER)

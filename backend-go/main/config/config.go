@@ -66,6 +66,22 @@ func GetServerPort() string {
 	return props.MustGetString("http.server.port")
 }
 
+func GetFrontServerUrl() string {
+	host := props.GetString("http.server.front.host", "")
+	if host == "" {
+		return ""
+	}
+	port := props.MustGetString("http.server.front.port")
+	server := fmt.Sprintf("%s:%s", host, port)
+	if props.GetBool("http.server.front.secure", false) {
+		return "https://" + server
+	}
+	return "http://" + server
+}
+func MustAuthenticate() bool {
+	return props.GetBool("authenticate.control", true)
+}
+
 func GetTokenDuration() time.Duration {
 	minuteDuration := props.MustGetInt64("authenticate.token.minutes")
 	return time.Duration(minuteDuration) * time.Minute

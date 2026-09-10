@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 
+	"goTool/config"
 	"goTool/domain/domainMessage"
 	"goTool/interface/handler/authentication"
 	"goTool/interface/handler/responseMessage"
@@ -39,13 +40,14 @@ func sendError(response http.ResponseWriter, requestPath string, err error) {
 }
 
 func writeResponse(response http.ResponseWriter, requestPath string, jsonData []byte, statusCode int) {
-	/*
+	frontUrl := config.GetFrontServerUrl()
+	if frontUrl != "" {
 		// Dans le cas où le serveur de fichier du front est différent du serveur des requêtes api
-		response.Header().Set("Access-Control-Allow-Origin", config.GetServerUrl())
+		response.Header().Set("Access-Control-Allow-Origin", frontUrl)
 		response.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		response.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 		response.Header().Set("Access-Control-Expose-Headers", "WWW-Authenticate")
-	*/
+	}
 	response.Header().Set("Content-Type", "application/json")
 	response.WriteHeader(statusCode)
 	if jsonData == nil {
