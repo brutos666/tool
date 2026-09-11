@@ -1,43 +1,56 @@
-import { Service } from '@angular/core';
+import { inject, Service } from '@angular/core';
 import { TreeData } from '../data/tree-data.js';
 import { ItemData } from '../data/item-data.js';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../config/environment';
+import { BehaviorSubject, catchError, map } from 'rxjs';
+import { TreeItemData } from '../data/tree-item-data.js';
 
 @Service()
 export class ItemService {
+  private http = inject(HttpClient);
+  private treeItemsSubject = new BehaviorSubject<TreeData<ItemData>[]>([]);
+  // asObservable permet de retourner un observable du sujet. Ainsi, on peut souscrire et être notifié à chaque fois que le sujet est modifié avec next
+  treeItems$ = this.treeItemsSubject.asObservable();
+
+  // Identifiant unique indépendant de l'identifiant issu de la base de données. Permet d'identifiant les nouveaux éléments non sauvegardés
+  private treeItemId: number = 0;
+
   constructor() {
-    this.load();
+    this.loadItems();
   }
 
-  private load() {
-    const treeItems: Array<TreeData<ItemData>> = this.getAll();
-    this.save(treeItems);
+  public loadItems() {
+    this.treeItemId = 0;
+    this.http
+      .get<TreeItemData[]>(`${environment.apiUrl}/item/findAllItems`)
+      .pipe(
+        catchError(() => {
+          this.treeItemsSubject.error('An error occurred');
+          return [];
+        }),
+        map((treeItems) =>
+          treeItems.map((treeItemObj) => {
+            return this.convertToTreeData(treeItemObj, '-1');
+          }),
+        ),
+      )
+      .subscribe((treeItems) => {
+        // next met à jour le sujet avec la valeur
+        this.treeItemsSubject.next(treeItems);
+      });
   }
 
-  private save(treeItems: Array<TreeData<ItemData>>) {
-    const rootItem = new TreeData(this.createItem('-1', 'Racine'));
-    rootItem.setChildren(treeItems);
-    localStorage.setItem('rootItem', JSON.stringify(rootItem));
-  }
-
-  getAll() {
-    const treeItems: Array<TreeData<ItemData>> = [];
-
-    const treeItem = new TreeData(this.createItem('1', 'Parent 1'));
-    treeItem.addChild(new TreeData(this.createItem('1-1', 'Enfant 1')));
-    treeItem.addChild(new TreeData(this.createItem('1-2', 'Enfant 2')));
-    treeItems.push(treeItem);
-    const treeItem2 = new TreeData(this.createItem('2', 'Parent 2'));
-    const treeItem2_1 = new TreeData(this.createItem('2-1', 'Enfant 1 de 2'));
-    treeItem2.addChild(treeItem2_1);
-    treeItem2.addChild(new TreeData(this.createItem('2-2', 'Enfant 2 de 2')));
-    const treeItem2_1_1 = new TreeData(this.createItem('2-1-1', 'Enfant 1 de 2-1'));
-    treeItem2_1.addChild(treeItem2_1_1);
-    treeItems.push(treeItem2);
-
-    return treeItems;
-  }
-
-  createItem(id: string, title: string): ItemData {
-    return new ItemData(id, title, '', 'TODO', 'OK');
+  private convertToTreeData(treeItemObj: Object, parentId: string): TreeData<ItemData> {
+    const treeItemData = Object.assign(new TreeItemData(), treeItemObj);
+    const treeData = treeItemData.convertToTreeData();
+    this.treeItemId++;
+    const treeItemId = `${this.treeItemId}`;
+    treeData.setTreeItemId(treeItemId);
+    treeData.setParentTreeItemId(parentId);
+    treeData.setChildren(
+      treeItemData.children.map((treeItem) => this.convertToTreeData(treeItem, treeItemId)),
+    );
+    return treeData;
   }
 }

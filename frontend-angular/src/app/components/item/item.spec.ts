@@ -13,7 +13,7 @@ describe('Item', () => {
       imports: [Item],
     }).compileComponents();
 
-    itemSignal = signal<ItemData>(new ItemData('12', 'Test 12', '', '', ''));
+    itemSignal = signal<ItemData>(new ItemData('12', 'Test 12', '', '', '', ''));
 
     fixture = TestBed.createComponent(Item, {
       bindings: [inputBinding('itemData', itemSignal)],

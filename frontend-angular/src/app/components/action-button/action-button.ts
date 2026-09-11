@@ -16,7 +16,7 @@ import { Icon } from '../icon/icon.js';
     '[aria-label]': 'data().label',
     '[attr.role]': 'data().role',
     tabindex: '-1',
-    '(click)': 'data().onClick()',
+    '(click)': 'data().onClick($event)',
     '(mousedown)': 'onMouseDown($event)',
   },
 })

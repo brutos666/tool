@@ -7,6 +7,7 @@ export class ItemData extends Data {
     public text: string,
     public state: string,
     public status: string,
+    public CRUDMode: string,
   ) {
     super(id);
   }
@@ -18,6 +19,7 @@ export class ItemData extends Data {
       text: this.text,
       state: this.state,
       status: this.status,
+      CRUDMode: this.CRUDMode,
     };
   }
 }

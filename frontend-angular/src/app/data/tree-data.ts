@@ -2,20 +2,36 @@ import { Data } from './data.js';
 
 export class TreeData<T extends Data> {
   private children: Array<TreeData<T>> = [];
+  private treeItemId: string = '0';
+  private treeParentItemId: string = '0';
 
   constructor(private content: T) {}
 
-  getId() {
+  getId(): string {
     return this.content.id;
   }
-  getContent() {
+
+  getTreeItemId(): string {
+    return this.treeItemId;
+  }
+  setTreeItemId(id: string) {
+    this.treeItemId = id;
+  }
+  setParentTreeItemId(id: string) {
+    this.treeParentItemId = id;
+  }
+
+  getContent(): T {
     return this.content;
   }
+
+  setContent(content: T) {
+    this.content = content;
+  }
   getData(): Object {
-    return {
+    return Object.assign(this.content.getData(), {
       children: this.children.map((child) => child.getData()),
-      content: this.content.getData(),
-    };
+    });
   }
 
   addChild(content: TreeData<T>) {
@@ -28,5 +44,12 @@ export class TreeData<T extends Data> {
 
   setChildren(children: TreeData<T>[]) {
     this.children = children;
+  }
+
+  getChildByTreeItemId(treeItemId: string): TreeData<T> | undefined {
+    if (treeItemId === this.treeItemId) {
+      return this;
+    }
+    return this.getChildren().find((child) => child.getChildByTreeItemId(treeItemId));
   }
 }
