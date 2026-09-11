@@ -10,9 +10,9 @@ describe('MenuBar', () => {
   let labelSignal: Signal<String>;
 
   const menuItems: Array<MenuButton> = [];
-  menuItems.push(new MenuButton('Action 1'));
-  menuItems.push(new MenuButton('Action 2'));
-  menuItems.push(new MenuButton('Action 3'));
+  menuItems.push(new MenuButton('id1', 'Action 1'));
+  menuItems.push(new MenuButton('id2', 'Action 2'));
+  menuItems.push(new MenuButton('id3', 'Action 3'));
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({

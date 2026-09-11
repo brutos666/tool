@@ -2,17 +2,19 @@ import { Component, input } from '@angular/core';
 import { Button } from './button';
 import { NodeElement } from '../common/NodeElement.js';
 import { Icon } from '../icon/icon.js';
+import { LabelInput } from '../label-input/label-input.js';
 
 @Component({
-  imports: [Icon],
+  imports: [Icon, LabelInput],
   selector: 'button[actionButton]',
   styleUrl: './action-button.scss',
   templateUrl: './action-button.html',
   standalone: true,
   providers: [{ provide: NodeElement, useExisting: ActionButton }],
   host: {
+    '[id]': 'data().id',
     class: 'clickable action__button',
-    '[class]': 'data().className',
+    '[class]': '`${data().type}-button`',
     '[aria-label]': 'data().label',
     '[attr.role]': 'data().role',
     tabindex: '-1',

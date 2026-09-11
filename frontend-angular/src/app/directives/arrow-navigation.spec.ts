@@ -18,10 +18,10 @@ import { Focusable } from './focusable.js';
   </nav>`,
 })
 class Test {
-  btnDataNoFocus: Button = new Button('Pas de focus', '', 'button', 'label');
-  btnDataFocus1: Button = new Button('Bouton 1', '', 'button', 'label');
-  btnDataFocus2: Button = new Button('Bouton 2', '', 'button', 'label');
-  btnDataFocus3: Button = new Button('Bouton 3', '', 'button', 'label');
+  btnDataNoFocus: Button = new Button('id0', 'Pas de focus', '', 'button', 'label');
+  btnDataFocus1: Button = new Button('id1', 'Bouton 1', '', 'button', 'label');
+  btnDataFocus2: Button = new Button('id2', 'Bouton 2', '', 'button', 'label');
+  btnDataFocus3: Button = new Button('id3', 'Bouton 3', '', 'button', 'label');
 
   orientation = input<'horizontal' | 'vertical'>('horizontal');
   index = input<number>(0);

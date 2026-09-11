@@ -1,5 +1,6 @@
 export class Button {
-  className!: string;
+  id!: string;
+  type!: string;
   label!: string;
   icon!: string;
   role!: string;
@@ -7,6 +8,7 @@ export class Button {
 
   /**
    * @constructor
+   * @param {string} id - Label du bouton
    * @param {string} label - Label du bouton
    * @param {string|undefined} icon - Icône du bouton
    * @param {'button'|'menuitem'} role - Rôle du bouton
@@ -14,13 +16,15 @@ export class Button {
    * @param {Function} onClick - méthode à appeler sur le click d'un bouton
    */
   constructor(
+    id: string,
     label: string,
     icon: string | undefined,
     role: 'button' | 'menuitem',
     type: 'icon' | 'menu' | 'label' | 'primary' | 'burger',
     onClick: Function = () => {},
   ) {
-    this.className = `${type}-button`;
+    this.id = id;
+    this.type = type;
     this.label = label;
     if (icon) {
       this.icon = icon;

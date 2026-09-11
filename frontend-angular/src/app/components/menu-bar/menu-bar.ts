@@ -30,7 +30,13 @@ export class MenuBar extends NodeElement implements AfterViewInit, OnDestroy {
 
   constructor() {
     super();
-    this.burgerItemData = new Button('Ouvrir le menu', 'burger', 'button', 'burger');
+    this.burgerItemData = new Button(
+      'burgerButton',
+      'Ouvrir le menu',
+      'burger',
+      'button',
+      'burger',
+    );
   }
 
   setMenuWidth(width: number) {

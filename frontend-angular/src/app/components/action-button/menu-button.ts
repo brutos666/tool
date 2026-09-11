@@ -1,7 +1,7 @@
 import { Button } from './button';
 
 export class MenuButton extends Button {
-  constructor(label: string, onClick: Function = () => {}) {
-    super(label, '', 'menuitem', 'menu', onClick);
+  constructor(id: string, label: string, onClick: Function = () => {}) {
+    super(id, label, '', 'menuitem', 'menu', onClick);
   }
 }

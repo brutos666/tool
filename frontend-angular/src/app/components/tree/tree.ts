@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, input, InputSignal, TemplateRef } from '@angular/core';
+import { Component, input, OnInit, TemplateRef } from '@angular/core';
 import { Button } from '../action-button/button.js';
 import { NodeElement } from '../common/NodeElement.js';
 import { ActionButton } from '../action-button/action-button.js';
@@ -12,7 +12,7 @@ import { NgClass, NgTemplateOutlet } from '@angular/common';
   styleUrl: './tree.scss',
   templateUrl: './tree.html',
 })
-export class Tree<T extends Data> extends NodeElement {
+export class Tree<T extends Data> extends NodeElement implements OnInit {
   toggleIcon!: Button;
   treeData = input.required<TreeData<T>>();
   contentTemplate = input<TemplateRef<{ content: T }>>();
@@ -22,7 +22,15 @@ export class Tree<T extends Data> extends NodeElement {
 
   constructor() {
     super();
-    this.toggleIcon = new Button('Ouvrir/Fermer le noeud', 'node', 'button', 'icon');
+  }
+  ngOnInit(): void {
+    this.toggleIcon = new Button(
+      `toggle${this.treeData().getTreeItemId()}`,
+      'Ouvrir/Fermer le noeud',
+      'node',
+      'button',
+      'icon',
+    );
   }
 
   onOpenClose() {
