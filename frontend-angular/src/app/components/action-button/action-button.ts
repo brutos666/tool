@@ -15,6 +15,7 @@ import { LabelInput } from '../label-input/label-input.js';
     '[id]': 'data().id',
     class: 'clickable action__button',
     '[class]': '`${data().type}-button`',
+    '[attr.aria-labelledby]': "data().id + '-label'",
     '[aria-label]': 'data().label',
     '[attr.role]': 'data().role',
     tabindex: '-1',

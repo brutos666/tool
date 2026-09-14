@@ -1,13 +1,4 @@
-import {
-  AfterViewInit,
-  Component,
-  contentChild,
-  inject,
-  input,
-  QueryList,
-  viewChild,
-  ViewChildren,
-} from '@angular/core';
+import { AfterViewInit, Component, input, QueryList, viewChild, ViewChildren } from '@angular/core';
 import { MenuButton } from '../action-button/menu-button.js';
 import { ActionButton } from '../action-button/action-button.js';
 import { NodeElement } from '../common/NodeElement.js';

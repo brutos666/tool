@@ -2,5 +2,5 @@
   <icon [name]="data().icon"></icon>
 }
 @if (['menu', 'label'].includes(data().type)) {
-  <label labelInput [text]="data().label" [for]="data().id"></label>
+  <label labelInput [text]="data().label" [id]="data().id + '-label'"></label>
 }
