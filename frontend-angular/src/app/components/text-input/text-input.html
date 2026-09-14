@@ -1,4 +1,10 @@
 @if (isDisplayLabel()) {
-  <label labelInput [text]="label()" [for]="id()"></label>
+  <label class="input__label" labelInput [text]="label()" [id]="id() + '-label'"></label>
+  <div #input [attr.aria-labelledby]="id() + '-label'"
+  [id]="id()" [aria-label]="label()" [innerHtml]="safeHtml()" (focus)="enter()" (blur)="exit()" 
+  contenteditable="true" property="text" role="textbox" aria-multiline="true"></div>
+} @else {
+  <div #input 
+  [id]="id()" [aria-label]="label()" [innerHtml]="safeHtml()" (focus)="enter()" (blur)="exit()"
+    contenteditable="true" property="text" role="textbox" aria-multiline="true"></div>
 }
-<ng-content></ng-content>

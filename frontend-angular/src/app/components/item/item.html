@@ -1,7 +1,10 @@
 <header class="item__header">
   <template id="done" class="item__checkbox" aria-label="Effectué/non effectué"
     aria-description="Cliquez pour marquer comme effectué"></template>
-  <text-input id="title" label="Titre de l'item" class="item__title" >{{ itemData().title }}</text-input>
+  <text-input 
+    id="title" label="Titre de l'item" class="item__title"
+    [value]="itemData().getTitle()" (valueChange)="onValueChange($event, 'title')">
+  </text-input>
 </header>
 <template id="text" class="item__text" aria-label="Détail de l'item"></template>
 <footer class="item__footer"></footer>

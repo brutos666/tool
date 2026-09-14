@@ -41,11 +41,12 @@ export class Tree<T extends Data> extends NodeElement implements OnInit {
   setOpen(open: boolean) {
     this.open = open;
     const element = this.getElement();
+    const tree = element.querySelector('.tree');
     const treeList = element.querySelector('.tree__list');
-    if (!treeList) {
+    if (!treeList || !tree) {
       return;
     }
-    element.setAttribute('aria-expanded', open ? 'true' : 'false');
+    tree.setAttribute('aria-expanded', open ? 'true' : 'false');
     if (open) {
       treeList.classList.remove('hidden');
     } else {

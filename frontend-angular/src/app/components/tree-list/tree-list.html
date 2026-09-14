@@ -1,4 +1,4 @@
-@for (treeData of dataList();track treeData.getId()) {
+@for (treeData of dataList();track treeData.getTreeItemId()) {
 <tree class="tree__element" [treeData]="treeData" [contentTemplate]="contentTemplate()" [isRoot]=true >
 </tree>
 } @empty {

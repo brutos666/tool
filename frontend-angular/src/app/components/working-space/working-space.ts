@@ -1,4 +1,4 @@
-import { Component, ElementRef, inject, OnDestroy, OnInit, Signal, ViewChild } from '@angular/core';
+import { Component, ElementRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MenuButton } from '../action-button/menu-button.js';
 import { MenuBar } from '../menu-bar/menu-bar.js';
 import { NodeElement } from '../common/NodeElement.js';

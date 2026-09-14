@@ -1,4 +1,4 @@
-import { ElementRef, inject, Signal } from '@angular/core';
+import { ElementRef, inject } from '@angular/core';
 
 export class NodeElement {
   elementRef = inject(ElementRef);
@@ -28,5 +28,17 @@ export class NodeElement {
   }
   public isVisible() {
     return !this.getElement().classList.contains('hidden');
+  }
+
+  setDisabled() {
+    this.getElement().classList.add('disabled');
+  }
+
+  setEnabled() {
+    this.getElement().classList.remove('disabled');
+  }
+
+  isDisabled() {
+    return this.getElement().classList.contains('disabled');
   }
 }

@@ -7,7 +7,15 @@ export class TreeData<T extends Data> {
 
   constructor(private content: T) {}
 
-  getId(): string {
+  copy(): TreeData<T> {
+    const copy = new TreeData(this.getContent());
+    copy.setChildren(this.getChildren());
+    copy.setTreeItemId(this.getTreeItemId());
+    copy.setParentTreeItemId(this.getParentTreeItemId());
+    return copy;
+  }
+
+  getItemId(): string {
     return this.content.id;
   }
 
@@ -16,6 +24,9 @@ export class TreeData<T extends Data> {
   }
   setTreeItemId(id: string) {
     this.treeItemId = id;
+  }
+  getParentTreeItemId(): string {
+    return this.treeParentItemId;
   }
   setParentTreeItemId(id: string) {
     this.treeParentItemId = id;

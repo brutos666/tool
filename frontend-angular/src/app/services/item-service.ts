@@ -41,6 +41,31 @@ export class ItemService {
       });
   }
 
+  public updateItem(content: ItemData) {
+    const treeItems = this.treeItemsSubject.value;
+    if (this.updateBranch(content, treeItems)) {
+      // Mise à jour pour les souscripteurs
+      this.treeItemsSubject.next([...treeItems]);
+    }
+  }
+
+  private updateBranch(content: ItemData, treeList: TreeData<ItemData>[]): boolean {
+    const index = treeList.findIndex((tree) => tree.getItemId() === content.getId());
+    if (index >= 0) {
+      treeList[index] = treeList[index].copy();
+      treeList[index].setContent(content);
+      return true;
+    }
+    for (let i = 0; i < treeList.length; i++) {
+      const treeChildren = treeList[i].getChildren();
+      if (this.updateBranch(content, treeChildren)) {
+        treeList[i] = treeList[i].copy();
+        return true;
+      }
+    }
+    return false;
+  }
+
   private convertToTreeData(treeItemObj: Object, parentId: string): TreeData<ItemData> {
     const treeItemData = Object.assign(new TreeItemData(), treeItemObj);
     const treeData = treeItemData.convertToTreeData();
