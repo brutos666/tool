@@ -6,6 +6,8 @@ export class Button {
   role!: string;
   onClick!: Function;
 
+  private visible: boolean = true;
+
   /**
    * @constructor
    * @param {string} id - Label du bouton
@@ -31,5 +33,13 @@ export class Button {
     }
     this.role = role;
     this.onClick = onClick;
+  }
+
+  setVisible(visible: boolean) {
+    this.visible = visible;
+  }
+
+  isVisible() {
+    return this.visible;
   }
 }

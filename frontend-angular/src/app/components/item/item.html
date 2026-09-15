@@ -2,9 +2,10 @@
   <template id="done" class="item__checkbox" aria-label="Effectué/non effectué"
     aria-description="Cliquez pour marquer comme effectué"></template>
   <text-input 
-    id="title" label="Titre de l'item" class="item__title"
+    [id]="itemData().getId()+'-title'" label="Titre de l'item" class="item__title"
     [value]="itemData().getTitle()" (valueChange)="onValueChange($event, 'title')">
   </text-input>
+  <toolbar [buttons]="buttons" aria-controls="itemArticle" class="item__toolbar"></toolbar>
 </header>
 <template id="text" class="item__text" aria-label="Détail de l'item"></template>
 <footer class="item__footer"></footer>

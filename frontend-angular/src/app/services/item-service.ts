@@ -49,6 +49,16 @@ export class ItemService {
     }
   }
 
+  addChildItem(parentId: string, itemData: ItemData) {
+    throw new Error('Method not implemented.');
+  }
+  markToDelete(itemData: ItemData) {
+    throw new Error('Method not implemented.');
+  }
+  undoToDelete(itemData: ItemData) {
+    throw new Error('Method not implemented.');
+  }
+
   private updateBranch(content: ItemData, treeList: TreeData<ItemData>[]): boolean {
     const index = treeList.findIndex((tree) => tree.getItemId() === content.getId());
     if (index >= 0) {

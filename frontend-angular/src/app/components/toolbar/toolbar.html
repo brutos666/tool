@@ -1,0 +1,7 @@
+<div arrow-navigation-directive class="toolbar" role="toolbar">
+  @for (buttonItem of buttons(); track buttonItem.label) {
+    <button actionButton focusable-directive [data]="buttonItem"></button>
+  } @empty {
+  No tabs available.
+  }
+</div>

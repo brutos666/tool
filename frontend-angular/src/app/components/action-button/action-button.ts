@@ -14,7 +14,7 @@ import { LabelInput } from '../label-input/label-input.js';
   host: {
     '[id]': 'data().id',
     class: 'clickable action__button',
-    '[class]': '`${data().type}-button`',
+    '[class]': "data().type + '-button' + (data().isVisible() ? '': ' hidden')",
     '[attr.aria-labelledby]': "data().id + '-label'",
     '[aria-label]': 'data().label',
     '[attr.role]': 'data().role',
