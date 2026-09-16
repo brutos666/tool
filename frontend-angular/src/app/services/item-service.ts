@@ -8,10 +8,13 @@ import { TreeItemData } from '../data/tree-item-data.js';
 
 @Service()
 export class ItemService {
+  static rootItemData = new ItemData('-1', 'Racine', '', '', '', '');
   private http = inject(HttpClient);
-  private treeItemsSubject = new BehaviorSubject<TreeData<ItemData>[]>([]);
+  private rootItemSubject = new BehaviorSubject<TreeData<ItemData>>(
+    new TreeData<ItemData>(ItemService.rootItemData),
+  );
   // asObservable permet de retourner un observable du sujet. Ainsi, on peut souscrire et être notifié à chaque fois que le sujet est modifié avec next
-  treeItems$ = this.treeItemsSubject.asObservable();
+  rootItem$ = this.rootItemSubject.asObservable();
 
   // Identifiant unique indépendant de l'identifiant issu de la base de données. Permet d'identifiant les nouveaux éléments non sauvegardés
   private treeItemId: number = 0;
@@ -22,58 +25,104 @@ export class ItemService {
 
   public loadItems() {
     this.treeItemId = 0;
+    const rootItem = new TreeData<ItemData>(ItemService.rootItemData);
     this.http
       .get<TreeItemData[]>(`${environment.apiUrl}/item/findAllItems`)
       .pipe(
         catchError(() => {
-          this.treeItemsSubject.error('An error occurred');
+          this.rootItemSubject.error('An error occurred');
           return [];
         }),
         map((treeItems) =>
-          treeItems.map((treeItemObj) => {
-            return this.convertToTreeData(treeItemObj, '-1');
-          }),
+          treeItems
+            .map((treeItemObj) => {
+              return this.convertToTreeData(treeItemObj, '-1');
+            })
+            .reduce((accumulator, current) => {
+              accumulator.addChild(current);
+              return accumulator;
+            }, rootItem),
         ),
       )
-      .subscribe((treeItems) => {
+      .subscribe((rootItem) => {
         // next met à jour le sujet avec la valeur
-        this.treeItemsSubject.next(treeItems);
+        this.rootItemSubject.next(rootItem);
       });
   }
 
-  public updateItem(content: ItemData) {
-    const treeItems = this.treeItemsSubject.value;
-    if (this.updateBranch(content, treeItems)) {
+  public updateItem(treeData: TreeData<ItemData>, property: string, value: string) {
+    const rootItem = this.rootItemSubject.value;
+    const callback = (tree: TreeData<ItemData>) =>
+      tree.getContent().setValueProperty(property, value);
+    if (this.applyNodes(rootItem, treeData, callback)) {
       // Mise à jour pour les souscripteurs
-      this.treeItemsSubject.next([...treeItems]);
+      this.rootItemSubject.next(rootItem.copy());
     }
   }
 
-  addChildItem(parentId: string, itemData: ItemData) {
-    throw new Error('Method not implemented.');
+  addChildItem(treeData: TreeData<ItemData>, title: string) {
+    const rootItem = this.rootItemSubject.value;
+    const callback = (tree: TreeData<ItemData>) => {
+      this.treeItemId++;
+      const treeData = new TreeData(new ItemData('', title, '', 'TODO', '', ''));
+      treeData.getContent().markAsNew();
+      treeData.setTreeItemId(`${this.treeItemId}`);
+      treeData.setParentTreeItemId(tree.getTreeItemId());
+      tree.addChild(treeData);
+    };
+    if (this.applyNodes(rootItem, treeData, callback)) {
+      // Mise à jour pour les souscripteurs
+      this.rootItemSubject.next(rootItem.copy());
+    }
   }
-  markToDelete(itemData: ItemData) {
-    throw new Error('Method not implemented.');
+  markToDelete(treeData: TreeData<ItemData>) {
+    const rootItem = this.rootItemSubject.value;
+    const callback = treeData.getContent().isNew()
+      ? (tree: TreeData<ItemData>, parentTree: TreeData<ItemData>) => parentTree.removeChild(tree)
+      : (tree: TreeData<ItemData>) =>
+          this.applyTree(tree, (node: TreeData<ItemData>) => node.getContent().markToDelete());
+    if (this.applyNodes(rootItem, treeData, callback)) {
+      // Mise à jour pour les souscripteurs
+      this.rootItemSubject.next(rootItem.copy());
+    }
   }
-  undoToDelete(itemData: ItemData) {
-    throw new Error('Method not implemented.');
+  undoToDelete(treeData: TreeData<ItemData>) {
+    const rootItem = this.rootItemSubject.value;
+    const callback = (tree: TreeData<ItemData>) =>
+      this.applyTree(tree, (node: TreeData<ItemData>) => node.getContent().undoToDelete());
+    if (this.applyNodes(rootItem, treeData, callback)) {
+      // Mise à jour pour les souscripteurs
+      this.rootItemSubject.next(rootItem.copy());
+    }
   }
 
-  private updateBranch(content: ItemData, treeList: TreeData<ItemData>[]): boolean {
-    const index = treeList.findIndex((tree) => tree.getItemId() === content.getId());
-    if (index >= 0) {
-      treeList[index] = treeList[index].copy();
-      treeList[index].setContent(content);
-      return true;
-    }
-    for (let i = 0; i < treeList.length; i++) {
-      const treeChildren = treeList[i].getChildren();
-      if (this.updateBranch(content, treeChildren)) {
-        treeList[i] = treeList[i].copy();
+  private applyNodes(
+    parentTree: TreeData<ItemData>,
+    treeData: TreeData<ItemData>,
+    callback: Function,
+  ): boolean {
+    const nodes = parentTree.getChildren();
+    for (let i = 0; i < nodes.length; i++) {
+      if (nodes[i].getTreeItemId() === treeData.getTreeItemId()) {
+        nodes[i] = nodes[i].copy();
+        callback(nodes[i], parentTree);
+        return true;
+      }
+      if (this.applyNodes(nodes[i], treeData, callback)) {
+        nodes[i] = nodes[i].copy();
         return true;
       }
     }
     return false;
+  }
+
+  private applyTree(node: TreeData<ItemData>, callback: Function) {
+    callback(node);
+    const nodes = node.getChildren();
+    for (let i = 0; i < nodes.length; i++) {
+      nodes[i] = nodes[i].copy();
+      this.applyTree(nodes[i], callback);
+    }
   }
 
   private convertToTreeData(treeItemObj: Object, parentId: string): TreeData<ItemData> {

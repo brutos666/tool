@@ -7,6 +7,9 @@ import { TreeList } from '../tree-list/tree-list';
 import { Item } from '../item/item.js';
 import { ItemService } from '../../services/item-service.js';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { TreeData } from '../../data/tree-data.js';
+import { ItemData } from '../../data/item-data.js';
+import { Layout } from '../common/Types.js';
 
 @Component({
   imports: [MenuBar, AsideSpace, TreeList, Item],
@@ -21,10 +24,13 @@ import { toSignal } from '@angular/core/rxjs-interop';
 export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
   private itemService = inject(ItemService);
 
-  treeItems = toSignal(this.itemService.treeItems$, { initialValue: [] });
+  rootItem = toSignal(this.itemService.rootItem$, {
+    initialValue: new TreeData<ItemData>(ItemService.rootItemData),
+  });
 
   menuItems: Array<MenuButton> = [];
   label: String = 'Menu des commandes';
+  mainLayout: Layout = Layout.Todo;
 
   @ViewChild('splitter') splitterRef!: ElementRef;
   @ViewChild('navSpace', { read: ElementRef }) navSpaceRef!: ElementRef;

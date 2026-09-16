@@ -8,8 +8,8 @@ export class TreeData<T extends Data> {
   constructor(private content: T) {}
 
   copy(): TreeData<T> {
-    const copy = new TreeData(this.getContent());
-    copy.setChildren(this.getChildren());
+    const copy = new TreeData(this.getContent().clone() as T);
+    copy.setChildren([...this.getChildren()]);
     copy.setTreeItemId(this.getTreeItemId());
     copy.setParentTreeItemId(this.getParentTreeItemId());
     return copy;
@@ -45,8 +45,16 @@ export class TreeData<T extends Data> {
     });
   }
 
-  addChild(content: TreeData<T>) {
-    this.children.push(content);
+  addChild(tree: TreeData<T>) {
+    this.children.push(tree);
+  }
+  removeChild(tree: TreeData<T>) {
+    const index = this.getChildren().findIndex(
+      (treeChild) => treeChild.getTreeItemId() === tree.getTreeItemId(),
+    );
+    if (index >= 0) {
+      this.getChildren().splice(index, 1);
+    }
   }
 
   getChildren(): Array<TreeData<T>> {

@@ -42,7 +42,8 @@
 }
 
 :host.item--crud-created .item__header::before,
-:host.item--crud-updated .item__header::before {
+:host.item--crud-updated .item__header::before,
+:host.item--crud-deleted .item__header::before {
   content: "•";
   color: var(--status-color);
 }

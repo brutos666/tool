@@ -15,5 +15,5 @@ import { Tree } from '../tree/tree.js';
 })
 export class TreeList<T extends Data> {
   dataList = input.required<Array<TreeData<T>>>();
-  contentTemplate = input<TemplateRef<{ content: T }>>();
+  contentTemplate = input<TemplateRef<{ content: TreeData<T> }>>();
 }

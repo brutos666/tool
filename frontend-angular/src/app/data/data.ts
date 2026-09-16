@@ -8,4 +8,8 @@ export class Data {
   getId(): string {
     return this.id;
   }
+
+  clone(): Data {
+    return new Data(this.id);
+  }
 }

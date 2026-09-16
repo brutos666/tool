@@ -1,11 +1,24 @@
+@let layout=layoutData();
+@let content=treeData().getContent();
+
 <header class="item__header">
-  <template id="done" class="item__checkbox" aria-label="Effectué/non effectué"
-    aria-description="Cliquez pour marquer comme effectué"></template>
-  <text-input 
-    [id]="itemData().getId()+'-title'" label="Titre de l'item" class="item__title"
-    [value]="itemData().getTitle()" (valueChange)="onValueChange($event, 'title')">
+  @if (this.hasDone(layout)) {
+    <text-input #done [id]="content.getId()+'-done'" label="Effectué/non effectué" class="item__checkbox" aria-description="Cliquez pour marquer comme effectué"
+      [value]="content.getState()" (valueChange)="onValueChange($event, 'state')">
+    </text-input>
+  }
+  <text-input #title 
+    [id]="content.getId()+'-title'" label="Titre de l'item" class="item__title"
+    [value]="content.getTitle()" (valueChange)="onValueChange($event, 'title')">
   </text-input>
-  <toolbar [buttons]="buttons" aria-controls="itemArticle" class="item__toolbar"></toolbar>
+
+  <toolbar [buttons]="buttonsData" aria-controls="itemArticle" class="item__toolbar"></toolbar>
 </header>
-<template id="text" class="item__text" aria-label="Détail de l'item"></template>
+@if (this.hasText(layout)) {
+<text-input #text [id]="content.getId()+'-text'" label="Détail de l'item" class="item__text" [value]="content.getText()"
+  (valueChange)="onValueChange($event, 'text')">
+</text-input>
+}
+@if (this.hasFooterToolbar(layout)) {
 <footer class="item__footer"></footer>
+}

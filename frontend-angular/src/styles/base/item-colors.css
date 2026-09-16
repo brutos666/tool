@@ -22,6 +22,9 @@
 .item--crud-updated {
   --status-color: var(--color-updated);
 }
+.item--crud-deleted {
+  --status-color: var(--color-deleted);
+}
 .item--post-it {
   --status-color: var(--color-text-on-post-it);
   --darker-post-it-color: oklch(from var(--color-post-it) calc(l + 0) calc(c + 0.45) calc(h + 0));

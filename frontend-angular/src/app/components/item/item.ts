@@ -1,10 +1,12 @@
-import { Component, inject, input, OnInit } from '@angular/core';
+import { Component, computed, effect, inject, input, OnInit, ViewChild } from '@angular/core';
 import { ItemData } from '../../data/item-data.js';
 import { TextInput } from '../text-input/text-input';
 import { ItemService } from '../../services/item-service.js';
 import { Toolbar } from '../toolbar/toolbar.js';
 import { Button } from '../action-button/button.js';
 import { IconButton } from '../action-button/icon-button.js';
+import { TreeData } from '../../data/tree-data.js';
+import { Layout, Right } from '../common/Types.js';
 
 @Component({
   imports: [TextInput, Toolbar],
@@ -12,42 +14,114 @@ import { IconButton } from '../action-button/icon-button.js';
   styleUrl: './item.scss',
   templateUrl: './item.html',
   host: {
-    '[class]': 'getClassForCRUDMode(itemData().getCRUDMode())',
+    '[class]': 'getClassForCRUDMode(crudModeData()) + " " + getClassForLayout(layoutData())',
   },
 })
 export class Item implements OnInit {
   private itemService = inject(ItemService);
-  private addAction = new IconButton(
-    'addNewItem',
-    'Ajouter un item',
-    'plus',
-    this.doAdd.bind(this, 'Nouvel item'),
-  );
-  private deleteAction = new IconButton(
-    'markToDelete',
-    'Marquer à supprimer',
-    'cross',
-    this.markToDelete.bind(this),
-  );
-  private undoToDeleteAction = new IconButton(
-    'undoToDelete',
-    'Annuler la suppression',
-    'plus',
-    this.undoToDelete.bind(this),
-  );
 
-  itemData = input.required<ItemData>();
-  buttons: Button[] = [this.addAction, this.deleteAction, this.undoToDeleteAction];
+  private addAction!: IconButton;
+  private deleteAction!: IconButton;
+  private undoToDeleteAction!: IconButton;
+  buttonsData: Button[] = [];
+  layoutData = input<Layout>(Layout.Title);
+  treeData = input.required<TreeData<ItemData>>();
+  // Crée un signal computed pour extraire la propriété
+  crudModeData = computed(() => this.treeData().getContent().getCRUDMode());
+  deletedData = computed(() => this.treeData().getContent().isDeleted());
+
+  @ViewChild('done') doneComponent!: TextInput;
+  @ViewChild('title') titleComponent!: TextInput;
+  @ViewChild('text') textComponent!: TextInput;
+
+  constructor() {
+    // Utilise effect pour réagir aux changements de treeItemId
+    effect(() => {
+      const isDeleted = this.deletedData();
+      this.addAction?.setVisible(!isDeleted);
+      this.deleteAction?.setVisible(!isDeleted);
+      this.undoToDeleteAction?.setVisible(isDeleted);
+      if (isDeleted) {
+        this.doneComponent?.setDisabled();
+        this.titleComponent?.setDisabled();
+        this.textComponent?.setDisabled();
+      } else {
+        this.doneComponent?.setEnabled();
+        this.titleComponent?.setEnabled();
+        this.textComponent?.setEnabled();
+      }
+      // Mise à jour du tableau pour déclencher les mises à jour des vues
+      this.buttonsData = [...this.buttonsData];
+    });
+  }
 
   ngOnInit(): void {
-    this.undoToDeleteAction.setVisible(false);
+    const rights = this.getRights(this.layoutData());
+    const buttons: IconButton[] = [];
+    if (rights.includes(Right.create)) {
+      this.addAction = new IconButton(
+        'addNewItem',
+        'Ajouter un item',
+        'plus',
+        this.doAdd.bind(this, 'Nouvel item'),
+      );
+      buttons.push(this.addAction);
+    }
+    if (rights.includes(Right.delete)) {
+      this.deleteAction = new IconButton(
+        'markToDelete',
+        'Marquer à supprimer',
+        'cross',
+        this.markToDelete.bind(this),
+      );
+      this.undoToDeleteAction = new IconButton(
+        'undoToDelete',
+        'Annuler la suppression',
+        'plus',
+        this.undoToDelete.bind(this),
+      );
+      buttons.push(this.deleteAction);
+      buttons.push(this.undoToDeleteAction);
+    }
+    this.buttonsData = buttons;
   }
 
   onValueChange(value: string, property: string) {
-    const itemData = this.itemData();
-    const changedItemData = itemData.clone();
-    changedItemData.setValueProperty(property, value);
-    this.itemService.updateItem(changedItemData);
+    this.itemService.updateItem(this.treeData(), property, value);
+  }
+  doAdd(title: string) {
+    const treeData = this.treeData();
+    this.itemService.addChildItem(treeData, title);
+  }
+  markToDelete() {
+    const treeData = this.treeData();
+    this.itemService.markToDelete(treeData);
+  }
+  undoToDelete() {
+    const treeData = this.treeData();
+    this.itemService.undoToDelete(treeData);
+  }
+
+  isPostIt(layout: Layout) {
+    return [Layout.Story, Layout.Rules, Layout.Sample, Layout.Question].includes(layout);
+  }
+  hasDone(layout: Layout) {
+    return this.isPostIt(layout) || [Layout.Todo].includes(layout);
+  }
+  hasText(layout: Layout) {
+    return this.isPostIt(layout);
+  }
+  hasFooterToolbar(layout: Layout) {
+    return layout === Layout.Title || layout === Layout.Todo;
+  }
+  getRights(layout: Layout): Right[] {
+    if (this.isPostIt(layout)) {
+      if (layout === Layout.Story) {
+        return [Right.update];
+      }
+      return [Right.update, Right.delete];
+    }
+    return [Right.create, Right.update, Right.delete];
   }
 
   /**
@@ -69,17 +143,17 @@ export class Item implements OnInit {
         return '';
     }
   }
-
-  doAdd(title: string) {
-    const itemData = this.itemData();
-    this.itemService.addChildItem(itemData.getId(), new ItemData('', title, '', 'TODO', '', ''));
-  }
-  markToDelete() {
-    const itemData = this.itemData();
-    this.itemService.markToDelete(itemData);
-  }
-  undoToDelete() {
-    const itemData = this.itemData();
-    this.itemService.undoToDelete(itemData);
+  getClassForLayout(layout: Layout) {
+    if (this.isPostIt(layout)) {
+      return 'item--post-it';
+    }
+    switch (layout) {
+      case Layout.Todo:
+        return 'item--todo';
+      case Layout.Title:
+        return 'item--title';
+      default:
+        return 'item--block';
+    }
   }
 }

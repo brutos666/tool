@@ -15,7 +15,7 @@ import { NgClass, NgTemplateOutlet } from '@angular/common';
 export class Tree<T extends Data> extends NodeElement implements OnInit {
   toggleIcon!: Button;
   treeData = input.required<TreeData<T>>();
-  contentTemplate = input<TemplateRef<{ content: T }>>();
+  contentTemplate = input<TemplateRef<{ content: TreeData<T> }>>();
   isRoot = input<boolean>(false);
 
   private open: boolean = false;

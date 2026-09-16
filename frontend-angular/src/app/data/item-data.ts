@@ -60,6 +60,9 @@ export class ItemData extends Data {
   isNew() {
     return this.new;
   }
+  markAsNew() {
+    this.new = true;
+  }
   /**
    * @returns {boolean} - Indique si la tâche a des modifications
    */
@@ -69,6 +72,12 @@ export class ItemData extends Data {
 
   isDeleted() {
     return this.deleted;
+  }
+  markToDelete() {
+    this.deleted = true;
+  }
+  undoToDelete() {
+    this.deleted = false;
   }
 
   override getData(): Object {
@@ -82,7 +91,7 @@ export class ItemData extends Data {
     };
   }
 
-  clone(): ItemData {
+  override clone(): Data {
     const itemData = new ItemData(
       this.getId(),
       this.title,
