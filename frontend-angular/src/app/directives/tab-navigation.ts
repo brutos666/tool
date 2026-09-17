@@ -1,13 +1,10 @@
 import {
-  AfterContentInit,
   AfterViewInit,
   contentChildren,
   Directive,
-  effect,
   ElementRef,
   inject,
   input,
-  viewChildren,
 } from '@angular/core';
 import { Focusable } from './focusable.js';
 

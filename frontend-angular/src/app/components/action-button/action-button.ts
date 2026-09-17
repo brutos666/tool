@@ -33,6 +33,10 @@ export class ActionButton extends NodeElement {
   }
 
   onMouseDown(event: MouseEvent) {
+    // Certains boutons ne doivent pas faire perdre le focus courant car ils peuvent agir sur l'élément qui a le focus. Ce n'est pas le cas du burger menu qui agit sur l'ouverture/fermeture du menu
+    if (this.data().type === 'burger') {
+      return;
+    }
     event.preventDefault();
   }
 }

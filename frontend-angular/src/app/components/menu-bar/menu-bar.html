@@ -1,4 +1,4 @@
 <li class="menu__element">
-  <button actionButton #burgerItem [data]="burgerItemData" ></button>
+  <button actionButton #burgerItem [data]="burgerItemData" [aria-expanded]="menuOpened()" aria-controls="menuContent"></button>
 </li>
-<menu-content #menu id="menuContent" class="menu__content" [menuItems]="menuItems()" (toggle)="onMenuShowHide()" [menuOrientation]="orientation()"></menu-content>
+<menu-content #menu id="menuContent" class="menu__content" [menuItems]="menuItems()" (toggle)="onMenuShowHide($event)" [menuOrientation]="orientation()"></menu-content>

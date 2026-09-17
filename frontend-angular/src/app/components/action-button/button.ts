@@ -1,6 +1,6 @@
 export class Button {
   id!: string;
-  type!: string;
+  type!: 'icon' | 'menu' | 'label' | 'primary' | 'burger';
   label!: string;
   icon!: string;
   role!: string;

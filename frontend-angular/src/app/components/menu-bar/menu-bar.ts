@@ -18,6 +18,7 @@ export class MenuBar extends NodeElement implements AfterViewInit, OnDestroy {
   menuItems = input.required<Array<MenuButton>>();
   label = input.required<String>();
   orientation = signal<'horizontal' | 'vertical'>('horizontal');
+  menuOpened = signal<boolean>(false);
   burgerItemData!: Button;
 
   @ViewChild('menu') menu!: Menu;
@@ -25,7 +26,6 @@ export class MenuBar extends NodeElement implements AfterViewInit, OnDestroy {
 
   #resizeObserver!: ResizeObserver;
 
-  #menuOpen: Boolean = false;
   #menuOrientation: 'horizontal' | 'vertical' | 'none' = 'none';
 
   constructor() {
@@ -103,29 +103,38 @@ export class MenuBar extends NodeElement implements AfterViewInit, OnDestroy {
     const wasFocused = this.isFocused();
 
     this.#menuOrientation = 'horizontal';
-    this.#menuOpen = false;
+    this.menuOpened.set(false);
+    this.orientation.set('horizontal');
     this.menu.undoPopup();
     this.burgerItem.changeVisibility(false);
     this.burgerItem.changeTabAccess(false);
     if (wasFocused) {
       this.menu.giveFocus();
     }
-    this.orientation.set('horizontal');
   }
 
   /**
    * Ouverture/fermeture du menu contextuel
    */
-  onMenuShowHide() {
-    this.#menuOpen = !this.#menuOpen;
-    this.burgerItem.changeTabAccess(!this.#menuOpen);
-    this.giveFocus();
+  onMenuShowHide(event: ToggleEvent) {
+    const wasFocused = this.isFocused();
+    const menuOpen = !this.menuOpened();
+    this.menuOpened.set(menuOpen);
+    this.burgerItem.changeTabAccess(!menuOpen);
+    if (wasFocused) {
+      // Le focus est dans le menu
+      this.giveFocus();
+    }
   }
 
   override getElementToFocus(): HTMLElement {
-    if (this.orientation() === 'horizontal' || this.#menuOpen) {
+    if (this.orientation() === 'horizontal' || this.menuOpened()) {
       return this.menu.getElementToFocus();
     }
     return this.burgerItem.getElementToFocus();
+  }
+
+  override isFocused(): boolean {
+    return this.menu.isFocused() || this.burgerItem.isFocused();
   }
 }
