@@ -33,10 +33,8 @@
   border: solid 1px var(--color-primary);
 }
 
-/* Reset indispensable sur button */
 :host(.burger-button),
 :host(.menu-button) {
-  all: unset; /* ou reset manuel */
   padding: var(--global-padding);
   display: flex;
   align-items: center;
@@ -44,10 +42,7 @@
   text-align: left;
   border-radius: var(--border-radius);
 }
-:host(.burger-button):focus-visible ,
-:host(.menu-button):focus-visible {
-  outline: var(--color-border-focus) solid 2px;
-}
+
 :host(.label-button) {
   background-color: var(--color-bg-surface);
   border: solid 1px var(--color-border);

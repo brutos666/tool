@@ -1,44 +1,17 @@
-import {
-  AfterContentInit,
-  computed,
-  contentChildren,
-  Directive,
-  effect,
-  input,
-} from '@angular/core';
+import { Directive, input } from '@angular/core';
 import { Focusable } from './focusable.js';
+import { TabNavigation } from './tab-navigation.js';
 
 @Directive({
   selector: '[arrow-navigation-directive]',
   host: {
     '[attr.aria-orientation]': 'orientation()',
-    '(keydown)': 'onKeyDown($event)',
-    '[attr.index-focus]': 'focusIndex()',
   },
 })
-export class ArrowNavigation implements AfterContentInit {
+export class ArrowNavigation extends TabNavigation {
   orientation = input<'horizontal' | 'vertical'>('horizontal');
-  focusIndex = input<number>(0);
-  focusableListQry = contentChildren(Focusable, { descendants: true });
 
-  #selectedIndex = -1;
-
-  constructor() {
-    effect(() => {
-      this.focusComponent(this.focusIndex());
-    });
-  }
-
-  ngAfterContentInit(): void {
-    const components = this.focusableListQry();
-    if (!components.length) {
-      return;
-    }
-    this.#selectedIndex = 0;
-    components[this.#selectedIndex].changeTabAccess(true);
-  }
-
-  interceptKeys() {
+  override interceptKeys() {
     const keys = ['Home', 'End'];
     const orientation = this.orientation();
     if (orientation === 'vertical') {
@@ -51,64 +24,23 @@ export class ArrowNavigation implements AfterContentInit {
     return keys;
   }
 
-  onKeyDown(event: KeyboardEvent) {
-    const components = this.focusableListQry();
+  override giveNext(components: readonly Focusable[], index: number, key: string): number {
+    let selectedIndex = index;
     const nbItems = components.length;
-    if (nbItems === 0) {
-      return;
-    }
-    if (!this.interceptKeys().includes(event.key)) {
-      return;
-    }
-
-    let selectedIndex = this.#selectedIndex;
-    switch (event.key) {
+    switch (key) {
       case 'Home':
-        selectedIndex = 0;
-        event.preventDefault();
-        break;
+        return 0;
       case 'End':
-        selectedIndex = nbItems - 1;
-        event.preventDefault();
-        break;
+        return nbItems - 1;
       case 'ArrowRight':
       case 'ArrowDown':
         selectedIndex++;
-        event.preventDefault();
         break;
       case 'ArrowUp':
       case 'ArrowLeft':
         selectedIndex--;
-        event.preventDefault();
         break;
     }
-
-    if (selectedIndex === -1 || selectedIndex === nbItems) {
-      return;
-    }
-    this.focusComponent(selectedIndex);
-  }
-
-  focusComponent(index: number) {
-    const components = this.focusableListQry();
-    if (this.#selectedIndex >= 0 && this.#selectedIndex < components.length) {
-      components[this.#selectedIndex].changeTabAccess(false);
-    }
-    if (index >= 0 && index < components.length) {
-      this.#selectedIndex = index;
-      components[this.#selectedIndex].giveFocus();
-    }
-  }
-
-  giveFocus() {
-    const components = this.focusableListQry();
-    if (this.#selectedIndex < components.length) {
-      components[this.#selectedIndex].giveFocus();
-    }
-  }
-
-  isFocused(): boolean {
-    const components = this.focusableListQry();
-    return !!components.find((focusable) => focusable.isFocused());
+    return selectedIndex;
   }
 }

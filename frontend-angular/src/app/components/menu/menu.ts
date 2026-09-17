@@ -3,14 +3,12 @@ import { MenuButton } from '../action-button/menu-button.js';
 import { ActionButton } from '../action-button/action-button.js';
 import { NodeElement } from '../common/NodeElement.js';
 import { ArrowNavigation } from '../../directives/arrow-navigation.js';
-import { Focusable } from '../../directives/focusable';
 
 @Component({
-  imports: [ActionButton, Focusable, ArrowNavigation],
+  imports: [ActionButton, ArrowNavigation],
   selector: 'menu-content',
   styleUrl: './menu.scss',
   templateUrl: './menu.html',
-  providers: [ArrowNavigation],
 })
 export class Menu extends NodeElement implements AfterViewInit {
   menuItems = input.required<Array<MenuButton>>();
@@ -21,11 +19,8 @@ export class Menu extends NodeElement implements AfterViewInit {
   private width!: number;
   private directive = viewChild.required(ArrowNavigation);
 
-  override giveFocus() {
-    this.directive().giveFocus();
-  }
-  override isFocused(): boolean {
-    return this.directive().isFocused();
+  override getElementToFocus(): HTMLElement {
+    return this.directive().getElementToFocus();
   }
 
   ngAfterViewInit(): void {

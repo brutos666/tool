@@ -2,12 +2,15 @@ import { Component, computed, ElementRef, inject, input, model, ViewChild } from
 import { LabelInput } from '../label-input/label-input.js';
 import { NodeElement } from '../common/NodeElement.js';
 import { DomSanitizer } from '@angular/platform-browser';
+import { Focusable } from '../../directives/focusable';
 
 @Component({
   imports: [LabelInput],
   selector: 'text-input',
   styleUrl: './text-input.scss',
   templateUrl: './text-input.html',
+  hostDirectives: [Focusable],
+  providers: [{ provide: NodeElement, useExisting: TextInput }],
 })
 export class TextInput extends NodeElement {
   private sanitizer = inject(DomSanitizer);
@@ -39,5 +42,9 @@ export class TextInput extends NodeElement {
   override setEnabled() {
     super.setEnabled();
     this.input.nativeElement.contentEditable = 'true';
+  }
+
+  override getElementToFocus(): HTMLElement {
+    return this.input.nativeElement;
   }
 }

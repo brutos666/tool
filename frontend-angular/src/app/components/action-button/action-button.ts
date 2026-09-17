@@ -3,6 +3,7 @@ import { Button } from './button';
 import { NodeElement } from '../common/NodeElement.js';
 import { Icon } from '../icon/icon.js';
 import { LabelInput } from '../label-input/label-input.js';
+import { Focusable } from '../../directives/focusable.js';
 
 @Component({
   imports: [Icon, LabelInput],
@@ -10,6 +11,7 @@ import { LabelInput } from '../label-input/label-input.js';
   styleUrl: './action-button.scss',
   templateUrl: './action-button.html',
   standalone: true,
+  hostDirectives: [Focusable],
   providers: [{ provide: NodeElement, useExisting: ActionButton }],
   host: {
     '[id]': 'data().id',

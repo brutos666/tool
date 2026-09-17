@@ -7,15 +7,13 @@ import { Button } from '../action-button/button.js';
 import { IconButton } from '../action-button/icon-button.js';
 import { TreeData } from '../../data/tree-data.js';
 import { Layout, Right } from '../common/Types.js';
+import { TabNavigation } from '../../directives/tab-navigation.js';
 
 @Component({
-  imports: [TextInput, Toolbar],
-  selector: 'article[item]',
+  imports: [TextInput, Toolbar, TabNavigation],
+  selector: 'item',
   styleUrl: './item.scss',
   templateUrl: './item.html',
-  host: {
-    '[class]': 'getClassForCRUDMode(crudModeData()) + " " + getClassForLayout(layoutData())',
-  },
 })
 export class Item implements OnInit {
   private itemService = inject(ItemService);

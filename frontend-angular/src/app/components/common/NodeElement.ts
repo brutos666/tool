@@ -9,15 +9,24 @@ export class NodeElement {
     return this.elementRef.nativeElement;
   }
 
+  public getElementToFocus(): HTMLElement {
+    return this.getElement();
+  }
+
   public giveFocus() {
     this.changeTabAccess(true);
-    this.getElement().focus();
+    this.getElementToFocus().focus();
   }
   public isFocused(): boolean {
-    return document.activeElement === this.getElement();
+    return document.activeElement === this.getElementToFocus();
+  }
+  public isFocusable(): boolean {
+    return (
+      this.isVisible() && !this.isDisabled() && this.getElementToFocus().hasAttribute('tabIndex')
+    );
   }
   public changeTabAccess(access: Boolean) {
-    this.getElement().setAttribute('tabindex', access ? '0' : '-1');
+    this.getElementToFocus().setAttribute('tabindex', access ? '0' : '-1');
   }
   public changeVisibility(visible: Boolean) {
     if (visible) {

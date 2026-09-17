@@ -100,9 +100,10 @@ export class MenuBar extends NodeElement implements AfterViewInit, OnDestroy {
     if (this.#menuOrientation === 'horizontal') {
       return;
     }
-    this.#menuOrientation = 'horizontal';
-
     const wasFocused = this.isFocused();
+
+    this.#menuOrientation = 'horizontal';
+    this.#menuOpen = false;
     this.menu.undoPopup();
     this.burgerItem.changeVisibility(false);
     this.burgerItem.changeTabAccess(false);
@@ -116,25 +117,15 @@ export class MenuBar extends NodeElement implements AfterViewInit, OnDestroy {
    * Ouverture/fermeture du menu contextuel
    */
   onMenuShowHide() {
-    if (this.#menuOpen) {
-      this.#menuOpen = false;
-      this.burgerItem.changeTabAccess(true);
-      this.burgerItem.giveFocus();
-      return;
-    }
-    this.#menuOpen = true;
-    this.burgerItem.changeTabAccess(false);
-    this.menu.giveFocus();
+    this.#menuOpen = !this.#menuOpen;
+    this.burgerItem.changeTabAccess(!this.#menuOpen);
+    this.giveFocus();
   }
 
-  override isFocused() {
-    return this.burgerItem.isFocused() || this.menu.isFocused();
-  }
-  override giveFocus() {
+  override getElementToFocus(): HTMLElement {
     if (this.orientation() === 'horizontal' || this.#menuOpen) {
-      this.menu.giveFocus();
-    } else {
-      this.burgerItem.giveFocus();
+      return this.menu.getElementToFocus();
     }
+    return this.burgerItem.getElementToFocus();
   }
 }
