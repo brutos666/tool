@@ -13,11 +13,9 @@ describe('ActionButton', () => {
       imports: [ActionButton],
     }).compileComponents();
 
-    buttonDataSignal = signal<Button>(new Button('Libellé', '+', 'button', 'label'));
+    buttonDataSignal = signal<Button>(new Button('', 'Libellé', '+', 'button', 'label'));
     fixture = TestBed.createComponent(ActionButton, {
-      bindings: [
-        inputBinding('data', buttonDataSignal)
-      ]
+      bindings: [inputBinding('data', buttonDataSignal)],
     });
     component = fixture.componentInstance;
     await fixture.whenStable();

@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Menu } from './menu';
 import { MenuButton } from '../action-button/menu-button.js';
-import { input, inputBinding, signal } from '@angular/core';
+import { inputBinding, signal } from '@angular/core';
 import { ArrowNavigation } from '../../directives/arrow-navigation.js';
 
 describe('Menu', () => {
@@ -26,7 +26,7 @@ describe('Menu', () => {
     fixture = TestBed.createComponent(Menu, {
       bindings: [
         inputBinding('menuItems', itemsDataSignal),
-        inputBinding('menuOrientation', orientationSignal),
+        inputBinding('navOrientation', orientationSignal),
       ],
     });
     component = fixture.componentInstance;

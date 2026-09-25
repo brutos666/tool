@@ -1,19 +1,24 @@
 import { Directive, input } from '@angular/core';
-import { Focusable } from './focusable.js';
 import { TabNavigation } from './tab-navigation.js';
+import { Navigable } from '../components/common/Navigable.js';
+import { Navigate } from '../components/common/Navigate.js';
 
 @Directive({
   selector: '[arrow-navigation-directive]',
+  providers: [
+    { provide: Navigable, useExisting: ArrowNavigation },
+    { provide: Navigate, useExisting: ArrowNavigation },
+  ],
   host: {
-    '[attr.aria-orientation]': 'orientation()',
+    '[attr.aria-orientation]': 'navOrientation()',
   },
 })
 export class ArrowNavigation extends TabNavigation {
-  orientation = input<'horizontal' | 'vertical'>('horizontal');
+  navOrientation = input<'horizontal' | 'vertical'>('horizontal');
 
   override interceptKeys() {
     const keys = ['Home', 'End'];
-    const orientation = this.orientation();
+    const orientation = this.navOrientation();
     if (orientation === 'vertical') {
       keys.push('ArrowUp');
       keys.push('ArrowDown');
@@ -24,14 +29,9 @@ export class ArrowNavigation extends TabNavigation {
     return keys;
   }
 
-  override giveNext(components: readonly Focusable[], index: number, key: string): number {
+  override giveNext(index: number, key: string): number {
     let selectedIndex = index;
-    const nbItems = components.length;
     switch (key) {
-      case 'Home':
-        return 0;
-      case 'End':
-        return nbItems - 1;
       case 'ArrowRight':
       case 'ArrowDown':
         selectedIndex++;
@@ -39,6 +39,9 @@ export class ArrowNavigation extends TabNavigation {
       case 'ArrowUp':
       case 'ArrowLeft':
         selectedIndex--;
+        break;
+      default:
+        super.giveNext(index, key);
         break;
     }
     return selectedIndex;

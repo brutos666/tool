@@ -20,7 +20,6 @@ import { Focusable } from '../../directives/focusable.js';
     '[attr.aria-labelledby]': "data().id + '-label'",
     '[aria-label]': 'data().label',
     '[attr.role]': 'data().role',
-    tabindex: '-1',
     '(click)': 'data().onClick($event)',
     '(mousedown)': 'onMouseDown($event)',
   },

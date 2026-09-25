@@ -1,4 +1,5 @@
-<menu arrow-navigation-directive class="menu" [orientation]="menuOrientation()" role="menu">
+<menu
+  class="menu" role="menu">
   @for (item of menuItems(); track item.label) {
     <li class="menu__element">
       <button actionButton [data]="item"></button>

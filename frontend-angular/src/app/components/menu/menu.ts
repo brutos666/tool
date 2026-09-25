@@ -1,27 +1,23 @@
-import { AfterViewInit, Component, input, QueryList, viewChild, ViewChildren } from '@angular/core';
+import { AfterViewInit, Component, input, QueryList, ViewChildren } from '@angular/core';
 import { MenuButton } from '../action-button/menu-button.js';
 import { ActionButton } from '../action-button/action-button.js';
-import { NodeElement } from '../common/NodeElement.js';
 import { ArrowNavigation } from '../../directives/arrow-navigation.js';
+import { Composite } from '../common/Composite.js';
 
 @Component({
-  imports: [ActionButton, ArrowNavigation],
+  imports: [ActionButton],
   selector: 'menu-content',
   styleUrl: './menu.scss',
   templateUrl: './menu.html',
+  hostDirectives: [{ directive: ArrowNavigation, inputs: ['navOrientation'] }],
 })
-export class Menu extends NodeElement implements AfterViewInit {
+export class Menu extends Composite implements AfterViewInit {
   menuItems = input.required<Array<MenuButton>>();
-  menuOrientation = input<'horizontal' | 'vertical'>('horizontal');
+  navOrientation = input<'horizontal' | 'vertical'>('horizontal');
 
   @ViewChildren(ActionButton) actionButtons!: QueryList<ActionButton>;
 
   private width!: number;
-  private directive = viewChild.required(ArrowNavigation);
-
-  override getElementToFocus(): HTMLElement {
-    return this.directive().getElementToFocus();
-  }
 
   ngAfterViewInit(): void {
     const menu = this.getElement().querySelector('.menu');

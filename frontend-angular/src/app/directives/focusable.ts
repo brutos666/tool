@@ -1,27 +1,29 @@
-import { Directive, inject } from '@angular/core';
-import { NodeElement } from '../components/common/NodeElement.js';
+import { Directive, ElementRef, inject, signal, viewChild } from '@angular/core';
+import { Navigable } from '../components/common/Navigable.js';
 
 @Directive({
   selector: '[focusable-directive]',
+  providers: [{ provide: Navigable, useExisting: Focusable }],
+  host: {
+    '[attr.tabindex]': 'accessible() ? 0 : -1',
+  },
 })
-export class Focusable {
-  component = inject(NodeElement);
-
-  getElementToFocus(): HTMLElement {
-    return this.component.getElementToFocus();
-  }
+export class Focusable implements Navigable {
+  elementRef = inject(ElementRef);
+  accessible = signal<boolean>(false);
 
   giveFocus() {
-    this.component.giveFocus();
+    this.elementRef.nativeElement.focus();
   }
-  public isFocused() {
-    return this.component.isFocused();
+  isFocused(): boolean {
+    return document.activeElement === this.elementRef.nativeElement;
   }
-  public isFocusable(): boolean {
-    return this.component.isFocusable();
+  isFocusable(): boolean {
+    const classList = this.elementRef.nativeElement.classList;
+    return !classList.contains('hidden') && !classList.contains('disabled');
   }
 
   changeTabAccess(access: boolean) {
-    this.component.changeTabAccess(access);
+    this.accessible.set(access);
   }
 }

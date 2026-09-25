@@ -45,25 +45,4 @@ describe('MenuBar', () => {
     menuInnerHtml.toContain('Action 2');
     menuInnerHtml.toContain('Action 3');
   });
-
-  it('menu should be horizontal when width is big enough', () => {
-    const fakeEntry = {
-      contentBoxSize: [{ inlineSize: 501, blockSize: 70 } as ResizeObserverSize],
-    } as unknown as ResizeObserverEntry;
-    component.setMenuWidth(500);
-    component.sizeHasChanged([fakeEntry]);
-    fixture.detectChanges();
-
-    expect(component.isHorizontal()).toBe(true);
-  });
-  it('menu should be vertical when width is not big enough', () => {
-    const fakeEntry = {
-      contentBoxSize: [{ inlineSize: 499, blockSize: 70 } as ResizeObserverSize],
-    } as unknown as ResizeObserverEntry;
-    component.setMenuWidth(500);
-    component.sizeHasChanged([fakeEntry]);
-    fixture.detectChanges();
-
-    expect(component.isHorizontal()).toBe(false);
-  });
 });

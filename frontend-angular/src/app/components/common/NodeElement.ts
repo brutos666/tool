@@ -1,53 +1,37 @@
-import { ElementRef, inject } from '@angular/core';
+import { Component, ElementRef, inject, signal } from '@angular/core';
 
+@Component({
+  imports: [],
+  selector: 'element',
+  template: '<div></div>',
+  host: {
+    '[class.disabled]': 'disabled()',
+    '[class.hidden]': 'hidden()',
+  },
+})
 export class NodeElement {
   elementRef = inject(ElementRef);
-
-  constructor() {}
+  disabled = signal<boolean>(false);
+  hidden = signal<boolean>(false);
 
   public getElement(): HTMLElement {
     return this.elementRef.nativeElement;
   }
 
-  public getElementToFocus(): HTMLElement {
-    return this.getElement();
-  }
-
-  public giveFocus() {
-    this.changeTabAccess(true);
-    this.getElementToFocus().focus();
-  }
-  public isFocused(): boolean {
-    return document.activeElement === this.getElementToFocus();
-  }
-  public isFocusable(): boolean {
-    return (
-      this.isVisible() && !this.isDisabled() && this.getElementToFocus().hasAttribute('tabIndex')
-    );
-  }
-  public changeTabAccess(access: Boolean) {
-    this.getElementToFocus().setAttribute('tabindex', access ? '0' : '-1');
-  }
   public changeVisibility(visible: Boolean) {
-    if (visible) {
-      this.getElement().classList.remove('hidden');
-    } else {
-      this.getElement().classList.add('hidden');
-    }
+    this.hidden.set(!visible);
   }
   public isVisible() {
-    return !this.getElement().classList.contains('hidden');
+    return !this.hidden();
   }
 
   setDisabled() {
-    this.getElement().classList.add('disabled');
+    this.disabled.set(true);
   }
-
   setEnabled() {
-    this.getElement().classList.remove('disabled');
+    this.disabled.set(false);
   }
-
-  isDisabled() {
-    return this.getElement().classList.contains('disabled');
+  isDisabled(): boolean {
+    return this.disabled();
   }
 }

@@ -1,4 +1,20 @@
 <li class="menu__element">
-  <button actionButton #burgerItem [data]="burgerItemData" [aria-expanded]="menuOpened()" aria-controls="menuContent"></button>
+  <button actionButton 
+    #burgerItem
+    class="menu__button"
+    [data]="burgerItemData"
+    [aria-expanded]="menuOpened()"
+    aria-controls="menuContent"
+    aria-haspopup="true"
+    popovertargetaction="toggle"
+    popovertarget="menuContent"></button>
 </li>
-<menu-content #menu id="menuContent" class="menu__content" [menuItems]="menuItems()" (toggle)="onMenuShowHide($event)" [menuOrientation]="orientation()"></menu-content>
+
+<menu-content
+  #menu 
+  id="menuContent"
+  class="menu__content"
+  [navOrientation]="menuOrientation.orientation()"
+  [menuItems]="menuItems()"
+  (toggle)="onMenuShowHide($event)">
+ </menu-content>

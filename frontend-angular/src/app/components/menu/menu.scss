@@ -1,4 +1,4 @@
-:host:has(> .menu[aria-orientation="vertical"]) {
+:host[aria-orientation="vertical"] {
   position: absolute;
   top: var(--menu-height);
   left: var(--global-padding);
@@ -11,7 +11,7 @@
   display: flex;
   flex-direction: row;
 }
-.menu[aria-orientation="vertical"] {
+:host[aria-orientation="vertical"] > .menu {
   display: flex;
   flex-direction: column;
   background-color: var(--color-bg-surface);

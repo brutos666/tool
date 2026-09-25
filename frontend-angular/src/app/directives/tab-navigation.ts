@@ -1,46 +1,72 @@
-import {
-  AfterViewInit,
-  contentChildren,
-  Directive,
-  ElementRef,
-  inject,
-  input,
-} from '@angular/core';
-import { Focusable } from './focusable.js';
+import { Directive, input, model, signal } from '@angular/core';
+import { Navigable } from '../components/common/Navigable.js';
+import { Navigate } from '../components/common/Navigate.js';
 
 @Directive({
   selector: '[tab-navigation-directive]',
+  providers: [
+    { provide: Navigable, useExisting: TabNavigation },
+    { provide: Navigate, useExisting: TabNavigation },
+  ],
   host: {
-    '(keydown)': 'onKeyDown($event)',
+    '(keydown)': 'enabled() && onKeyDown($event)',
+    '(focus)': 'giveFocus()',
     '[attr.index-focus]': 'focusIndex()',
+    '[class]': 'enabled() ? "inside" : "outside"',
   },
 })
-export class TabNavigation implements AfterViewInit {
-  private elementRef = inject(ElementRef);
+export class TabNavigation implements Navigable, Navigate {
+  focusIndex = signal<number>(0);
+  private focusableList = signal<readonly Navigable[]>([]);
 
-  focusIndex = input<number>(0);
-  focusableListQry = contentChildren(Focusable, { descendants: true });
+  // L'accès permet d'entrée dans le composant pour naviguer
+  needAccess = input<boolean>(false);
+  enabled = model<boolean>(true);
 
-  #selectedIndex = -1;
+  #selectedIndex = 0;
 
   constructor() {}
 
-  ngAfterViewInit(): void {
-    const components = this.focusableListQry();
-    if (!components.length) {
-      return;
+  setFocusableList(focusableList: readonly Navigable[]) {
+    this.focusableList.set(focusableList);
+    if (focusableList.length) {
+      focusableList[this.#selectedIndex].changeTabAccess(this.enabled());
     }
-    components.forEach((component) => component.changeTabAccess(false));
-    this.#selectedIndex = 0;
-    components[this.#selectedIndex].changeTabAccess(true);
+  }
+
+  setFocusIndex(focusIndex: number): void {
+    const wasFocused = this.isFocused();
+    this.focusIndex.set(focusIndex);
+    this.focusComponent(focusIndex);
+    if (wasFocused) {
+      this.giveFocus();
+    }
+  }
+
+  changeTabAccess(access: boolean) {
+    const components = this.focusableList();
+    if (components.length) {
+      components[this.#selectedIndex].changeTabAccess(access);
+    }
+  }
+  isFocusable(): boolean {
+    const components = this.focusableList();
+    if (components.length) {
+      return components[this.#selectedIndex].isFocusable();
+    }
+    return false;
   }
 
   interceptKeys() {
-    return ['Home', 'End', 'Tab'];
+    const keys = ['Home', 'End', 'Tab'];
+    if (this.needAccess()) {
+      keys.push(this.enabled() ? 'Escape' : 'Enter');
+    }
+    return keys;
   }
 
   onKeyDown(event: KeyboardEvent) {
-    const components = this.focusableListQry();
+    const components = this.focusableList();
     const nbItems = components.length;
     if (nbItems === 0) {
       return;
@@ -49,24 +75,31 @@ export class TabNavigation implements AfterViewInit {
       return;
     }
     event.preventDefault();
-    if (event.key === 'Tab') {
+    if (event.key === 'Enter') {
+      this.enabled.set(true);
+    } else if (event.key === 'Escape') {
+      this.enabled.set(false);
+    } else if (event.key === 'Home') {
+      // Astuce pour trouver le 1er accessible à partir du début
+      this.moveToDirection(components, -1, 'Next');
+    } else if (event.key === 'End') {
+      // Astuce pour trouver le dernier accessible à partir de la fin
+      this.moveToDirection(components, nbItems, 'Previous');
+    } else if (event.key === 'Tab') {
       this.moveToDirection(components, this.#selectedIndex, event.shiftKey ? 'shift+Tab' : 'Tab');
     } else {
       this.moveToDirection(components, this.#selectedIndex, event.key);
     }
   }
 
-  giveNext(components: readonly Focusable[], index: number, key: string): number {
+  giveNext(index: number, key: string): number {
     let selectedIndex = index;
-    const nbItems = components.length;
     switch (key) {
-      case 'Home':
-        return 0;
-      case 'End':
-        return nbItems - 1;
+      case 'Next':
       case 'Tab':
         selectedIndex++;
         break;
+      case 'Previous':
       case 'shift+Tab':
         selectedIndex--;
         break;
@@ -74,9 +107,9 @@ export class TabNavigation implements AfterViewInit {
     return selectedIndex;
   }
 
-  moveToDirection(components: readonly Focusable[], index: number, key: string) {
+  moveToDirection(components: readonly Navigable[], index: number, key: string) {
     const nbItems = components.length;
-    const selectedIndex = this.giveNext(components, index, key);
+    const selectedIndex = this.giveNext(index, key);
     if (selectedIndex === -1) {
       if (key === 'shift+Tab') {
         // retour à la fin
@@ -92,40 +125,32 @@ export class TabNavigation implements AfterViewInit {
       return;
     }
     if (components[selectedIndex].isFocusable()) {
-      this.focusComponent(selectedIndex);
+      this.setFocusIndex(selectedIndex);
+      this.giveFocus();
     } else {
       this.moveToDirection(components, selectedIndex, key);
     }
   }
 
   focusComponent(index: number) {
-    const components = this.focusableListQry();
+    const components = this.focusableList();
+    if (!(index >= 0 && index < components.length)) {
+      return;
+    }
     if (this.#selectedIndex >= 0 && this.#selectedIndex < components.length) {
       components[this.#selectedIndex].changeTabAccess(false);
     }
-    if (index >= 0 && index < components.length) {
-      this.#selectedIndex = index;
-      components[this.#selectedIndex].giveFocus();
-    }
-  }
-
-  getElementToFocus(): HTMLElement {
-    const components = this.focusableListQry();
-    if (this.#selectedIndex < components.length) {
-      return components[this.#selectedIndex].getElementToFocus();
-    }
-    return this.elementRef.nativeElement;
+    this.#selectedIndex = index;
+    components[this.#selectedIndex].changeTabAccess(true);
   }
 
   giveFocus() {
-    const components = this.focusableListQry();
-    if (this.#selectedIndex < components.length) {
-      components[this.#selectedIndex].giveFocus();
-    }
+    const components = this.focusableList();
+    components[this.#selectedIndex].giveFocus();
   }
 
   public isFocused(): boolean {
-    const components = this.focusableListQry();
+    const components = this.focusableList();
     return !!components.find((focusable) => focusable.isFocused());
   }
 }

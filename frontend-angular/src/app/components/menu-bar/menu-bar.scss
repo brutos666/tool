@@ -14,12 +14,3 @@
   cursor: pointer;
   padding: var(--global-padding);
 }
-.menu__content {
-  visibility: visible;
-}
-.menu__content[popover] {
-  visibility: hidden;
-}
-.menu__content[popover]:popover-open {
-  visibility: visible;
-}
