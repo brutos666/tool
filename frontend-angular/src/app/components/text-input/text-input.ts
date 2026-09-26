@@ -5,7 +5,7 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { Focusable } from '../../directives/focusable';
 
 @Component({
-  imports: [LabelInput],
+  imports: [],
   selector: 'text-input',
   styleUrl: './text-input.scss',
   templateUrl: './text-input.html',
@@ -42,9 +42,5 @@ export class TextInput extends NodeElement {
   override setEnabled() {
     super.setEnabled();
     this.input.nativeElement.contentEditable = 'true';
-  }
-
-  override getElementToFocus(): HTMLElement {
-    return this.input.nativeElement;
   }
 }
