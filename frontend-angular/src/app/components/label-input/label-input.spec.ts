@@ -6,7 +6,7 @@ describe('LabelInput', () => {
   let component: LabelInput;
   let fixture: ComponentFixture<LabelInput>;
   let textSignal: Signal<String>;
-  let forSignal: Signal<String>;
+  let idSignal: Signal<String>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -14,10 +14,10 @@ describe('LabelInput', () => {
     }).compileComponents();
 
     textSignal = signal<String>('Libellé');
-    forSignal = signal<String>('inputId');
+    idSignal = signal<String>('inputId');
 
     fixture = TestBed.createComponent(LabelInput, {
-      bindings: [inputBinding('text', textSignal), inputBinding('for', forSignal)],
+      bindings: [inputBinding('text', textSignal), inputBinding('id', idSignal)],
     });
     component = fixture.componentInstance;
     await fixture.whenStable();
