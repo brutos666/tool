@@ -1,6 +1,7 @@
 import { Directive, input, model, signal } from '@angular/core';
 import { Navigable } from '../components/common/Navigable.js';
 import { Navigate } from '../components/common/Navigate.js';
+import { ManualNavigation } from './manual-navigation.js';
 
 @Directive({
   selector: '[tab-navigation-directive]',
@@ -10,52 +11,11 @@ import { Navigate } from '../components/common/Navigate.js';
   ],
   host: {
     '(keydown)': 'enabled() && onKeyDown($event)',
-    '(focus)': 'giveFocus()',
-    '[attr.index-focus]': 'focusIndex()',
-    '[class]': 'enabled() ? "inside" : "outside"',
   },
 })
-export class TabNavigation implements Navigable, Navigate {
-  focusIndex = signal<number>(0);
-  private focusableList = signal<readonly Navigable[]>([]);
-
+export class TabNavigation extends ManualNavigation {
   // L'accès permet d'entrée dans le composant pour naviguer
   needAccess = input<boolean>(false);
-  enabled = model<boolean>(true);
-
-  #selectedIndex = 0;
-
-  constructor() {}
-
-  setFocusableList(focusableList: readonly Navigable[]) {
-    this.focusableList.set(focusableList);
-    if (focusableList.length) {
-      focusableList[this.#selectedIndex].changeTabAccess(this.enabled());
-    }
-  }
-
-  setFocusIndex(focusIndex: number): void {
-    const wasFocused = this.isFocused();
-    this.focusIndex.set(focusIndex);
-    this.focusComponent(focusIndex);
-    if (wasFocused) {
-      this.giveFocus();
-    }
-  }
-
-  changeTabAccess(access: boolean) {
-    const components = this.focusableList();
-    if (components.length) {
-      components[this.#selectedIndex].changeTabAccess(access);
-    }
-  }
-  isFocusable(): boolean {
-    const components = this.focusableList();
-    if (components.length) {
-      return components[this.#selectedIndex].isFocusable();
-    }
-    return false;
-  }
 
   interceptKeys() {
     const keys = ['Home', 'End', 'Tab'];
@@ -86,9 +46,9 @@ export class TabNavigation implements Navigable, Navigate {
       // Astuce pour trouver le dernier accessible à partir de la fin
       this.moveToDirection(components, nbItems, 'Previous');
     } else if (event.key === 'Tab') {
-      this.moveToDirection(components, this.#selectedIndex, event.shiftKey ? 'shift+Tab' : 'Tab');
+      this.moveToDirection(components, this.focusIndex(), event.shiftKey ? 'shift+Tab' : 'Tab');
     } else {
-      this.moveToDirection(components, this.#selectedIndex, event.key);
+      this.moveToDirection(components, this.focusIndex(), event.key);
     }
   }
 
@@ -130,27 +90,5 @@ export class TabNavigation implements Navigable, Navigate {
     } else {
       this.moveToDirection(components, selectedIndex, key);
     }
-  }
-
-  focusComponent(index: number) {
-    const components = this.focusableList();
-    if (!(index >= 0 && index < components.length)) {
-      return;
-    }
-    if (this.#selectedIndex >= 0 && this.#selectedIndex < components.length) {
-      components[this.#selectedIndex].changeTabAccess(false);
-    }
-    this.#selectedIndex = index;
-    components[this.#selectedIndex].changeTabAccess(true);
-  }
-
-  giveFocus() {
-    const components = this.focusableList();
-    components[this.#selectedIndex].giveFocus();
-  }
-
-  public isFocused(): boolean {
-    const components = this.focusableList();
-    return !!components.find((focusable) => focusable.isFocused());
   }
 }

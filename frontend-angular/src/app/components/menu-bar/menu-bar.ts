@@ -13,14 +13,14 @@ import { MenuButton } from '../action-button/menu-button';
 import { Menu } from '../menu/menu.js';
 import { MenuOrientation } from '../../directives/menu-orientation.js';
 import { Composite } from '../common/Composite.js';
-import { TabNavigation } from '../../directives/tab-navigation.js';
+import { ManualNavigation } from '../../directives/manual-navigation.js';
 
 @Component({
   imports: [ActionButton, Menu],
   selector: 'menu-bar',
   styleUrl: './menu-bar.scss',
   templateUrl: './menu-bar.html',
-  hostDirectives: [MenuOrientation, TabNavigation],
+  hostDirectives: [MenuOrientation, ManualNavigation],
   host: {
     '[aria-label]': 'label()',
   },
