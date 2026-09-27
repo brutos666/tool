@@ -1,0 +1,18 @@
+:host(.drag-button) {
+  text-align: center;
+  border-radius: var(--border-radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+:host(.icon-button),
+:host(.drag-button){
+  border-style: none;
+}
+:host(.icon-button):hover {
+  background-color: var(--color-bg-hover);
+  border-color: var(--color-border-hover);
+}
+
+

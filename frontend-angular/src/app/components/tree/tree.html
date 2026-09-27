@@ -4,7 +4,7 @@ role="treeitem"
 position="inside" 
 [attr.item-id]= "treeData().getItemId()" 
 [attr.tree-item-id]= "treeData().getTreeItemId()">
-  <button actionButton class="tree__toggle" [data]="toggleIcon" (click)="onOpenClose()"></button>
+  <button basicButton class="tree__toggle" [data]="toggleIcon" (click)="onOpenClose()"></button>
   <div class="tree__content">
     <ng-container *ngTemplateOutlet="contentTemplate();context: {content: treeData()}"></ng-container>
   </div>

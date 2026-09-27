@@ -1,9 +1,9 @@
-import { Component, input } from '@angular/core';
-import { Button } from './button';
+import { Component } from '@angular/core';
 import { NodeElement } from '../common/NodeElement.js';
 import { Icon } from '../icon/icon.js';
 import { LabelInput } from '../label-input/label-input.js';
 import { Focusable } from '../../directives/focusable.js';
+import { BasicButton } from '../basic-button/basic-button.js';
 
 @Component({
   imports: [Icon, LabelInput],
@@ -14,24 +14,15 @@ import { Focusable } from '../../directives/focusable.js';
   hostDirectives: [Focusable],
   providers: [{ provide: NodeElement, useExisting: ActionButton }],
   host: {
-    '[id]': 'data().id',
-    class: 'clickable action__button',
-    '[class]': "data().type + '-button' + (data().isVisible() ? '': ' hidden')",
-    '[attr.aria-labelledby]': "data().id + '-label'",
-    '[aria-label]': 'data().label',
-    '[attr.role]': 'data().role',
-    '(click)': 'data().onClick($event)',
-    '(mousedown)': 'onMouseDown($event)',
+    class: 'action__button',
   },
 })
-export class ActionButton extends NodeElement {
-  data = input.required<Button>();
-
+export class ActionButton extends BasicButton {
   constructor() {
     super();
   }
 
-  onMouseDown(event: MouseEvent) {
+  override onMouseDown(event: MouseEvent) {
     // Certains boutons ne doivent pas faire perdre le focus courant car ils peuvent agir sur l'élément qui a le focus. Ce n'est pas le cas du burger menu qui agit sur l'ouverture/fermeture du menu
     if (this.data().type === 'burger') {
       return;
