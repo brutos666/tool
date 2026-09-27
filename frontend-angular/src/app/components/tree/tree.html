@@ -5,15 +5,11 @@ position="inside"
 [attr.item-id]= "treeData().getItemId()" 
 [attr.tree-item-id]= "treeData().getTreeItemId()">
   <button basicButton class="tree__toggle" [data]="toggleIcon" (click)="onOpenClose()"></button>
-  <div class="tree__content">
-    <ng-container
-      [ngTemplateOutlet]="contentTemplate()"
-      [ngTemplateOutletContext]="{content: treeData()}"
-      [ngTemplateOutletInjector]="treeInjector"></ng-container>
-  </div>
+  <tree-content class="tree__content" [contentTemplate]="contentTemplate()" [treeData]="treeData()">
+  </tree-content>
   <ul #treeList class="tree__list hidden" aria-orientation="vertical" role="group">
     @for (child of treeData().getChildren(); track child.getTreeItemId()) {
-      <tree [treeData]="child" [contentTemplate]="contentTemplate()" />
+      <tree [treeData]="child" [contentTemplate]="contentTemplate()"></tree>
     }
   </ul>
 </div>

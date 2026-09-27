@@ -10,5 +10,5 @@
   <ng-template #itemTemplateMain let-tree="content">
     <item [treeData]="tree" [layoutData]="mainLayout"></item>
   </ng-template>
-  <tree-list [dataList]="rootItem().getChildren()" [contentTemplate]="itemTemplateMain"></tree-list>
+  <tree-list [dataList]="rootItem().getChildren()" [contentTemplate]="itemTemplateMain" [navOrientation]="'vertical'"></tree-list>
 </main>

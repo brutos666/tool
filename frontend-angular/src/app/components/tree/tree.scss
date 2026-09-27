@@ -56,9 +56,6 @@
 .tree__toggle {
   border-radius: 0;
 }
-.tree__content {
-  outline: none;
-}
 
 .tree.tree--node.drag-over>.tree__toggle,
 .tree.tree--node:focus>.tree__toggle {

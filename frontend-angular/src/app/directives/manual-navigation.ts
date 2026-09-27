@@ -13,4 +13,9 @@ import { BasicNavigation } from './basic-navigation.js';
 })
 export class ManualNavigation extends BasicNavigation {
   override name = 'ManuelNavigation';
+
+  constructor() {
+    super();
+    this.navEnabled.set(false);
+  }
 }

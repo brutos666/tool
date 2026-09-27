@@ -1,21 +1,31 @@
-import { Component, inject, Injector, input, OnInit, TemplateRef } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  inject,
+  Injector,
+  input,
+  OnInit,
+  TemplateRef,
+} from '@angular/core';
 import { Button } from '../action-button/button.js';
 import { TreeData } from '../../data/tree-data.js';
 import { Data } from '../../data/data.js';
-import { NgClass, NgTemplateOutlet } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { NodeElement } from '../common/NodeElement.js';
-import { ArrowNavigation } from '../../directives/arrow-navigation';
 import { BasicButton } from '../basic-button/basic-button.js';
+import { TreeContent } from '../tree-content/tree-content';
+import { TreeNavigation } from '../../directives/tree-navigation.js';
 
 @Component({
-  imports: [BasicButton, NgTemplateOutlet, NgClass],
+  imports: [BasicButton, NgClass, TreeContent],
   selector: 'tree',
   styleUrl: './tree.scss',
   templateUrl: './tree.html',
-  hostDirectives: [ArrowNavigation],
+  hostDirectives: [TreeNavigation],
 })
-export class Tree<T extends Data> extends NodeElement implements OnInit {
+export class Tree<T extends Data> extends NodeElement implements OnInit, AfterViewInit {
   treeInjector = inject(Injector);
+  treeNavigation = inject(TreeNavigation);
 
   toggleIcon!: Button;
   treeData = input.required<TreeData<T>>();
@@ -26,6 +36,9 @@ export class Tree<T extends Data> extends NodeElement implements OnInit {
 
   constructor() {
     super();
+  }
+  ngAfterViewInit(): void {
+    this.setOpen(false);
   }
 
   ngOnInit(): void {
@@ -39,11 +52,11 @@ export class Tree<T extends Data> extends NodeElement implements OnInit {
   }
 
   onOpenClose() {
-    this.open = !this.open;
-    this.setOpen(this.open);
+    this.setOpen(!this.open);
   }
 
   setOpen(open: boolean) {
+    this.treeNavigation.setOpen(open);
     this.open = open;
     const element = this.getElement();
     const tree = element.querySelector('.tree');
