@@ -1,6 +1,6 @@
-import { Component, effect, inject, viewChildren } from '@angular/core';
-import { Navigable } from './Navigable.js';
+import { Component, inject } from '@angular/core';
 import { NodeElement } from './NodeElement.js';
+import { ManualNavigation } from '../../directives/manual-navigation.js';
 import { Navigate } from './Navigate.js';
 
 @Component({
@@ -9,18 +9,13 @@ import { Navigate } from './Navigate.js';
   template: '<div></div>',
 })
 export class Composite extends NodeElement {
-  focusableListQry = viewChildren(Navigable);
-
-  private navigation = inject(Navigate, { self: true, optional: true });
+  navigation = inject(Navigate, { self: true, optional: true });
 
   constructor() {
     super();
     if (!this.navigation) {
       return;
     }
-    effect(() => {
-      this.navigation?.setFocusableList(this.focusableListQry());
-    });
   }
 
   setFocusIndex(focusIndex: number) {

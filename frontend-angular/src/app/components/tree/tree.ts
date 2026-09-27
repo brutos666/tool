@@ -1,18 +1,22 @@
-import { Component, input, OnInit, TemplateRef } from '@angular/core';
+import { Component, inject, Injector, input, OnInit, TemplateRef } from '@angular/core';
 import { Button } from '../action-button/button.js';
-import { NodeElement } from '../common/NodeElement.js';
-import { ActionButton } from '../action-button/action-button.js';
 import { TreeData } from '../../data/tree-data.js';
 import { Data } from '../../data/data.js';
 import { NgClass, NgTemplateOutlet } from '@angular/common';
+import { NodeElement } from '../common/NodeElement.js';
+import { ArrowNavigation } from '../../directives/arrow-navigation';
+import { BasicButton } from '../basic-button/basic-button.js';
 
 @Component({
-  imports: [ActionButton, NgTemplateOutlet, NgClass],
+  imports: [BasicButton, NgTemplateOutlet, NgClass],
   selector: 'tree',
   styleUrl: './tree.scss',
   templateUrl: './tree.html',
+  hostDirectives: [ArrowNavigation],
 })
 export class Tree<T extends Data> extends NodeElement implements OnInit {
+  treeInjector = inject(Injector);
+
   toggleIcon!: Button;
   treeData = input.required<TreeData<T>>();
   contentTemplate = input<TemplateRef<{ content: TreeData<T> }>>();
@@ -23,6 +27,7 @@ export class Tree<T extends Data> extends NodeElement implements OnInit {
   constructor() {
     super();
   }
+
   ngOnInit(): void {
     this.toggleIcon = new Button(
       `toggle${this.treeData().getTreeItemId()}`,

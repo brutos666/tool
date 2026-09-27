@@ -1,7 +1,7 @@
 import { Directive, input } from '@angular/core';
 import { TabNavigation } from './tab-navigation.js';
-import { Navigable } from '../components/common/Navigable.js';
 import { Navigate } from '../components/common/Navigate.js';
+import { Navigable } from '../components/common/Navigable.js';
 
 @Directive({
   selector: '[arrow-navigation-directive]',
@@ -14,6 +14,8 @@ import { Navigate } from '../components/common/Navigate.js';
   },
 })
 export class ArrowNavigation extends TabNavigation {
+  override name = 'ArrowNavigation';
+
   navOrientation = input<'horizontal' | 'vertical'>('horizontal');
 
   override interceptKeys() {
@@ -29,7 +31,7 @@ export class ArrowNavigation extends TabNavigation {
     return keys;
   }
 
-  override giveNext(index: number, key: string): number {
+  override giveNext(index: number, key: string, nbItems: number): number {
     let selectedIndex = index;
     switch (key) {
       case 'ArrowRight':
@@ -41,7 +43,7 @@ export class ArrowNavigation extends TabNavigation {
         selectedIndex--;
         break;
       default:
-        super.giveNext(index, key);
+        super.giveNext(index, key, nbItems);
         break;
     }
     return selectedIndex;
