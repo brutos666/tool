@@ -2,6 +2,7 @@ import { Component, input } from '@angular/core';
 import { Button } from '../action-button/button';
 import { NodeElement } from '../common/NodeElement.js';
 import { Icon } from '../icon/icon.js';
+import { NoFocusable } from '../../directives/no-focusable.js';
 
 @Component({
   imports: [Icon],
@@ -9,6 +10,7 @@ import { Icon } from '../icon/icon.js';
   styleUrl: './basic-button.scss',
   templateUrl: './basic-button.html',
   standalone: true,
+  hostDirectives: [NoFocusable],
   host: {
     '[id]': 'data().id',
     class: 'clickable',
@@ -16,7 +18,6 @@ import { Icon } from '../icon/icon.js';
     '[attr.aria-labelledby]': "data().id + '-label'",
     '[aria-label]': 'data().label',
     '[attr.role]': 'data().role',
-    '[attr.tabindex]': '-1',
     '(click)': 'data().onClick($event)',
     '(mousedown)': 'onMouseDown($event)',
   },
