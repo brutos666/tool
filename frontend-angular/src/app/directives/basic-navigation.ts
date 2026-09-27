@@ -1,4 +1,4 @@
-import { afterRenderEffect, Directive, ElementRef, inject, model, signal } from '@angular/core';
+import { Directive, ElementRef, inject, model, signal } from '@angular/core';
 import { Navigable } from '../components/common/Navigable.js';
 import { Navigate } from '../components/common/Navigate.js';
 
@@ -24,11 +24,12 @@ export class BasicNavigation implements Navigate, Navigable {
   navEnabled = model<boolean>(true);
 
   #selectedIndex = 0;
+  // Remonte les parents jusqu'au parent répondant au provider ManualNavigation
+  private parentNav = inject(Navigate, { skipSelf: true, optional: true });
 
   constructor() {
-    afterRenderEffect(() => {
-      this.changeTabAccess(this.navEnabled());
-    });
+    // S'enregistrer auprès de la navigation parente
+    this.parentNav?.registerChild(this);
   }
 
   setEnable(enable: boolean): void {

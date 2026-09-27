@@ -4,6 +4,8 @@ import { AfterViewInit, Directive, ElementRef, inject, OnDestroy, signal } from 
   selector: '[menu-orientation]',
 })
 export class MenuOrientation implements AfterViewInit, OnDestroy {
+  name = 'MenuOrientation';
+
   elementRef = inject(ElementRef);
   orientation = signal<'horizontal' | 'vertical'>('horizontal');
 

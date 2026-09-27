@@ -1,7 +1,6 @@
 import { Component, ElementRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MenuButton } from '../action-button/menu-button.js';
 import { MenuBar } from '../menu-bar/menu-bar.js';
-import { NodeElement } from '../common/NodeElement.js';
 import { AsideSpace } from '../aside-space/aside-space.js';
 import { TreeList } from '../tree-list/tree-list';
 import { Item } from '../item/item.js';
@@ -10,6 +9,8 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { TreeData } from '../../data/tree-data.js';
 import { ItemData } from '../../data/item-data.js';
 import { Layout } from '../common/Types.js';
+import { WorkspaceNavigation } from '../../directives/workspace-navigation.js';
+import { Composite } from '../common/Composite.js';
 
 @Component({
   imports: [MenuBar, AsideSpace, TreeList, Item],
@@ -17,11 +18,14 @@ import { Layout } from '../common/Types.js';
   selector: 'working-space',
   styleUrl: './working-space.scss',
   templateUrl: './working-space.html',
+  hostDirectives: [WorkspaceNavigation],
   host: {
     class: 'working-space',
   },
 })
-export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
+export class WorkingSpace extends Composite implements OnInit, OnDestroy {
+  name = 'WorkingSpace';
+
   private itemService = inject(ItemService);
 
   rootItem = toSignal(this.itemService.rootItem$, {
