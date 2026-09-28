@@ -10,7 +10,7 @@ import { TreeData } from '../../data/tree-data.js';
 import { ItemData } from '../../data/item-data.js';
 import { Layout } from '../common/Types.js';
 import { WorkspaceNavigation } from '../../directives/workspace-navigation.js';
-import { Composite } from '../common/Composite.js';
+import { NodeElement } from '../common/NodeElement.js';
 
 @Component({
   imports: [MenuBar, AsideSpace, TreeList, Item],
@@ -23,7 +23,7 @@ import { Composite } from '../common/Composite.js';
     class: 'working-space',
   },
 })
-export class WorkingSpace extends Composite implements OnInit, OnDestroy {
+export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
   name = 'WorkingSpace';
 
   private itemService = inject(ItemService);

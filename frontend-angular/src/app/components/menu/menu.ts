@@ -3,6 +3,7 @@ import { MenuButton } from '../action-button/menu-button.js';
 import { ActionButton } from '../action-button/action-button.js';
 import { ArrowNavigation } from '../../directives/arrow-navigation.js';
 import { Composite } from '../common/Composite.js';
+import { NodeElement } from '../common/NodeElement.js';
 
 @Component({
   imports: [ActionButton],
@@ -11,7 +12,7 @@ import { Composite } from '../common/Composite.js';
   templateUrl: './menu.html',
   hostDirectives: [{ directive: ArrowNavigation, inputs: ['navOrientation'] }],
 })
-export class Menu extends Composite implements AfterViewInit {
+export class Menu extends NodeElement implements AfterViewInit {
   menuItems = input.required<Array<MenuButton>>();
   navOrientation = input<'horizontal' | 'vertical'>('horizontal');
 

@@ -1,6 +1,5 @@
 import { Component, inject } from '@angular/core';
 import { NodeElement } from './NodeElement.js';
-import { ManualNavigation } from '../../directives/manual-navigation.js';
 import { Navigate } from './Navigate.js';
 
 @Component({
