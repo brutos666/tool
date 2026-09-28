@@ -1,4 +1,4 @@
-import { Directive, ElementRef, inject, model, signal } from '@angular/core';
+import { Directive, effect, ElementRef, inject, model, OnDestroy, signal } from '@angular/core';
 import { Navigable } from '../components/common/Navigable.js';
 import { Navigate } from '../components/common/Navigate.js';
 
@@ -11,10 +11,9 @@ import { Navigate } from '../components/common/Navigate.js';
   ],
   host: {
     '[attr.index-focus]': 'focusIndex()',
-    '(keydown)': 'navEnabled() && onKeyDown($event)',
   },
 })
-export class BasicNavigation implements Navigate, Navigable {
+export class BasicNavigation implements Navigate, Navigable, OnDestroy {
   name = 'BasicNavigation';
 
   elementRef = inject(ElementRef);
@@ -30,6 +29,16 @@ export class BasicNavigation implements Navigate, Navigable {
   constructor() {
     // S'enregistrer auprès de la navigation parente
     this.parentNav?.registerChild(this);
+    effect(() => {
+      if (this.navEnabled()) {
+        this.elementRef.nativeElement.addEventListener('keydown', this.onKeyDown.bind(this));
+      } else {
+        this.elementRef.nativeElement.removeEventListener('keydown', this.onKeyDown.bind(this));
+      }
+    });
+  }
+  ngOnDestroy(): void {
+    this.elementRef.nativeElement.removeEventListener('keydown', this.onKeyDown.bind(this));
   }
 
   setEnable(enable: boolean): void {
@@ -68,6 +77,9 @@ export class BasicNavigation implements Navigate, Navigable {
   }
 
   onKeyDown(event: KeyboardEvent) {
+    if (!this.navEnabled()) {
+      return;
+    }
     const components = this.navigables;
     const nbItems = components.length;
     if (nbItems === 0) {
@@ -77,6 +89,7 @@ export class BasicNavigation implements Navigate, Navigable {
       return;
     }
     event.preventDefault();
+    event.stopImmediatePropagation();
     if (event.key === 'Home') {
       // Astuce pour trouver le 1er accessible à partir du début
       this.moveToDirection(components, -1, 'Next');
