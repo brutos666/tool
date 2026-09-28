@@ -1,6 +1,7 @@
 import {
   AfterViewInit,
   Component,
+  effect,
   inject,
   Injector,
   input,
@@ -32,13 +33,12 @@ export class Tree<T extends Data> extends NodeElement implements OnInit, AfterVi
   contentTemplate = input<TemplateRef<{ content: TreeData<T> }>>();
   isRoot = input<boolean>(false);
 
-  private open: boolean = false;
-
   constructor() {
     super();
+    effect(() => this.doOpenClose(this.treeNavigation.openState()));
   }
   ngAfterViewInit(): void {
-    this.setOpen(false);
+    this.treeNavigation.changeOpenState(false);
   }
 
   ngOnInit(): void {
@@ -52,12 +52,10 @@ export class Tree<T extends Data> extends NodeElement implements OnInit, AfterVi
   }
 
   onOpenClose() {
-    this.setOpen(!this.open);
+    this.treeNavigation.changeOpenState(!this.treeNavigation.openState());
   }
 
-  setOpen(open: boolean) {
-    this.treeNavigation.setOpen(open);
-    this.open = open;
+  doOpenClose(open: boolean) {
     const element = this.getElement();
     const tree = element.querySelector('.tree');
     const treeList = element.querySelector('.tree__list');
