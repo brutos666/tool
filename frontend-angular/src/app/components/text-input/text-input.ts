@@ -1,5 +1,4 @@
 import { Component, computed, ElementRef, inject, input, model, ViewChild } from '@angular/core';
-import { LabelInput } from '../label-input/label-input.js';
 import { NodeElement } from '../common/NodeElement.js';
 import { DomSanitizer } from '@angular/platform-browser';
 import { Focusable } from '../../directives/focusable';
@@ -13,6 +12,8 @@ import { Focusable } from '../../directives/focusable';
   providers: [{ provide: NodeElement, useExisting: TextInput }],
 })
 export class TextInput extends NodeElement {
+  name = 'TextInput';
+
   private sanitizer = inject(DomSanitizer);
 
   @ViewChild('input') input!: ElementRef;
