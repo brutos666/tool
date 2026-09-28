@@ -43,8 +43,7 @@ export class ArrowNavigation extends KeyboardNavigation {
         selectedIndex--;
         break;
       default:
-        super.giveNext(index, key, nbItems);
-        break;
+        return super.giveNext(index, key, nbItems);
     }
     return selectedIndex;
   }
