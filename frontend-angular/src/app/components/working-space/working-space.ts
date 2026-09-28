@@ -3,7 +3,6 @@ import { MenuButton } from '../action-button/menu-button.js';
 import { MenuBar } from '../menu-bar/menu-bar.js';
 import { AsideSpace } from '../aside-space/aside-space.js';
 import { TreeList } from '../tree-list/tree-list';
-import { Item } from '../item/item.js';
 import { ItemService } from '../../services/item-service.js';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TreeData } from '../../data/tree-data.js';
@@ -13,7 +12,7 @@ import { WorkspaceNavigation } from '../../directives/workspace-navigation.js';
 import { NodeElement } from '../common/NodeElement.js';
 
 @Component({
-  imports: [MenuBar, AsideSpace, TreeList, Item],
+  imports: [MenuBar, AsideSpace, TreeList],
   standalone: true,
   selector: 'working-space',
   styleUrl: './working-space.scss',
@@ -34,6 +33,7 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
 
   menuItems: Array<MenuButton> = [];
   label: String = 'Menu des commandes';
+  navLayout: Layout = Layout.Title;
   mainLayout: Layout = Layout.Todo;
 
   @ViewChild('splitter') splitterRef!: ElementRef;

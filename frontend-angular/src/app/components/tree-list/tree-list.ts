@@ -1,9 +1,10 @@
-import { Component, input, TemplateRef } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { TreeData } from '../../data/tree-data.js';
-import { Data } from '../../data/data.js';
 import { Tree } from '../tree/tree.js';
 import { ArrowNavigation } from '../../directives/arrow-navigation.js';
 import { NodeElement } from '../common/NodeElement.js';
+import { ItemData } from '../../data/item-data.js';
+import { Layout } from '../common/Types.js';
 
 @Component({
   imports: [Tree],
@@ -16,9 +17,9 @@ import { NodeElement } from '../common/NodeElement.js';
     role: 'group',
   },
 })
-export class TreeList<T extends Data> extends NodeElement {
+export class TreeList extends NodeElement {
   name = 'TreeList';
 
-  dataList = input.required<Array<TreeData<T>>>();
-  contentTemplate = input<TemplateRef<{ content: TreeData<T> }>>();
+  dataList = input.required<Array<TreeData<ItemData>>>();
+  layoutData = input.required<Layout>();
 }

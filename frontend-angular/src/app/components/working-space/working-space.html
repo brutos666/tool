@@ -1,14 +1,8 @@
 <menu-bar class="working-space__menu" [label]="label" [menuItems]="menuItems"></menu-bar>
 <aside-space #navSpace class="working-space__nav" aria-current="true" title="Navigation">
-  <ng-template #itemTemplate let-tree="content">
-    <item [treeData]="tree"></item>
-  </ng-template>
-  <tree-list [dataList]="rootItem().getChildren()" [contentTemplate]="itemTemplate"></tree-list>
+  <tree-list [dataList]="rootItem().getChildren()" [navOrientation]="'vertical'" [layoutData]="navLayout"></tree-list>
 </aside-space>
 <div #splitter class="working-space__splitter" (pointerdown)="onPointerDown($event)">&nbsp;</div>
 <main #mainSpace class="working-space__main">
-  <ng-template #itemTemplateMain let-tree="content">
-    <item [treeData]="tree" [layoutData]="mainLayout"></item>
-  </ng-template>
-  <tree-list [dataList]="rootItem().getChildren()" [contentTemplate]="itemTemplateMain" [navOrientation]="'vertical'"></tree-list>
+  <tree-list [dataList]="rootItem().getChildren()" [navOrientation]="'vertical'" [layoutData]="mainLayout"></tree-list>
 </main>
