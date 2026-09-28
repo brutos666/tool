@@ -1,7 +1,7 @@
 import { Directive, input } from '@angular/core';
-import { TabNavigation } from './tab-navigation.js';
 import { Navigate } from '../components/common/Navigate.js';
 import { Navigable } from '../components/common/Navigable.js';
+import { KeyboardNavigation } from './keyboard-navigation.js';
 
 @Directive({
   selector: '[arrow-navigation-directive]',
@@ -13,7 +13,7 @@ import { Navigable } from '../components/common/Navigable.js';
     '[attr.aria-orientation]': 'navOrientation()',
   },
 })
-export class ArrowNavigation extends TabNavigation {
+export class ArrowNavigation extends KeyboardNavigation {
   override name = 'ArrowNavigation';
 
   navOrientation = input<'horizontal' | 'vertical'>('horizontal');

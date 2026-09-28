@@ -12,4 +12,9 @@ export class WorkspaceNavigation extends TabNavigation implements AfterViewInit 
   ngAfterViewInit(): void {
     this.changeTabAccess(true);
   }
+
+  override interceptKeys(): String[] {
+    // Pas de prise en compte de Home et End au niveau de l'interface
+    return ['Tab'];
+  }
 }

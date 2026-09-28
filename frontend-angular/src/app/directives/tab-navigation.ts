@@ -1,7 +1,7 @@
 import { Directive } from '@angular/core';
 import { Navigable } from '../components/common/Navigable.js';
 import { Navigate } from '../components/common/Navigate.js';
-import { BasicNavigation } from './basic-navigation.js';
+import { KeyboardNavigation } from './keyboard-navigation.js';
 
 @Directive({
   selector: '[tab-navigation-directive]',
@@ -10,7 +10,7 @@ import { BasicNavigation } from './basic-navigation.js';
     { provide: Navigate, useExisting: TabNavigation },
   ],
 })
-export class TabNavigation extends BasicNavigation {
+export class TabNavigation extends KeyboardNavigation {
   override name = 'TabNavigation';
 
   override interceptKeys(): String[] {
