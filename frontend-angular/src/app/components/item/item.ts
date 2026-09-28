@@ -8,14 +8,18 @@ import { IconButton } from '../action-button/icon-button.js';
 import { TreeData } from '../../data/tree-data.js';
 import { Layout, Right } from '../common/Types.js';
 import { TabNavigation } from '../../directives/tab-navigation.js';
+import { NodeElement } from '../common/NodeElement.js';
 
 @Component({
-  imports: [TextInput, Toolbar, TabNavigation],
+  imports: [TextInput, Toolbar],
   selector: 'item',
   styleUrl: './item.scss',
   templateUrl: './item.html',
+  hostDirectives: [TabNavigation],
 })
-export class Item implements OnInit {
+export class Item extends NodeElement implements OnInit {
+  name = 'Item';
+
   private itemService = inject(ItemService);
 
   private addAction!: IconButton;
@@ -33,6 +37,7 @@ export class Item implements OnInit {
   @ViewChild('text') textComponent!: TextInput;
 
   constructor() {
+    super();
     // Utilise effect pour réagir aux changements de treeItemId
     effect(() => {
       const isDeleted = this.deletedData();

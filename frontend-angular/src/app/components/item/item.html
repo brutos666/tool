@@ -1,6 +1,6 @@
 @let layout=layoutData();
 @let content=treeData().getContent();
-<article tab-navigation-directive class="item {{getClassForCRUDMode(crudModeData())}} {{getClassForLayout(layoutData())}}">
+<article class="item {{getClassForCRUDMode(crudModeData())}} {{getClassForLayout(layoutData())}}">
     <header class="item__header">
       @if (this.hasDone(layout)) {
         <text-input #done [id]="content.getId()+'-done'" label="Effectué/non effectué" class="item__checkbox" aria-description="Cliquez pour marquer comme effectué"
