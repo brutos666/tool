@@ -46,16 +46,29 @@ export class EnterNavigation extends KeyboardNavigation {
   }
 
   enter() {
+    // Lorsque l'on entre dans un composant, le seul moyen d'en sortir doit être la touche Echap (ou la souris)
+    // On désactive donc toute la branche de navigation courante pour n'activer que l'intérieur du composant
+    this.getParentNavigation()?.stopNavigation();
     this.inside.set(true);
-    this.directive.setEnable(true);
     this.accessible.set(false);
-    this.navigables[0].giveFocus();
+    this.changeTabAccess(true);
+    this.giveFocus();
   }
 
   exit() {
+    this.getParentNavigation()?.startNavigation();
+    this.changeTabAccess(false);
     this.inside.set(false);
     this.accessible.set(true);
-    this.directive.setEnable(false);
+    this.changeTabAccess(true);
+    this.giveFocus();
+  }
+
+  override startNavigation(): void {
+    // Tant que je suis à l'intérieur d'un composant, il ne faut pas réactiver les parents
+    if (!this.inside()) {
+      super.startNavigation();
+    }
   }
 
   override isFocusable(): boolean {

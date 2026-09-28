@@ -43,9 +43,11 @@ export class KeyboardNavigation extends BasicNavigation implements OnDestroy {
 
   override startNavigation() {
     this.navEnabled.set(true);
+    this.getParentNavigation()?.startNavigation();
   }
   override stopNavigation() {
     this.navEnabled.set(false);
+    this.getParentNavigation()?.stopNavigation();
   }
 
   interceptKeys(): String[] {

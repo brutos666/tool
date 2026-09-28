@@ -10,6 +10,9 @@ import { Focusable } from '../../directives/focusable';
   templateUrl: './text-input.html',
   hostDirectives: [Focusable],
   providers: [{ provide: NodeElement, useExisting: TextInput }],
+  host: {
+    '(focus)': 'this.input.nativeElement.focus()',
+  },
 })
 export class TextInput extends NodeElement {
   name = 'TextInput';

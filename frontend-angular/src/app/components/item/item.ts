@@ -26,7 +26,7 @@ export class Item extends NodeElement implements OnInit {
   private deleteAction!: IconButton;
   private undoToDeleteAction!: IconButton;
   buttonsData: Button[] = [];
-  layoutData = input<Layout>(Layout.Title);
+  layoutData = input.required<Layout>();
   treeData = input.required<TreeData<ItemData>>();
   // Crée un signal computed pour extraire la propriété
   crudModeData = computed(() => this.treeData().getContent().getCRUDMode());
