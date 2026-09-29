@@ -1,4 +1,4 @@
-import { Directive, model, signal } from '@angular/core';
+import { Directive, model } from '@angular/core';
 import { Navigate } from '../components/common/Navigate.js';
 import { BasicNavigation } from './basic-navigation.js';
 import { Navigable } from '../components/common/Navigable.js';

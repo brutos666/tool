@@ -74,8 +74,7 @@ export class TreeNavigation extends KeyboardNavigation {
     if (!components[selectedIndex].isFocusable()) {
       return this.goNext(components, selectedIndex, key);
     }
-    this.setFocusIndex(selectedIndex);
-    this.giveFocus();
+    this.giveFocusIndex(selectedIndex);
     return true;
   }
 

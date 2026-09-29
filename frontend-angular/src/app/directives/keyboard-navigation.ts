@@ -89,8 +89,7 @@ export class KeyboardNavigation extends BasicNavigation implements OnDestroy {
       return;
     }
     if (components[selectedIndex].isFocusable()) {
-      this.setFocusIndex(selectedIndex);
-      this.giveFocus();
+      this.giveFocusIndex(selectedIndex);
     } else {
       this.moveToDirection(components, selectedIndex, key);
     }

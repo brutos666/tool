@@ -66,13 +66,25 @@ export class BasicNavigation extends Focusable implements Navigate {
     });
   }
 
-  setFocusIndex(focusIndex: number): void {
-    const wasFocused = this.isFocused();
+  giveFocusIndex(focusIndex: number): void {
     this.focusComponent(focusIndex);
-    if (wasFocused) {
-      this.giveFocus();
-    }
+    this.giveFocus();
     this.focusIndex.set(focusIndex);
+  }
+
+  setFocusIndex(index: number): void {
+    const wasFocused = this.isFocused();
+    if (wasFocused) {
+      this.giveFocusIndex(index);
+      return;
+    }
+    const components = this.navigables;
+    if (!(index >= 0 && index < components.length)) {
+      return;
+    }
+    components[this.#selectedIndex].changeTabAccess(false);
+    this.#selectedIndex = index;
+    this.focusIndex.set(index);
   }
 
   focusComponent(index: number) {
