@@ -12,14 +12,12 @@ import { KeyboardNavigation } from './keyboard-navigation.js';
   ],
   host: {
     '[class]': 'inside() ? "inside" : "outside"',
-    '[attr.tabindex]': 'accessible() ? 0 : -1',
   },
 })
 export class EnterNavigation extends KeyboardNavigation {
   override name = 'EnterNavigation';
 
   inside = model<boolean>(false);
-  accessible = signal<boolean>(false);
   directive!: Navigate;
 
   override registerChild(navigable: Navigable): void {
@@ -46,21 +44,21 @@ export class EnterNavigation extends KeyboardNavigation {
   }
 
   enter() {
+    this.inside.set(true);
     // Lorsque l'on entre dans un composant, le seul moyen d'en sortir doit être la touche Echap (ou la souris)
     // On désactive donc toute la branche de navigation courante pour n'activer que l'intérieur du composant
     this.getParentNavigation()?.stopNavigation();
-    this.inside.set(true);
-    this.accessible.set(false);
-    this.changeTabAccess(true);
+    // La tabulation ne doit plus se positionner sur l'élément mais à l'intérieur
+    this.getElement().setAttribute('tabindex', '-1');
+    this.navigables[0].changeTabAccess(true);
     this.giveFocus();
   }
 
   exit() {
-    this.getParentNavigation()?.startNavigation();
-    this.changeTabAccess(false);
     this.inside.set(false);
-    this.accessible.set(true);
-    this.changeTabAccess(true);
+    this.getParentNavigation()?.startNavigation();
+    this.navigables[0].changeTabAccess(false);
+    this.getElement().setAttribute('tabindex', '0');
     this.giveFocus();
   }
 
@@ -75,7 +73,7 @@ export class EnterNavigation extends KeyboardNavigation {
     if (this.inside()) {
       return this.navigables[0].isFocusable();
     }
-    const classList = this.elementRef.nativeElement.classList;
+    const classList = this.getElement().classList;
     return !classList.contains('hidden') && !classList.contains('disabled');
   }
 
@@ -83,22 +81,22 @@ export class EnterNavigation extends KeyboardNavigation {
     if (this.inside()) {
       this.navigables[0].giveFocus();
     } else {
-      this.elementRef.nativeElement.focus();
+      this.getElement().focus();
     }
   }
   override isFocused(): boolean {
     if (this.inside()) {
       return this.navigables[0].isFocused();
     }
-    return document.activeElement === this.elementRef.nativeElement;
+    return document.activeElement === this.getElement();
   }
 
   override changeTabAccess(access: boolean) {
     if (this.inside()) {
       this.navigables[0].changeTabAccess(access);
     } else {
+      this.getElement().setAttribute('tabindex', access ? '0' : '-1');
       this.navEnabled.set(access);
-      this.accessible.set(access);
     }
   }
 }

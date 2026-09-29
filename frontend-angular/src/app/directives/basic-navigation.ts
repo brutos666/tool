@@ -1,6 +1,7 @@
 import { Directive, ElementRef, inject, signal } from '@angular/core';
 import { Navigable } from '../components/common/Navigable.js';
 import { Navigate } from '../components/common/Navigate.js';
+import { Focusable } from './focusable.js';
 
 /** Cette classe gère la navigation manuelle d'un composant focusable à un autre */
 @Directive({
@@ -13,8 +14,8 @@ import { Navigate } from '../components/common/Navigate.js';
     '[attr.index-focus]': 'focusIndex()',
   },
 })
-export class BasicNavigation implements Navigate, Navigable {
-  name = 'BasicNavigation';
+export class BasicNavigation extends Focusable implements Navigate {
+  override name = 'BasicNavigation';
 
   elementRef = inject(ElementRef);
 
@@ -22,21 +23,10 @@ export class BasicNavigation implements Navigate, Navigable {
   navigables: Navigable[] = [];
 
   #selectedIndex = 0;
-  // Remonte les parents jusqu'au parent répondant au provider ManualNavigation
-  private parentNav = inject(Navigate, { skipSelf: true, optional: true });
-
-  constructor() {
-    // S'enregistrer auprès de la navigation parente
-    this.parentNav?.registerChild(this);
-  }
 
   setEnable(enable: boolean): void {}
   startNavigation() {}
   stopNavigation() {}
-
-  getParentNavigation(): Navigate | null {
-    return this.parentNav;
-  }
 
   registerChild(navigable: Navigable) {
     this.navigables.push(navigable);
@@ -61,14 +51,14 @@ export class BasicNavigation implements Navigate, Navigable {
     this.#selectedIndex = index;
   }
 
-  changeTabAccess(access: boolean) {
+  override changeTabAccess(access: boolean) {
     const components = this.navigables;
     if (components.length) {
       components[this.#selectedIndex].changeTabAccess(access);
     }
   }
 
-  isFocusable(): boolean {
+  override isFocusable(): boolean {
     const components = this.navigables;
     if (components.length) {
       return components[this.#selectedIndex].isFocusable();
@@ -76,12 +66,12 @@ export class BasicNavigation implements Navigate, Navigable {
     return false;
   }
 
-  giveFocus() {
+  override giveFocus() {
     const components = this.navigables;
     components[this.#selectedIndex].giveFocus();
   }
 
-  isFocused(): boolean {
+  override isFocused(): boolean {
     const components = this.navigables;
     return !!components.find((focusable) => focusable.isFocused());
   }

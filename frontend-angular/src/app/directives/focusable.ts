@@ -4,15 +4,11 @@ import { Navigable } from '../components/common/Navigable.js';
 
 @Directive({
   selector: '[focusable-directive]',
-  host: {
-    '[attr.tabindex]': 'accessible() ? 0 : -1',
-  },
 })
 export class Focusable implements Navigable {
   name = 'Focusable';
 
-  elementRef = inject(ElementRef);
-  accessible = signal<boolean>(false);
+  private element = inject(ElementRef).nativeElement;
 
   // Remonte les parents jusqu'au parent répondant au provider ManualNavigation
   private parentNav = inject(Navigate, { skipSelf: true, optional: true });
@@ -21,19 +17,30 @@ export class Focusable implements Navigable {
     // S'enregistrer auprès de la navigation parente
     this.parentNav?.registerChild(this);
   }
+  getParentNavigation(): Navigate | null {
+    return this.parentNav;
+  }
+
+  setElement(element: HTMLElement) {
+    this.element = element;
+    this.changeTabAccess(false);
+  }
+  getElement() {
+    return this.element;
+  }
 
   giveFocus() {
-    this.elementRef.nativeElement.focus();
+    this.getElement().focus();
   }
   isFocused(): boolean {
-    return document.activeElement === this.elementRef.nativeElement;
+    return document.activeElement === this.getElement();
   }
   isFocusable(): boolean {
-    const classList = this.elementRef.nativeElement.classList;
+    const classList = this.getElement().classList;
     return !classList.contains('hidden') && !classList.contains('disabled');
   }
 
   changeTabAccess(access: boolean) {
-    this.accessible.set(access);
+    this.getElement().setAttribute('tabindex', access ? '0' : '-1');
   }
 }
