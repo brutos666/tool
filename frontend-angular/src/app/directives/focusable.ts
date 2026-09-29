@@ -1,4 +1,4 @@
-import { Directive, ElementRef, inject, signal } from '@angular/core';
+import { DestroyRef, Directive, ElementRef, inject } from '@angular/core';
 import { Navigate } from '../components/common/Navigate.js';
 import { Navigable } from '../components/common/Navigable.js';
 
@@ -12,10 +12,12 @@ export class Focusable implements Navigable {
 
   // Remonte les parents jusqu'au parent répondant au provider ManualNavigation
   private parentNav = inject(Navigate, { skipSelf: true, optional: true });
+  private destroyRef = inject(DestroyRef);
 
   constructor() {
     // S'enregistrer auprès de la navigation parente
     this.parentNav?.registerChild(this);
+    this.destroyRef.onDestroy(() => this.parentNav?.unregisterChild(this));
   }
   getParentNavigation(): Navigate | null {
     return this.parentNav;
@@ -25,7 +27,7 @@ export class Focusable implements Navigable {
     this.element = element;
     this.changeTabAccess(false);
   }
-  getElement() {
+  getElement(): HTMLElement {
     return this.element;
   }
 
