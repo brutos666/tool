@@ -18,14 +18,19 @@ export class EnterNavigation extends KeyboardNavigation {
   override name = 'EnterNavigation';
 
   inside = model<boolean>(false);
-  directive!: Navigate;
 
   override registerChild(navigable: Navigable): void {
     if (!(navigable instanceof BasicNavigation)) {
       return;
     }
-    this.directive = navigable;
     super.registerChild(navigable);
+  }
+  override unregisterChild(navigable: Navigable) {
+    if (this.inside()) {
+      this.inside.set(false);
+      this.getParentNavigation()?.startNavigation();
+    }
+    super.unregisterChild(navigable);
   }
 
   override interceptKeys() {

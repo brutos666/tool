@@ -24,10 +24,13 @@ export class BasicNavigation extends Focusable implements Navigate {
   needSort = signal<boolean>(false);
 
   #selectedIndex = 0;
+  #access: boolean = false;
+  #focused: boolean = false;
 
   constructor() {
     super();
     afterNextRender({
+      // Note : après toutes les modifications appliquées au DOM suite des changements (signal, événement)
       read: () => {
         this.sortNavigables();
       },
@@ -40,9 +43,43 @@ export class BasicNavigation extends Focusable implements Navigate {
 
   registerChild(navigable: Navigable) {
     this.navigables.push(navigable);
+    const nbNav = this.navigables.length;
+    if (nbNav === 1) {
+      this.reloadNavigation();
+    }
   }
   unregisterChild(navigable: Navigable) {
-    this.navigables.splice(this.navigables.indexOf(navigable), 1);
+    const indexToRemove = this.navigables.indexOf(navigable);
+    this.navigables.splice(indexToRemove, 1);
+    if (this.#selectedIndex < indexToRemove) {
+      return;
+    }
+    const nbLeft = this.navigables.length;
+    if (nbLeft === 0) {
+      this.#selectedIndex = 0;
+      this.focusIndex.set(0);
+      return;
+    }
+    const index =
+      this.#selectedIndex > indexToRemove || indexToRemove === nbLeft
+        ? this.#selectedIndex - 1
+        : this.#selectedIndex;
+    this.#selectedIndex = index;
+    this.focusIndex.set(index);
+    this.reloadNavigation();
+  }
+
+  reloadNavigation() {
+    const component = this.navigables[this.#selectedIndex];
+    if (!component) {
+      return;
+    }
+    if (this.#access) {
+      component.changeTabAccess(true);
+    }
+    if (this.#focused) {
+      component.giveFocus();
+    }
   }
 
   sortNavigables() {
@@ -51,18 +88,11 @@ export class BasicNavigation extends Focusable implements Navigate {
     }
     this.navigables.sort((a, b) => {
       const pos = a.getElement().compareDocumentPosition(b.getElement());
-      if (pos & Node.DOCUMENT_POSITION_DISCONNECTED) {
-        return 0;
-      }
       if (pos & Node.DOCUMENT_POSITION_FOLLOWING || pos & Node.DOCUMENT_POSITION_CONTAINS) {
         // Si b suit a alors -1 indique que a est avant b
         return -1;
       }
-      if (pos & Node.DOCUMENT_POSITION_PRECEDING || pos & Node.DOCUMENT_POSITION_CONTAINED_BY) {
-        return 1;
-      }
-
-      return 0;
+      return 1;
     });
   }
 
@@ -98,6 +128,8 @@ export class BasicNavigation extends Focusable implements Navigate {
   }
 
   override changeTabAccess(access: boolean) {
+    this.#access = access;
+    this.#focused = false;
     const components = this.navigables;
     if (components.length) {
       components[this.#selectedIndex].changeTabAccess(access);
@@ -113,8 +145,11 @@ export class BasicNavigation extends Focusable implements Navigate {
   }
 
   override giveFocus() {
+    this.#focused = true;
     const components = this.navigables;
-    components[this.#selectedIndex].giveFocus();
+    if (components.length) {
+      components[this.#selectedIndex].giveFocus();
+    }
   }
 
   override isFocused(): boolean {

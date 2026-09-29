@@ -1,6 +1,8 @@
 <div class="toolbar" role="toolbar">
   @for (buttonItem of buttons(); track buttonItem.label) {
-    <button actionButton [data]="buttonItem"></button>
+    @if (buttonItem.isVisible()) {
+      <button actionButton [data]="buttonItem"></button>
+    }
   } @empty {
   No tabs available.
   }

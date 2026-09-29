@@ -1,4 +1,4 @@
-import { DestroyRef, Directive, ElementRef, inject } from '@angular/core';
+import { afterNextRender, DestroyRef, Directive, ElementRef, inject } from '@angular/core';
 import { Navigate } from '../components/common/Navigate.js';
 import { Navigable } from '../components/common/Navigable.js';
 
@@ -7,6 +7,9 @@ import { Navigable } from '../components/common/Navigable.js';
 })
 export class Focusable implements Navigable {
   name = 'Focusable';
+
+  private accessible: boolean = false;
+  private mustGiveFocus: boolean = false;
 
   private element = inject(ElementRef).nativeElement;
 
@@ -18,6 +21,16 @@ export class Focusable implements Navigable {
     // S'enregistrer auprès de la navigation parente
     this.parentNav?.registerChild(this);
     this.destroyRef.onDestroy(() => this.parentNav?.unregisterChild(this));
+    afterNextRender({
+      // Note : après toutes les modifications appliquées au DOM suite des changements (signal, événement)
+      read: () => {
+        this.getElement().setAttribute('tabindex', this.accessible ? '0' : '-1');
+        if (this.mustGiveFocus) {
+          this.getElement().focus();
+          this.mustGiveFocus = false;
+        }
+      },
+    });
   }
   getParentNavigation(): Navigate | null {
     return this.parentNav;
@@ -32,6 +45,7 @@ export class Focusable implements Navigable {
   }
 
   giveFocus() {
+    this.mustGiveFocus = true;
     this.getElement().focus();
   }
   isFocused(): boolean {
@@ -43,6 +57,10 @@ export class Focusable implements Navigable {
   }
 
   changeTabAccess(access: boolean) {
+    if (!access) {
+      this.mustGiveFocus = false;
+    }
+    this.accessible = access;
     this.getElement().setAttribute('tabindex', access ? '0' : '-1');
   }
 }
