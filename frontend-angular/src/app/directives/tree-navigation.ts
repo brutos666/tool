@@ -1,4 +1,12 @@
-import { Directive, inject, input, signal } from '@angular/core';
+import {
+  ContentChildren,
+  Directive,
+  inject,
+  input,
+  QueryList,
+  signal,
+  ViewChildren,
+} from '@angular/core';
 import { Navigate } from '../components/common/Navigate.js';
 import { KeyboardNavigation } from './keyboard-navigation.js';
 import { Navigable } from '../components/common/Navigable.js';
@@ -17,7 +25,7 @@ export class TreeNavigation extends KeyboardNavigation {
   changeOpenState(open: boolean) {
     this.openState.set(open);
     if (!open) {
-      this.setFocusIndex(0);
+      this.changeCurrentIndex(0);
     }
   }
   isOpen(): boolean {
@@ -25,7 +33,7 @@ export class TreeNavigation extends KeyboardNavigation {
   }
 
   override interceptKeys() {
-    const keys = ['Home', 'End', 'ArrowLeft', 'ArrowRight'];
+    const keys = ['ArrowLeft', 'ArrowRight'];
     const orientation = this.navOrientation();
     if (orientation === 'vertical') {
       keys.push('ArrowUp');
@@ -40,11 +48,7 @@ export class TreeNavigation extends KeyboardNavigation {
     }
     event.preventDefault();
     const isOpen = this.isOpen();
-    if (event.key === 'Home') {
-      // Laisser les composants
-      return;
-    } else if (event.key === 'End') {
-    } else if (event.key === 'ArrowLeft') {
+    if (event.key === 'ArrowLeft') {
       if (isOpen) {
         this.changeOpenState(false);
         event.stopImmediatePropagation();
@@ -55,26 +59,28 @@ export class TreeNavigation extends KeyboardNavigation {
         event.stopImmediatePropagation();
       }
     } else {
+      const key = event.key === 'ArrowDown' ? 'Next' : 'Previous';
       const components = this.navigables;
-      const done = this.goNext(components, this.focusIndex(), event.key);
+      const done = this.goNext(components, this.getFocusIndex(), key);
       if (done) {
         event.stopImmediatePropagation();
       }
     }
   }
 
-  goNext(components: readonly Navigable[], index: number, key: string): boolean {
-    const nbItems = components.length;
-    const selectedIndex = this.giveNext(index, key === 'ArrowDown' ? 'Next' : 'Previous', nbItems);
-    if (selectedIndex === -1 || selectedIndex === nbItems) {
+  override goNext(components: readonly Navigable[], index: number, key: string): boolean {
+    const nextIndex = this.getNextIndex(components, index, key);
+    if (nextIndex === -1) {
       // Désactivation si on est hors limite
       this.changeTabAccess(false);
       return false;
     }
-    if (!components[selectedIndex].isFocusable()) {
-      return this.goNext(components, selectedIndex, key);
+    if (key === 'Previous') {
+      this.getTreeChildNav(nextIndex)?.setCurrentLast();
+    } else {
+      this.getTreeChildNav(nextIndex)?.setCurrentIndex(0);
     }
-    this.giveFocusIndex(selectedIndex);
+    this.giveFocusIndex(nextIndex);
     return true;
   }
 
@@ -94,14 +100,30 @@ export class TreeNavigation extends KeyboardNavigation {
     return selectedIndex;
   }
 
-  override changeTabAccess(access: boolean) {
-    if (this.isOpen()) {
-      super.changeTabAccess(access);
+  setCurrentLast() {
+    if (!this.isOpen()) {
+      this.setCurrentIndex(0);
       return;
     }
-    this.navEnabled.set(access);
     const components = this.navigables;
-    components[0].changeTabAccess(access);
+    const nbItems = components.length;
+    // Astuce pour trouver le dernier accessible à partir de la fin
+    const nextIndex = this.getNextIndex(components, nbItems, 'Previous');
+    if (nextIndex === -1) {
+      return;
+    }
+    const treeNav = this.getTreeChildNav(nextIndex);
+    if (treeNav) {
+      treeNav.setCurrentLast();
+    }
+    this.setCurrentIndex(nextIndex);
+  }
+
+  override isFocusable(): boolean {
+    if (this.isOpen()) {
+      return super.isFocusable();
+    }
+    return this.navigables[0].isFocusable();
   }
 
   getRootNavigation(): TreeNavigation {
@@ -109,5 +131,12 @@ export class TreeNavigation extends KeyboardNavigation {
       return this.treeParentNav.getRootNavigation();
     }
     return this;
+  }
+
+  getTreeChildNav(index: number): TreeNavigation | undefined {
+    return this.getTreeChildrenNav()[index - 1];
+  }
+  getTreeChildrenNav(): TreeNavigation[] {
+    return this.navigables.filter((navigable) => navigable instanceof TreeNavigation);
   }
 }

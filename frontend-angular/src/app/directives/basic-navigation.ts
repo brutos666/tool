@@ -11,7 +11,7 @@ import { Focusable } from './focusable.js';
     { provide: Navigate, useExisting: BasicNavigation },
   ],
   host: {
-    '[attr.index-focus]': 'focusIndex()',
+    '[attr.index-focus]': 'getFocusIndex()',
   },
 })
 export class BasicNavigation extends Focusable implements Navigate {
@@ -19,7 +19,6 @@ export class BasicNavigation extends Focusable implements Navigate {
 
   elementRef = inject(ElementRef);
 
-  focusIndex = signal<number>(0);
   navigables: Navigable[] = [];
   needSort = signal<boolean>(false);
 
@@ -37,9 +36,12 @@ export class BasicNavigation extends Focusable implements Navigate {
     });
   }
 
-  setEnable(enable: boolean): void {}
   startNavigation() {}
   stopNavigation() {}
+
+  getFocusIndex(): number {
+    return this.#selectedIndex;
+  }
 
   registerChild(navigable: Navigable) {
     this.navigables.push(navigable);
@@ -57,7 +59,6 @@ export class BasicNavigation extends Focusable implements Navigate {
     const nbLeft = this.navigables.length;
     if (nbLeft === 0) {
       this.#selectedIndex = 0;
-      this.focusIndex.set(0);
       return;
     }
     const index =
@@ -65,7 +66,6 @@ export class BasicNavigation extends Focusable implements Navigate {
         ? this.#selectedIndex - 1
         : this.#selectedIndex;
     this.#selectedIndex = index;
-    this.focusIndex.set(index);
     this.reloadNavigation();
   }
 
@@ -99,13 +99,18 @@ export class BasicNavigation extends Focusable implements Navigate {
   giveFocusIndex(focusIndex: number): void {
     this.focusComponent(focusIndex);
     this.giveFocus();
-    this.focusIndex.set(focusIndex);
   }
 
   setFocusIndex(index: number): void {
     const wasFocused = this.isFocused();
     if (wasFocused) {
       this.giveFocusIndex(index);
+    } else {
+      this.changeCurrentIndex(index);
+    }
+  }
+  changeCurrentIndex(index: number): void {
+    if (this.#selectedIndex === index) {
       return;
     }
     const components = this.navigables;
@@ -114,7 +119,9 @@ export class BasicNavigation extends Focusable implements Navigate {
     }
     components[this.#selectedIndex].changeTabAccess(false);
     this.#selectedIndex = index;
-    this.focusIndex.set(index);
+  }
+  setCurrentIndex(index: number) {
+    this.#selectedIndex = index;
   }
 
   focusComponent(index: number) {

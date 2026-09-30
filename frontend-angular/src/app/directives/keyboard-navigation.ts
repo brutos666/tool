@@ -11,7 +11,7 @@ import { BasicNavigation } from './basic-navigation.js';
     { provide: Navigate, useExisting: KeyboardNavigation },
   ],
   host: {
-    '[attr.index-focus]': 'focusIndex()',
+    '[attr.index-focus]': 'getFocusIndex()',
   },
 })
 export class KeyboardNavigation extends BasicNavigation implements OnDestroy {
@@ -32,13 +32,6 @@ export class KeyboardNavigation extends BasicNavigation implements OnDestroy {
   }
   ngOnDestroy(): void {
     this.elementRef.nativeElement.removeEventListener('keydown', this.onKeyDown.bind(this));
-  }
-
-  override setEnable(enable: boolean): void {
-    this.changeTabAccess(enable);
-    if (enable) {
-      this.giveFocus();
-    }
   }
 
   override startNavigation() {
@@ -68,31 +61,54 @@ export class KeyboardNavigation extends BasicNavigation implements OnDestroy {
     }
     event.preventDefault();
     if (event.key === 'Home') {
-      // Astuce pour trouver le 1er accessible à partir du début
-      this.moveToDirection(components, -1, 'Next');
-    } else if (event.key === 'End') {
-      // Astuce pour trouver le dernier accessible à partir de la fin
-      this.moveToDirection(components, nbItems, 'Previous');
-    } else {
-      this.moveToDirection(
-        components,
-        this.focusIndex(),
-        event.shiftKey ? `shift+${event.key}` : event.key,
-      );
+      this.goFirst();
+      return;
+    }
+    if (event.key === 'End') {
+      this.goLast();
+      return;
+    }
+    this.goNext(
+      components,
+      this.getFocusIndex(),
+      event.shiftKey ? `shift+${event.key}` : event.key,
+    );
+  }
+
+  goNext(components: readonly Navigable[], index: number, key: string) {
+    const nextIndex = this.getNextIndex(components, index, key);
+    if (nextIndex > -1) {
+      this.giveFocusIndex(nextIndex);
     }
   }
 
-  moveToDirection(components: readonly Navigable[], index: number, key: string) {
+  goFirst() {
+    // Astuce pour trouver le 1er accessible à partir du début
+    const nextIndex = this.getNextIndex(this.navigables, -1, 'Next');
+    if (nextIndex > -1) {
+      this.giveFocusIndex(nextIndex);
+    }
+  }
+  goLast() {
+    const components = this.navigables;
+    const nbItems = components.length;
+    // Astuce pour trouver le dernier accessible à partir de la fin
+    const nextIndex = this.getNextIndex(components, nbItems, 'Previous');
+    if (nextIndex > -1) {
+      this.giveFocusIndex(nextIndex);
+    }
+  }
+
+  getNextIndex(components: readonly Navigable[], index: number, key: string): number {
     const nbItems = components.length;
     const selectedIndex = this.giveNext(index, key, nbItems);
     if (selectedIndex === -1 || selectedIndex === nbItems) {
-      return;
+      return -1;
     }
     if (components[selectedIndex].isFocusable()) {
-      this.giveFocusIndex(selectedIndex);
-    } else {
-      this.moveToDirection(components, selectedIndex, key);
+      return selectedIndex;
     }
+    return this.getNextIndex(components, selectedIndex, key);
   }
 
   giveNext(index: number, key: string, nbItems: number): number {
