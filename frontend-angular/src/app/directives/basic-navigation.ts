@@ -12,6 +12,7 @@ import { Focusable } from './focusable.js';
   ],
   host: {
     '[attr.index-focus]': 'getFocusIndex()',
+    '(mousedown)': 'onMouseDown($event)',
   },
 })
 export class BasicNavigation extends Focusable implements Navigate {
@@ -94,6 +95,23 @@ export class BasicNavigation extends Focusable implements Navigate {
       }
       return 1;
     });
+  }
+
+  onMouseDown(event: MouseEvent) {
+    // Trouver l'arbre cliqué
+    if (!event.target) {
+      return;
+    }
+    if (event.target instanceof HTMLElement) {
+      const index = this.getNavigableIndex(event.target);
+      if (index > -1) {
+        this.changeCurrentIndex(index);
+      }
+    }
+  }
+
+  getNavigableIndex(element: HTMLElement): number {
+    return this.navigables.findIndex((navigable) => navigable.getElement().contains(element));
   }
 
   giveFocusIndex(focusIndex: number): void {

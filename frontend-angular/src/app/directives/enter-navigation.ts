@@ -33,6 +33,10 @@ export class EnterNavigation extends KeyboardNavigation {
     super.unregisterChild(navigable);
   }
 
+  override onMouseDown(event: MouseEvent) {
+    this.inside.set(true);
+  }
+
   override interceptKeys() {
     return [this.inside() ? 'Escape' : 'Enter'];
   }
@@ -50,28 +54,14 @@ export class EnterNavigation extends KeyboardNavigation {
 
   enter() {
     this.inside.set(true);
-    // Lorsque l'on entre dans un composant, le seul moyen d'en sortir doit être la touche Echap (ou la souris)
-    // On désactive donc toute la branche de navigation courante pour n'activer que l'intérieur du composant
-    this.getParentNavigation()?.stopNavigation();
-    // La tabulation ne doit plus se positionner sur l'élément mais à l'intérieur
-    this.getElement().setAttribute('tabindex', '-1');
-    this.navigables[0].changeTabAccess(true);
+    this.changeTabAccess(true);
     this.giveFocus();
   }
 
   exit() {
     this.inside.set(false);
-    this.getParentNavigation()?.startNavigation();
-    this.navigables[0].changeTabAccess(false);
-    this.getElement().setAttribute('tabindex', '0');
+    this.changeTabAccess(true);
     this.giveFocus();
-  }
-
-  override startNavigation(): void {
-    // Tant que je suis à l'intérieur d'un composant, il ne faut pas réactiver les parents
-    if (!this.inside()) {
-      super.startNavigation();
-    }
   }
 
   override isFocusable(): boolean {
@@ -97,11 +87,23 @@ export class EnterNavigation extends KeyboardNavigation {
   }
 
   override changeTabAccess(access: boolean) {
-    if (this.inside()) {
-      this.navigables[0].changeTabAccess(access);
-    } else {
-      this.getElement().setAttribute('tabindex', access ? '0' : '-1');
-      this.navEnabled.set(access);
+    if (access) {
+      this.navEnabled.set(true);
+      if (this.inside()) {
+        // Lorsque l'on entre dans un composant, le seul moyen d'en sortir doit être la touche Echap (ou la souris)
+        // On désactive donc toute la branche de navigation courante pour n'activer que l'intérieur du composant
+        this.getParentNavigation()?.stopNavigation();
+        // La tabulation ne doit plus se positionner sur l'élément mais à l'intérieur
+        this.getElement().setAttribute('tabindex', '-1');
+        this.navigables[0].changeTabAccess(true);
+      } else {
+        this.getParentNavigation()?.startNavigation();
+        this.getElement().setAttribute('tabindex', '0');
+      }
+      return;
     }
+    this.navEnabled.set(false);
+    this.inside.set(false);
+    this.getElement().setAttribute('tabindex', '-1');
   }
 }

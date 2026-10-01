@@ -13,6 +13,12 @@ export class WorkspaceNavigation extends TabNavigation implements AfterViewInit 
     this.changeTabAccess(true);
   }
 
+  override onMouseDown(event: MouseEvent) {
+    super.onMouseDown(event);
+    this.changeTabAccess(true);
+    this.giveFocus();
+  }
+
   override interceptKeys(): String[] {
     // Pas de prise en compte de Home et End au niveau de l'interface
     return ['Tab'];
