@@ -62,7 +62,6 @@ export class TreeListNavigation extends ArrowNavigation {
     if (treeNav) {
       treeNav.setCurrentLast();
     }
-    // NOTE : pb désactivation quand l'index ne change pas
     this.giveFocusIndex(nextIndex);
   }
 

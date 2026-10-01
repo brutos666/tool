@@ -1,12 +1,4 @@
-import {
-  ContentChildren,
-  Directive,
-  inject,
-  input,
-  QueryList,
-  signal,
-  ViewChildren,
-} from '@angular/core';
+import { Directive, inject, input, signal } from '@angular/core';
 import { Navigate } from '../components/common/Navigate.js';
 import { KeyboardNavigation } from './keyboard-navigation.js';
 import { Navigable } from '../components/common/Navigable.js';
@@ -25,11 +17,17 @@ export class TreeNavigation extends KeyboardNavigation {
   changeOpenState(open: boolean) {
     this.openState.set(open);
     if (!open) {
-      this.changeCurrentIndex(0);
+      this.giveFocusIndex(0);
     }
   }
   isOpen(): boolean {
     return this.openState();
+  }
+  isNode(): boolean {
+    return this.navigables.length > 1;
+  }
+  isOnChildNode(): boolean {
+    return this.getFocusIndex() > 0;
   }
 
   override interceptKeys() {
@@ -50,18 +48,26 @@ export class TreeNavigation extends KeyboardNavigation {
     const isOpen = this.isOpen();
     if (event.key === 'ArrowLeft') {
       if (isOpen) {
-        this.changeOpenState(false);
+        if (this.isOnChildNode()) {
+          this.giveFocusIndex(0);
+        } else {
+          this.changeOpenState(false);
+        }
         event.stopImmediatePropagation();
       }
     } else if (event.key === 'ArrowRight') {
-      if (!isOpen) {
+      if (isOpen) {
+        if (!this.isOnChildNode()) {
+          this.goNext(this.navigables, 0, 'Next');
+          event.stopImmediatePropagation();
+        }
+      } else if (this.isNode()) {
         this.changeOpenState(true);
         event.stopImmediatePropagation();
       }
     } else {
       const key = event.key === 'ArrowDown' ? 'Next' : 'Previous';
-      const components = this.navigables;
-      const done = this.goNext(components, this.getFocusIndex(), key);
+      const done = this.goNext(this.navigables, this.getFocusIndex(), key);
       if (done) {
         event.stopImmediatePropagation();
       }
@@ -71,7 +77,7 @@ export class TreeNavigation extends KeyboardNavigation {
   override goNext(components: readonly Navigable[], index: number, key: string): boolean {
     const nextIndex = this.getNextIndex(components, index, key);
     if (nextIndex === -1) {
-      // Désactivation si on est hors limite
+      // Désactivation si on est en dehors des limites
       this.changeTabAccess(false);
       return false;
     }
