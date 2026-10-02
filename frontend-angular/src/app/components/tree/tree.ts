@@ -16,7 +16,7 @@ import { Layout } from '../common/Types.js';
   templateUrl: './tree.html',
   hostDirectives: [TreeNavigation],
 })
-export class Tree extends NodeElement implements OnInit, AfterViewInit {
+export class Tree extends NodeElement implements OnInit {
   treeInjector = inject(Injector);
   treeNavigation = inject(TreeNavigation);
 
@@ -25,13 +25,9 @@ export class Tree extends NodeElement implements OnInit, AfterViewInit {
   layoutData = input.required<Layout>();
 
   isRoot = input<boolean>(false);
-
   constructor() {
     super();
     effect(() => this.doOpenClose(this.treeNavigation.openState()));
-  }
-  ngAfterViewInit(): void {
-    this.treeNavigation.changeOpenState(false);
   }
 
   ngOnInit(): void {
