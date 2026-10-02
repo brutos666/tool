@@ -11,6 +11,9 @@ import { NodeElement } from '../common/NodeElement.js';
   styleUrl: './toolbar.scss',
   templateUrl: './toolbar.html',
   hostDirectives: [ArrowNavigation],
+  host: {
+    role: 'toolbar',
+  },
 })
 export class Toolbar extends NodeElement {
   buttons = input.required<Array<Button>>();
