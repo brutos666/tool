@@ -1,18 +1,16 @@
-import { Directive, inject, input, signal } from '@angular/core';
+import { Directive, input, signal } from '@angular/core';
 import { Navigate } from '../components/common/Navigate.js';
-import { KeyboardNavigation } from './keyboard-navigation.js';
+import { MoveNavigation } from './move-navigation.js';
 import { Navigable } from '../components/common/Navigable.js';
 
 @Directive({
   selector: '[tree-navigation-directive]',
   providers: [{ provide: Navigate, useExisting: TreeNavigation }],
 })
-export class TreeNavigation extends KeyboardNavigation {
+export class TreeNavigation extends MoveNavigation {
   override name = 'TreeNavigation';
   navOrientation = input<'horizontal' | 'vertical'>('vertical');
   openState = signal<boolean>(false);
-
-  private treeParentNav = inject(TreeNavigation, { skipSelf: true, optional: true });
 
   changeOpenState(open: boolean) {
     this.openState.set(open);
@@ -20,14 +18,23 @@ export class TreeNavigation extends KeyboardNavigation {
       this.giveFocusIndex(0);
     }
   }
-  isOpen(): boolean {
-    return this.openState();
+  openNode() {
+    this.changeOpenState(true);
   }
-  isNode(): boolean {
-    return this.navigables.length > 1;
+  closeNode() {
+    this.changeOpenState(false);
   }
-  isOnChildNode(): boolean {
-    return this.getFocusIndex() > 0;
+  isClosed(): boolean {
+    return !this.openState();
+  }
+  isLeaf(): boolean {
+    return this.navigables.length === 1;
+  }
+  isOnNode(): boolean {
+    return this.getFocusIndex() === 0;
+  }
+  getNode(): Navigable {
+    return this.navigables[0];
   }
 
   override interceptKeys() {
@@ -40,81 +47,78 @@ export class TreeNavigation extends KeyboardNavigation {
     return keys;
   }
 
-  override onKeyDown(event: KeyboardEvent) {
-    if (!this.interceptKeys().includes(event.key)) {
-      return;
+  override moveToDirection(key: string): boolean {
+    if (['ArrowUp', 'ArrowDown'].includes(key)) {
+      return super.moveToDirection(key === 'ArrowDown' ? 'Next' : 'Previous');
     }
-    event.preventDefault();
-    const isOpen = this.isOpen();
-    if (event.key === 'ArrowLeft') {
-      if (isOpen) {
-        if (this.isOnChildNode()) {
-          this.giveFocusIndex(0);
-        } else {
-          this.changeOpenState(false);
-        }
-        event.stopImmediatePropagation();
-      }
-    } else if (event.key === 'ArrowRight') {
-      if (isOpen) {
-        if (!this.isOnChildNode()) {
-          this.goNext(this.navigables, 0, 'Next');
-          event.stopImmediatePropagation();
-        }
-      } else if (this.isNode()) {
-        this.changeOpenState(true);
-        event.stopImmediatePropagation();
-      }
-    } else {
-      const key = event.key === 'ArrowDown' ? 'Next' : 'Previous';
-      const done = this.goNext(this.navigables, this.getFocusIndex(), key);
-      if (done) {
-        event.stopImmediatePropagation();
-      }
-    }
-  }
-
-  override goNext(components: readonly Navigable[], index: number, key: string): boolean {
-    const nextIndex = this.getNextIndex(components, index, key);
-    if (nextIndex === -1) {
-      // Désactivation si on est en dehors des limites
-      this.changeTabAccess(false);
+    // Gauche/Droite
+    if (this.isLeaf()) {
       return false;
     }
-    if (key === 'Previous') {
-      this.getTreeChildNav(nextIndex)?.setCurrentLast();
+    if (this.isClosed()) {
+      if (key === 'ArrowRight') {
+        this.openNode();
+        return true;
+      }
+      return false; // noeud fermé, direction vers la gauche
+    }
+    // Noeud ouvert
+    if (key === 'ArrowLeft') {
+      if (this.isOnNode()) {
+        this.closeNode();
+      } else {
+        this.goOnNode();
+      }
+      return true;
+    }
+    // Ouvert, direction vers la droite
+    if (this.isOnNode()) {
+      return this.goOnFirstTree();
+    }
+    return false;
+  }
+  goOnNode() {
+    this.giveFocusIndex(0);
+  }
+  goOnFirstTree(): boolean {
+    // Recherche du 1er focusable après 0
+    const nextIndex = this.getNextIndex(this.navigables, 0, 'Next');
+    if (nextIndex > -1) {
+      this.moveToIndex('Next', nextIndex);
+      return true;
+    }
+    return false;
+  }
+
+  override moveToIndex(key: string, index: number) {
+    // IMPORTANT : Désactiver la prise de focus courante. On doit le faire avant les modifications d'index dans l'arbre
+    this.navigables[this.getFocusIndex()].changeTabAccess(false);
+    // Modification des index dans l'arbre avant de le rendre courant
+    if (key === 'Next') {
+      this.getTreeChildNav(index)?.setCurrentIndex(0);
     } else {
-      this.getTreeChildNav(nextIndex)?.setCurrentIndex(0);
+      this.getTreeChildNav(index)?.setCurrentLast();
     }
-    this.giveFocusIndex(nextIndex);
-    return true;
+    // Prise de focus
+    this.giveFocusIndex(index);
   }
 
-  override giveNext(index: number, key: string, nbItems: number): number {
-    let selectedIndex = index;
-    switch (key) {
-      case 'Next':
-        if (!this.isOpen()) {
-          return nbItems;
-        }
-        selectedIndex++;
-        break;
-      case 'Previous':
-        selectedIndex--;
-        break;
+  override giveNext(index: number, direction: string, nbItems: number): number {
+    if (direction === 'Next' && this.isClosed()) {
+      return nbItems;
     }
-    return selectedIndex;
+    return super.giveNext(index, direction, nbItems);
   }
 
+  /** Positionne sur la dernière feuille de la dernière branche du dernier arbre */
   setCurrentLast() {
-    if (!this.isOpen()) {
+    if (this.isClosed() || this.isLeaf()) {
       this.setCurrentIndex(0);
       return;
     }
     const components = this.navigables;
-    const nbItems = components.length;
     // Astuce pour trouver le dernier accessible à partir de la fin
-    const nextIndex = this.getNextIndex(components, nbItems, 'Previous');
+    const nextIndex = this.getNextIndex(components, components.length, 'Previous');
     if (nextIndex === -1) {
       return;
     }
@@ -126,23 +130,16 @@ export class TreeNavigation extends KeyboardNavigation {
   }
 
   override isFocusable(): boolean {
-    if (this.isOpen()) {
-      return super.isFocusable();
+    if (this.isClosed()) {
+      return this.getNode().isFocusable();
     }
-    return this.navigables[0].isFocusable();
-  }
-
-  getRootNavigation(): TreeNavigation {
-    if (this.treeParentNav) {
-      return this.treeParentNav.getRootNavigation();
-    }
-    return this;
+    return super.isFocusable();
   }
 
   getTreeChildNav(index: number): TreeNavigation | undefined {
     return this.getTreeChildrenNav()[index - 1];
   }
   getTreeChildrenNav(): TreeNavigation[] {
-    return this.navigables.filter((navigable) => navigable instanceof TreeNavigation);
+    return this.navigables.slice(1).map((navigable) => navigable as TreeNavigation);
   }
 }

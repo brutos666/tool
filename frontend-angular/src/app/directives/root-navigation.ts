@@ -4,9 +4,9 @@ import { TabNavigation } from './tab-navigation.js';
 
 @Directive({
   selector: '[workspace-navigation-directive]',
-  providers: [{ provide: Navigate, useExisting: WorkspaceNavigation }],
+  providers: [{ provide: Navigate, useExisting: RootNavigation }],
 })
-export class WorkspaceNavigation extends TabNavigation implements AfterViewInit {
+export class RootNavigation extends TabNavigation implements AfterViewInit {
   override name = 'WorkspaceNavigation';
 
   ngAfterViewInit(): void {

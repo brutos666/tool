@@ -1,7 +1,7 @@
 import { Directive } from '@angular/core';
 import { Navigable } from '../components/common/Navigable.js';
 import { Navigate } from '../components/common/Navigate.js';
-import { KeyboardNavigation } from './keyboard-navigation.js';
+import { MoveNavigation } from './move-navigation.js';
 
 @Directive({
   selector: '[tab-navigation-directive]',
@@ -10,31 +10,32 @@ import { KeyboardNavigation } from './keyboard-navigation.js';
     { provide: Navigate, useExisting: TabNavigation },
   ],
 })
-export class TabNavigation extends KeyboardNavigation {
+export class TabNavigation extends MoveNavigation {
   override name = 'TabNavigation';
 
   override interceptKeys(): String[] {
     return [...super.interceptKeys(), 'Tab'];
   }
 
-  override giveNext(index: number, key: string, nbItems: number): number {
-    let selectedIndex = index;
+  override moveToDirection(key: string): boolean {
     switch (key) {
       case 'Tab':
-        if (selectedIndex === nbItems - 1) {
-          return 0;
-        }
-        selectedIndex++;
-        break;
+        return super.moveToDirection('Next');
       case 'shift+Tab':
-        if (selectedIndex === 0) {
-          return nbItems - 1;
-        }
-        selectedIndex--;
-        break;
+        return super.moveToDirection('Previous');
       default:
-        return super.giveNext(index, key, nbItems);
+        return super.moveToDirection(key);
     }
-    return selectedIndex;
+  }
+
+  override giveNext(index: number, direction: string, nbItems: number): number {
+    // Contrairement à la navigation avec les flèches, la navigation avec les tabulation revient au départ
+    if (direction === 'Next' && index === nbItems - 1) {
+      return 0;
+    }
+    if (direction === 'Previous' && index === 0) {
+      return nbItems - 1;
+    }
+    return super.giveNext(index, direction, nbItems);
   }
 }

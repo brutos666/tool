@@ -1,7 +1,7 @@
 import { Directive, effect, model, OnDestroy } from '@angular/core';
 import { Navigable } from '../components/common/Navigable.js';
 import { Navigate } from '../components/common/Navigate.js';
-import { BasicNavigation } from './basic-navigation.js';
+import { ManualNavigation } from './manual-navigation.js';
 
 /** Cette classe gère la navigation manuelle d'un composant focusable à un autre */
 @Directive({
@@ -14,7 +14,7 @@ import { BasicNavigation } from './basic-navigation.js';
     '[attr.index-focus]': 'getFocusIndex()',
   },
 })
-export class KeyboardNavigation extends BasicNavigation implements OnDestroy {
+export class KeyboardNavigation extends ManualNavigation implements OnDestroy {
   override name = 'KeyboardNavigation';
 
   navEnabled = model<boolean>(false);
@@ -44,84 +44,25 @@ export class KeyboardNavigation extends BasicNavigation implements OnDestroy {
   }
 
   interceptKeys(): String[] {
-    return ['Home', 'End'];
+    return [];
   }
 
   onKeyDown(event: KeyboardEvent) {
-    if (!this.navEnabled()) {
-      return;
-    }
-    const components = this.navigables;
-    const nbItems = components.length;
-    if (nbItems === 0) {
-      return;
-    }
-    if (!this.interceptKeys().includes(event.key)) {
+    if (
+      !this.navEnabled() ||
+      !this.navigables.length ||
+      !this.interceptKeys().includes(event.key)
+    ) {
       return;
     }
     event.preventDefault();
-    if (event.key === 'Home') {
-      this.goFirst();
-      return;
-    }
-    if (event.key === 'End') {
-      this.goLast();
-      return;
-    }
-    this.goNext(
-      components,
-      this.getFocusIndex(),
-      event.shiftKey ? `shift+${event.key}` : event.key,
-    );
-  }
-
-  goNext(components: readonly Navigable[], index: number, key: string) {
-    const nextIndex = this.getNextIndex(components, index, key);
-    if (nextIndex > -1) {
-      this.giveFocusIndex(nextIndex);
+    if (this.moveToDirection(event.shiftKey ? `shift+${event.key}` : event.key)) {
+      event.stopImmediatePropagation();
     }
   }
 
-  goFirst() {
-    // Astuce pour trouver le 1er accessible à partir du début
-    const nextIndex = this.getNextIndex(this.navigables, -1, 'Next');
-    if (nextIndex > -1) {
-      this.giveFocusIndex(nextIndex);
-    }
-  }
-  goLast() {
-    const components = this.navigables;
-    const nbItems = components.length;
-    // Astuce pour trouver le dernier accessible à partir de la fin
-    const nextIndex = this.getNextIndex(components, nbItems, 'Previous');
-    if (nextIndex > -1) {
-      this.giveFocusIndex(nextIndex);
-    }
-  }
-
-  getNextIndex(components: readonly Navigable[], index: number, key: string): number {
-    const nbItems = components.length;
-    const selectedIndex = this.giveNext(index, key, nbItems);
-    if (selectedIndex === -1 || selectedIndex === nbItems) {
-      return -1;
-    }
-    if (components[selectedIndex].isFocusable()) {
-      return selectedIndex;
-    }
-    return this.getNextIndex(components, selectedIndex, key);
-  }
-
-  giveNext(index: number, key: string, nbItems: number): number {
-    let selectedIndex = index;
-    switch (key) {
-      case 'Next':
-        selectedIndex++;
-        break;
-      case 'Previous':
-        selectedIndex--;
-        break;
-    }
-    return selectedIndex;
+  moveToDirection(key: string): boolean {
+    return true;
   }
 
   override changeTabAccess(access: boolean) {

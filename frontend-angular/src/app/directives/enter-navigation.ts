@@ -1,8 +1,8 @@
 import { Directive, model } from '@angular/core';
 import { Navigate } from '../components/common/Navigate.js';
-import { BasicNavigation } from './basic-navigation.js';
 import { Navigable } from '../components/common/Navigable.js';
 import { KeyboardNavigation } from './keyboard-navigation.js';
+import { ManualNavigation } from './manual-navigation.js';
 
 @Directive({
   selector: '[enter-directive]',
@@ -20,7 +20,7 @@ export class EnterNavigation extends KeyboardNavigation {
   inside = model<boolean>(false);
 
   override registerChild(navigable: Navigable): void {
-    if (!(navigable instanceof BasicNavigation)) {
+    if (!(navigable instanceof ManualNavigation)) {
       return;
     }
     super.registerChild(navigable);
