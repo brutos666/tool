@@ -1,6 +1,6 @@
 @if (data().icon) {
   <icon [name]="data().icon"></icon>
 }
-@if (['menu', 'label'].includes(data().type)) {
+@if (['menu', 'label', 'item-like'].includes(data().type)) {
   <label labelInput [text]="data().label" [id]="data().id + '-label'"></label>
 }

@@ -1,6 +1,6 @@
 export class Button {
   id!: string;
-  type!: 'icon' | 'menu' | 'label' | 'primary' | 'burger';
+  type!: 'icon' | 'menu' | 'label' | 'primary' | 'burger' | 'item-like';
   label!: string;
   icon!: string;
   role!: string;
@@ -14,7 +14,7 @@ export class Button {
    * @param {string} label - Label du bouton
    * @param {string|undefined} icon - Icône du bouton
    * @param {'button'|'menuitem'} role - Rôle du bouton
-   * @param {'icon'|'menu'|'label'|'primary'|'burger'} data.type - Type de bouton
+   * @param {'icon'|'menu'|'label'|'primary'|'burger'| 'item-like'} data.type - Type de bouton
    * @param {Function} onClick - méthode à appeler sur le click d'un bouton
    */
   constructor(
@@ -22,7 +22,7 @@ export class Button {
     label: string,
     icon: string | undefined,
     role: 'button' | 'menuitem',
-    type: 'icon' | 'menu' | 'label' | 'primary' | 'burger',
+    type: 'icon' | 'menu' | 'label' | 'primary' | 'burger' | 'item-like',
     onClick: Function = () => {},
   ) {
     this.id = id;
