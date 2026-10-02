@@ -1,0 +1,15 @@
+:host {
+  display: flex;
+  flex-direction: column;
+}
+.element {
+  padding: var(--medium-padding);
+  display: flex;
+  flex-direction: column;
+}
+.element__tree {
+  background: var(--color-bg-surface);
+  border-radius: var(--border-radius);
+  box-shadow: 3px 3px 4px var(--color-box-shadow);
+  padding: var(--medium-padding);
+}

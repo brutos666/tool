@@ -22,6 +22,18 @@
   height: calc(100% - 4px);
   overflow: hidden;
 }
+h1 {
+  margin: var(--global-margin);
+  font-size: 1.5em;
+}
+.working-space__add-button {
+  min-height: 40px;
+  width: 100%;
+  background: var(--color-bg-surface);
+  border-radius: var(--border-radius);
+  box-shadow: 3px 3px 4px var(--color-box-shadow);
+  padding: var(--medium-padding);
+}
 
 .working-space__splitter {
   grid-row: 2;

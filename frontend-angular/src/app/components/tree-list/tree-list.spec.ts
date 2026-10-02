@@ -5,8 +5,8 @@ import { inputBinding, signal, Signal } from '@angular/core';
 import { TreeData } from '../../data/tree-data.js';
 
 describe('TreeList', () => {
-  let component: TreeList<Data>;
-  let fixture: ComponentFixture<TreeList<Data>>;
+  let component: TreeList;
+  let fixture: ComponentFixture<TreeList>;
   let dataListSignal: Signal<Array<TreeData<Data>>>;
 
   beforeEach(async () => {
