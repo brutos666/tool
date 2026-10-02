@@ -1,7 +1,6 @@
 import { Component, ElementRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MenuButton } from '../action-button/menu-button.js';
 import { MenuBar } from '../menu-bar/menu-bar.js';
-import { AsideSpace } from '../aside-space/aside-space.js';
 import { TreeList } from '../tree-list/tree-list';
 import { ItemService } from '../../services/item-service.js';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -10,9 +9,15 @@ import { ItemData } from '../../data/item-data.js';
 import { Layout } from '../common/Types.js';
 import { RootNavigation } from '../../directives/root-navigation.js';
 import { NodeElement } from '../common/NodeElement.js';
+import { SpaceBody } from '../space/space-body';
+import { SpaceHeader } from '../space/space-header';
+import { Space } from '../space/space.js';
+import { SpaceFooter } from '../space/space-footer';
+import { ItemLikeButton } from '../action-button/item-like-button.js';
+import { ActionButton } from '../action-button/action-button';
 
 @Component({
-  imports: [MenuBar, AsideSpace, TreeList],
+  imports: [MenuBar, TreeList, Space, SpaceBody, SpaceHeader, SpaceFooter, ActionButton],
   standalone: true,
   selector: 'working-space',
   styleUrl: './working-space.scss',
@@ -35,6 +40,7 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
   label: String = 'Menu des commandes';
   navLayout: Layout = Layout.Title;
   mainLayout: Layout = Layout.Todo;
+  addNewTreeButton: ItemLikeButton = new ItemLikeButton('addNewItem', 'Ajouter un élément');
 
   @ViewChild('splitter') splitterRef!: ElementRef;
   @ViewChild('navSpace', { read: ElementRef }) navSpaceRef!: ElementRef;
