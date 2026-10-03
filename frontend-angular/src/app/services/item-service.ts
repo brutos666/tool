@@ -60,14 +60,18 @@ export class ItemService {
     }
   }
 
+  addRootItem(title: string) {
+    const treeRootItem = this.rootItemSubject.value;
+    const treeData = this.createNewItem(treeRootItem.getTreeItemId(), title);
+    treeRootItem.addChild(treeData);
+    // Mise à jour pour les souscripteurs
+    this.rootItemSubject.next(treeRootItem.copy());
+  }
+
   addChildItem(treeData: TreeData<ItemData>, title: string) {
     const rootItem = this.rootItemSubject.value;
     const callback = (tree: TreeData<ItemData>) => {
-      this.treeItemId++;
-      const treeData = new TreeData(new ItemData('', title, '', 'TODO', '', ''));
-      treeData.getContent().markAsNew();
-      treeData.setTreeItemId(`${this.treeItemId}`);
-      treeData.setParentTreeItemId(tree.getTreeItemId());
+      const treeData = this.createNewItem(tree.getTreeItemId(), title);
       tree.addChild(treeData);
     };
     if (this.applyNodes(rootItem, treeData, callback)) {
@@ -75,6 +79,7 @@ export class ItemService {
       this.rootItemSubject.next(rootItem.copy());
     }
   }
+
   markToDelete(treeData: TreeData<ItemData>) {
     const rootItem = this.rootItemSubject.value;
     const callback = treeData.getContent().isNew()
@@ -94,6 +99,15 @@ export class ItemService {
       // Mise à jour pour les souscripteurs
       this.rootItemSubject.next(rootItem.copy());
     }
+  }
+
+  private createNewItem(parentId: string, title: string) {
+    this.treeItemId++;
+    const treeData = new TreeData(new ItemData('', title, '', 'TODO', '', ''));
+    treeData.getContent().markAsNew();
+    treeData.setTreeItemId(`${this.treeItemId}`);
+    treeData.setParentTreeItemId(parentId);
+    return treeData;
   }
 
   private applyNodes(

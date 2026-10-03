@@ -40,7 +40,11 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
   label: String = 'Menu des commandes';
   navLayout: Layout = Layout.Title;
   mainLayout: Layout = Layout.Todo;
-  addNewTreeButton: ItemLikeButton = new ItemLikeButton('addNewItem', 'Ajouter un élément');
+  addNewTreeButton: ItemLikeButton = new ItemLikeButton(
+    'addNewItem',
+    'Ajouter un élément',
+    this.doAdd.bind(this, 'Saisir un espace'),
+  );
 
   @ViewChild('splitter') splitterRef!: ElementRef;
   @ViewChild('navSpace', { read: ElementRef }) navSpaceRef!: ElementRef;
@@ -64,6 +68,10 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
 
   onReloadClick() {
     this.itemService.loadItems();
+  }
+
+  doAdd(title: string) {
+    this.itemService.addRootItem(title);
   }
 
   onPointerDown(event: PointerEvent) {
