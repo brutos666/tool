@@ -87,23 +87,21 @@ export class EnterNavigation extends KeyboardNavigation {
   }
 
   override changeTabAccess(access: boolean) {
+    this.navEnabled.set(access);
     if (access) {
-      this.navEnabled.set(true);
-      if (this.inside()) {
+      const inside = this.inside();
+      this.navigables[0].changeTabAccess(inside);
+      this.getElement().setAttribute('tabindex', inside ? '-1' : '0');
+      if (inside) {
         // Lorsque l'on entre dans un composant, le seul moyen d'en sortir doit être la touche Echap (ou la souris)
-        // On désactive donc toute la branche de navigation courante pour n'activer que l'intérieur du composant
         this.getParentNavigation()?.stopNavigation();
-        // La tabulation ne doit plus se positionner sur l'élément mais à l'intérieur
-        this.getElement().setAttribute('tabindex', '-1');
-        this.navigables[0].changeTabAccess(true);
       } else {
         this.getParentNavigation()?.startNavigation();
-        this.getElement().setAttribute('tabindex', '0');
       }
       return;
     }
-    this.navEnabled.set(false);
     this.inside.set(false);
+    this.navigables[0].changeTabAccess(false);
     this.getElement().setAttribute('tabindex', '-1');
   }
 }

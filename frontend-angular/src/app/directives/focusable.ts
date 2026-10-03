@@ -8,8 +8,8 @@ import { Navigable } from '../components/common/Navigable.js';
 export class Focusable implements Navigable {
   name = 'Focusable';
 
-  private accessible: boolean = false;
-  private mustGiveFocus: boolean = false;
+  protected accessible: boolean = false;
+  protected mustGiveFocus: boolean = false;
 
   private element = inject(ElementRef).nativeElement;
 
@@ -24,9 +24,9 @@ export class Focusable implements Navigable {
     afterNextRender({
       // Note : après toutes les modifications appliquées au DOM suite des changements (signal, événement)
       read: () => {
-        this.getElement().setAttribute('tabindex', this.accessible ? '0' : '-1');
+        this.changeTabAccess(this.accessible);
         if (this.mustGiveFocus) {
-          this.getElement().focus();
+          this.giveFocus();
           this.mustGiveFocus = false;
         }
       },
@@ -38,7 +38,6 @@ export class Focusable implements Navigable {
 
   setElement(element: HTMLElement) {
     this.element = element;
-    this.changeTabAccess(false);
   }
   getElement(): HTMLElement {
     return this.element;

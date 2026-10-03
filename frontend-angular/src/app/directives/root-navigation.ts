@@ -1,26 +1,27 @@
-import { AfterViewInit, Directive } from '@angular/core';
+import { Directive } from '@angular/core';
 import { Navigate } from '../components/common/Navigate.js';
-import { TabNavigation } from './tab-navigation.js';
+import { ManualNavigation } from './manual-navigation.js';
 
 @Directive({
   selector: '[workspace-navigation-directive]',
   providers: [{ provide: Navigate, useExisting: RootNavigation }],
 })
-export class RootNavigation extends TabNavigation implements AfterViewInit {
-  override name = 'WorkspaceNavigation';
+export class RootNavigation extends ManualNavigation {
+  override name = 'RootNavigation';
 
-  ngAfterViewInit(): void {
-    this.changeTabAccess(true);
-  }
+  protected override accessible: boolean = true;
 
   override onMouseDown(event: MouseEvent) {
     super.onMouseDown(event);
-    this.changeTabAccess(true);
+    this.navigables[this.getFocusIndex()].changeTabAccess(true);
     this.giveFocus();
   }
 
-  override interceptKeys(): String[] {
-    // Pas de prise en compte de Home et End au niveau de l'interface
-    return ['Tab'];
+  override changeCurrentIndex(index: number): void {
+    this.setCurrentIndex(index);
+  }
+
+  override changeTabAccess(access: boolean): void {
+    this.navigables.forEach((navigable) => navigable.changeTabAccess(access));
   }
 }
