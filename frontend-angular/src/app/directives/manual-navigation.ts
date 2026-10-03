@@ -76,6 +76,11 @@ export class ManualNavigation extends Focusable implements Navigate {
     if (!event.target || !(event.target instanceof Element)) {
       return;
     }
+    // Exclure les boutons notamment l'ouverture des noeuds
+    if (event.target.closest('button')) {
+      event.stopPropagation();
+      return;
+    }
     const index = this.getNavigableIndex(event.target);
     if (index > -1) {
       this.changeCurrentIndex(index);

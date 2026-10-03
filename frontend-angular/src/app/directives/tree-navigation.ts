@@ -15,7 +15,7 @@ export class TreeNavigation extends MoveNavigation {
   changeOpenState(open: boolean) {
     this.openState.set(open);
     if (!open) {
-      this.giveFocusIndex(0);
+      this.setFocusIndex(0);
     }
   }
   openNode() {
