@@ -73,7 +73,7 @@ export class ManualNavigation extends Focusable implements Navigate {
   }
 
   onMouseDown(event: MouseEvent) {
-    if (!event.target || !(event.target instanceof HTMLElement)) {
+    if (!event.target || !(event.target instanceof Element)) {
       return;
     }
     const index = this.getNavigableIndex(event.target);
@@ -82,7 +82,7 @@ export class ManualNavigation extends Focusable implements Navigate {
     }
   }
 
-  private getNavigableIndex(element: HTMLElement): number {
+  private getNavigableIndex(element: Element): number {
     return this.navigables.findIndex((navigable) => navigable.getElement().contains(element));
   }
 
@@ -146,11 +146,11 @@ export class ManualNavigation extends Focusable implements Navigate {
 
   private getIndexAfterRemove(navigable: Navigable): number {
     const indexToRemove = this.navigables.indexOf(navigable);
-    const nbLeft = this.navigables.length;
+    const nbLeft = this.navigables.length - 1;
     if (nbLeft === 0) {
       return 0;
     }
-    return this.#selectedIndex > indexToRemove || indexToRemove === nbLeft
+    return this.#selectedIndex > indexToRemove || this.#selectedIndex === nbLeft
       ? this.#selectedIndex - 1
       : this.#selectedIndex;
   }
