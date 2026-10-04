@@ -31,7 +31,7 @@ export class KeyboardNavigation extends ManualNavigation implements OnDestroy {
     });
   }
   ngOnDestroy(): void {
-    this.elementRef.nativeElement.removeEventListener('keydown', this.onKeyDown.bind(this));
+    this.elementRef.nativeElement.removeEventListener('keydown', this.#onKeyDownEvent);
   }
 
   override startNavigation() {

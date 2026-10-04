@@ -65,10 +65,28 @@ export class TreeData<T extends Data> {
     this.children = children;
   }
 
-  getChildByTreeItemId(treeItemId: string): TreeData<T> | undefined {
+  getChildByTreeItemId(treeItemId: string): TreeData<T> | null {
     if (treeItemId === this.treeItemId) {
       return this;
     }
-    return this.getChildren().find((child) => child.getChildByTreeItemId(treeItemId));
+    for (const treeChild of this.getChildren()) {
+      const found = treeChild.getChildByTreeItemId(treeItemId);
+      if (found) {
+        return found;
+      }
+    }
+    return null;
+  }
+  getChildByItemId(itemId: string): TreeData<T> | null {
+    if (itemId === this.getItemId()) {
+      return this;
+    }
+    for (const treeChild of this.getChildren()) {
+      const found = treeChild.getChildByItemId(itemId);
+      if (found) {
+        return found;
+      }
+    }
+    return null;
   }
 }

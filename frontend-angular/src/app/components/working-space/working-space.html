@@ -12,5 +12,5 @@
 </aside>
 <div #splitter class="working-space__splitter" (pointerdown)="onPointerDown($event)">&nbsp;</div>
 <main #mainSpace class="working-space__main">
-  <tree-list [dataList]="rootItem().getChildren()" [navOrientation]="'vertical'" [layoutData]="mainLayout"></tree-list>
+  <tree-list [dataList]="currentItem()?.getChildren() || []" [navOrientation]="'vertical'" [layoutData]="mainLayout"></tree-list>
 </main>

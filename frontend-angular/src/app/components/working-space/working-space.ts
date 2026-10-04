@@ -35,6 +35,7 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
   rootItem = toSignal(this.itemService.rootItem$, {
     initialValue: new TreeData<ItemData>(ItemService.rootItemData),
   });
+  currentItem = this.itemService.currentItemSignal;
 
   menuItems: Array<MenuButton> = [];
   label: String = 'Menu des commandes';

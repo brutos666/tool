@@ -1,4 +1,4 @@
-import { inject, Service } from '@angular/core';
+import { inject, Service, signal } from '@angular/core';
 import { TreeData } from '../data/tree-data.js';
 import { ItemData } from '../data/item-data.js';
 import { HttpClient } from '@angular/common/http';
@@ -15,6 +15,7 @@ export class ItemService {
   );
   // asObservable permet de retourner un observable du sujet. Ainsi, on peut souscrire et être notifié à chaque fois que le sujet est modifié avec next
   rootItem$ = this.rootItemSubject.asObservable();
+  currentItemSignal = signal<TreeData<ItemData> | null>(null);
 
   // Identifiant unique indépendant de l'identifiant issu de la base de données. Permet d'identifiant les nouveaux éléments non sauvegardés
   private treeItemId: number = 0;
@@ -46,7 +47,7 @@ export class ItemService {
       )
       .subscribe((rootItem) => {
         // next met à jour le sujet avec la valeur
-        this.rootItemSubject.next(rootItem);
+        this.propageUpdates(rootItem);
       });
   }
 
@@ -55,49 +56,64 @@ export class ItemService {
     const callback = (tree: TreeData<ItemData>) =>
       tree.getContent().setValueProperty(property, value);
     if (this.applyNodes(rootItem, treeData, callback)) {
-      // Mise à jour pour les souscripteurs
-      this.rootItemSubject.next(rootItem.copy());
+      this.propageUpdates(rootItem);
     }
   }
 
-  addRootItem(title: string) {
+  public addRootItem(title: string) {
     const treeRootItem = this.rootItemSubject.value;
     const treeData = this.createNewItem(treeRootItem.getTreeItemId(), title);
     treeRootItem.addChild(treeData);
-    // Mise à jour pour les souscripteurs
-    this.rootItemSubject.next(treeRootItem.copy());
+    this.propageUpdates(treeRootItem);
   }
 
-  addChildItem(treeData: TreeData<ItemData>, title: string) {
+  public addChildItem(treeData: TreeData<ItemData>, title: string) {
     const rootItem = this.rootItemSubject.value;
     const callback = (tree: TreeData<ItemData>) => {
       const treeData = this.createNewItem(tree.getTreeItemId(), title);
       tree.addChild(treeData);
     };
     if (this.applyNodes(rootItem, treeData, callback)) {
-      // Mise à jour pour les souscripteurs
-      this.rootItemSubject.next(rootItem.copy());
+      this.propageUpdates(rootItem);
     }
   }
 
-  markToDelete(treeData: TreeData<ItemData>) {
+  public markToDelete(treeData: TreeData<ItemData>) {
     const rootItem = this.rootItemSubject.value;
     const callback = treeData.getContent().isNew()
       ? (tree: TreeData<ItemData>, parentTree: TreeData<ItemData>) => parentTree.removeChild(tree)
       : (tree: TreeData<ItemData>) =>
           this.applyTree(tree, (node: TreeData<ItemData>) => node.getContent().markToDelete());
     if (this.applyNodes(rootItem, treeData, callback)) {
-      // Mise à jour pour les souscripteurs
-      this.rootItemSubject.next(rootItem.copy());
+      this.propageUpdates(rootItem);
     }
   }
-  undoToDelete(treeData: TreeData<ItemData>) {
+  public undoToDelete(treeData: TreeData<ItemData>) {
     const rootItem = this.rootItemSubject.value;
     const callback = (tree: TreeData<ItemData>) =>
       this.applyTree(tree, (node: TreeData<ItemData>) => node.getContent().undoToDelete());
     if (this.applyNodes(rootItem, treeData, callback)) {
-      // Mise à jour pour les souscripteurs
-      this.rootItemSubject.next(rootItem.copy());
+      this.propageUpdates(rootItem);
+    }
+  }
+
+  public setCurrentItem(treeData: TreeData<ItemData>) {
+    this.currentItemSignal.set(treeData);
+  }
+  public isCurrentItem(treeData: TreeData<ItemData>) {
+    return this.currentItemSignal() === treeData;
+  }
+
+  private propageUpdates(rootItem: TreeData<ItemData>) {
+    // Mise à jour pour les souscripteurs
+    this.rootItemSubject.next(rootItem.copy());
+    // Le courant doit être mis à jour
+    const currentItem = this.currentItemSignal();
+    if (currentItem) {
+      const foundItem = currentItem.getContent().isNew()
+        ? rootItem.getChildByTreeItemId(currentItem.getTreeItemId())
+        : rootItem.getChildByItemId(currentItem.getItemId());
+      this.currentItemSignal.set(foundItem);
     }
   }
 

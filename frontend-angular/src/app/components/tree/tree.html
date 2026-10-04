@@ -1,9 +1,8 @@
-<div class="tree" 
+<div 
+class="tree" 
 [ngClass]="{'tree--node':treeData().getChildren().length, 'tree--leaf':treeData().getChildren().length === 0, 'tree--root':isRoot() }" 
 role="treeitem" 
-position="inside" 
-[attr.item-id]= "treeData().getItemId()" 
-[attr.tree-item-id]= "treeData().getTreeItemId()">
+position="inside">
   <button basicButton class="tree__toggle" [data]="toggleIcon" (click)="onOpenClose()"></button>
   <tree-content class="tree__content" [layoutData]="layoutData()" [treeData]="treeData()">
   </tree-content>

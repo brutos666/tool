@@ -39,12 +39,12 @@
 }
 
 /* -- Apparence -- */
-.current-tree>.tree__content,
-.current-tree>.tree__toggle {
+:host[aria-selected="true"] > .tree > .tree__content,
+:host[aria-selected="true"] > .tree > .tree__toggle {
   background-color: var(--color-bg-current);
 }
-.current .current-tree>.tree__content,
-.current .current-tree>.tree__toggle {
+.current :host[aria-selected="true"] > .tree >.tree__content,
+.current :host[aria-selected="true"] > .tree >.tree__toggle {
   background-color: var(--color-bg-focus);
 }
 

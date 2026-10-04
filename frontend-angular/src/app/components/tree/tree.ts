@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, effect, inject, Injector, input, OnInit } from '@angular/core';
+import { Component, effect, inject, input, OnInit } from '@angular/core';
 import { Button } from '../action-button/button.js';
 import { TreeData } from '../../data/tree-data.js';
 import { NgClass } from '@angular/common';
@@ -8,21 +8,26 @@ import { TreeContent } from '../tree-content/tree-content';
 import { TreeNavigation } from '../../directives/tree-navigation.js';
 import { ItemData } from '../../data/item-data.js';
 import { Layout } from '../common/Types.js';
+import { SelectTree } from '../../directives/select-tree.js';
 
 @Component({
   imports: [BasicButton, NgClass, TreeContent],
   selector: 'tree',
   styleUrl: './tree.scss',
   templateUrl: './tree.html',
-  hostDirectives: [TreeNavigation],
+  hostDirectives: [TreeNavigation, { directive: SelectTree, inputs: ['treeData', 'layoutData'] }],
+  host: {
+    '[attr.item-id]': 'treeData().getItemId()',
+    '[attr.tree-item-id]': 'treeData().getTreeItemId()',
+  },
 })
 export class Tree extends NodeElement implements OnInit {
-  treeInjector = inject(Injector);
   treeNavigation = inject(TreeNavigation);
 
   toggleIcon!: Button;
   treeData = input.required<TreeData<ItemData>>();
   layoutData = input.required<Layout>();
+  selectTree = input<SelectTree>();
 
   isRoot = input<boolean>(false);
   constructor() {
