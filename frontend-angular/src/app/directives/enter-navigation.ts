@@ -54,19 +54,19 @@ export class EnterNavigation extends KeyboardNavigation {
 
   enter() {
     this.inside.set(true);
-    this.changeTabAccess(true);
+    this.applyAccessInside();
     this.giveFocus();
   }
 
   exit() {
     this.inside.set(false);
-    this.changeTabAccess(true);
+    this.applyAccessOutside();
     this.giveFocus();
   }
 
   override isFocusable(): boolean {
     if (this.inside()) {
-      return this.navigables[0].isFocusable();
+      return this.getInside().isFocusable();
     }
     const classList = this.getElement().classList;
     return !classList.contains('hidden') && !classList.contains('disabled');
@@ -74,14 +74,14 @@ export class EnterNavigation extends KeyboardNavigation {
 
   override giveFocus() {
     if (this.inside()) {
-      this.navigables[0].giveFocus();
+      this.getInside().giveFocus();
     } else {
       this.getElement().focus();
     }
   }
   override isFocused(): boolean {
     if (this.inside()) {
-      return this.navigables[0].isFocused();
+      return this.getInside().isFocused();
     }
     return document.activeElement === this.getElement();
   }
@@ -94,20 +94,38 @@ export class EnterNavigation extends KeyboardNavigation {
   }
 
   override applyTabAccess() {
-    const access = this.accessible;
-    if (access) {
-      const inside = this.inside();
-      this.navigables[0].changeTabAccess(inside);
-      this.getElement().setAttribute('tabindex', inside ? '-1' : '0');
-      if (inside) {
-        // Lorsque l'on entre dans un composant, le seul moyen d'en sortir doit être la touche Echap (ou la souris)
-        this.getParentNavigation()?.stopNavigation();
-      } else {
-        this.getParentNavigation()?.startNavigation();
-      }
+    if (!this.hasInside()) {
       return;
     }
-    this.navigables[0].changeTabAccess(false);
+    if (this.inside()) {
+      this.applyAccessInside();
+      return;
+    }
+    if (this.accessible) {
+      this.applyAccessOutside();
+      return;
+    }
+    this.getInside().changeTabAccess(false);
     this.getElement().setAttribute('tabindex', '-1');
+  }
+
+  private applyAccessInside() {
+    this.getElement().setAttribute('tabindex', '-1');
+    this.getInside().changeTabAccess(true);
+    // Lorsque l'on entre dans un composant, le seul moyen d'en sortir doit être la touche Echap (ou la souris)
+    this.getParentNavigation()?.stopNavigation();
+  }
+
+  private applyAccessOutside() {
+    this.getElement().setAttribute('tabindex', '0');
+    this.getInside().changeTabAccess(false);
+    this.getParentNavigation()?.startNavigation();
+  }
+
+  private getInside(): Navigable {
+    return this.navigables[0];
+  }
+  private hasInside(): boolean {
+    return this.navigables.length > 0;
   }
 }

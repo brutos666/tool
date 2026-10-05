@@ -15,9 +15,19 @@ import { Space } from '../space/space.js';
 import { SpaceFooter } from '../space/space-footer';
 import { ItemLikeButton } from '../action-button/item-like-button.js';
 import { ActionButton } from '../action-button/action-button';
+import { TreeContent } from '../tree-content/tree-content';
 
 @Component({
-  imports: [MenuBar, TreeList, Space, SpaceBody, SpaceHeader, SpaceFooter, ActionButton],
+  imports: [
+    MenuBar,
+    TreeList,
+    Space,
+    SpaceBody,
+    SpaceHeader,
+    SpaceFooter,
+    ActionButton,
+    TreeContent,
+  ],
   standalone: true,
   selector: 'working-space',
   styleUrl: './working-space.scss',
@@ -41,10 +51,15 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
   label: String = 'Menu des commandes';
   navLayout: Layout = Layout.Title;
   mainLayout: Layout = Layout.Todo;
-  addNewTreeButton: ItemLikeButton = new ItemLikeButton(
+  navAddButton: ItemLikeButton = new ItemLikeButton(
+    'addNewSpace',
+    'Ajouter un élément',
+    this.doAddSpace.bind(this, 'Saisir un espace'),
+  );
+  mainAddButton: ItemLikeButton = new ItemLikeButton(
     'addNewItem',
     'Ajouter un élément',
-    this.doAdd.bind(this, 'Saisir un espace'),
+    this.doAddItem.bind(this, 'Saisir un pense-bête'),
   );
 
   @ViewChild('splitter') splitterRef!: ElementRef;
@@ -71,8 +86,14 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
     this.itemService.loadItems();
   }
 
-  doAdd(title: string) {
+  doAddSpace(title: string) {
     this.itemService.addRootItem(title);
+  }
+  doAddItem(title: string) {
+    const currentItem = this.currentItem();
+    if (currentItem) {
+      this.itemService.addChildItem(currentItem, title);
+    }
   }
 
   onPointerDown(event: PointerEvent) {

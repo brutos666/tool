@@ -13,7 +13,7 @@ import { Layout } from '../common/Types.js';
   templateUrl: './tree-list.html',
   hostDirectives: [{ directive: TreeListNavigation, inputs: ['navOrientation'] }],
   host: {
-    'aria-orientation': 'vertical',
+    'aria-orientation': 'navOrientation',
     role: 'group',
   },
 })

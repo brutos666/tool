@@ -49,3 +49,18 @@ h1 {
   width: calc(100% - 4px);
   overflow: hidden;
 }
+.main-space__header {
+  display: flex;
+  justify-content: center;
+}
+.main-space__footer {
+padding: var(--medium-padding);
+  display: flex;
+  align-items: center;
+  min-width: min-content;
+  max-width: 400px;
+}
+.main-space__footer > button {
+  flex: 1;
+  min-height: 40px;
+}

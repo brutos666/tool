@@ -13,3 +13,13 @@
   box-shadow: 3px 3px 4px var(--color-box-shadow);
   padding: var(--medium-padding);
 }
+
+:host[aria-orientation="horizontal"] {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, max-content));
+  margin: var(--small-margin);
+  padding: 0;
+  align-items: start;
+  align-content: start;
+}

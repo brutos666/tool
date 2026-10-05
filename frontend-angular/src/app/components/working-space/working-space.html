@@ -1,16 +1,31 @@
 <menu-bar class="working-space__menu" [label]="label" [menuItems]="menuItems"></menu-bar>
 <aside #navSpace class="working-space__nav" aria-current="true">
   <space>
-    <space-header><h1>Navigation</h1></space-header>
+    <space-header class="nav-space__header"><h1>Navigation</h1></space-header>
     <space-body>
       <tree-list [dataList]="rootItem().getChildren()" [navOrientation]="'vertical'" [layoutData]="navLayout"></tree-list>
     </space-body>
     <space-footer>
-      <button class="working-space__add-button" actionButton [data]="addNewTreeButton"></button>
+      <button class="working-space__add-button" actionButton [data]="navAddButton"></button>
     </space-footer>
   </space>
 </aside>
 <div #splitter class="working-space__splitter" (pointerdown)="onPointerDown($event)">&nbsp;</div>
 <main #mainSpace class="working-space__main">
-  <tree-list [dataList]="currentItem()?.getChildren() || []" [navOrientation]="'vertical'" [layoutData]="mainLayout"></tree-list>
+  @let currentTreeData = currentItem();
+  @if (currentTreeData) {
+    <space>
+      <space-header class="main-space__header">
+        <h1><tree-content [treeData]="currentTreeData" [layoutData]="mainLayout"></tree-content></h1>
+      </space-header>
+      <space-body>
+        <tree-list [dataList]="currentTreeData.getChildren() || []" [navOrientation]="'horizontal'" [layoutData]="mainLayout"></tree-list>
+      </space-body>
+      <space-footer class="main-space__footer">
+        <button actionButton [data]="mainAddButton"></button>
+      </space-footer>
+    </space>
+  } @else {
+    <p>Sélectionner un élément dans la navigation à gauche</p>
+  }
 </main>
