@@ -32,7 +32,7 @@ export class ManualNavigation extends Focusable implements Navigate {
       // Comme on veut modifier des attributs html tabindex, on le fait sur la phase write
       write: () => {
         this.navigables = this.sortNavigables([...this.navigablesSignal()]);
-        this.changeTabAccess(this.accessible);
+        this.applyTabAccess();
         if (this.mustGiveFocus) {
           this.giveFocus();
           this.mustGiveFocus = false;
@@ -117,14 +117,10 @@ export class ManualNavigation extends Focusable implements Navigate {
     this.#selectedIndex = index;
   }
 
-  override changeTabAccess(access: boolean) {
-    if (!access) {
-      this.mustGiveFocus = false;
-    }
-    this.accessible = access;
+  override applyTabAccess() {
     const components = this.navigables;
     if (components.length) {
-      components[this.#selectedIndex].changeTabAccess(access);
+      components[this.#selectedIndex].changeTabAccess(this.accessible);
     }
   }
 

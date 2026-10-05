@@ -86,8 +86,15 @@ export class EnterNavigation extends KeyboardNavigation {
     return document.activeElement === this.getElement();
   }
 
-  override changeTabAccess(access: boolean) {
-    this.navEnabled.set(access);
+  override changeTabAccess(access: boolean): void {
+    if (!access) {
+      this.inside.set(false);
+    }
+    super.changeTabAccess(access);
+  }
+
+  override applyTabAccess() {
+    const access = this.accessible;
     if (access) {
       const inside = this.inside();
       this.navigables[0].changeTabAccess(inside);
@@ -100,7 +107,6 @@ export class EnterNavigation extends KeyboardNavigation {
       }
       return;
     }
-    this.inside.set(false);
     this.navigables[0].changeTabAccess(false);
     this.getElement().setAttribute('tabindex', '-1');
   }

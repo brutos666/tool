@@ -24,7 +24,7 @@ export class Focusable implements Navigable {
     afterNextRender({
       // Note : après toutes les modifications appliquées au DOM suite des changements (signal, événement)
       read: () => {
-        this.changeTabAccess(this.accessible);
+        this.applyTabAccess();
         if (this.mustGiveFocus) {
           this.giveFocus();
           this.mustGiveFocus = false;
@@ -60,6 +60,10 @@ export class Focusable implements Navigable {
       this.mustGiveFocus = false;
     }
     this.accessible = access;
-    this.getElement().setAttribute('tabindex', access ? '0' : '-1');
+    this.applyTabAccess();
+  }
+
+  applyTabAccess() {
+    this.getElement().setAttribute('tabindex', this.accessible ? '0' : '-1');
   }
 }

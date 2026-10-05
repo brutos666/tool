@@ -21,7 +21,7 @@ export class RootNavigation extends ManualNavigation {
     this.setCurrentIndex(index);
   }
 
-  override changeTabAccess(access: boolean): void {
-    this.navigables.forEach((navigable) => navigable.changeTabAccess(access));
+  override applyTabAccess(): void {
+    this.navigables.forEach((navigable) => navigable.changeTabAccess(this.accessible));
   }
 }
