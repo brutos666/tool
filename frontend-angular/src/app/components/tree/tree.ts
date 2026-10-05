@@ -1,7 +1,6 @@
-import { Component, effect, inject, input, OnInit } from '@angular/core';
+import { Component, effect, inject, input, OnInit, ViewChild } from '@angular/core';
 import { Button } from '../action-button/button.js';
 import { TreeData } from '../../data/tree-data.js';
-import { NgClass } from '@angular/common';
 import { NodeElement } from '../common/NodeElement.js';
 import { BasicButton } from '../basic-button/basic-button.js';
 import { TreeContent } from '../tree-content/tree-content';
@@ -11,7 +10,7 @@ import { Layout } from '../common/Types.js';
 import { SelectTree } from '../../directives/select-tree.js';
 
 @Component({
-  imports: [BasicButton, NgClass, TreeContent],
+  imports: [BasicButton, TreeContent],
   selector: 'tree',
   styleUrl: './tree.scss',
   templateUrl: './tree.html',
@@ -19,6 +18,9 @@ import { SelectTree } from '../../directives/select-tree.js';
   host: {
     '[attr.item-id]': 'treeData().getItemId()',
     '[attr.tree-item-id]': 'treeData().getTreeItemId()',
+    '[class]':
+      "{'tree--node':treeData().getChildren().length, 'tree--leaf':treeData().getChildren().length === 0, 'tree--root':isRoot() }",
+    role: 'treeitem',
   },
 })
 export class Tree extends NodeElement implements OnInit {
@@ -27,9 +29,10 @@ export class Tree extends NodeElement implements OnInit {
   toggleIcon!: Button;
   treeData = input.required<TreeData<ItemData>>();
   layoutData = input.required<Layout>();
-  selectTree = input<SelectTree>();
-
   isRoot = input<boolean>(false);
+
+  @ViewChild('toggle') toggleComponent!: BasicButton;
+
   constructor() {
     super();
     effect(() => this.doOpenClose(this.treeNavigation.openState()));
@@ -51,16 +54,16 @@ export class Tree extends NodeElement implements OnInit {
 
   doOpenClose(open: boolean) {
     const element = this.getElement();
-    const tree = element.querySelector('.tree');
     const treeList = element.querySelector('.tree__list');
-    if (!treeList || !tree) {
+    if (!treeList) {
       return;
     }
-    tree.setAttribute('aria-expanded', open ? 'true' : 'false');
+    element.setAttribute('aria-expanded', open ? 'true' : 'false');
     if (open) {
       treeList.classList.remove('hidden');
     } else {
       treeList.classList.add('hidden');
     }
+    this.toggleComponent?.rotate90(open);
   }
 }

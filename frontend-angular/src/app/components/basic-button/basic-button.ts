@@ -29,6 +29,14 @@ export class BasicButton extends NodeElement {
     super();
   }
 
+  rotate90(rotate: boolean) {
+    if (rotate) {
+      this.getElement().classList.add('rotate90');
+    } else {
+      this.getElement().classList.remove('rotate90');
+    }
+  }
+
   onMouseDown(event: MouseEvent) {
     event.preventDefault();
   }

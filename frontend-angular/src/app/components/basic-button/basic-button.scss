@@ -15,4 +15,8 @@
   border-color: var(--color-border-hover);
 }
 
+:host.rotate90 icon {
+  transform: rotate(90deg);
+}
+
 
