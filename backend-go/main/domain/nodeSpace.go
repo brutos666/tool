@@ -19,7 +19,11 @@ func (nodeSpace *NodeSpace) SetPreviousId(previousId string) { nodeSpace.previou
 func (nodeSpace NodeSpace) GetNextId() string                { return nodeSpace.nextId }
 func (nodeSpace *NodeSpace) SetNextId(nextId string)         { nodeSpace.nextId = nextId }
 func (nodeSpace NodeSpace) ApplyModification() {
-	nodeSpace.space.ApplyModification()
+	if nodeSpace.space.IsToDelete() {
+		nodeSpace.space.crudMode = TO_REMOVE
+	} else {
+		nodeSpace.space.ApplyModification()
+	}
 }
 
 func CreateNodeSpace(space *Space, parentId, previousId, nextId string) *NodeSpace {

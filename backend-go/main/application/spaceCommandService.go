@@ -32,6 +32,7 @@ func (commandService SpaceCmdService) SaveSpaces(ctx context.Context, dataAccess
 	if err != nil {
 		return spaces, err
 	}
+	spaces.RemoveToDelete()
 	spaces.ApplyModification()
 	return spaces, nil
 }

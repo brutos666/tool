@@ -7,10 +7,11 @@ import (
 )
 
 const (
-	CREATE = "CREATE"
-	UPDATE = "UPDATE"
-	DELETE = "DELETE"
-	READ   = "READ"
+	CREATE    = "CREATE"
+	UPDATE    = "UPDATE"
+	DELETE    = "DELETE"
+	TO_REMOVE = "TO_REMOVE"
+	READ      = "READ"
 )
 
 // Spaces : ensemble des espaces racines
