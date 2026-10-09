@@ -3,7 +3,7 @@ import { Data } from './data.js';
 export class TreeData<T extends Data> {
   private children: Array<TreeData<T>> = [];
   private treeItemId: string = '0';
-  private treeParentItemId: string = '0';
+  private treeParentItemId: string = '';
 
   constructor(private content: T) {}
 
@@ -64,25 +64,45 @@ export class TreeData<T extends Data> {
   setChildren(children: TreeData<T>[]) {
     this.children = children;
   }
+  replaceChild(toReplace: TreeData<T>, replaceBy: TreeData<T>) {
+    this.children.splice(this.children.indexOf(toReplace), 1, replaceBy);
+  }
 
-  getChildByTreeItemId(treeItemId: string): TreeData<T> | null {
+  getPrevious(child: TreeData<T>): TreeData<T> | null {
+    const children = this.getChildren();
+    const index = children.indexOf(child);
+    if (index === 0) {
+      return null;
+    }
+    return children[index - 1];
+  }
+  getNext(child: TreeData<T>): TreeData<T> | null {
+    const children = this.getChildren();
+    const index = children.indexOf(child);
+    if (index === this.children.length - 1) {
+      return null;
+    }
+    return children[index + 1];
+  }
+
+  getTreeByTreeId(treeItemId: string): TreeData<T> | null {
     if (treeItemId === this.treeItemId) {
       return this;
     }
     for (const treeChild of this.getChildren()) {
-      const found = treeChild.getChildByTreeItemId(treeItemId);
+      const found = treeChild.getTreeByTreeId(treeItemId);
       if (found) {
         return found;
       }
     }
     return null;
   }
-  getChildByItemId(itemId: string): TreeData<T> | null {
+  getTreeByItemId(itemId: string): TreeData<T> | null {
     if (itemId === this.getItemId()) {
       return this;
     }
     for (const treeChild of this.getChildren()) {
-      const found = treeChild.getChildByItemId(itemId);
+      const found = treeChild.getTreeByItemId(itemId);
       if (found) {
         return found;
       }

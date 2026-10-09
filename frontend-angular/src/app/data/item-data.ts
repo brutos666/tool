@@ -43,6 +43,9 @@ export class ItemData extends Data {
   getState(): string {
     return this.newState || this.state;
   }
+  getStatus(): string {
+    return this.status;
+  }
 
   getCRUDMode(): 'CREATE' | 'UPDATE' | 'DELETE' | 'READ' {
     if (this.isNew()) {
@@ -58,7 +61,7 @@ export class ItemData extends Data {
   }
 
   isNew() {
-    return this.new;
+    return this.new || this.CRUDMode === 'CREATE';
   }
   markAsNew() {
     this.new = true;
@@ -67,17 +70,22 @@ export class ItemData extends Data {
    * @returns {boolean} - Indique si la tâche a des modifications
    */
   isModified(): boolean {
-    return !!(this.newTitle || this.newText || this.newState || this.moved);
+    return (
+      !!(this.newTitle || this.newText || this.newState || this.moved) || this.CRUDMode === 'UPDATE'
+    );
   }
 
   isDeleted() {
-    return this.deleted;
+    return this.deleted || this.CRUDMode === 'DELETE';
   }
   markToDelete() {
     this.deleted = true;
   }
   undoToDelete() {
     this.deleted = false;
+  }
+  isToRemove() {
+    return this.CRUDMode === 'TO_REMOVE';
   }
 
   override getData(): Object {

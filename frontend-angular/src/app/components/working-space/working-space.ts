@@ -69,9 +69,11 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
   private onPointerUpEvent: Function = this.onPointerUp.bind(this);
 
   ngOnInit(): void {
-    this.menuItems.push(new MenuButton('reload', 'Actualiser', this.onReloadClick.bind(this)));
-    this.menuItems.push(new MenuButton('saveAll', 'Sauvegarder tout'));
-    this.menuItems.push(new MenuButton('save', 'Sauvegarder la vue courante'));
+    this.menuItems.push(new MenuButton('reload', 'Actualiser', this.reload.bind(this)));
+    this.menuItems.push(new MenuButton('saveAll', 'Sauvegarder tout', this.saveAll.bind(this)));
+    this.menuItems.push(
+      new MenuButton('save', 'Sauvegarder la vue courante', this.saveCurrent.bind(this)),
+    );
     this.menuItems.push(new MenuButton('exportAll', 'Exporter tout'));
     this.menuItems.push(new MenuButton('import', 'Importer'));
   }
@@ -82,8 +84,14 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
     splitter.removeEventListener('pointerup', this.onPointerUpEvent, { once: true });
   }
 
-  onReloadClick() {
+  reload() {
     this.itemService.loadItems();
+  }
+  saveAll() {
+    this.itemService.saveAllItems();
+  }
+  saveCurrent() {
+    this.itemService.saveCurrentItem();
   }
 
   doAddSpace(title: string) {

@@ -5,6 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../config/environment';
 import { BehaviorSubject, catchError, map } from 'rxjs';
 import { TreeItemData } from '../data/tree-item-data.js';
+import { TreeInfoData } from '../data/tree-info-data.js';
 
 @Service()
 export class ItemService {
@@ -31,13 +32,14 @@ export class ItemService {
       .get<TreeItemData[]>(`${environment.apiUrl}/item/findAllItems`)
       .pipe(
         catchError(() => {
+          // TODO : afficher une notif dans le centre de notification
           this.rootItemSubject.error('An error occurred');
           return [];
         }),
         map((treeItems) =>
           treeItems
             .map((treeItemObj) => {
-              return this.convertToTreeData(treeItemObj, '-1');
+              return this.convertToTreeData(treeItemObj, '0');
             })
             .reduce((accumulator, current) => {
               accumulator.addChild(current);
@@ -49,6 +51,69 @@ export class ItemService {
         // next met à jour le sujet avec la valeur
         this.propageUpdates(rootItem);
       });
+  }
+
+  public saveAllItems() {
+    const rootItem = this.rootItemSubject.value;
+    this.saveItem(rootItem);
+  }
+
+  public saveCurrentItem() {
+    const currentItem = this.currentItemSignal();
+    if (!currentItem) {
+      return;
+    }
+    this.saveItem(currentItem);
+  }
+
+  private saveItem(treeItem: TreeData<ItemData>) {
+    const rootItem = this.rootItemSubject.value;
+    const parentItem = rootItem.getTreeByTreeId(treeItem.getParentTreeItemId());
+    if (parentItem?.getContent().isNew()) {
+      this.saveItem(parentItem);
+      return;
+    }
+    const treeInfosData = new TreeInfoData();
+    treeInfosData.item = this.convertToTreeItemData(treeItem);
+    if (parentItem) {
+      treeInfosData.parentItemId = parentItem.getItemId();
+      treeInfosData.previousItemId = parentItem.getPrevious(treeItem)?.getItemId() || '';
+      treeInfosData.nextItemId = parentItem.getNext(treeItem)?.getItemId() || '';
+    }
+    this.http
+      .post(`${environment.apiUrl}/item/save`, treeInfosData)
+      .pipe(
+        catchError(() => {
+          // TODO : afficher une notif dans le centre de notification
+          this.rootItemSubject.error('An error occurred');
+          return [];
+        }),
+        map((treeInfoObj) => {
+          const resultTreeInfo = Object.assign(new TreeInfoData(), treeInfoObj);
+          return this.convertToTreeData(resultTreeInfo.item, parentItem?.getTreeItemId() || '0');
+        }),
+      )
+      .subscribe((newTreeItem) => {
+        if (parentItem) {
+          this.replaceItem(parentItem, treeItem, newTreeItem);
+        } else {
+          this.propageUpdates(newTreeItem);
+        }
+      });
+  }
+
+  private replaceItem(
+    parent: TreeData<ItemData>,
+    toReplace: TreeData<ItemData>,
+    replaceBy: TreeData<ItemData>,
+  ) {
+    const rootItem = this.rootItemSubject.value;
+    if (replaceBy.getContent().isToRemove()) {
+      parent.removeChild(toReplace);
+    } else {
+      parent.replaceChild(toReplace, replaceBy);
+    }
+    this.propageUpdates(rootItem);
   }
 
   public updateItem(treeData: TreeData<ItemData>, property: string, value: string) {
@@ -111,8 +176,8 @@ export class ItemService {
     const currentItem = this.currentItemSignal();
     if (currentItem) {
       const foundItem = currentItem.getContent().isNew()
-        ? rootItem.getChildByTreeItemId(currentItem.getTreeItemId())
-        : rootItem.getChildByItemId(currentItem.getItemId());
+        ? rootItem.getTreeByTreeId(currentItem.getTreeItemId())
+        : rootItem.getTreeByItemId(currentItem.getItemId());
       this.currentItemSignal.set(foundItem);
     }
   }
@@ -155,16 +220,31 @@ export class ItemService {
     }
   }
 
-  private convertToTreeData(treeItemObj: Object, parentId: string): TreeData<ItemData> {
+  private convertToTreeData(treeItemObj: Object, parentTreeItemId: string): TreeData<ItemData> {
     const treeItemData = Object.assign(new TreeItemData(), treeItemObj);
     const treeData = treeItemData.convertToTreeData();
     this.treeItemId++;
     const treeItemId = `${this.treeItemId}`;
     treeData.setTreeItemId(treeItemId);
-    treeData.setParentTreeItemId(parentId);
+    treeData.setParentTreeItemId(parentTreeItemId);
     treeData.setChildren(
       treeItemData.children.map((treeItem) => this.convertToTreeData(treeItem, treeItemId)),
     );
     return treeData;
+  }
+
+  private convertToTreeItemData(treeData: TreeData<ItemData>): TreeItemData {
+    const itemData = treeData.getContent();
+    const treeItemData = new TreeItemData();
+    treeItemData.id = itemData.getId();
+    treeItemData.title = itemData.getTitle();
+    treeItemData.text = itemData.getText();
+    treeItemData.state = itemData.getState();
+    treeItemData.status = itemData.getStatus();
+    treeItemData.CRUDMode = itemData.getCRUDMode();
+    treeItemData.children = treeData
+      .getChildren()
+      .map((child) => this.convertToTreeItemData(child));
+    return treeItemData;
   }
 }
