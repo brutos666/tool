@@ -7,13 +7,13 @@ import FileUpload from './FileUpload.js';
 import MainSpace from './MainSpace.js';
 import Menu from './Menu.js';
 import NavSpace from './NavSpace.js';
-import NavTree from './NavTree.js';
 import WorkingSpaceView from './views/WorkingSpaceView.js';
 
 class WorkingSpace extends Component {
 
   #currentTreeItem;
   #menu;
+  #decorateMainSpace;
 
   constructor() {
     super(new WorkingSpaceView());
@@ -22,7 +22,7 @@ class WorkingSpace extends Component {
     this.#menu = new Menu();
     const navSpace = new NavSpace();
     const decorateNavSpace = new CommandItemsDecorator(navSpace, { treeItem: this.#currentTreeItem });
-    const decorateMainSpace = new CommandItemsDecorator(new MainSpace(), { treeItem: this.#currentTreeItem });
+    this.#decorateMainSpace = new CommandItemsDecorator(new MainSpace(), { treeItem: this.#currentTreeItem });
 
     const reloadAction = new ActionButton({ id: 'reload', label: 'Actualiser', role: 'menuitem', type: 'menu' });
     reloadAction.setDoActionCallback(decorateNavSpace.loadItems.bind(decorateNavSpace));
@@ -30,7 +30,7 @@ class WorkingSpace extends Component {
     saveAllAction.setDoActionCallback(decorateNavSpace.doSave.bind(decorateNavSpace));
 
     const saveMainAction = new ActionButton({ id: 'saveCurrent', label: 'Sauvegarder la vue courante', role: 'menuitem', type: 'menu' });
-    saveMainAction.setDoActionCallback(decorateMainSpace.doSave.bind(decorateMainSpace));
+    saveMainAction.setDoActionCallback(this.#decorateMainSpace.doSave.bind(this.#decorateMainSpace));
     const exportAction = new ActionButton({ id: 'export', label: 'Exporter tout', role: 'menuitem', type: 'menu' });
     exportAction.setDoActionCallback(decorateNavSpace.exportItems.bind(decorateNavSpace));
     const importFile = new FileUpload({ id: 'import', label: 'Importer' });
@@ -45,24 +45,22 @@ class WorkingSpace extends Component {
 
     this.setStaticChild('menu', this.#menu);
     this.setStaticChild('nav', decorateNavSpace);
-    this.setStaticChild('main', decorateMainSpace);
-
-    decorateNavSpace.getView()
-      .addEventListener(NavTree.EVENTS.current, event => {
-        const treeItem = event.detail;
-        if (this.#currentTreeItem === treeItem) {
-          return;
-        }
-        this.#currentTreeItem = treeItem;
-        if (treeItem) {
-          decorateMainSpace.getDecoratedElement()
-            .setTreeItem(treeItem);
-          decorateMainSpace.setTreeItem(treeItem);
-        }
-      });
+    this.setStaticChild('main', this.#decorateMainSpace);
 
     decorateNavSpace.loadItems()
       .then(() => navSpace.giveFocus());
+  }
+
+  setCurrentTreeItem(treeItem) {
+    if (this.#currentTreeItem === treeItem) {
+      return;
+    }
+    this.#currentTreeItem = treeItem;
+    if (treeItem) {
+      this.#decorateMainSpace.getDecoratedElement()
+        .setTreeItem(treeItem);
+      this.#decorateMainSpace.setTreeItem(treeItem);
+    }
   }
 
 }

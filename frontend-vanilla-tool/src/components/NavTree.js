@@ -11,11 +11,6 @@ class NavTree extends TreeItems {
 
   name = 'NavTree';
 
-  static EVENTS = { current: 'itemCurrent' };
-
-  /** @type {Tree} */
-  #currentTree = null;
-
   constructor() {
     super(new NavTreeView(), StoreData.getTreeItem(), ITEM_LAYOUT.Title);
 
@@ -28,26 +23,6 @@ class NavTree extends TreeItems {
     treeFocusManager.setCallbackBeforeEnter(this.onEnterIn.bind(this));
   }
 
-  getCurrentTree() {
-    return this.#currentTree;
-  }
-  setCurrentTree(currentTree) {
-    this.#currentTree?.removeCurrentTree();
-    this.#currentTree = currentTree;
-    currentTree.setCurrentTree();
-    const treeItem = this.#currentTree.getTreeItem();
-    this.getView()
-      .dispatchEvent(new CustomEvent(NavTree.EVENTS.current, { bubbles: true, detail: treeItem }));
-  }
-  removeCurrentTree() {
-    if (this.#currentTree) {
-      this.#currentTree.removeCurrentTree();
-      this.#currentTree = null;
-    }
-    this.getView()
-      .dispatchEvent(new CustomEvent(NavTree.EVENTS.current, { bubbles: true, detail: null }));
-  }
-
   /** @override */
   getItemComponent(treeItem) {
     const itemComponent = super.getItemComponent(treeItem);
@@ -56,22 +31,9 @@ class NavTree extends TreeItems {
   }
 
   /** @override */
-  removeChild(element) {
-    super.removeChild(element);
-
-    if (this.#currentTree === element) {
-      this.removeCurrentTree();
-    }
-  }
-
-  /** @override */
-  removeAllChildren() {
-    this.removeCurrentTree();
-    super.removeAllChildren();
-  }
-  /** @override */
   replaceAllItems(treeItemArray) {
-    const currentItemId = this.#currentTree?.getDecoratedElementByName('Item')
+    const currentItemId = StoreData.getCurrentTree()
+      ?.getDecoratedElementByName('Item')
       .getTreeItem()
       .getItemId();
 
@@ -80,7 +42,7 @@ class NavTree extends TreeItems {
     if (currentItemId) {
       const currentTree = this.findTreeByItemId(currentItemId);
       if (currentTree) {
-        this.setCurrentTree(currentTree);
+        StoreData.setCurrentTree(currentTree);
       }
     }
   }
@@ -107,10 +69,10 @@ class NavTree extends TreeItems {
    * @returns true l'entrée dans le composant doit se faire, false si elle ne doit pas se faire
    */
   onEnterIn(component) {
-    if (component.getName() !== 'Tree' || component === this.#currentTree) {
+    if (component.getName() !== 'Tree' || component === StoreData.getCurrentTree()) {
       return true;
     }
-    this.setCurrentTree(component);
+    StoreData.setCurrentTree(component);
     return false;
   }
 

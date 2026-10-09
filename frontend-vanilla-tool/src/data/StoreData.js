@@ -7,6 +7,7 @@ import User from './User.js';
 /** @import {ItemInfos} from './TreeItem.js'; */
 /** @import {LoggedUser} from './User.js'; */
 /** @import {SpaceView} from '../components/views/SpaceView.js'; */
+/** @import Tree from '../components/decorators/Tree.js'; */
 /** @import WorkingSpace from '../components/WorkingSpace.js'; */
 
 class StoreData {
@@ -16,6 +17,7 @@ class StoreData {
     treeItem: null,
     treeItemLastId: 0,
     currentSpace: null,
+    currentTree: null,
     notificationCenter: null,
     dragDropCenter: null,
     workSpace: null
@@ -24,6 +26,7 @@ class StoreData {
   static async init() {
     this.state.treeItem = new TreeItem({ id: ROOT_ID, title: 'Racine', state: 'TODO', children: [] });
     this.state.currentSpace = null;
+    this.state.currentTree = null;
     this.state.notification_center = new NotificationCenter();
     this.state.drag_drop_center = new DragDropCenter();
     document.body.appendChild(this.state.notification_center.getElementView());
@@ -115,6 +118,40 @@ class StoreData {
    */
   static getCurrentSpace() {
     return this.state.currentSpace;
+  }
+
+  /**
+   * Positionne l'arbre courant
+   * @param {Tree} currentTree : arbre
+   */
+  static setCurrentTree(currentTree) {
+    this.state.currentTree?.removeCurrentTree();
+    this.state.currentTree = currentTree;
+    currentTree.setCurrentTree();
+
+    this.getWorkingSpace()
+      .setCurrentTreeItem(currentTree.getTreeItem());
+  }
+  static removeCurrentTree() {
+    this.state.currentTree?.removeCurrentTree();
+    this.state.currentTree = null;
+
+    this.getWorkingSpace()
+      .setCurrentTreeItem(null);
+  }
+  /**
+   * Retourne l''arbre courant
+   * @returns {Tree}
+   */
+  static getCurrentTree() {
+    return this.state.currentTree;
+  }
+  /**
+   * Retourne l'item de l'arbre courant
+   * @returns {TreeItem}
+   */
+  static getCurrentTreeItem() {
+    return this.state.currentTree?.getTreeItem();
   }
 
 }

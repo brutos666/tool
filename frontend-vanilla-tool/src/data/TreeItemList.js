@@ -1,3 +1,4 @@
+import StoreData from './StoreData.js';
 import TreeItem from './TreeItem.js';
 /** @import {ItemInfos} from './TreeItem.js'; */
 
@@ -74,6 +75,9 @@ class TreeItemList {
     const index = this.#treeList.findIndex(treeItem => treeItem === treeItemToRemove);
     if (index === -1) {
       return;
+    }
+    if (treeItemToRemove === StoreData.getCurrentTreeItem()) {
+      StoreData.removeCurrentTree();
     }
     treeItemToRemove.alertObservers('removed');
     this.alertObservers('remove', [treeItemToRemove]);
