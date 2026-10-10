@@ -67,7 +67,7 @@ export class TextInput extends NodeElement implements AfterViewInit {
     const safeValue =
       this.sanitizer.sanitize(SecurityContext.HTML, this.input.nativeElement.innerText) || '';
     this.input.nativeElement.innerHTML = safeValue;
-    this.value.set(safeValue);
+    this.value.set(this.input.nativeElement.innerHTML);
   }
 
   override setDisabled() {
