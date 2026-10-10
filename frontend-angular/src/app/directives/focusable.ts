@@ -10,6 +10,7 @@ export class Focusable implements Navigable {
 
   protected accessible: boolean = false;
   protected mustGiveFocus: boolean = false;
+  protected containFocus: boolean = false;
 
   private element = inject(ElementRef).nativeElement;
 
@@ -58,6 +59,7 @@ export class Focusable implements Navigable {
   changeTabAccess(access: boolean) {
     if (!access) {
       this.mustGiveFocus = false;
+      this.containFocus = false;
     }
     this.accessible = access;
     this.applyTabAccess();

@@ -49,10 +49,15 @@ export class ManualNavigation extends Focusable implements Navigate {
   }
 
   registerChild(navigable: Navigable) {
+    this.mustGiveFocus = this.containFocus;
     this.navigablesSignal.update((navigables) => navigables.concat(navigable));
   }
   unregisterChild(navigable: Navigable) {
-    this.#selectedIndex = this.getIndexAfterRemove(navigable);
+    const indexToRemove = this.navigables.indexOf(navigable);
+    if (this.#selectedIndex === indexToRemove) {
+      this.mustGiveFocus = this.containFocus;
+    }
+    this.#selectedIndex = this.getIndexAfterRemove(indexToRemove);
     this.navigablesSignal.update((navigables) =>
       navigables.filter((component) => component !== navigable),
     );
@@ -83,6 +88,7 @@ export class ManualNavigation extends Focusable implements Navigate {
     }
     const index = this.getNavigableIndex(event.target);
     if (index > -1) {
+      this.containFocus = true;
       this.changeCurrentIndex(index);
     }
   }
@@ -133,7 +139,7 @@ export class ManualNavigation extends Focusable implements Navigate {
   }
 
   override giveFocus() {
-    this.mustGiveFocus = true;
+    this.containFocus = true;
     const components = this.navigables;
     if (components.length) {
       components[this.#selectedIndex].giveFocus();
@@ -145,8 +151,7 @@ export class ManualNavigation extends Focusable implements Navigate {
     return !!components.find((focusable) => focusable.isFocused());
   }
 
-  private getIndexAfterRemove(navigable: Navigable): number {
-    const indexToRemove = this.navigables.indexOf(navigable);
+  private getIndexAfterRemove(indexToRemove: number): number {
     const nbLeft = this.navigables.length - 1;
     if (nbLeft === 0) {
       return 0;

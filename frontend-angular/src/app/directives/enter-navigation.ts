@@ -35,6 +35,7 @@ export class EnterNavigation extends KeyboardNavigation {
 
   override onMouseDown(event: MouseEvent) {
     this.inside.set(true);
+    this.containFocus = true;
   }
 
   override interceptKeys() {
