@@ -14,7 +14,6 @@ export class RootNavigation extends ManualNavigation {
   override onMouseDown(event: MouseEvent) {
     super.onMouseDown(event);
     this.navigables[this.getFocusIndex()].changeTabAccess(true);
-    this.giveFocus();
   }
 
   override changeCurrentIndex(index: number): void {
