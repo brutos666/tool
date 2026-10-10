@@ -1,5 +1,6 @@
 import Command from './Command.js';
 import ItemCallsRequests from '../requests/ItemCallsRequests.js';
+import { CRUD_MODE } from '../tools/Constants.js';
 /** @import CommandDecorator from '../components/decorators/CommandDecorator.js' */
 /** @import TreeItem from '../data/TreeItem.js' */
 /** @import {TreeInfos} from '../requests/ItemCallsRequests.js' */
@@ -41,6 +42,11 @@ class SaveItem extends Command {
   commandDone(treeInfos) {
     super.commandDone(treeInfos);
 
+    if (treeInfos.item.CRUDMode === CRUD_MODE.TO_REMOVE) {
+      this.#treeItem.getParentItem()
+        .removeChildItem(this.#treeItem);
+      return;
+    }
     this.#treeItem.updateItem(treeInfos.item);
     const treeItemList = this.#treeItem.getTreeItemList();
     treeItemList.setItems(this.#treeItem, treeInfos.item.children);
