@@ -27,6 +27,6 @@ export class ActionButton extends BasicButton {
     if (this.data().type === 'burger') {
       return;
     }
-    event.preventDefault();
+    super.onMouseDown(event);
   }
 }

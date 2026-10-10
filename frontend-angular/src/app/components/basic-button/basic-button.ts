@@ -18,12 +18,14 @@ import { NoFocusable } from '../../directives/no-focusable.js';
     '[attr.aria-labelledby]': "data().id + '-label'",
     '[aria-label]': 'data().label',
     '[attr.role]': 'data().role',
-    '(click)': 'data().onClick($event)',
+    '(click)': 'onClick($event)',
     '(mousedown)': 'onMouseDown($event)',
   },
 })
 export class BasicButton extends NodeElement {
   data = input.required<Button>();
+
+  private focusedOnClick!: HTMLElement | null;
 
   constructor() {
     super();
@@ -38,6 +40,15 @@ export class BasicButton extends NodeElement {
   }
 
   onMouseDown(event: MouseEvent) {
+    if (document.activeElement instanceof HTMLElement) {
+      this.focusedOnClick = document.activeElement;
+    }
     event.preventDefault();
+  }
+  onClick(event: MouseEvent) {
+    this.focusedOnClick?.blur();
+    this.data().onClick(event);
+    this.focusedOnClick?.focus();
+    this.focusedOnClick = null;
   }
 }

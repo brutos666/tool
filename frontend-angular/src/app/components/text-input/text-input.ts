@@ -1,4 +1,5 @@
 import {
+  afterRenderEffect,
   AfterViewInit,
   Component,
   computed,
@@ -6,7 +7,7 @@ import {
   inject,
   input,
   model,
-  signal,
+  SecurityContext,
   ViewChild,
 } from '@angular/core';
 import { NodeElement } from '../common/NodeElement.js';
@@ -34,7 +35,20 @@ export class TextInput extends NodeElement implements AfterViewInit {
   displayLabel = input<string>('false');
   value = model<string>('');
 
-  safeHtml = computed(() => this.sanitizer.bypassSecurityTrustHtml(this.value()));
+  safeValue = computed(() => this.sanitizer.sanitize(SecurityContext.HTML, this.value()) || '');
+
+  private inside: boolean = false;
+
+  constructor() {
+    super();
+
+    // Astuce pour mettre à jour la valeur au format HTML lorsqu'il y a une actualisation des données
+    afterRenderEffect(() => {
+      if (this.value() && this.inside) {
+        this.input.nativeElement.innerText = this.input.nativeElement.innerHTML;
+      }
+    });
+  }
 
   ngAfterViewInit(): void {
     this.focusable.setElement(this.input.nativeElement);
@@ -45,11 +59,15 @@ export class TextInput extends NodeElement implements AfterViewInit {
   }
 
   enter() {
+    this.inside = true;
     this.input.nativeElement.innerText = this.input.nativeElement.innerHTML;
-    this.value.set(this.input.nativeElement.innerHTML);
   }
   exit() {
-    this.value.set(this.input.nativeElement.innerText);
+    this.inside = false;
+    const safeValue =
+      this.sanitizer.sanitize(SecurityContext.HTML, this.input.nativeElement.innerText) || '';
+    this.input.nativeElement.innerHTML = safeValue;
+    this.value.set(safeValue);
   }
 
   override setDisabled() {
