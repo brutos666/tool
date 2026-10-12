@@ -3,7 +3,7 @@
   <space>
     <space-header class="nav-space__header"><h1>Navigation</h1></space-header>
     <space-body>
-      <tree-list [dataList]="rootItem().getChildren()" [navOrientation]="'vertical'" [layoutData]="navLayout"></tree-list>
+      <tree-list [dataList]="rootItem().getChildren()" [orientation]="'vertical'" [layoutData]="navLayout"></tree-list>
     </space-body>
     <space-footer>
       <button class="working-space__add-button" actionButton [data]="navAddButton"></button>
@@ -19,7 +19,7 @@
         <h1><tree-content [treeData]="currentTreeData" [layoutData]="mainLayout"></tree-content></h1>
       </space-header>
       <space-body>
-        <tree-list [dataList]="currentTreeData.getChildren() || []" [navOrientation]="'horizontal'" [layoutData]="mainLayout"></tree-list>
+        <tree-list [dataList]="currentTreeData.getChildren() || []" [orientation]="'horizontal'" [layoutData]="mainLayout"></tree-list>
       </space-body>
       <space-footer class="main-space__footer">
         <button actionButton [data]="mainAddButton"></button>

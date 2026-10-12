@@ -11,9 +11,9 @@ import { Layout } from '../common/Types.js';
   selector: 'tree-list',
   styleUrl: './tree-list.scss',
   templateUrl: './tree-list.html',
-  hostDirectives: [{ directive: TreeListNavigation, inputs: ['navOrientation'] }],
+  hostDirectives: [{ directive: TreeListNavigation, inputs: ['navOrientation: orientation'] }],
   host: {
-    'aria-orientation': 'navOrientation',
+    '[attr.aria-orientation]': 'orientation()',
     role: 'group',
   },
 })
@@ -22,4 +22,5 @@ export class TreeList extends NodeElement {
 
   dataList = input.required<Array<TreeData<ItemData>>>();
   layoutData = input.required<Layout>();
+  orientation = input<'horizontal' | 'vertical'>('vertical');
 }
