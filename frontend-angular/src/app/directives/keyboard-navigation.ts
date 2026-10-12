@@ -48,15 +48,17 @@ export class KeyboardNavigation extends ManualNavigation implements OnDestroy {
   }
 
   onKeyDown(event: KeyboardEvent) {
-    if (
-      !this.navEnabled() ||
-      !this.navigables.length ||
-      !this.interceptKeys().includes(event.key)
-    ) {
+    let modifierKey = event.ctrlKey ? 'Ctrl+' : '';
+    if (event.shiftKey) {
+      modifierKey += 'Shift+';
+    }
+    const key = modifierKey + event.key;
+    if (!this.navEnabled() || !this.navigables.length || !this.interceptKeys().includes(key)) {
       return;
     }
     event.preventDefault();
-    if (this.moveToDirection(event.shiftKey ? `shift+${event.key}` : event.key)) {
+
+    if (this.moveToDirection(key)) {
       event.stopImmediatePropagation();
     }
   }

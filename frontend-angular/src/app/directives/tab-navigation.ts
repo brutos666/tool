@@ -14,14 +14,14 @@ export class TabNavigation extends MoveNavigation {
   override name = 'TabNavigation';
 
   override interceptKeys(): String[] {
-    return [...super.interceptKeys(), 'Tab'];
+    return [...super.interceptKeys(), 'Tab', 'Shift+Tab'];
   }
 
   override moveToDirection(key: string): boolean {
     switch (key) {
       case 'Tab':
         return super.moveToDirection('Next');
-      case 'shift+Tab':
+      case 'Shift+Tab':
         return super.moveToDirection('Previous');
       default:
         return super.moveToDirection(key);
