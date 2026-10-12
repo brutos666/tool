@@ -7,7 +7,6 @@ import { Button } from '../action-button/button.js';
 import { IconButton } from '../action-button/icon-button.js';
 import { TreeData } from '../../data/tree-data.js';
 import { Layout, Right } from '../common/Types.js';
-import { TabNavigation } from '../../directives/tab-navigation.js';
 import { NodeElement } from '../common/NodeElement.js';
 
 @Component({
@@ -15,7 +14,6 @@ import { NodeElement } from '../common/NodeElement.js';
   selector: 'item',
   styleUrl: './item.scss',
   templateUrl: './item.html',
-  hostDirectives: [TabNavigation],
 })
 export class Item extends NodeElement implements OnInit {
   name = 'Item';
