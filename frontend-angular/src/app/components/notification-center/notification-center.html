@@ -1,0 +1,14 @@
+<div class="notification__center">
+  @if (showAll()) {
+    @for (notification of notifications(); track notification.getId()) {
+      <notification [data]="notification"></notification>
+    } @empty {
+      Pas de notification
+    }
+  } @else {
+    @for (notification of popNotifications(); track notification.getId()) {
+      <notification [data]="notification"></notification>
+    }
+  }
+</div>
+<button actionButton class="notification__button" [data]="notificationButton"></button>

@@ -16,6 +16,7 @@ import { SpaceFooter } from '../space/space-footer';
 import { ItemLikeButton } from '../action-button/item-like-button.js';
 import { ActionButton } from '../action-button/action-button';
 import { TreeContent } from '../tree-content/tree-content';
+import { NotificationCenter } from '../notification-center/notification-center';
 
 @Component({
   imports: [
@@ -27,6 +28,7 @@ import { TreeContent } from '../tree-content/tree-content';
     SpaceFooter,
     ActionButton,
     TreeContent,
+    NotificationCenter,
   ],
   standalone: true,
   selector: 'working-space',

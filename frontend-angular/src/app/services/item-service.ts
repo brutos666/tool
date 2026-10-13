@@ -1,11 +1,13 @@
 import { inject, Service, signal } from '@angular/core';
 import { TreeData } from '../data/tree-data.js';
 import { ItemData } from '../data/item-data.js';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpContext } from '@angular/common/http';
 import { environment } from '../config/environment';
 import { BehaviorSubject, catchError, map } from 'rxjs';
 import { TreeItemData } from '../data/tree-item-data.js';
 import { TreeInfoData } from '../data/tree-info-data.js';
+import { ErrorInterceptor } from '../errors/error-interceptor.js';
+import { NotificationMessage } from '../errors/notification-messages.js';
 
 @Service()
 export class ItemService {
@@ -21,6 +23,15 @@ export class ItemService {
   // Identifiant unique indépendant de l'identifiant issu de la base de données. Permet d'identifiant les nouveaux éléments non sauvegardés
   private treeItemId: number = 0;
 
+  private loadNotificationMessage = new NotificationMessage(
+    'Chargement effectué',
+    'Une erreur est survenue lors du chargement des éléments',
+  );
+  private saveNotificationMessage = new NotificationMessage(
+    'Les modifications ont bien été enregistrées',
+    'Une erreur est survenue lors de la sauvegarde des modifications',
+  );
+
   constructor() {
     this.loadItems();
   }
@@ -29,13 +40,14 @@ export class ItemService {
     this.treeItemId = 0;
     const rootItem = new TreeData<ItemData>(ItemService.rootItemData);
     this.http
-      .get<TreeItemData[]>(`${environment.apiUrl}/item/findAllItems`)
+      .get<TreeItemData[]>(`${environment.apiUrl}/item/findAllItems`, {
+        context: new HttpContext().set(
+          ErrorInterceptor.notificationMessage,
+          this.loadNotificationMessage,
+        ),
+      })
       .pipe(
-        catchError(() => {
-          // TODO : afficher une notif dans le centre de notification
-          this.rootItemSubject.error('An error occurred');
-          return [];
-        }),
+        catchError(() => []),
         map((treeItems) =>
           treeItems
             .map((treeItemObj) => {
@@ -81,11 +93,14 @@ export class ItemService {
       treeInfosData.nextItemId = parentItem.getNext(treeItem)?.getItemId() || '';
     }
     this.http
-      .post(`${environment.apiUrl}/item/save`, treeInfosData)
+      .post(`${environment.apiUrl}/item/save`, treeInfosData, {
+        context: new HttpContext().set(
+          ErrorInterceptor.notificationMessage,
+          this.saveNotificationMessage,
+        ),
+      })
       .pipe(
         catchError(() => {
-          // TODO : afficher une notif dans le centre de notification
-          this.rootItemSubject.error('An error occurred');
           return [];
         }),
         map((treeInfoObj) => {

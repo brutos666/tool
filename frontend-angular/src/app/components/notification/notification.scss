@@ -1,0 +1,69 @@
+/* Style de base d'une notification */
+:host {
+  background: var(--color-success);
+  color: var(--color-text);
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 12px var(--color-box-shadow);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: var(--global-padding);
+  gap: var(--global-gap)
+}
+.notification__message {
+  flex-grow: 1;
+}
+
+:host.show {
+  opacity: 0;
+  animation: fade-in 0.4s ease-out forwards;
+}
+:host.hide {
+  animation: fade-out 0.4s ease-out forwards;
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+}
+@keyframes fade-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Icône de succès (optionnelle) */
+:host::before {
+  content: "✓";
+  font-weight: bold;
+}
+
+:host.error {
+  background: var(--color-error);
+}
+:host.error::before {
+  content: "✗";
+}
+
+:host.warning {
+  background: var(--color-warning);
+}
+:host.warning::before {
+  content: "!";
+}
+
+:host.info {
+  background: var(--color-info);
+}
+:host.info::before {
+  content: "i";
+}
