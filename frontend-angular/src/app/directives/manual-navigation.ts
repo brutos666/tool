@@ -50,17 +50,20 @@ export class ManualNavigation extends Focusable implements Navigate {
 
   registerChild(navigable: Navigable) {
     this.mustGiveFocus = this.containFocus;
-    this.navigablesSignal.update((navigables) => navigables.concat(navigable));
+    this.navigables = this.navigables.concat(navigable);
+    this.navigablesSignal.set(this.navigables);
   }
   unregisterChild(navigable: Navigable) {
     const indexToRemove = this.navigables.indexOf(navigable);
+    if (indexToRemove === -1) {
+      return;
+    }
     if (this.#selectedIndex === indexToRemove) {
       this.mustGiveFocus = this.containFocus;
     }
     this.#selectedIndex = this.getIndexAfterRemove(indexToRemove);
-    this.navigablesSignal.update((navigables) =>
-      navigables.filter((component) => component !== navigable),
-    );
+    this.navigables = this.navigables.filter((component) => component !== navigable);
+    this.navigablesSignal.set(this.navigables);
   }
 
   private sortNavigables(navigables: Navigable[]) {

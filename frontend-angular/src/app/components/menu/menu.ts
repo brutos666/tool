@@ -2,7 +2,6 @@ import { AfterViewInit, Component, input, QueryList, ViewChildren } from '@angul
 import { MenuButton } from '../action-button/menu-button.js';
 import { ActionButton } from '../action-button/action-button.js';
 import { ArrowNavigation } from '../../directives/arrow-navigation.js';
-import { Composite } from '../common/Composite.js';
 import { NodeElement } from '../common/NodeElement.js';
 
 @Component({
@@ -25,6 +24,15 @@ export class Menu extends NodeElement implements AfterViewInit {
     if (menu) {
       this.width = menu.clientWidth;
     }
+    const menuElement = this.getElement();
+    if (menuElement.getAttribute('popover')) {
+      // Indiquer aux boutons de fermer automatiquement la fenêtre
+      this.actionButtons.forEach((actionButton) => {
+        const element = actionButton.getElement() as HTMLButtonElement;
+        element.popoverTargetElement = menuElement;
+        element.popoverTargetAction = 'hide';
+      });
+    }
   }
 
   getInitialWidth() {
@@ -32,21 +40,5 @@ export class Menu extends NodeElement implements AfterViewInit {
   }
   setInitialWidth(width: number) {
     this.width = width;
-  }
-
-  setPopup() {
-    const menuElement = this.getElement();
-    menuElement.popover = 'auto';
-
-    // Indiquer aux boutons de fermer automatiquement la fenêtre
-    this.actionButtons.forEach((actionButton) => {
-      const element = actionButton.getElement() as HTMLButtonElement;
-      element.popoverTargetElement = menuElement;
-      element.popoverTargetAction = 'hide';
-    });
-  }
-  undoPopup() {
-    const menuElement = this.getElement();
-    menuElement.popover = null;
   }
 }

@@ -1,12 +1,12 @@
 import { AfterViewInit, Component, computed, inject, input, signal } from '@angular/core';
 import { NotificationData } from '../../data/notification-data.js';
 import { NodeElement } from '../common/NodeElement.js';
-import { BasicButton } from '../basic-button/basic-button';
 import { IconButton } from '../action-button/icon-button.js';
 import { NotificationService } from '../../services/notification-service.js';
+import { ActionButton } from '../action-button/action-button.js';
 
 @Component({
-  imports: [BasicButton],
+  imports: [ActionButton],
   selector: 'notification',
   styleUrl: './notification.scss',
   templateUrl: './notification.html',

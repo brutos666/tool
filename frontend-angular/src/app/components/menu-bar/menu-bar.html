@@ -1,20 +1,26 @@
-<li class="menu__element">
-  <button actionButton 
-    #burgerItem
-    class="menu__button"
-    [data]="burgerItemData"
-    [aria-expanded]="menuOpened()"
-    aria-controls="menuContent"
-    aria-haspopup="true"
-    popovertargetaction="toggle"
-    popovertarget="menuContent"></button>
-</li>
+@if (menuOrientation.orientation() === 'vertical') {
+  <li class="menu__element">
+    <button actionButton
+      popup-button-directive target="menuContent" [opened]="menuOpened()"
+      #burgerItem
+      class="menu__button"
+      [data]="burgerItemData"></button>
+  </li>
+  <menu-content
+    popover-directive [(show)]="menuOpened"
+    #menu
+    id="menuContent"
+    class="menu__content"
+    [navOrientation]="'vertical'"
+    [menuItems]="menuItems()">
+  </menu-content>
+} @else {
+  <menu-content
+    #menu
+    class="menu__content"
+    [navOrientation]="'horizontal'"
+    [menuItems]="menuItems()">
+</menu-content>
+}
 
-<menu-content
-  #menu 
-  id="menuContent"
-  class="menu__content"
-  [navOrientation]="menuOrientation.orientation()"
-  [menuItems]="menuItems()"
-  (toggle)="onMenuShowHide($event)">
- </menu-content>
+

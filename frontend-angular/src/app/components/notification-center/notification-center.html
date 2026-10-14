@@ -1,7 +1,11 @@
-<div class="notification__center">
-  @if (showAll()) {
+<div 
+  popover-directive
+  [(show)]="show"
+  id="notificationCenter"
+  class="notification__center">
+  @if (show()) {
     @for (notification of notifications(); track notification.getId()) {
-      <notification [data]="notification"></notification>
+      <notification enter-tab-directive [data]="notification"></notification>
     } @empty {
       Pas de notification
     }
@@ -11,4 +15,9 @@
     }
   }
 </div>
-<button actionButton class="notification__button" [data]="notificationButton"></button>
+<button actionButton
+  popup-button-directive
+  target="notificationCenter"
+  [opened]="show()"
+  class="notification__button"
+  [data]="notificationButton"></button>

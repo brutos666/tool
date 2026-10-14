@@ -14,9 +14,11 @@ import { Menu } from '../menu/menu.js';
 import { MenuOrientation } from '../../directives/menu-orientation.js';
 import { Composite } from '../common/Composite.js';
 import { ManualNavigation } from '../../directives/manual-navigation.js';
+import { PopupButton } from '../../directives/popup-button';
+import { PopOverContainer } from '../../directives/popover-container';
 
 @Component({
-  imports: [ActionButton, Menu],
+  imports: [ActionButton, Menu, PopupButton, PopOverContainer],
   selector: 'menu-bar',
   styleUrl: './menu-bar.scss',
   templateUrl: './menu-bar.html',
@@ -36,7 +38,6 @@ export class MenuBar extends Composite {
   burgerItemData!: Button;
 
   @ViewChild('menu') menu!: Menu;
-  @ViewChild('burgerItem') burgerItem!: ActionButton;
 
   constructor() {
     super();
@@ -48,28 +49,12 @@ export class MenuBar extends Composite {
       'burger',
     );
     effect(() => {
-      const orientation = this.menuOrientation.orientation();
-      if (orientation === 'vertical') {
-        this.menu.setPopup();
-        this.burgerItemData.setVisible(true);
-        // Attendre la prise en compte du changement de visibilité avant de donner le focus
-        this.changeDetectorRef.detectChanges();
-        this.setFocusIndex(0);
-        return;
+      if (this.menuOpened()) {
+        this.setFocusIndex(1);
       }
-      this.menu?.undoPopup();
-      this.menuOpened.set(false);
-      this.setFocusIndex(1);
-      this.burgerItemData.setVisible(false);
+      if (this.menuOrientation.orientation() === 'horizontal') {
+        this.menuOpened.set(false);
+      }
     });
-  }
-
-  /**
-   * Ouverture/fermeture du menu contextuel
-   */
-  onMenuShowHide(event: ToggleEvent) {
-    const menuOpen = !this.menuOpened();
-    this.menuOpened.set(menuOpen);
-    this.setFocusIndex(menuOpen ? 1 : 0);
   }
 }
