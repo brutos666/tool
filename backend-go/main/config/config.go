@@ -3,15 +3,14 @@ package config
 import (
 	"authentication/tokens"
 	"database/server/connection"
+	"flag"
 	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/magiconair/properties"
-)
-
-const (
-	schemaPath     string = "./config/schema-postgresql.sql"
-	propertiesFile string = "./config/config.properties"
 )
 
 var (
@@ -22,14 +21,36 @@ var (
 
 type baseDescription struct{}
 
-func (base baseDescription) GetDriverName() string { return "postgres" }
+func (base baseDescription) GetDriverName() string {
+	url := base.GetDataSourceName()
+	urlArray := strings.Split(url, "/")
+	if len(urlArray) > 3 {
+		url3 := urlArray[3]
+		if strings.Contains(url3, "?") {
+			return strings.Split(url3, "?")[0]
+		}
+		return url3
+	}
+	panic("Base de données mal paramétrée :" + url)
+}
 
 func (base baseDescription) GetDataSourceName() string {
+	url := os.Getenv("DATABASE_URL")
+	if url != "" {
+		return url
+	}
 	return props.GetString("database.datasource.url", "No_database_found")
 }
 
 func InitConfig() {
-	props = properties.MustLoadFile(propertiesFile, properties.UTF8)
+	propertiesFile := flag.String("config", "", "Nom du fichier de configuration (ex: '-config ./config.properties)'")
+	flag.Parse()
+	filepath := *propertiesFile
+	if filepath == "" {
+		// Si rien spécifié en ligne de commande, prendre le fichier dans le répertoire courant
+		filepath = "./config.properties"
+	}
+	props = properties.MustLoadFile(filepath, properties.UTF8)
 	secretKey = tokens.GenerateJWTRandomKey()
 }
 
@@ -38,6 +59,17 @@ func IsDev() bool {
 }
 
 func GetSchemaPath() string {
+	schemaFile := flag.String("schema", "", "Nom du fichier d'initialisation de la base de données (ex: '-schema ./schema-postgresql.sql)'")
+	flag.Parse()
+	schemaPath := *schemaFile
+	if schemaPath == "" {
+		files, err := filepath.Glob("./*.sql")
+		if err != nil {
+			return ""
+		}
+		// Si rien spécifié en ligne de commande, prendre le fichier dans le répertoire courant
+		schemaPath = files[0]
+	}
 	return schemaPath
 }
 
@@ -45,25 +77,12 @@ func GetFrontEndPath() string {
 	return props.MustGetString("http.server.frontend.path")
 }
 
-func GetServerUrl() string {
-	if props.GetBool("http.server.secure", false) {
-		return "https://" + GetServer()
-	}
-	return "http://" + GetServer()
-}
-
 func GetServer() string {
-	host := GetServerHost()
-	port := GetServerPort()
-	return fmt.Sprintf("%s:%s", host, port)
-}
-
-func GetServerHost() string {
-	return props.MustGetString("http.server.host")
-}
-
-func GetServerPort() string {
-	return props.MustGetString("http.server.port")
+	addr := os.Getenv("LISTEN_ADDR")
+	if addr == "" {
+		return ":8080"
+	}
+	return addr
 }
 
 func GetFrontServerUrl() string {

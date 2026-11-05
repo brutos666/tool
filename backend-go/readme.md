@@ -1,59 +1,110 @@
-# Arborescence du projet
+# Démarrage
 
-```text
-backend-go/
-├── main
-		├── controller
-		├── entity
-		├── handler
-		├── mapper
-		├── repository
-		├── service
-		└── main.go
-├── modules
-		├── authentication
-		└── database
-└── resources
-		└── schema-[base].sql
+Se positionner dans le même répertoire que ce readme (./backend-go)
+
+## Hors docker
+
+```bash
+# Dev
+go run ./main -config config.dev.properties
+
+# Prod (utilise config.properties par défaut)
+go run ./main
+# -schema pour spécifier le .sql à lancer pour initialiser la base de données
+go run ./main -schema schema-postgresql.sql
 ```
 
-# Nouvelle architecture
+## Docker en développement
+
+```bash
+docker build --target dev -t tool-go:dev  .
+# host permet d'avoir l'accès à la base de données qui est à l'extérieur du conteneur
+docker run --rm --network host tool-go:dev
+```
+
+** Si le fichier de configuration (config.dev.properties) ou si le fichier d'initialisation de la base de données (xxx.sql) est modifié, il faut refaire 'docker build ...' pour reconstruire l'image **
+
+### Attacher le debugger Go via delve
+
+Les fichiers DockerFile et docker-compose-dev.yaml sont écrit pour pouvoir mettre en place le debug du back Pour cela, ajouter la configuration suivante dans le fichier : .vscode/launch.json
+
+```json
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Attach Go (Docker)",
+      "type": "go",
+      "request": "attach",
+      "mode": "remote",
+      "host": "127.0.0.1",
+      "port": 2345,
+      "substitutePath": [{ "from": "${workspaceFolder}/go/main", "to": "/src" }]
+    }
+  ]
+}
+```
+
+## Docker en production
+
+```bash
+# En prod, variable d'environnement obligatoire (passer par docker compose chez le client)
+docker build --target prod -t tool-go:prod .
+docker run --rm --network host tool-go:prod
+```
+
+** Si le fichier de configuration (config.dev.properties) ou si le fichier d'initialisation de la base de données (xxx.sql) est modifié, il faut refaire 'docker build ...' pour reconstruire l'image **
+
+## Docker compose (Recommandé) (En cours)
+
+Se placer sur la racine du projet tool.
+Choisir les fichiers docker-compose pour utiliser la partie back en go
+
+```shell
+docker compose -f docker-compose.yaml -f docker-compose.dev.yaml up --watch
+```
+
+# Arborescence du projet
+
+Approche Domain Driven Development
 
 ```text
 backend-go/
 ├── main
 		├── application			-> cas d'usage ou action métier
 		├── domain					-> Logique métier (contient le contrat d'accès aux données)
-		├── infrastructure	-> gestion des données, lecture/écriture des fichiers, congif, logging
+		├── infrastructure	-> gestion des données, lecture/écriture des fichiers, logging
 		├── interface		 		-> présentation du résultat au navigateur
+		|
+		├── config					-> lecture du fichier.properties et/ou des variables d'environnement
+		├── generic					-> Interfaces transverses
 		└── main.go
 ├── modules
 		├── authentication
 		├── database
 		└── treeConverter
-└── resources
-		└── schema-[base].sql
+└── config.properties
+└── schema-[base].sql
 ```
-
-Dans le but de rendre le projet le plus limpide possible, je dois revoir la logique pour mettre en avant les objets qui vont orchestrer tout, en gardant une séparation avec la base de données, une séparation avec comment aller rechercher les données (pas forcément une base de données) et la logique métier (approche Domain Driven Development)
 
 # La logique métier :
 
 ## Les utilisateurs :
 
 - l'utilisateur connecté
-- l'utilisateur ADMIN
-- tous les utilisateurs (accessible uniquement par l'ADMIN qui aura tous les droits dessus)
+- l'utilisateur ADMIN (à faire)
+- tous les utilisateurs, accessible uniquement par l'ADMIN qui aura tous les droits dessus (à faire)
 
 ### Actions :
 
 - création d'un nouveau compte (à faire en Java)
+- authentification (à faire en Java)
 
 ### Actions à faire :
 
-- authentification
 - suppression du compte
 - modification du compte
+- attribution des taches à l'utilisateur connecté
 
 ## Les espaces
 
@@ -81,7 +132,7 @@ Un espace avec une arborescence incohérente apparaît en erreur quand il appara
 - pouvoir définir des fonctions personnalisées
 - pouvoir planifier tout ça (futur)
 
-# Ce qu'il en ressort
+# Résumé des fonctionnalités attendues (pas encore toutes présentes en Go)
 
 Un utilisateur peut :
 
@@ -102,6 +153,5 @@ Les espaces racines peuvent :
 - être chargés
 - être sauvegardés
 - être exportés
-
-On peut importer une liste d'espace dans la zone de navigation
+  On peut importer une liste d'espace dans la zone de navigation
 

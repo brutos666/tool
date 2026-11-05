@@ -1,9 +1,0 @@
-go 1.27.1
-
-use ./backend-go/main
-
-use ./backend-go/module/database
-
-use ./backend-go/module/authentication
-
-use ./backend-go/module/treeConverter

@@ -68,6 +68,6 @@ func ServeLocalFrontEnd() {
 		// Le serveur de fichier n'est pas configuré (production), il faut le démarrer via un reverse proxy (Nginx, Apache, Caddy, Traefik, etc.),
 		return
 	}
-	frontEnd := http.FileServer(http.Dir(config.GetFrontEndPath()))
+	frontEnd := http.FileServer(http.Dir(frontEndToServe))
 	http.Handle("/", frontEnd)
 }
