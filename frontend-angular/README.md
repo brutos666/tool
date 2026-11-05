@@ -1,59 +1,68 @@
-# FrontendAngular
+# Démarrage
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.1.6.
+Se positionner dans le même répertoire que ce readme (./frontend-angular)
 
-## Development server
-
-To start a local development server, run:
+## Hors docker
 
 ```bash
+# Dev
 ng serve
+
+# Prod (pour tester en local)
+ng serve -c production
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Docker en développement
 
 ```bash
-ng generate component component-name
+docker build --target dev -t tool-angular:dev .
+docker run --rm tool-angular:dev
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Utiliser l'url affichée dans les traces (ex: ➜ Network: http://192.168.1.29:4200/)
+
+Pour un fonctionnement avec le back sans passer par docker compose (déconseillé), on devra faire en sorte que chaque partie communique entre elle (angular avec go, go avec la base de données)
+Exemple avec un back en Go et une base de données dont les données sont dans le répertoire : ../database
+
+> Docker Go écoute le port **:8090** (env LISTEN_ADDR DockerFile). Docker Angular redirige les requêtes /api/ vers **http://go:8090** (donnée par proxy.conf.docker.js + env BACKEND_URL DockerFile). Docker Db stocke les données dans le répertoire **/database** du projet (à l'extérieur de l'environnement de docker). Docker Go retrouve la base de données grâce au nom **db** de l'url "postgresql://postgres:postgres@**db**:5432/postgres?sslmode=disable", le nom db étant spécifié dans la commande docker via "--name db". Le tout fonctionne sur le même réseau de type bridge, nommé ici **angularGo**
+> On préféra bien évidemment utiliser docker compose en choisissant les fichiers correspondant aux technos désirées
 
 ```bash
-ng generate --help
+docker build --target dev -t tool-angular:dev .
+docker build --target dev -t tool-go:dev ../backend-go/
+
+docker network create angularGo
+docker run --rm --network angularGo --name db \
+  -e POSTGRES_PASSWORD=postgres \
+  -v "$(pwd)/../database:/var/lib/postgresql/18/docker" \
+  postgres:18.6-alpine3.24
+docker run --rm --network angularGo --name go \
+  -e DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres?sslmode=disable \
+  -p 2345:2345 \
+  tool-go:dev
+docker run --rm --network angularGo --name angular -p 4200:4200 tool-angular:dev
 ```
 
-## Building
+> Ajouter -d pour lancer en arrière plan.
+> L'extension Container tools "ms-azuretools.vscode-containers" est très utile pour la gestion des images, réseaux et conteneur
 
-To build the project run:
+> ** Si des fichiers de configuration (*.json) ou des sources sont modifiés, il faut refaire 'docker build ...' pour reconstruire l'image **
+
+## Docker en production
 
 ```bash
-ng build
+# En prod, variable d'environnement obligatoire (passer par docker compose chez le client)
+docker build --target prod -t tool-angular:prod .
+docker run --rm -d -p 80:8080 tool-angular:prod
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+** Si des fichiers de configuration (*.json) ou des sources sont modifiés, il faut refaire 'docker build ...' pour reconstruire l'image **
 
-## Running unit tests
+## Docker compose (Recommandé) (En cours)
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+Se placer sur la racine du projet tool.
+Choisir les fichiers docker-compose pour utiliser la partie front en angular
 
-```bash
-ng test
+```shell
+docker compose -f docker-compose.yaml -f docker-compose.dev.yaml up --watch
 ```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.

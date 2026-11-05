@@ -25,7 +25,12 @@ COPY --parents ./**/*.go ./
 RUN --mount=type=cache,target=/go/pkg/mod \
   --mount=type=cache,target=/root/.cache/go-build \
   go build -gcflags="all=-N -l" -o /goTool ./main
+
+ENV LISTEN_ADDR=:8090
+
+# port d'écoute pour le debugger
 EXPOSE 2345
+
 CMD ["dlv", "exec", "/goTool", "--headless", "--listen=:2345", "--api-version=2", "--accept-multiclient", "--continue", "--", "-config", "config.properties"]
 
 # ============================================
@@ -47,4 +52,8 @@ COPY --from=build /go-tool /go-tool
 # Faire un volume avec docker compose pour externaliser le fichier de configuration
 COPY *.sql .
 COPY config.properties .
+
+ENV LISTEN_ADDR=:8090
+EXPOSE 8090
+
 ENTRYPOINT ["/go-tool"]

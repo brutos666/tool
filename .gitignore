@@ -8,6 +8,9 @@ backend-tool/*.log
 # Frontend
 node_modules/
 
+# Database
+database/*
+
 # IntelliJ
 .idea/
 *.iml

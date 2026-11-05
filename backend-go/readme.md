@@ -17,7 +17,7 @@ go run ./main -schema schema-postgresql.sql
 ## Docker en développement
 
 ```bash
-docker build --target dev -t tool-go:dev  .
+docker build --target dev -t tool-go:dev .
 # host permet d'avoir l'accès à la base de données qui est à l'extérieur du conteneur
 docker run --rm --network host tool-go:dev
 ```
