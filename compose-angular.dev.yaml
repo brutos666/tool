@@ -1,0 +1,25 @@
+services:
+  angular:
+    build:
+      context: ./frontend-angular
+      target: dev
+    image: tool-angular:dev
+    ports:
+      - "8080:4200"
+    develop:
+      watch:
+        - action: sync
+          path: ./frontend-angular/src
+          target: /app/src
+        - action: rebuild
+          path: ./frontend-angular/angular.json
+        - action: rebuild
+          path: ./frontend-angular/package.json
+        - action: rebuild
+          path: ./frontend-angular/package-lock.json
+    # environment:
+    #   - BACKEND_URL=http://[back]:[backPort]
+    # depends_on:
+    #  - back
+    # networks: [internal]
+

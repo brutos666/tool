@@ -1,0 +1,39 @@
+services:
+  # Base de données
+  db:
+    extends:
+      file: compose-postgresql.yaml
+      service: postgresql
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    networks: [internal]
+
+  # Back
+  go:
+    extends:
+      file: compose-go.prod.yaml
+      service: go
+    environment:
+      DATABASE_URL: "postgresql://postgres:postgres@db:5432/postgres?sslmode=disable"
+      DATABASE_DRIVER: "postgres"
+      DATABASE_SQL: "schema-postgresql.sql"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [internal]
+
+  # Front
+  angular:
+    extends:
+      file: compose-angular.prod.yaml
+      service: angular
+    environment: [BACKEND_URL=http://go:8090]
+    depends_on:
+      - go
+    networks: [internal]
+
+networks:
+  internal:
+

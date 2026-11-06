@@ -46,7 +46,8 @@ RUN CGO_ENABLED=0 go build -o /go-tool ./main
 FROM scratch AS prod
 
 WORKDIR /
-USER 65532:65532
+# Le groupe 66666 devra avoir accès à la base de données qui se trouve dans ./database
+USER 65532:66666
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=build /go-tool /go-tool
 # Faire un volume avec docker compose pour externaliser le fichier de configuration

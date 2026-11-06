@@ -5,6 +5,10 @@ import (
 	"log"
 	"time"
 
+	// Base de données supportées
+	_ "github.com/lib/pq"
+	_ "modernc.org/sqlite"
+
 	"goTool/application"
 	"goTool/config"
 	"goTool/infrastructure/bddService"

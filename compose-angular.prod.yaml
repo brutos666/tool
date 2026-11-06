@@ -1,0 +1,15 @@
+services:
+  angular:
+    build:
+      context: ./frontend-angular
+      target: prod
+    image: tool-angular:prod
+    ports:
+      - "8080:8080"
+
+    # environment:
+    #   - BACKEND_URL=http://[back]:[backPort]
+    # depends_on:
+    #  - back
+    # networks: [internal]
+

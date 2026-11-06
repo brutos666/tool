@@ -2,6 +2,18 @@
 
 Se positionner dans le même répertoire que ce readme (./backend-go)
 
+## Base de données
+
+Si la base de données est paramétrée pour atterrir dans le répertoire /database, les droits d'accès doivent être partagés entre le développeur et l'utilisateur du conteneur (UID=65532, GID=66666 en prod).
+On va donc créer le groupe dbaccess avec le numéro 66666, s'octroyer ce groupe et donner les droits au répertoire database
+
+```bash
+sudo groupadd -r -g 66666 dbaccess
+sudo usermod -aG dbaccess $USER    # toi
+sudo chown -R :dbaccess ./database
+sudo chmod -R g+rwX ./database
+```
+
 ## Hors docker
 
 ```bash
@@ -10,19 +22,23 @@ go run ./main -config config.dev.properties
 
 # Prod (utilise config.properties par défaut)
 go run ./main
-# -schema pour spécifier le .sql à lancer pour initialiser la base de données
-go run ./main -schema schema-postgresql.sql
 ```
 
 ## Docker en développement
 
 ```bash
 docker build --target dev -t tool-go:dev .
-# host permet d'avoir l'accès à la base de données qui est à l'extérieur du conteneur
+# Si la base de données est un service local qui tourne sur la machine
 docker run --rm --network host tool-go:dev
+# Si la base de données est statique dans un répertoire local (sqlite)
+docker run --rm --network host -v ../database/sqlite tool-go:dev
 ```
 
-** Si le fichier de configuration (config.dev.properties) ou si le fichier d'initialisation de la base de données (xxx.sql) est modifié, il faut refaire 'docker build ...' pour reconstruire l'image **
+> "--network host" permet le contact avec une base données qui tourne sur le poste et au debugger
+
+> Si le fichier de configuration (config.dev.properties) ou si le fichier d'initialisation de la base de données (xxx.sql) est modifié, il faut refaire 'docker build ...' pour reconstruire l'image
+>
+> > Idée : faut-il externaliser les fichiers de config et les fichiers d'initialisation de la base de données (via des volumes) ?
 
 ### Attacher le debugger Go via delve
 
@@ -50,18 +66,26 @@ Les fichiers DockerFile et docker-compose-dev.yaml sont écrit pour pouvoir mett
 ```bash
 # En prod, variable d'environnement obligatoire (passer par docker compose chez le client)
 docker build --target prod -t tool-go:prod .
+# Si la base de données est un service local qui tourne sur la machine
 docker run --rm --network host tool-go:prod
+# Si la base de données est statique dans un répertoire local (sqlite)
+docker run --rm --network host -v ../database/sqlite tool-go:prod
 ```
 
-** Si le fichier de configuration (config.dev.properties) ou si le fichier d'initialisation de la base de données (xxx.sql) est modifié, il faut refaire 'docker build ...' pour reconstruire l'image **
+> "--network host" permet le contact avec une base données qui tourne sur le poste et au debugger
 
-## Docker compose (Recommandé) (En cours)
+> Si le fichier de configuration (config.properties) ou si le fichier d'initialisation de la base de données (xxx.sql) est modifié, il faut refaire 'docker build ...' pour reconstruire l'image
+>
+> > Idée : faut-il externaliser les fichiers de config et les fichiers d'initialisation de la base de données (via des volumes) ?
+
+## Docker compose (Recommandé)
 
 Se placer sur la racine du projet tool.
 Choisir les fichiers docker-compose pour utiliser la partie back en go
 
 ```shell
-docker compose -f docker-compose.yaml -f docker-compose.dev.yaml up --watch
+# Exemple go/angular/postgresql
+docker compose -f docker-compose-go-angular.dev.yaml up --watch
 ```
 
 # Arborescence du projet

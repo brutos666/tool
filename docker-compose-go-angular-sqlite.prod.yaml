@@ -1,0 +1,27 @@
+services:
+  # Back
+  go:
+    extends:
+      file: compose-go.prod.yaml
+      service: go
+    environment:
+      DATABASE_URL: "file:/data/tool.db?_pragma=journal_mode(WAL)&_pragma=busy_timeout(5000)"
+      DATABASE_DRIVER: "sqlite"
+      DATABASE_SQL: "./schema-sqlite.sql"
+    volumes:
+      - ./database/sqlite:/data
+    networks: [internal]
+
+  # Front
+  angular:
+    extends:
+      file: compose-angular.prod.yaml
+      service: angular
+    environment: [BACKEND_URL=http://go:8090]
+    depends_on:
+      - go
+    networks: [internal]
+
+networks:
+  internal:
+

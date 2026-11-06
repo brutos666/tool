@@ -91,6 +91,18 @@ Il est possible d'exporter les données dans un fichier et d'importer à partir 
 Pas besoin de prérequis en utilisant les conteneurs docker.
 Si besoin de travailler hors conteneur, se référer aux versions en parcourant les fichiers DockerFile.
 
+## Base de données
+
+Si la base de données est paramétrée pour atterrir dans le répertoire /database, les droits d'accès doivent être partagés entre le développeur et l'utilisateur du conteneur (UID=65532, GID=66666 en prod).
+On va donc créer le groupe dbaccess avec le numéro 66666, s'octroyer ce groupe et donner les droits au répertoire database
+
+```bash
+sudo groupadd -r -g 66666 dbaccess
+sudo usermod -aG dbaccess $USER    # toi
+sudo chown -R :dbaccess ./database
+sudo chmod -R g+rwX ./database
+```
+
 ## Pour développer et debugger dans l'environnement du conteneur
 
 Récupérer le projet par un clone du repo GitHub

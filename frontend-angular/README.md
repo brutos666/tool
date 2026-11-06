@@ -25,6 +25,7 @@ Pour un fonctionnement avec le back sans passer par docker compose (déconseill�
 Exemple avec un back en Go et une base de données dont les données sont dans le répertoire : ../database
 
 > Docker Go écoute le port **:8090** (env LISTEN_ADDR DockerFile). Docker Angular redirige les requêtes /api/ vers **http://go:8090** (donnée par proxy.conf.docker.js + env BACKEND_URL DockerFile). Docker Db stocke les données dans le répertoire **/database** du projet (à l'extérieur de l'environnement de docker). Docker Go retrouve la base de données grâce au nom **db** de l'url "postgresql://postgres:postgres@**db**:5432/postgres?sslmode=disable", le nom db étant spécifié dans la commande docker via "--name db". Le tout fonctionne sur le même réseau de type bridge, nommé ici **angularGo**
+
 > On préféra bien évidemment utiliser docker compose en choisissant les fichiers correspondant aux technos désirées
 
 ```bash
@@ -44,25 +45,28 @@ docker run --rm --network angularGo --name angular -p 4200:4200 tool-angular:dev
 ```
 
 > Ajouter -d pour lancer en arrière plan.
+
 > L'extension Container tools "ms-azuretools.vscode-containers" est très utile pour la gestion des images, réseaux et conteneur
 
-> ** Si des fichiers de configuration (*.json) ou des sources sont modifiés, il faut refaire 'docker build ...' pour reconstruire l'image **
+> Si des fichiers de configuration (*.json) ou des sources sont modifiées, il faut refaire 'docker build ...' pour reconstruire l'image
 
 ## Docker en production
 
 ```bash
 # En prod, variable d'environnement obligatoire (passer par docker compose chez le client)
 docker build --target prod -t tool-angular:prod .
-docker run --rm -d -p 80:8080 tool-angular:prod
+docker run --rm --network host -e BACKEND_URL="http://localhost:8090" tool-angular:prod
 ```
 
-** Si des fichiers de configuration (*.json) ou des sources sont modifiés, il faut refaire 'docker build ...' pour reconstruire l'image **
+> "--network host" permet le fonctionnement avec le back lancé en local
+> Si des fichiers de configuration (*.json) ou des sources sont modifiées, il faut refaire 'docker build ...' pour reconstruire l'image
 
-## Docker compose (Recommandé) (En cours)
+## Docker compose (Recommandé)
 
 Se placer sur la racine du projet tool.
-Choisir les fichiers docker-compose pour utiliser la partie front en angular
+Choisir les fichiers docker-compose pour utiliser la partie front angular
 
 ```shell
-docker compose -f docker-compose.yaml -f docker-compose.dev.yaml up --watch
+# Exemple go/angular/postgresql
+docker compose -f docker-compose-go-angular.dev.yaml up --watch
 ```

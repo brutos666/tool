@@ -6,8 +6,6 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/magiconair/properties"
@@ -22,16 +20,15 @@ var (
 type baseDescription struct{}
 
 func (base baseDescription) GetDriverName() string {
-	url := base.GetDataSourceName()
-	urlArray := strings.Split(url, "/")
-	if len(urlArray) > 3 {
-		url3 := urlArray[3]
-		if strings.Contains(url3, "?") {
-			return strings.Split(url3, "?")[0]
-		}
-		return url3
+	driver := os.Getenv("DATABASE_DRIVER")
+	if driver != "" {
+		return driver
 	}
-	panic("Base de données mal paramétrée :" + url)
+	driver = props.GetString("database.datasource.driver", "")
+	if driver == "" {
+		panic("Le driver de la base de données n'est pas fourni (sqlite, postgres, ...) env=DATABASE_DRIVER ou database.datasource.driver dans config.properties")
+	}
+	return driver
 }
 
 func (base baseDescription) GetDataSourceName() string {
@@ -48,7 +45,7 @@ func InitConfig() {
 	filepath := *propertiesFile
 	if filepath == "" {
 		// Si rien spécifié en ligne de commande, prendre le fichier dans le répertoire courant
-		filepath = "./config.properties"
+		filepath = "../config.properties"
 	}
 	props = properties.MustLoadFile(filepath, properties.UTF8)
 	secretKey = tokens.GenerateJWTRandomKey()
@@ -59,18 +56,15 @@ func IsDev() bool {
 }
 
 func GetSchemaPath() string {
-	schemaFile := flag.String("schema", "", "Nom du fichier d'initialisation de la base de données (ex: '-schema ./schema-postgresql.sql)'")
-	flag.Parse()
-	schemaPath := *schemaFile
-	if schemaPath == "" {
-		files, err := filepath.Glob("./*.sql")
-		if err != nil {
-			return ""
-		}
-		// Si rien spécifié en ligne de commande, prendre le fichier dans le répertoire courant
-		schemaPath = files[0]
+	driver := os.Getenv("DATABASE_SQL")
+	if driver != "" {
+		return driver
 	}
-	return schemaPath
+	driver = props.GetString("database.datasource.sql", "")
+	if driver == "" {
+		panic("Le fichier d'initialisation des tables de la base de données n'est pas fourni (xxx.sql) env=DATABASE_SQL ou database.datasource.driver dans config.properties")
+	}
+	return driver
 }
 
 func GetFrontEndPath() string {
@@ -80,7 +74,7 @@ func GetFrontEndPath() string {
 func GetServer() string {
 	addr := os.Getenv("LISTEN_ADDR")
 	if addr == "" {
-		return ":8080"
+		return ":8090"
 	}
 	return addr
 }
@@ -97,6 +91,7 @@ func GetFrontServerUrl() string {
 	}
 	return "http://" + server
 }
+
 func MustAuthenticate() bool {
 	return props.GetBool("authenticate.control", true)
 }

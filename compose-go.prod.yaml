@@ -1,0 +1,20 @@
+services:
+  go:
+    build:
+      context: ./backend-go
+      target: prod
+    image: tool-go:prod
+    ports:
+      - "8090:8090"
+    environment:
+      LISTEN_ADDR: ":8090"
+
+    # environment:
+    #   DATABASE_URL: "aaa://user:password@database:port/zzz"
+    #   DATABASE_DRIVER: "yyy"
+    #   DATABASE_SQL: "xxx.sql"
+    # depends_on:
+    #   database:
+    #     condition: service_healthy
+    # networks: [internal]
+
