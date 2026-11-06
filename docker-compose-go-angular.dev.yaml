@@ -1,0 +1,37 @@
+services:
+  go:
+    build:
+      context: ./backend-go
+      target: dev
+    image: tool-go:dev
+    # les lignes suivantes servent pour debugger
+    ports:
+      - "2345:2345"
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - "seccomp:unconfined"
+    develop:
+      watch:
+        - action: rebuild
+          path: ./backend-go
+          ignore:
+            - "**/*_test.go"
+  angular:
+    build:
+      context: ./frontend-angular
+      target: dev
+    image: tool-angular:dev
+    ports: !override ["8080:4200"]
+    develop:
+      watch:
+        - action: sync
+          path: ./frontend-angular/src
+          target: /app/src
+        - action: rebuild
+          path: ./frontend-angular/angular.json
+        - action: rebuild
+          path: ./frontend-angular/package.json
+        - action: rebuild
+          path: ./frontend-angular/package-lock.json
+
