@@ -79,7 +79,7 @@ func selectUsers(ctx context.Context, dataBase bddService.ReadCommands, email st
 func insertUser(ctx context.Context, dataBase bddService.WriteCommands, user *domain.User, hashPassword string) error {
 	userModel := *entityBdd.CreateUserToRegister(*user, hashPassword)
 
-	err := dataBase.Insert(ctx, INSERT_USER, userModel)
+	err := dataBase.Insert(ctx, INSERT_USER, &userModel)
 	if err != nil {
 		return err
 	}
