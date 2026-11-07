@@ -116,15 +116,22 @@ git clone https://github.com/brutos666/tool
 Exemple pour un back en Go, un front en Angular et une Base de données postgresql
 
 ```shell
-docker compose -f docker-compose-go-angular.yaml -f docker-compose-go-angular.dev.yaml up --watch
+# Exemple pour un back en Go, un front en Angular et une Base de données postgresql
+docker compose -f docker-compose-go-angular.dev.yaml build
+docker compose -f docker-compose-go-angular.dev.yaml up --watch
+# Lancer l'url indiquée pour "Network"
+
+# Exemple pour un back en Go, un front en Vanilla Js et une Base de données sqlite
+docker compose -f docker-compose-go-vanilla-sqlite.dev.yaml build
+docker compose -f docker-compose-go-vanilla-sqlite.dev.yaml up --watch
+# Lancer l'url http://localhost:8081
 ```
 
-Lancer l'url http://localhost:8080
-
-Pour l'arrêter :
+Pour les arrêter :
 
 ```shell
-docker compose -f docker-compose-go-angular.yaml -f docker-compose-go-angular.dev.yaml down
+docker compose -f docker-compose-go-angular.dev.yaml down
+docker compose -f docker-compose-go-vanilla-sqlite.dev.yaml down
 ```
 
 ### Attacher le debugger Go via delve
@@ -150,18 +157,17 @@ Pour cela, ajouter la configuration suivante dans le fichier :
 }
 ```
 
-### Lancer docker en mode production
+### Docker en mode production
 
 Exemple pour un back en Go, un front en Angular et une Base de données postgresql
 
 ```shell
-docker compose -f docker-compose-go-angular.yaml up
-```
-
-Pour l'arrêter :
-
-```shell
-docker compose -f docker-compose-go-angular.yaml down
+# Compiler
+docker compose -f docker-compose-go-angular.prod.yaml build
+# Démarrer
+docker compose -f docker-compose-go-angular.prod.yaml up
+# Arrêter
+docker compose -f docker-compose-go-angular.prod.yaml down
 ```
 
 ## Lancer le projet sans docker
@@ -187,18 +193,34 @@ npm run start
 
 ```bash
 # Dev
-cd backend-go
 go run ./main -config config.dev.properties
 
 # Prod (utilise config.properties par défaut)
 go run ./main
-# -schema pour spécifier le .sql à lancer pour initialiser la base de données
-go run ./main -schema schema-postgresql.sql
 ```
 
-### Frontend
+### Frontend Vanilla JS
 
-Installer l'extension [Live Server](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer) dans Visual Studio Code et cliquer sur "Go Live" dans la barre d'état de l'IDE
+Pour fonctionner avec le back sans soucis de cross-domain, il faut un reverse-proxy quelque soit la technologie utilisée pour servir le front.
+
+```bash
+# Pour un back qui écoute le port 8090
+npx local-web-server --rewrite '/api/(.*) -> http://localhost:8090/api/$1'
+```
+
+Lancer l'url http://localhost:8000
+
+### Frontend Angular
+
+```bash
+# Dev
+ng serve
+
+# Prod (pour tester en local)
+ng serve -c production
+```
+
+Lancer l'url http://localhost:4200
 
 ## Lancer les tests
 

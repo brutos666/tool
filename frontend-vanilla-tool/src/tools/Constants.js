@@ -1,6 +1,6 @@
 'use strict';
 
-const URL_ROOT_API = 'http://localhost:8080/api/';
+const URL_ROOT_API = '/api/';
 const NOTIFICATION_TIMEOUT = 3000;
 const SAVE_TIMEOUT = 5000;
 

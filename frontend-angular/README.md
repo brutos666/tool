@@ -17,9 +17,11 @@ ng serve -c production
 ```bash
 docker build --target dev -t tool-angular:dev .
 docker run --rm tool-angular:dev
+# Pour un back qui écoute le port 8090
+docker run --rm --network host -e BACKEND_URL="http://localhost:8090" tool-angular:dev
 ```
 
-Utiliser l'url affichée dans les traces (ex: ➜ Network: http://192.168.1.29:4200/)
+Utiliser l'url affichée dans les traces (ex: ➜ Network: http://192.168.1.29:8080/)
 
 Pour un fonctionnement avec le back sans passer par docker compose (déconseillé), on devra faire en sorte que chaque partie communique entre elle (angular avec go, go avec la base de données)
 Exemple avec un back en Go et une base de données dont les données sont dans le répertoire : ../database
@@ -41,7 +43,7 @@ docker run --rm --network angularGo --name go \
   -e DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres?sslmode=disable \
   -p 2345:2345 \
   tool-go:dev
-docker run --rm --network angularGo --name angular -p 4200:4200 tool-angular:dev
+docker run --rm --network angularGo --name angular -p 8080:8080 tool-angular:dev
 ```
 
 > Ajouter -d pour lancer en arrière plan.
@@ -53,10 +55,11 @@ docker run --rm --network angularGo --name angular -p 4200:4200 tool-angular:dev
 ## Docker en production
 
 ```bash
-# En prod, variable d'environnement obligatoire (passer par docker compose chez le client)
 docker build --target prod -t tool-angular:prod .
 docker run --rm --network host -e BACKEND_URL="http://localhost:8090" tool-angular:prod
 ```
+
+Lancer l'url http://localhost:8080
 
 > "--network host" permet le fonctionnement avec le back lancé en local
 > Si des fichiers de configuration (*.json) ou des sources sont modifiées, il faut refaire 'docker build ...' pour reconstruire l'image

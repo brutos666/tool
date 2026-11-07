@@ -1,0 +1,32 @@
+services:
+  vanilla:
+    build:
+      context: ./frontend-vanilla-tool
+      target: dev
+    image: tool-vanilla:dev
+    ports:
+      - "8081:8081"
+    develop:
+      watch:
+        - action: sync
+          path: ./frontend-vanilla-tool/public
+          target: /app/public
+        - action: sync
+          path: ./frontend-vanilla-tool/src
+          target: /app/src
+        - action: sync
+          path: ./frontend-vanilla-tool/test
+          target: /app/test
+        - action: sync
+          path: ./frontend-vanilla-tool/index.html
+          target: /app
+        - action: sync
+          path: ./frontend-vanilla-tool/login.html
+          target: /app
+
+    # environment:
+    #   - BACKEND_URL=http://[back]:[backPort]
+    # depends_on:
+    #  - back
+    # networks: [internal]
+

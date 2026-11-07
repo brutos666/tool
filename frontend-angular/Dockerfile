@@ -21,8 +21,8 @@ FROM pre-build AS dev
 
 ENV BACKEND_URL=http://go:8090
 
-EXPOSE 4200
-CMD ["npx","ng","serve","--host","0.0.0.0","--port","4200"]
+EXPOSE 8080
+CMD ["npx","ng","serve","--host","0.0.0.0","--port","8080"]
 
 # ============================================
 # Stage 3 : Compilation pour la prod
