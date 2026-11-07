@@ -72,14 +72,15 @@ func ConvertUserToModel(user domain.User) *UserModel {
 }
 
 func CreateUserToRegister(user domain.User, hashPassword string) *UserModel {
+	now := time.Now().UTC()
 	userModel := new(UserModel)
 	userModel.SetFirstName(user.GetFirstName())
 	userModel.SetLastName(user.GetLastName())
 	userModel.SetPassword(user.GetPassword())
 	userModel.SetEmail(user.GetEmail())
 	userModel.SetRole(user.GetRole())
-	userModel.SetCreatedAt(time.Now())
-	userModel.SetUpdatedAt(time.Now())
+	userModel.SetCreatedAt(now)
+	userModel.SetUpdatedAt(now)
 	userModel.SetPassword(hashPassword)
 	return userModel
 }

@@ -88,6 +88,6 @@ func insertUser(ctx context.Context, dataBase bddService.WriteCommands, user *do
 }
 
 func updateUserToken(ctx context.Context, dataBase bddService.WriteCommands, userId, accessToken, refreshToken string) error {
-	_, err := dataBase.Update(ctx, UPDATE_USER_TOKEN, accessToken, refreshToken, time.Now(), userId)
+	_, err := dataBase.Update(ctx, UPDATE_USER_TOKEN, accessToken, refreshToken, time.Now().UTC(), userId)
 	return err
 }

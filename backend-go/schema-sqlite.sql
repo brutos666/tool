@@ -7,8 +7,8 @@ CREATE TABLE IF NOT EXISTS users (
     role          TEXT NOT NULL,   -- Rôle
     token         TEXT,            -- Jeton de connexion
     refresh_token TEXT,            -- Jeton de rafraîchissement
-    created_at    TEXT DEFAULT CURRENT_TIMESTAMP,  -- Date de création
-    updated_at    TEXT DEFAULT CURRENT_TIMESTAMP   -- Date de mise à jour
+    created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- Date de création
+    updated_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP   -- Date de mise à jour
 );
 
 CREATE TRIGGER IF NOT EXISTS users_set_updated_at
