@@ -25,10 +25,6 @@ comment on column users.refresh_token is 'Jeton de rafraîchissement';
 comment on column users.created_at is 'Date de création';
 comment on column users.updated_at is 'Date de mise à jour';
 
-
-alter table users
-    owner to postgres;
-
 create sequence if not exists item_id_seq START 1;
 
 create table if not exists item
@@ -48,6 +44,3 @@ comment on column item.state is 'Etat';
 comment on column item.id is 'Identifiant unique';
 comment on column item.parent_id is 'Identifiant de l''item parent';
 comment on column item.next_id is 'Identifiant de l''item suivant';
-
-alter table item
-    owner to postgres;
