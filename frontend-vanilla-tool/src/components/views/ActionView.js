@@ -5,7 +5,7 @@ class ActionView extends View {
 
   name = 'ActionView';
 
-  #doActionCallback = () => {};
+  #doActionCallback = null;
   #onClickEvent = this.callDoActionCallback.bind(this);
   #onMouseDownEvent = event => event.preventDefault();
 
@@ -55,8 +55,10 @@ class ActionView extends View {
    */
 
   callDoActionCallback(event) {
-    event.stopPropagation();
-    this.#doActionCallback(event);
+    if (this.#doActionCallback) {
+      event.stopPropagation();
+      this.#doActionCallback(event);
+    }
   }
 
   setReadOnly() {

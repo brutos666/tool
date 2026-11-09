@@ -19,6 +19,12 @@ class ButtonDialog extends Decorator {
     super(new ButtonDialogView(decoratedElement.getView(), data), decoratedElement);
   }
 
+  closeDialog() {
+    /** @type {ButtonDialogView} */
+    const buttonDialogView = this.getView();
+    buttonDialogView.closeDialog();
+  }
+
 }
 
 export default ButtonDialog;

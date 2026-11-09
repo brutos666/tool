@@ -14,6 +14,7 @@ class WorkingSpace extends Component {
   #currentTreeItem;
   #menu;
   #decorateMainSpace;
+  #decorateNavSpace;
 
   constructor() {
     super(new WorkingSpaceView());
@@ -21,21 +22,21 @@ class WorkingSpace extends Component {
     this.#currentTreeItem = StoreData.getTreeItem();
     this.#menu = new Menu();
     const navSpace = new NavSpace();
-    const decorateNavSpace = new CommandItemsDecorator(navSpace, { treeItem: this.#currentTreeItem });
+    this.#decorateNavSpace = new CommandItemsDecorator(navSpace, { treeItem: this.#currentTreeItem });
     this.#decorateMainSpace = new CommandItemsDecorator(new MainSpace(), { treeItem: this.#currentTreeItem });
 
     const reloadAction = new ActionButton({ id: 'reload', label: 'Actualiser', role: 'menuitem', type: 'menu' });
-    reloadAction.setDoActionCallback(decorateNavSpace.loadItems.bind(decorateNavSpace));
+    reloadAction.setDoActionCallback(this.#decorateNavSpace.loadItems.bind(this.#decorateNavSpace));
     const saveAllAction = new ActionButton({ id: 'save', label: 'Sauvegarder tout', role: 'menuitem', type: 'menu' });
-    saveAllAction.setDoActionCallback(decorateNavSpace.doSave.bind(decorateNavSpace));
+    saveAllAction.setDoActionCallback(this.#decorateNavSpace.doSave.bind(this.#decorateNavSpace));
 
     const saveMainAction = new ActionButton({ id: 'saveCurrent', label: 'Sauvegarder la vue courante', role: 'menuitem', type: 'menu' });
     saveMainAction.setDoActionCallback(this.#decorateMainSpace.doSave.bind(this.#decorateMainSpace));
     const exportAction = new ActionButton({ id: 'export', label: 'Exporter tout', role: 'menuitem', type: 'menu' });
-    exportAction.setDoActionCallback(decorateNavSpace.exportItems.bind(decorateNavSpace));
+    exportAction.setDoActionCallback(this.#decorateNavSpace.exportItems.bind(this.#decorateNavSpace));
     const importFile = new FileUpload({ id: 'import', label: 'Importer' });
-    importFile.setDoActionCallback(decorateNavSpace.importItems.bind(decorateNavSpace));
     const importAction = new ButtonDialog(importFile, { id: 'import', label: 'Importer', role: 'menuitem', type: 'menu' });
+    importFile.setDoActionCallback(this.importItems.bind(this, importAction));
 
     this.#menu.addChild(reloadAction);
     this.#menu.addChild(saveAllAction);
@@ -44,10 +45,10 @@ class WorkingSpace extends Component {
     this.#menu.addChild(importAction);
 
     this.setStaticChild('menu', this.#menu);
-    this.setStaticChild('nav', decorateNavSpace);
+    this.setStaticChild('nav', this.#decorateNavSpace);
     this.setStaticChild('main', this.#decorateMainSpace);
 
-    decorateNavSpace.loadItems()
+    this.#decorateNavSpace.loadItems()
       .then(() => navSpace.giveFocus());
   }
 
@@ -61,6 +62,11 @@ class WorkingSpace extends Component {
         .setTreeItem(treeItem);
       this.#decorateMainSpace.setTreeItem(treeItem);
     }
+  }
+
+  importItems(importAction, file) {
+    this.#decorateNavSpace.importItems(file)
+      .then(() => importAction.closeDialog());
   }
 
 }

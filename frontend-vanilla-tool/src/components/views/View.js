@@ -7,7 +7,7 @@ class View {
 
   name = 'View';
 
-  /** @type {Element} */
+  /** @type {HTMLElement} */
   #elementView;
 
   /** @type {Object.<string, View>} */

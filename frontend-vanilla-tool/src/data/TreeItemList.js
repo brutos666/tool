@@ -49,7 +49,7 @@ class TreeItemList {
   addItems(parentTreeItem, itemInfosList) {
     itemInfosList.forEach(itemInfos => {
       const treeItem = new TreeItem(itemInfos);
-      this.addItem(treeItem);
+      this.addItem(parentTreeItem, treeItem);
     });
   }
 

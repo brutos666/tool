@@ -42,12 +42,12 @@ class CommandItemsDecorator extends CommandDecorator {
   }
 
   exportItems() {
-    new ExportItems(this)
+    return new ExportItems(this)
       .execute();
   }
 
   importItems(fileUpload) {
-    new ImportItems(this, fileUpload)
+    return new ImportItems(this, fileUpload)
       .execute();
   }
 
