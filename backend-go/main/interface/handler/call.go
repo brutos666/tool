@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"io"
 
 	"goTool/domain"
 	"goTool/generic"
@@ -16,6 +17,7 @@ type (
 	NoDataAccessCall[R any] func(context context.Context) (R, error)
 	DataAccessCall[R any]   func(context context.Context, dataAccessId int) (R, error)
 	ParamCall[P, R any]     func(context context.Context, dataAccessId int, parameter P) (R, error)
+	FileParamCall[R any]    func(context context.Context, fileReader io.Reader) (R, error)
 	LoginCall[P, R any]     func(context context.Context, dataAccessId int, tokenGeneration domain.TokensProduct, parameter P) (R, error)
 	RefreshCall             func(context context.Context, dataAccessId int, tokenGeneration domain.TokensProduct, user domain.ConnectedUser) (*domain.LoggedUser, error)
 )
@@ -43,4 +45,8 @@ func AsLoginCall[P, R any](callback LoginCall[P, R], dataAccessService generic.D
 // AsRefreshCall englobe dans des fonctions imbriqués l'appel à la fonction (bdd, conversion réponse) pour le rafraîchissement de l'authentification à partir du jeton dédié
 func AsRefreshCall(callback RefreshCall, dataAccessService generic.DataAccessService, accessType string) responseRequestCall {
 	return Wrapper[*domain.LoggedUser]{}.forRefreshCall(callback).withDataAccessService(dataAccessService, accessType).wrap()
+}
+
+func AsFileParamCall[R any](callback FileParamCall[R]) responseRequestCall {
+	return Wrapper[R]{}.forFileParamCall(callback).wrap()
 }

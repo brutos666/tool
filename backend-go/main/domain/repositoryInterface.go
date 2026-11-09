@@ -1,6 +1,9 @@
 package domain
 
-import "context"
+import (
+	"context"
+	"io"
+)
 
 type DataInitRepository interface {
 	Init(ctx context.Context) error
@@ -12,6 +15,11 @@ type SpaceCommandRepository interface {
 }
 type SpaceQueryRepository interface {
 	FindAll(ctx context.Context, dataAccessId int) ([]*Space, error)
+}
+
+type SpaceFileRepository interface {
+	Save(ctx context.Context) error
+	Load(ctx context.Context, sourceFile io.Reader) ([]*Space, error)
 }
 
 type UserCommandRepository interface {

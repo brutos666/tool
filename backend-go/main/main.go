@@ -48,6 +48,7 @@ func main() {
 	}
 	// Services : lien entre le métier (service) et les données (repository). Ici les données sont en base et la base de données est configurable
 	spaceQueryService := application.SpaceQueryService(repository.SpaceQuery())
+	spaceFileService := application.SpaceFileService(repository.SpaceFile())
 	spaceCommandService := application.SpaceCommandService(repository.SpaceCommand())
 	userCommandService := application.UserCommandService(repository.UserCommand())
 	userQueryService := application.UserQueryService(repository.UserQuery())
@@ -61,6 +62,7 @@ func main() {
 
 	handler.HandlePostRoute(route.ITEM_SAVE, handler.AsParamDataAccessCall(spaceCommandService.Save, bddAccessService, bddService.WRITE))
 	handler.HandleGetRoute(route.ITEM_FIND_ALL, handler.AsDataAccessCall(spaceQueryService.FindAll, bddAccessService, bddService.READ))
+	handler.HandlePostRoute(route.ITEM_IMPORT, handler.AsFileParamCall(spaceFileService.Import))
 
 	handler.HandlePostRoute(route.REFRESH, handler.AsRefreshCall(userCommandService.Refresh, bddAccessService, bddService.WRITE))
 	handler.HandlePostRoute(route.SIGNUP, handler.AsLoginCall(userCommandService.Signup, bddAccessService, bddService.WRITE))

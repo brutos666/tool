@@ -36,6 +36,12 @@ func (spaces *Spaces) ApplyModification() {
 	}
 }
 
+func (spaces *Spaces) SetToCreate() {
+	for index := range spaces.list {
+		spaces.list[index].SetToCreate()
+	}
+}
+
 func (spaces *Spaces) RemoveToDelete() {
 	spaces.list = slices.DeleteFunc(spaces.list, func(space *Space) bool {
 		return space.IsToDelete()
@@ -133,4 +139,10 @@ func (space *Space) ApplyModification() {
 	space.crudMode = READ
 	space.children.RemoveToDelete()
 	space.children.ApplyModification()
+}
+
+func (space *Space) SetToCreate() {
+	space.id = ""
+	space.crudMode = CREATE
+	space.children.SetToCreate()
 }

@@ -3,9 +3,14 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"io"
+	"mime/multipart"
 	"net/http"
+	"strings"
 
 	"goTool/domain"
+	"goTool/domain/domainMessage"
 	"goTool/generic"
 	"goTool/interface/handler/authentication"
 	"goTool/interface/mapper"
@@ -14,6 +19,9 @@ import (
 const (
 	DATA_ACCESS_PANIC   = "L'appel exige un accès à des données (base de données)"
 	PARAM_CONVERT_PANIC = "Problème de conversion du paramètre de la requête vers l'entité du domain"
+	FORM_FILE_NAME      = "fileToUpload"
+	BAD_FILE            = "Le fichier '" + FORM_FILE_NAME + "' n'est pas fourni ou n'est pas un fichier"
+	INVALID_FILE        = "Formulaire invalide"
 )
 
 type (
@@ -70,6 +78,14 @@ func (w Wrapper[R]) forRefreshCall(callback RefreshCall) Wrapper[R] {
 	return w
 }
 
+func (w Wrapper[R]) forFileParamCall(callback FileParamCall[R]) Wrapper[R] {
+	fileCall := func(ctx context.Context, callContext CallContext, fileReader io.Reader) (any, error) {
+		return callback(ctx, fileReader)
+	}
+	w.requestCall = wrapRequestFileParameter(fileCall)
+	return w
+}
+
 func (w Wrapper[R]) withDataAccessService(dataAccessService generic.DataAccessService, accessType string) Wrapper[R] {
 	if dataAccessService == nil {
 		panic(DATA_ACCESS_PANIC)
@@ -105,6 +121,48 @@ func wrapRequestParameter[P any](wrappedCall parameterCall[P]) requestCall {
 		}
 		return wrappedCall(ctx, callContext, *domainParameter)
 	}
+}
+
+func wrapRequestFileParameter(wrappedCall parameterCall[io.Reader]) requestCall {
+	return func(ctx context.Context, callContext CallContext, request *http.Request) (any, error) {
+		if !strings.HasPrefix(request.Header.Get("Content-Type"), "multipart/form-data") {
+			return nil, domainMessage.NewError(INVALID_FILE)
+		}
+		reader, err := request.MultipartReader()
+		if err != nil {
+			return nil, domainMessage.NewError(INVALID_FILE)
+		}
+		fileReader, err := getFileReader(reader)
+		if err != nil {
+			return nil, err
+		}
+		return wrappedCall(ctx, callContext, fileReader)
+	}
+}
+
+func getFileReader(reader *multipart.Reader) (io.Reader, error) {
+	for {
+		part, err := reader.NextPart()
+		if errors.Is(err, io.EOF) {
+			break
+		}
+		if err != nil {
+			if isTooBigError(err) {
+				return nil, domainMessage.NewError(FILE_TOO_BIG)
+			}
+			return nil, domainMessage.NewError(INVALID_FILE)
+		}
+		if part.FormName() != FORM_FILE_NAME || part.FileName() == "" {
+			continue // pas le fichier attendu
+		}
+		return part, nil
+	}
+	return nil, domainMessage.NewError(BAD_FILE)
+}
+
+func isTooBigError(err error) bool {
+	var mbe *http.MaxBytesError
+	return errors.As(err, &mbe)
 }
 
 func wrapDataAccess(wrappedCall requestCall, dataAccessService generic.DataAccessService, accessType string) requestCall {

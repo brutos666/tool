@@ -13,7 +13,9 @@ import (
 
 const (
 	METHOD_IS_NOT_ALLOWED = "Méthode non autorisée"
+	FILE_TOO_BIG          = "Le fichier est trop gros"
 	REQUEST_TIMEOUT       = 100 * time.Second
+	MAX_UPLOAD            = 10 << 20 // 10 Mo
 )
 
 func HandleGetRoute(requestPath string, toCall responseRequestCall) {
