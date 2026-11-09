@@ -21,10 +21,10 @@ class CallRequest {
     if (response.status === 401) {
       response = await logoutIfRefreshFail.call(this, response, requestName, method, data);
     }
-    const responseData = await response.json();
     if (!response.ok) {
-      return Promise.reject(`Erreur HTTP ${ response.status } : ${ responseData.error } (${ responseData.path })`);
+      return this.rejectRequest(requestName, response);
     }
+    const responseData = await response.json();
     return Promise.resolve(responseData);
   }
   async executeDownloadFile(requestName, method = 'POST', data) {
@@ -33,8 +33,7 @@ class CallRequest {
       response = await logoutIfRefreshFail.call(this, response, requestName, method, data);
     }
     if (!response.ok) {
-      const responseData = await response.json();
-      return Promise.reject(`Erreur HTTP ${ response.status } : ${ responseData.error } (${ responseData.path })`);
+      return this.rejectRequest(requestName, response);
     }
     const responseData = await response.blob();
     return Promise.resolve(responseData);
@@ -42,29 +41,31 @@ class CallRequest {
 
   async executeUpload(requestName, file) {
     const formData = new FormData();
-    formData.append('file', file);
-    const response = await fetch(URL_ROOT_API + requestName, {
-      method: 'POST',
-      body: formData
-    });
-    const responseData = await response.json();
-    if (!response.ok) {
-      return Promise.reject(`Erreur HTTP ${ response.status } : ${ responseData.error } (${ responseData.path })`);
-    }
-    return Promise.resolve(responseData);
+    formData.append('fileToUpload', file);
+    return this.execute(requestName, 'POST', formData);
   }
 
   /**
-   * Rafraîchissement du token ou redirection sur la page de connection si le rafraichissement échoue
+   * Rafraîchissement du token ou redirection sur la page de connection si le rafraîchissement échoue
    * @returns {Object} contenant les données attendues
    */
   async executeRefreshToken() {
     const response = await callFetch('authenticate/refresh', 'POST');
-    const responseData = await response.json();
     if (!response.ok) {
+      return this.rejectRequest('authenticate/refresh', response);
+    }
+    const responseData = await response.json();
+    return Promise.resolve(responseData);
+  }
+
+  async rejectRequest(requestName, response) {
+    const contentType = response.headers.get('Content-Type');
+    if (contentType === 'application/json') {
+      const responseData = await response.json();
       return Promise.reject(`Erreur HTTP ${ response.status } : ${ responseData.error } (${ responseData.path })`);
     }
-    return Promise.resolve(responseData);
+    const responseData = await response.text();
+    return Promise.reject(`Erreur HTTP ${ response.status } : ${ responseData } (${ requestName })`);
   }
 
 }
@@ -79,10 +80,18 @@ class CallRequest {
 function callFetch(requestName, method, data = {}) {
   const token = StoreData.getUser()
     ?.getToken();
-  const headers = { 'Content-Type': 'application/json' };
+  const headers = {};
   if (token) {
     headers.Authorization = `Bearer ${ token }`;
   }
+  if (data instanceof FormData) {
+    return fetch(URL_ROOT_API + requestName, {
+      method,
+      headers,
+      body: data,
+    });
+  }
+  headers['Content-Type'] = 'application/json';
   if (method === 'GET') {
     return fetch(URL_ROOT_API + requestName, { headers });
   }
