@@ -8,6 +8,7 @@ const (
 	ITEM_FIND_ALL string = "/api/item/findAllItems"
 	ITEM_SAVE     string = "/api/item/save"
 	ITEM_IMPORT   string = "/api/import/items"
+	ITEM_EXPORT   string = "/api/export/items"
 	STOP          string = "/stop"
 	START         string = "/start"
 	TEST          string = "/test"

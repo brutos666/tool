@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"bytes"
 	"context"
 	"io"
 )
@@ -18,7 +19,7 @@ type SpaceQueryRepository interface {
 }
 
 type SpaceFileRepository interface {
-	Save(ctx context.Context) error
+	Write(ctx context.Context, nodeSpace NodeSpace) (*bytes.Buffer, error)
 	Load(ctx context.Context, sourceFile io.Reader) ([]*Space, error)
 }
 

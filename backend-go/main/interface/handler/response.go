@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"log"
@@ -13,13 +14,25 @@ import (
 	"goTool/utilities"
 )
 
-func sendOkResponse(response http.ResponseWriter, requestPath string, webResultValues any) {
+func sendJsonResponse(response http.ResponseWriter, requestPath string, webResultValues any) {
 	jsonData, err := json.Marshal(webResultValues)
 	if err != nil {
 		sendError(response, requestPath, err)
 		return
 	}
-	writeResponse(response, requestPath, jsonData, http.StatusOK)
+	writeJsonResponse(response, requestPath, jsonData, http.StatusOK)
+}
+
+func sendCsvResponse(response http.ResponseWriter, requestPath string, buffer *bytes.Buffer, fileName string) {
+	response.Header().Set("Content-Type", "text/csv; charset=utf-8")
+	response.Header().Set("Content-Disposition", `inline; filename=" `+fileName+`.csv"`)
+	response.WriteHeader(http.StatusOK)
+	size, err := response.Write(buffer.Bytes())
+	if err != nil {
+		// Supposition : si l'écriture échoue ici, c'est qu'il y a quelque chose de grave...
+		panic(err)
+	}
+	log.Printf("Export du fichier %s : %d octets", requestPath, size)
 }
 
 func sendError(response http.ResponseWriter, requestPath string, err error) {
@@ -33,12 +46,12 @@ func sendError(response http.ResponseWriter, requestPath string, err error) {
 	if statusCode == http.StatusUnauthorized {
 		authentication.SendInvalidToken(response, err.(domainMessage.TokenError).GetCause())
 	}
-	writeResponse(response, requestPath, jsonData, statusCode)
+	writeJsonResponse(response, requestPath, jsonData, statusCode)
 
 	log.Println("Erreur requête", requestPath, ":", errorMess)
 }
 
-func writeResponse(response http.ResponseWriter, requestPath string, jsonData []byte, statusCode int) {
+func writeJsonResponse(response http.ResponseWriter, requestPath string, jsonData []byte, statusCode int) {
 	response.Header().Set("Content-Type", "application/json")
 	response.WriteHeader(statusCode)
 	if jsonData == nil {

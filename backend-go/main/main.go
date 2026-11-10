@@ -63,6 +63,7 @@ func main() {
 	handler.HandlePostRoute(route.ITEM_SAVE, handler.AsParamDataAccessCall(spaceCommandService.Save, bddAccessService, bddService.WRITE))
 	handler.HandleGetRoute(route.ITEM_FIND_ALL, handler.AsDataAccessCall(spaceQueryService.FindAll, bddAccessService, bddService.READ))
 	handler.HandlePostRoute(route.ITEM_IMPORT, handler.AsFileParamCall(spaceFileService.Import))
+	handler.HandlePostRoute(route.ITEM_EXPORT, handler.AsConvertFileCall(spaceFileService.Export))
 
 	handler.HandlePostRoute(route.REFRESH, handler.AsRefreshCall(userCommandService.Refresh, bddAccessService, bddService.WRITE))
 	handler.HandlePostRoute(route.SIGNUP, handler.AsLoginCall(userCommandService.Signup, bddAccessService, bddService.WRITE))

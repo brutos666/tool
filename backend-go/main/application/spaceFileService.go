@@ -4,6 +4,7 @@
 package application
 
 import (
+	"bytes"
 	"context"
 	"io"
 
@@ -30,6 +31,6 @@ func (fileService SpaceFService) Import(ctx context.Context, sourceFile io.Reade
 	return spaces, nil
 }
 
-func (fileService SpaceFService) Save(ctx context.Context) error {
-	return fileService.repository.Save(ctx)
+func (fileService SpaceFService) Export(ctx context.Context, nodeSpace domain.NodeSpace) (*bytes.Buffer, error) {
+	return fileService.repository.Write(ctx, nodeSpace)
 }

@@ -56,7 +56,7 @@ func getHandler(method string, toCall responseRequestCall) func(response http.Re
 		case http.MethodGet:
 			processRequest(response, request, toCall)
 		case http.MethodOptions:
-			writeResponse(response, requestPath, nil, http.StatusOK)
+			writeJsonResponse(response, requestPath, nil, http.StatusOK)
 		default:
 			err := responseMessage.NewError(METHOD_IS_NOT_ALLOWED, requestPath, http.StatusMethodNotAllowed)
 			sendError(response, requestPath, err)

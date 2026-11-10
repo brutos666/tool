@@ -35,8 +35,15 @@ class CallRequest {
     if (!response.ok) {
       return this.rejectRequest(requestName, response);
     }
+    // Lecture du titre du fichier
+    let fileName = 'tool.txt';
+    // inline; filename="test.pdf"
+    const contentDisposition = response.headers.get('Content-Disposition');
+    if (contentDisposition) {
+      fileName = getMatchGroupContent(contentDisposition, /filename="(.*)"/) || 'tool.txt';
+    }
     const responseData = await response.blob();
-    return Promise.resolve(responseData);
+    return Promise.resolve({ name: fileName, content: responseData });
   }
 
   async executeUpload(requestName, file) {
@@ -120,5 +127,21 @@ function logoutIfRefreshFail(response, requestName, method, data) {
   }
   StoreData.logout();
   return Promise.resolve();
+}
+/**
+ * Retourne la valeur du groupe recherché dans la chaîne via une expression régulière
+ * Par exemple :
+ * L'expression régulière '/Nom ="(.*)"/' permet de trouver le nom 'Jane' dans la chaîne suivante
+ * 'Email = "jane.doe@boitemail.com", Nom = "Doe", Prénom = "Jane"'
+ * @param {string} str - chaîne
+ * @param {RegExp} regex Expression régulière. Doit contenir un groupe.
+ * @returns {string} chaîne contenant le groupe recherché
+ */
+function getMatchGroupContent(str, regex) {
+  const foundArray = str.match(regex);
+  if (!foundArray || foundArray.length < 2) {
+    return null;
+  }
+  return foundArray[1];
 }
 export default CallRequest;

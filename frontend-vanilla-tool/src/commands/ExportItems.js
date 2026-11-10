@@ -9,13 +9,24 @@ class ExportItems extends Command {
   /**
    * @constructor
    * @param {CommandDecorator} commandDecorator
+   * @param {TreeItem} treeItem
    */
-  constructor(commandDecorator) {
+  constructor(commandDecorator, treeItem) {
     super(commandDecorator);
 
     this.setSuccessMessage('Export effectué');
     this.setErrorMessage('Une erreur est survenue lors de l\'export des éléments');
-    this.setExecuteCallback(new FileCallsRequest().downloadCsv.bind(null));
+    /** @type {TreeInfos} */
+    const treeInfos = {
+      item: treeItem.getItemInfos(),
+      previousItemId: treeItem.getPrevious()
+        ?.getItemId(),
+      parentItemId: treeItem.getParentItem()
+        ?.getItemId(),
+      nextItemId: treeItem.getNext()
+        ?.getItemId()
+    };
+    this.setExecuteCallback(new FileCallsRequest().downloadItemCsv.bind(null, treeInfos));
   }
 
 }

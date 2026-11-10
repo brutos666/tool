@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"bytes"
 	"context"
 	"io"
 	"net/http"
@@ -21,7 +22,7 @@ type (
 	DataAccessCall[R any]   func(context context.Context, dataAccessId int) (R, error)
 	ParamCall[P, R any]     func(context context.Context, dataAccessId int, parameter P) (R, error)
 	FileParamCall[R any]    func(context context.Context, reader io.Reader) (R, error)
-	FileConvertCall[P any]  func(context context.Context, parameter P, writer io.Writer) error
+	FileConvertCall[P any]  func(context context.Context, parameter P) (*bytes.Buffer, error)
 	LoginCall[P, R any]     func(context context.Context, dataAccessId int, tokenGeneration domain.TokensProduct, parameter P) (R, error)
 	RefreshCall             func(context context.Context, dataAccessId int, tokenGeneration domain.TokensProduct, user domain.ConnectedUser) (*domain.LoggedUser, error)
 
@@ -67,7 +68,7 @@ func GetCall[P, R any](serviceCall any, parameterType P) Call {
 			if err != nil {
 				return nil, err
 			}
-			return nil, call(ctx, *parameter, response)
+			return call(ctx, *parameter)
 		}
 	case FileParamCall[R]:
 		return func(ctx context.Context, callContext CallContext, response http.ResponseWriter, request *http.Request) (any, error) {

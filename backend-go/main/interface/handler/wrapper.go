@@ -1,11 +1,13 @@
 package handler
 
 import (
+	"bytes"
 	"context"
 	"goTool/generic"
 	"goTool/interface/handler/authentication"
 	"goTool/interface/mapper"
 	"net/http"
+	"time"
 )
 
 const (
@@ -69,7 +71,7 @@ func (w Wrap[P, R]) build() responseRequestCall {
 			return
 		}
 		if values != nil {
-			sendOkResponse(response, requestPath, values)
+			sendJsonResponse(response, requestPath, values)
 		}
 	}
 }
@@ -88,20 +90,22 @@ func (w Wrap[P, R]) loginBuild() responseRequestCall {
 		authentication.SendRefreshTokenCookie(response, tokenGenerator.GetRefreshToken())
 		loggedWebResult.(*mapper.LoggedUserWebResult).SetToken(tokenGenerator.GetAccessToken())
 
-		sendOkResponse(response, requestPath, loggedWebResult)
+		sendJsonResponse(response, requestPath, loggedWebResult)
 	}
 }
 
 func (w Wrap[P, R]) fileBuild() responseRequestCall {
-	// TODO : revoir la gestion d'erreur
 	call := w.call
 	return func(ctx context.Context, callContext CallContext, response http.ResponseWriter, request *http.Request) {
-		response.Header().Set("Content-Type", "text/csv; charset=utf-8")
-		response.Header().Set("Content-Disposition", `attachment; filename="export.csv"`)
-		_, err := call(ctx, callContext, response, request)
+		requestPath := request.URL.Path
+		buffer, err := call(ctx, callContext, response, request)
 		if err != nil {
-			// coupe la connexion sans log de stack
-			panic(http.ErrAbortHandler)
+			sendError(response, requestPath, err)
+			return
 		}
+		// Transforme la date du jour au format "YYYY-MM-DD"
+		now := time.Now().UTC().Format(time.DateOnly)
+		fileName := "toolTache" + now
+		sendCsvResponse(response, requestPath, buffer.(*bytes.Buffer), fileName)
 	}
 }

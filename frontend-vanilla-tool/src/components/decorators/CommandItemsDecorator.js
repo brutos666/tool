@@ -42,7 +42,7 @@ class CommandItemsDecorator extends CommandDecorator {
   }
 
   exportItems() {
-    return new ExportItems(this)
+    return new ExportItems(this, this.getTreeItem())
       .execute();
   }
 
