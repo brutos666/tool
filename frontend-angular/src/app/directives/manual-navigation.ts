@@ -21,7 +21,9 @@ export class ManualNavigation extends Focusable implements Navigate {
   elementRef = inject(ElementRef);
 
   navigables: Navigable[] = [];
-  navigablesSignal = signal<Navigable[]>([]);
+  needSort: boolean = false;
+  // Il s'agit juste d'un boolean qui va indiquer que quelque chose a changé
+  toggleForReload = signal<boolean>(false);
 
   #selectedIndex = 0;
 
@@ -31,7 +33,12 @@ export class ManualNavigation extends Focusable implements Navigate {
       // Déclencher à la mise à jour d'un signal après mise à jour du DOM
       // Comme on veut modifier des attributs html tabindex, on le fait sur la phase write
       write: () => {
-        this.navigables = this.sortNavigables([...this.navigablesSignal()]);
+        this.toggleForReload();
+        if (!this.needSort) {
+          return;
+        }
+        this.sortNavigables(this.navigables);
+        this.needSort = false;
         this.applyTabAccess();
         if (this.mustGiveFocus) {
           this.giveFocus();
@@ -51,8 +58,10 @@ export class ManualNavigation extends Focusable implements Navigate {
   registerChild(navigable: Navigable) {
     this.mustGiveFocus = this.containFocus;
     this.navigables = this.navigables.concat(navigable);
-    this.navigablesSignal.set(this.navigables);
+    this.needSort = true;
+    this.forceReload();
   }
+
   unregisterChild(navigable: Navigable) {
     const indexToRemove = this.navigables.indexOf(navigable);
     if (indexToRemove === -1) {
@@ -63,9 +72,12 @@ export class ManualNavigation extends Focusable implements Navigate {
     }
     this.#selectedIndex = this.getIndexAfterRemove(indexToRemove);
     this.navigables = this.navigables.filter((component) => component !== navigable);
-    this.navigablesSignal.set(this.navigables);
+    this.needSort = true;
+    this.forceReload();
   }
-
+  private forceReload() {
+    this.toggleForReload.set(!this.toggleForReload());
+  }
   private sortNavigables(navigables: Navigable[]) {
     if (navigables.length <= 1) {
       return navigables;
