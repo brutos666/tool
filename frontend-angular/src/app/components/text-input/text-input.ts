@@ -21,6 +21,9 @@ import { Focusable } from '../../directives/focusable';
   templateUrl: './text-input.html',
   hostDirectives: [Focusable],
   providers: [{ provide: NodeElement, useExisting: TextInput }],
+  host: {
+    '(keydown)': 'onKeyDown($event)',
+  },
 })
 export class TextInput extends NodeElement implements AfterViewInit {
   name = 'TextInput';
@@ -68,6 +71,12 @@ export class TextInput extends NodeElement implements AfterViewInit {
       this.sanitizer.sanitize(SecurityContext.HTML, this.input.nativeElement.innerText) || '';
     this.input.nativeElement.innerHTML = safeValue;
     this.value.set(this.input.nativeElement.innerHTML);
+  }
+
+  onKeyDown(event: KeyboardEvent) {
+    if (this.inside && !['Escape', 'Tab'].includes(event.key)) {
+      event.stopPropagation();
+    }
   }
 
   override setDisabled() {
