@@ -170,6 +170,101 @@ docker compose -f docker-compose-go-angular.prod.yaml up
 docker compose -f docker-compose-go-angular.prod.yaml down
 ```
 
+Exemple pour un back en Go, un front en Angular et une Base de données sqlite
+
+```shell
+# Compiler
+docker compose -f docker-compose-go-angular-sqlite.prod.yaml build
+# Démarrer
+docker compose -f docker-compose-go-angular-sqlite.prod.yaml up
+# Arrêter
+docker compose -f docker-compose-go-angular-sqlite.prod.yaml down
+```
+
+### Publier les images dans docker Hub
+
+Avoir un compte : https://www.docker.com/
+Documentation :
+https://docs.docker.com/build/building/registry-auth/
+
+Mon compte :
+https://app.docker.com/accounts/brutos666
+
+```bash
+# se connecter
+docker login
+
+# Angular
+## Construire l'image
+cd frontend-angular
+docker build --target prod -t tool-angular:prod .
+## publier dans la registry de docker hub
+docker tag tool-angular:prod brutos666/angularbrutostool
+docker push brutos666/angularbrutostool
+# Go
+## Construire l'image
+cd backend-go
+docker build --target prod -t tool-go:prod .
+## publier dans la registry de docker hub
+docker tag tool-go:prod brutos666/gobrutostool
+docker push brutos666/gobrutostool
+```
+
+# Utiliser render
+
+Avoir un compte sur https://dashboard.render.com/
+
+## Go - PostGres - Vanilla JS
+
+### Postgres
+
+- Ajouter un nouveau service PostGres (bouton "+ New" puis "PostGres").
+- Récupéré l'url de connexion en cliquant sur le bouton "Connect" puis l'onglet "Internal"
+
+> Les données seront perdues au bout de 30 jours avec la version gratuite. Pensez à exporter les tâches si besoin.
+
+### Go
+
+- Ajouter nouveau service web (bouton "+ New" puis "Web Service")
+- Saisir l'image "brutos666/gobrutostool"
+- MANAGE/Environment, ajouter les variables :
+  - DATABASE_URL: l'url de connexion récupéré du service PostGres
+  - DATABASE_DRIVER: postgres
+  - DATABASE_SQL: schema-postgresql.sql
+  - MUST_AUTHENTICATE: true => si on veut tester avec une authentification
+
+### Vanilla JS
+
+- Ajouter nouveau site static (bouton "+ New" puis "Static site")
+- Saisir le Public Repository "https://github.com/brutos666/tool".
+- Saisir le Root Directory "frontend-vanilla-tool/"
+  MANAGE/Environment, ajouter la variable :
+  - BACKEND_URL: url récupéré depuis le service Go
+- MANAGE/Redirects/Rewrite ajouter la règle :
+  - Source : /api/\*, Destination : https://gobrutostool.onrender.com/api/*, Action: Rewrite
+
+### Déployer
+
+Déployer et tester avec l'url du service Vanilla
+
+## Go-Sqlite-Angular
+
+> Les données seront perdues à chaque déploiement. Pensez à exporter les tâches si besoin
+
+### Go
+
+- Ajouter nouveau service web (bouton "+ New" puis "Web Service")
+- Saisir l'image "brutos666/gobrutostool"
+- MANAGE/Environment, ajouter la variable :
+  - MUST_AUTHENTICATE: false => l’authentification n'a pas été portée en Angular
+
+### Angular
+
+- Ajouter nouveau service web (bouton "+ New" puis "Web Service")
+- Saisir l'image "brutos666/angularbrutostool"
+- MANAGE/Environment, ajouter la variable :
+  - BACKEND_URL: url récupéré depuis le service Go
+
 ## Lancer le projet sans docker
 
 TODO : Mettre à jour la documentation quand le DockerFile sera fait et qu'on saura exactement de quoi il y a besoin

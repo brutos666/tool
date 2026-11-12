@@ -65,15 +65,17 @@ func Commit(connection *Connection) error {
 }
 
 func OpenConnection(base DatabaseConnection) *sqlx.DB {
+	url := base.GetDataSourceName()
 	driverName := base.GetDriverName()
-	db, err := sqlx.Open(driverName, base.GetDataSourceName())
+	db, err := sqlx.Open(driverName, url)
 	if err != nil {
-		log.Fatalf("Base %s : impossible de se connecter (%s)", driverName, err)
+		log.Fatalf("Base '%s' : impossible de se connecter (%s)", url, err)
 	}
 	err = db.Ping()
 	if err != nil {
-		log.Fatalf("Base %s : impossible de ping (%s)", driverName, err)
+		log.Fatalf("Base '%s' : impossible de ping (%s)", url, err)
 	}
+	log.Printf("Base '%s' connectée", url)
 	return db
 }
 

@@ -3,8 +3,12 @@
 # ============================================
 FROM golang:1.27.3-alpine3.24 AS pre-build
 
+# Indique le répertoire où se trouve la base de données sqlite (base par défaut)
+ENV DATABASE_PATH=/app/database
+WORKDIR /app/database
+
 # go.work (permet de définir les chemins pour utiliser les modules)
-WORKDIR /src
+WORKDIR /app
 COPY ./go.work ./go.work.sum ./
 COPY --parents ./**/go.sum ./**/go.mod ./
 RUN --mount=type=cache,target=/go/pkg/mod go mod download
@@ -24,7 +28,7 @@ COPY --parents ./**/*.go ./
 # --continue permet le démarrage du serveur sans attendre le debugger. Pour debugger le démarrage, il faut l'enlever
 RUN --mount=type=cache,target=/go/pkg/mod \
   --mount=type=cache,target=/root/.cache/go-build \
-  go build -gcflags="all=-N -l" -o /goTool ./main
+  go build -gcflags="all=-N -l" -o /goTool ./cmd/server
 
 ENV LISTEN_ADDR=:8090
 
@@ -38,16 +42,22 @@ CMD ["dlv", "exec", "/goTool", "--headless", "--listen=:2345", "--api-version=2"
 # ============================================
 FROM pre-build AS build
 COPY --parents ./**/*.go ./
-RUN CGO_ENABLED=0 go build -o /go-tool ./main
+RUN CGO_ENABLED=0 go build -o /go-tool ./cmd/server
 
 # ============================================
 # Stage 3 : Production
 # ============================================
 FROM scratch AS prod
 
-WORKDIR /
-# Le groupe 66666 devra avoir accès à la base de données qui se trouve dans ./database
 USER 65532:66666
+
+# Indique le répertoire où se trouve la base de données sqlite (base par défaut)
+ENV DATABASE_PATH=/app/database
+WORKDIR /app/database
+
+WORKDIR /app
+
+# Le groupe 66666 devra avoir accès à la base de données du volume
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=build /go-tool /go-tool
 # Faire un volume avec docker compose pour externaliser le fichier de configuration

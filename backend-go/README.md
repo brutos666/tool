@@ -17,21 +17,33 @@ sudo chmod -R g+rwX ./database
 ## Hors docker
 
 ```bash
-# Dev
-go run ./main -config config.dev.properties
+# Lancer le serveur back Go
+go run ./cmd/server/
+# Avec un fichier de config différent de ./config.properties
+go run ./cmd/server/ -config ./config.dev.properties
 
-# Prod (utilise config.properties par défaut)
-go run ./main
+# Pour créer un exécutable
+go build ./cmd/server/
+
+# Pour créer une application (wails) desktop autonome (contient le back, le front)
+## Préparation front
+(cd ../frontend-angular/ && npm run build)
+cp -r ../frontend-angular/dist ./frontend
+# Pour le lancer
+go run ./cmd/desktop/
+## Compilation (embarque le front)
+go build -o wails-tool ./cmd/desktop/
 ```
 
 ## Docker en développement
 
 ```bash
+# Embarque le fichier de configuration config.dev.properties
 docker build --target dev -t tool-go:dev .
-# Si la base de données est un service local qui tourne sur la machine
+# Si la base de données est un service local qui tourne sur la machine (dépend du fichier de config au moment du build)
 docker run --rm --network host tool-go:dev
-# Si la base de données est statique dans un répertoire local (sqlite)
-docker run --rm --network host -v ../database/sqlite tool-go:dev
+# Si la base de données est la base sqlite (défaut), il faut définir un volume qui pointe sur le répertoire de la base de données dans le conteneur (voir DockerFile)
+docker run --rm --network host -v $(pwd)/../database/sqlite:/app/database tool-go:dev
 ```
 
 > "--network host" permet le contact avec une base données qui tourne sur le poste et au debugger
@@ -64,12 +76,12 @@ Les fichiers DockerFile et docker-compose-dev.yaml sont écrit pour pouvoir mett
 ## Docker en production
 
 ```bash
-# En prod, variable d'environnement obligatoire (passer par docker compose chez le client)
+# Embarque le fichier de configuration config.properties
 docker build --target prod -t tool-go:prod .
-# Si la base de données est un service local qui tourne sur la machine
+# Si la base de données est un service local qui tourne sur la machine (dépend du fichier de config au moment du build)
 docker run --rm --network host tool-go:prod
-# Si la base de données est statique dans un répertoire local (sqlite)
-docker run --rm --network host -v ../database/sqlite tool-go:prod
+# Si la base de données est la base sqlite (défaut), il faut définir un volume qui pointe sur le répertoire /app/database du conteneur
+docker run --rm --network host -v $(pwd)/../database/sqlite:/app/database tool-go:prod
 ```
 
 > "--network host" permet le contact avec une base données qui tourne sur le poste et au debugger
@@ -94,15 +106,21 @@ Approche Domain Driven Development
 
 ```text
 backend-go/
-├── main
-		├── application			-> cas d'usage ou action métier
-		├── domain					-> Logique métier (contient le contrat d'accès aux données)
-		├── infrastructure	-> gestion des données, lecture/écriture des fichiers, logging
-		├── interface		 		-> présentation du résultat au navigateur
-		|
-		├── config					-> lecture du fichier.properties et/ou des variables d'environnement
-		├── generic					-> Interfaces transverses
-		└── main.go
+├── cmd
+		├── desktop         -> Application cliente avec Wails
+		|   ├── frontend    -> Déploiement de la partie frontend (Angular)
+		|   └── main.go
+		└── server          -> Serveur back seul
+		    └── main.go
+├── internal
+    ├── api
+		|   ├── application			-> cas d'usage ou action métier
+    |   ├── domain					-> Logique métier (contient le contrat d'accès aux données)
+    |   ├── infrastructure	-> gestion des données, lecture/écriture des fichiers, logging
+    |   ├── interface		 		-> présentation du résultat au navigateur
+    |   ├── config					-> lecture du fichier.properties et/ou des variables d'environnement
+    |   └── generic					-> Interfaces transverses
+		└── api.go
 ├── modules
 		├── authentication
 		├── database

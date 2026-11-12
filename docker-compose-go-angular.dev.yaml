@@ -1,3 +1,4 @@
+# docker-compose-go-angular.dev.yaml
 services:
   db:
     extends:
@@ -16,6 +17,7 @@ services:
       DATABASE_URL: "postgresql://postgres:postgres@db:5432/postgres?sslmode=disable"
       DATABASE_DRIVER: "postgres"
       DATABASE_SQL: "schema-postgresql.sql"
+      MUST_AUTHENTICATE: false
     depends_on:
       db:
         condition: service_healthy

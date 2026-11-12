@@ -1,3 +1,4 @@
+# docker-compose-go-angular.prod.yaml
 services:
   # Base de données
   db:
@@ -8,6 +9,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: postgres
+      MUST_AUTHENTICATE: false
     networks: [internal]
 
   # Back
@@ -19,6 +21,7 @@ services:
       DATABASE_URL: "postgresql://postgres:postgres@db:5432/postgres?sslmode=disable"
       DATABASE_DRIVER: "postgres"
       DATABASE_SQL: "schema-postgresql.sql"
+      MUST_AUTHENTICATE: false
     depends_on:
       db:
         condition: service_healthy
