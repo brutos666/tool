@@ -22,11 +22,6 @@ export class RootNavigation extends ManualNavigation {
     navigable.getElement().removeEventListener('focus', this.onFocusEvent, true);
   }
 
-  override onMouseDown(event: MouseEvent) {
-    super.onMouseDown(event);
-    this.navigables[this.getFocusIndex()].changeTabAccess(true);
-  }
-
   onFocus(event: FocusEvent) {
     if (!event.currentTarget || !(event.currentTarget instanceof Element)) {
       return;
@@ -38,10 +33,12 @@ export class RootNavigation extends ManualNavigation {
   }
 
   override changeCurrentIndex(index: number): void {
+    const selectedIndex = this.getFocusIndex();
+    if (selectedIndex === index) {
+      return;
+    }
+    // Chaque espace doit pouvoir être accédé par la touche Tab => on ne fera jamais changeTabAccess(false)
+    this.navigables[selectedIndex]?.removeFocus();
     this.setCurrentIndex(index);
-  }
-
-  override applyTabAccess(): void {
-    this.navigables.forEach((navigable) => navigable.changeTabAccess(this.accessible));
   }
 }

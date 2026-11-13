@@ -48,6 +48,10 @@ export class Focusable implements Navigable {
     this.mustGiveFocus = true;
     this.getElement().focus();
   }
+  removeFocus() {
+    this.mustGiveFocus = false;
+    this.containFocus = false;
+  }
   isFocused(): boolean {
     return document.activeElement === this.getElement();
   }
@@ -58,8 +62,7 @@ export class Focusable implements Navigable {
 
   changeTabAccess(access: boolean) {
     if (!access) {
-      this.mustGiveFocus = false;
-      this.containFocus = false;
+      this.removeFocus();
     }
     this.accessible = access;
     this.applyTabAccess();
