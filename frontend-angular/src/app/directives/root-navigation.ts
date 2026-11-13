@@ -41,4 +41,8 @@ export class RootNavigation extends ManualNavigation {
     this.navigables[selectedIndex]?.removeFocus();
     this.setCurrentIndex(index);
   }
+
+  override applyTabAccess(): void {
+    this.navigables.forEach((navigable) => navigable.changeTabAccess(true));
+  }
 }

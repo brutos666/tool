@@ -59,12 +59,12 @@ export class EnterTabNavigation extends TabNavigation {
     this.getParentNavigation()?.stopNavigation();
     // Activer l'intérieur
     this.inside.set(true);
-    super.changeTabAccess(true);
+    this.changeTabAccess(true);
   }
 
   exit() {
     // Désactiver l'intérieur
-    super.changeTabAccess(false);
+    this.changeTabAccess(false);
     this.inside.set(false);
     // Activer l'extérieur
     this.getElement().setAttribute('tabindex', '0');
@@ -86,6 +86,10 @@ export class EnterTabNavigation extends TabNavigation {
       this.getElement().focus();
     }
   }
+  override removeFocus(): void {
+    this.inside.set(false);
+    super.removeFocus();
+  }
   override isFocused(): boolean {
     if (this.inside()) {
       return super.isFocused();
@@ -93,16 +97,15 @@ export class EnterTabNavigation extends TabNavigation {
     return document.activeElement === this.getElement();
   }
   override applyTabAccess() {
+    if (!this.accessible) {
+      super.applyTabAccess();
+      this.getElement().setAttribute('tabindex', '-1');
+      return;
+    }
     if (this.inside()) {
       super.applyTabAccess();
     } else {
-      this.getElement().setAttribute('tabindex', this.accessible ? '0' : '-1');
+      this.getElement().setAttribute('tabindex', '0');
     }
-  }
-  override changeTabAccess(access: boolean): void {
-    if (!access) {
-      this.inside.set(false);
-    }
-    super.changeTabAccess(access);
   }
 }
