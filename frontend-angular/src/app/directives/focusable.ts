@@ -60,6 +60,7 @@ export class Focusable implements Navigable {
     return !classList.contains('hidden') && !classList.contains('disabled');
   }
 
+  /** Rend l'élément courant accessible via la touche Tab */
   changeTabAccess(access: boolean) {
     if (!access) {
       this.removeFocus();
@@ -68,6 +69,7 @@ export class Focusable implements Navigable {
     this.applyTabAccess();
   }
 
+  /** Applique l'accessibilité via la touche Tab (peut être fait en différé si l'élément n'est pas encore dans le DOM lors de la modification de son accessibilité) */
   applyTabAccess() {
     this.getElement().setAttribute('tabindex', this.accessible ? '0' : '-1');
   }

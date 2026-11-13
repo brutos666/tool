@@ -17,6 +17,7 @@ export class Composite extends NodeElement {
     }
   }
 
+  /** Modifie l'élément courant sans perdre le focus */
   setFocusIndex(focusIndex: number) {
     this.navigation?.setFocusIndex(focusIndex);
   }

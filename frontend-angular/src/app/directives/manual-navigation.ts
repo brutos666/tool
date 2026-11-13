@@ -107,11 +107,11 @@ export class ManualNavigation extends Focusable implements Navigate {
       this.changeCurrentIndex(index);
     }
   }
-
   private getNavigableIndex(element: Element): number {
     return this.navigables.findIndex((navigable) => navigable.getElement().contains(element));
   }
 
+  /** Modifie l'élément courant, le rend accessible via la touche Tab et lui donne le focus */
   giveFocusIndex(index: number): void {
     this.changeCurrentIndex(index);
     if (index >= 0 && index < this.navigables.length) {
@@ -119,7 +119,7 @@ export class ManualNavigation extends Focusable implements Navigate {
       this.giveFocus();
     }
   }
-
+  /** Modifie l'élément courant sans perdre le focus */
   setFocusIndex(index: number): void {
     const wasFocused = this.isFocused();
     if (wasFocused) {
@@ -128,16 +128,19 @@ export class ManualNavigation extends Focusable implements Navigate {
       this.changeCurrentIndex(index);
     }
   }
+  /** Désactive l'élément accessible via la touche Tab et modifie l'élément courant (sans donner le focus) */
   changeCurrentIndex(index: number): void {
     if (this.#selectedIndex !== index) {
       this.navigables[this.#selectedIndex]?.changeTabAccess(false);
       this.setCurrentIndex(index);
     }
   }
+  /** Positionne l'élément courant */
   setCurrentIndex(index: number) {
     this.#selectedIndex = index;
   }
 
+  /** Rend l'élément courant accessible via la touche Tab */
   override applyTabAccess() {
     const components = this.navigables;
     if (components.length) {
@@ -153,6 +156,7 @@ export class ManualNavigation extends Focusable implements Navigate {
     return false;
   }
 
+  /** Donne le focus */
   override giveFocus() {
     this.containFocus = true;
     const components = this.navigables;
