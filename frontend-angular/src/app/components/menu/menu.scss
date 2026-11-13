@@ -6,7 +6,6 @@
 }
 .menu {
   padding: 0;
-  margin: var(--global-margin);
   gap: var(--global-gap);
   display: flex;
   flex-direction: row;
@@ -15,7 +14,6 @@
   display: flex;
   flex-direction: column;
   background-color: var(--color-bg-surface);
-  margin: 0;
   padding: var(--global-padding);
   width: fit-content;
 }

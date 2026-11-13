@@ -67,16 +67,16 @@
   --color-text-on-post-it: oklch(0.22 0.015 var(--hue-primary));
 
   /* === DIVERS === */
-  --global-padding: 10px;
-  --medium-padding: 5px;
-  --small-padding: 2px;
-  --large-gap: 20px;
-  --global-gap: 10px;
-  --medium-gap: 5px;
-  --small-gap: 2px;
-  --global-margin: 10px;
-  --medium-margin: 5px;
-  --small-margin: 2px;
+  --global-padding: 12px;
+  --medium-padding: 8px;
+  --small-padding: 4px;
+  --large-gap: 16px;
+  --global-gap: 12px;
+  --medium-gap: 8px;
+  --small-gap: 4px;
+  --global-margin: 12px;
+  --medium-margin: 8px;
+  --small-margin: 4px;
   --border-radius: 0.25rem;
   --default-post-it-width: 210px;
   --default-post-it-height: 210px;
