@@ -13,6 +13,7 @@ import { Focusable } from './focusable.js';
   host: {
     '[attr.index-focus]': 'getFocusIndex()',
     '(mousedown)': 'onMouseDown($event)',
+    '(focusout)': 'onFocusOut($event)',
   },
 })
 export class ManualNavigation extends Focusable implements Navigate {
@@ -90,6 +91,15 @@ export class ManualNavigation extends Focusable implements Navigate {
       }
       return 1;
     });
+  }
+
+  onFocusOut(event: FocusEvent) {
+    if (!event.relatedTarget || !(event.relatedTarget instanceof Element)) {
+      return;
+    }
+    if (!this.getElement().contains(event.relatedTarget)) {
+      this.removeFocus();
+    }
   }
 
   onMouseDown(event: MouseEvent) {
