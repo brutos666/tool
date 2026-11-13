@@ -26,10 +26,6 @@ export class Focusable implements Navigable {
       // Note : après toutes les modifications appliquées au DOM suite des changements (signal, événement)
       read: () => {
         this.applyTabAccess();
-        if (this.mustGiveFocus) {
-          this.giveFocus();
-          this.mustGiveFocus = false;
-        }
       },
     });
   }
@@ -45,11 +41,9 @@ export class Focusable implements Navigable {
   }
 
   giveFocus() {
-    this.mustGiveFocus = true;
     this.getElement().focus();
   }
   removeFocus() {
-    this.mustGiveFocus = false;
     this.containFocus = false;
   }
   isFocused(): boolean {
