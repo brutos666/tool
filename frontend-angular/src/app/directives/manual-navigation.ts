@@ -115,10 +115,16 @@ export class ManualNavigation extends Focusable implements Navigate {
     if (index > -1) {
       this.containFocus = true;
       this.changeCurrentIndex(index);
+    } else {
+      this.giveFocusIndex(this.getNavigableWithElement(event.target));
+      event.preventDefault();
     }
   }
   private getNavigableIndex(element: Element): number {
     return this.navigables.findIndex((navigable) => navigable.getElement().contains(element));
+  }
+  private getNavigableWithElement(element: Element): number {
+    return this.navigables.findIndex((navigable) => element.contains(navigable.getElement()));
   }
 
   /** Modifie l'élément courant, le rend accessible via la touche Tab et lui donne le focus */

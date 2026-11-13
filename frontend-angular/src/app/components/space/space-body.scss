@@ -1,9 +1,0 @@
-:host {
-  margin: var(--small-margin);
-  overflow: auto;
-}
-/* Encadrer l'espace si le focus est à l'intérieur  */
-:host:has(*:focus) {
-  outline: 1px solid var(--color-border-focus);
-  outline-offset: 1px;
-}

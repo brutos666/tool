@@ -1,7 +1,7 @@
 <menu-bar class="working-space__menu" [label]="label" [menuItems]="menuItems"></menu-bar>
 <aside #navSpace class="working-space__nav" aria-current="true">
   <space>
-    <space-header class="nav-space__header"><h1>Navigation</h1></space-header>
+    <space-header>Navigation</space-header>
     <space-body>
       <tree-list [dataList]="rootItem().getChildren()" [orientation]="'vertical'" [layoutData]="navLayout"></tree-list>
     </space-body>
@@ -16,13 +16,13 @@
   @if (currentTreeData) {
     <space>
       <space-header class="main-space__header">
-        <h1><tree-content [treeData]="currentTreeData" [layoutData]="mainLayout"></tree-content></h1>
+        <tree-content [treeData]="currentTreeData" [layoutData]="mainLayout"></tree-content>
       </space-header>
       <space-body>
         <tree-list [dataList]="currentTreeData.getChildren() || []" [orientation]="'horizontal'" [layoutData]="mainLayout"></tree-list>
       </space-body>
-      <space-footer class="main-space__footer">
-        <button actionButton [data]="mainAddButton"></button>
+      <space-footer>
+        <button actionButton [data]="mainAddButton" class="working-space__add-button main-space__add-button"></button>
       </space-footer>
     </space>
   } @else {

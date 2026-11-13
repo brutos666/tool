@@ -4,3 +4,22 @@
   width: 100%;
   height: 100%;
 }
+
+header {
+  margin: var(--global-margin);
+  min-height: 0;
+  font-size: var(--big-font-size);
+  font-weight: bold;
+}
+section {
+  margin:var(--global-margin);
+  overflow: auto;
+}
+/* Encadrer l'espace si le focus est à l'intérieur  */
+section:has(*:focus) {
+  outline: 1px solid var(--color-border-focus);
+  outline-offset: 1px;
+}
+footer {
+  margin: var(--global-margin);
+}
