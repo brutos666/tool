@@ -8,9 +8,10 @@ import { IconButton } from '../action-button/icon-button.js';
 import { TreeData } from '../../data/tree-data.js';
 import { Layout, Right } from '../common/Types.js';
 import { NodeElement } from '../common/NodeElement.js';
+import { CheckBox } from '../check-box/check-box.js';
 
 @Component({
-  imports: [TextInput, Toolbar],
+  imports: [TextInput, Toolbar, CheckBox],
   selector: 'item',
   styleUrl: './item.scss',
   templateUrl: './item.html',
@@ -27,8 +28,11 @@ export class Item extends NodeElement implements OnInit {
   layoutData = input.required<Layout>();
   treeData = input.required<TreeData<ItemData>>();
   // Crée un signal computed pour extraire la propriété
-  crudModeData = computed(() => this.treeData().getContent().getCRUDMode());
-  deletedData = computed(() => this.treeData().getContent().isDeleted());
+  itemData = computed(() => this.treeData().getContent());
+  itemForm = computed(() => this.itemData().getItemForm());
+  indeterminateState = false;
+
+  crudModeData = computed(() => this.itemData().getCRUDMode());
 
   @ViewChild('done') doneComponent!: TextInput;
   @ViewChild('title') titleComponent!: TextInput;
@@ -38,19 +42,10 @@ export class Item extends NodeElement implements OnInit {
     super();
     // Utilise effect pour réagir aux changements de treeItemId
     effect(() => {
-      const isDeleted = this.deletedData();
+      const isDeleted = this.itemForm().deleted();
       this.addAction?.setVisible(!isDeleted);
       this.deleteAction?.setVisible(!isDeleted);
       this.undoToDeleteAction?.setVisible(isDeleted);
-      if (isDeleted) {
-        this.doneComponent?.setDisabled();
-        this.titleComponent?.setDisabled();
-        this.textComponent?.setDisabled();
-      } else {
-        this.doneComponent?.setEnabled();
-        this.titleComponent?.setEnabled();
-        this.textComponent?.setEnabled();
-      }
       // Mise à jour du tableau pour déclencher les mises à jour des vues
       this.buttonsData = [...this.buttonsData];
     });
@@ -87,9 +82,6 @@ export class Item extends NodeElement implements OnInit {
     this.buttonsData = buttons;
   }
 
-  onValueChange(value: string, property: string) {
-    this.itemService.updateItem(this.treeData(), property, value);
-  }
   doAdd(title: string) {
     const treeData = this.treeData();
     this.itemService.addChildItem(treeData, title);

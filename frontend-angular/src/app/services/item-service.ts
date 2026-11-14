@@ -131,15 +131,6 @@ export class ItemService {
     this.propageUpdates(rootItem);
   }
 
-  public updateItem(treeData: TreeData<ItemData>, property: string, value: string) {
-    const rootItem = this.rootItemSubject.value;
-    const callback = (tree: TreeData<ItemData>) =>
-      tree.getContent().setValueProperty(property, value);
-    if (this.applyNodes(rootItem, treeData, callback)) {
-      this.propageUpdates(rootItem);
-    }
-  }
-
   public addRootItem(title: string) {
     const treeRootItem = this.rootItemSubject.value;
     const treeData = this.createNewItem(treeRootItem.getTreeItemId(), title);

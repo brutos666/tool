@@ -1,12 +1,8 @@
 import { Data } from './data.js';
+import { ItemForm } from './item-form.js';
 
 export class ItemData extends Data {
-  private new: boolean = false;
-  private moved: boolean = false;
-  private deleted: boolean = false;
-  private newTitle!: string | null;
-  private newText!: string | null;
-  private newState!: string | null;
+  private updates: ItemForm;
 
   constructor(
     id: string,
@@ -17,41 +13,40 @@ export class ItemData extends Data {
     private CRUDMode: string,
   ) {
     super(id);
+    this.updates = new ItemForm({
+      id,
+      title,
+      text,
+      done: state === 'DONE',
+      indeterminate: false,
+      new: CRUDMode === 'CREATE',
+      moved: false,
+      deleted: false,
+    });
   }
 
-  setValueProperty(property: string, value: string) {
-    switch (property) {
-      case 'title':
-        this.newTitle = this.title === value ? null : value;
-        break;
-      case 'text':
-        this.newText = this.text === value ? null : value;
-        break;
-      case 'state':
-        this.newState = this.state === value ? null : value;
-        break;
-      default:
-        break;
-    }
+  getItemForm() {
+    return this.updates;
   }
+
   getTitle(): string {
-    return this.newTitle || this.title;
+    return this.updates.title();
   }
   getText(): string {
-    return this.newText || this.text;
+    return this.updates.text();
   }
   getState(): string {
-    return this.newState || this.state;
+    return this.updates.done() ? 'DONE' : 'TODO';
   }
   getStatus(): string {
     return this.status;
   }
 
   getCRUDMode(): 'CREATE' | 'UPDATE' | 'DELETE' | 'READ' {
-    if (this.isNew()) {
+    if (this.updates.new()) {
       return 'CREATE';
     }
-    if (this.isDeleted()) {
+    if (this.updates.deleted()) {
       return 'DELETE';
     }
     if (this.isModified()) {
@@ -61,28 +56,32 @@ export class ItemData extends Data {
   }
 
   isNew() {
-    return this.new || this.CRUDMode === 'CREATE';
+    return this.updates.new();
   }
   markAsNew() {
-    this.new = true;
+    this.updates.new.set(true);
   }
   /**
    * @returns {boolean} - Indique si la tâche a des modifications
    */
   isModified(): boolean {
     return (
-      !!(this.newTitle || this.newText || this.newState || this.moved) || this.CRUDMode === 'UPDATE'
+      this.title != this.getTitle() ||
+      this.text != this.getText() ||
+      this.state != this.getState() ||
+      this.updates.moved() ||
+      this.CRUDMode === 'UPDATE'
     );
   }
 
   isDeleted() {
-    return this.deleted || this.CRUDMode === 'DELETE';
+    return this.updates.deleted();
   }
   markToDelete() {
-    this.deleted = true;
+    this.updates.deleted.set(true);
   }
   undoToDelete() {
-    this.deleted = false;
+    this.updates.deleted.set(false);
   }
   isToRemove() {
     return this.CRUDMode === 'TO_REMOVE';
@@ -94,7 +93,7 @@ export class ItemData extends Data {
       title: this.getTitle(),
       text: this.getText(),
       state: this.getState(),
-      status: this.status,
+      status: this.getStatus(),
       CRUDMode: this.getCRUDMode(),
     };
   }
@@ -108,12 +107,13 @@ export class ItemData extends Data {
       this.status,
       this.CRUDMode,
     );
-    itemData.newTitle = this.newTitle;
-    itemData.newText = this.newText;
-    itemData.newState = this.newState;
-    itemData.new = this.new;
-    itemData.moved = this.moved;
-    itemData.deleted = this.deleted;
+    const newUpdates = itemData.getItemForm();
+    newUpdates.text.set(this.updates.text());
+    newUpdates.title.set(this.updates.title());
+    newUpdates.done.set(this.updates.done());
+    newUpdates.new.set(this.updates.new());
+    newUpdates.moved.set(this.updates.moved());
+    newUpdates.deleted.set(this.updates.deleted());
     return itemData;
   }
 }

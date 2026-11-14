@@ -1,22 +1,35 @@
 @let layout=layoutData();
-@let content=treeData().getContent();
 <article class="item {{getClassForCRUDMode(crudModeData())}} {{getClassForLayout(layoutData())}}">
     <header class="item__header">
       @if (this.hasDone(layout)) {
-        <text-input #done [id]="content.getId()+'-done'" label="Effectué/non effectué" class="item__checkbox" aria-description="Cliquez pour marquer comme effectué"
-        [value]="content.getState()" (valueChange)="onValueChange($event, 'state')">
-      </text-input>
-    }
-    <text-input #title 
-      [id]="content.getId()+'-title'" label="Titre de l'item" class="item__title"
-      [value]="content.getTitle()" (valueChange)="onValueChange($event, 'title')">
+        <check-box #done
+          [id]="itemForm().id + '-done'"
+          label="Effectué/non effectué"
+          [checked]="itemForm().done()"
+          (checkedChange)="itemForm().done.set($event)"
+          [indeterminate]="itemForm().indeterminate()"
+          (indeterminateChange)="itemForm().indeterminate.set($event)"
+          [disabled]="itemForm().deleted()">
+        </check-box>
+      }
+    <text-input #title
+      [id]="itemForm().id + '-title'"
+      label="Titre de l'item" class="item__title"
+      [value]="itemForm().title()"
+      (valueChange)="itemForm().title.set($event)"
+      [disabled]="itemForm().deleted()">
     </text-input>
 
     <toolbar [buttons]="buttonsData" aria-controls="itemArticle" class="item__toolbar"></toolbar>
   </header>
   @if (this.hasText(layout)) {
-    <text-input #text [id]="content.getId()+'-text'" label="Détail de l'item" class="item__text" [value]="content.getText()"
-    (valueChange)="onValueChange($event, 'text')">
+    <text-input #text 
+      [id]="itemForm().id + '-text'"
+      label="Détail de l'item"
+      class="item__text"
+      [value]="itemForm().text()"
+      (valueChange)="itemForm().text.set($event)"
+      [disabled]="itemForm().deleted()">
   </text-input>
   }
   @if (this.hasFooterToolbar(layout)) {
