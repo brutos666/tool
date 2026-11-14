@@ -78,14 +78,4 @@ export class TextInput extends NodeElement implements AfterViewInit {
       event.stopPropagation();
     }
   }
-
-  override setDisabled() {
-    super.setDisabled();
-    this.input.nativeElement.contentEditable = 'false';
-  }
-
-  override setEnabled() {
-    super.setEnabled();
-    this.input.nativeElement.contentEditable = 'true';
-  }
 }

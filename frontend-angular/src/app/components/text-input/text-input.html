@@ -5,7 +5,7 @@
   [innerHtml]="value()"
   (focus)="enter()"
   (blur)="exit()"
-  contenteditable="true"
+  [attr.contenteditable]="!this.disabled()"
   role="textbox"
   aria-multiline="true">
 </div>

@@ -1,4 +1,4 @@
-import { Component, ElementRef, inject, signal } from '@angular/core';
+import { Component, ElementRef, inject, input } from '@angular/core';
 
 @Component({
   imports: [],
@@ -11,27 +11,11 @@ import { Component, ElementRef, inject, signal } from '@angular/core';
 })
 export class NodeElement {
   elementRef = inject(ElementRef);
-  disabled = signal<boolean>(false);
-  hidden = signal<boolean>(false);
+
+  disabled = input<boolean>(false);
+  hidden = input<boolean>(false);
 
   public getElement(): HTMLElement {
     return this.elementRef.nativeElement;
-  }
-
-  public changeVisibility(visible: Boolean) {
-    this.hidden.set(!visible);
-  }
-  public isVisible() {
-    return !this.hidden();
-  }
-
-  setDisabled() {
-    this.disabled.set(true);
-  }
-  setEnabled() {
-    this.disabled.set(false);
-  }
-  isDisabled(): boolean {
-    return this.disabled();
   }
 }
