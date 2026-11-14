@@ -16,7 +16,7 @@ import { CheckBox } from '../check-box/check-box.js';
   styleUrl: './item.scss',
   templateUrl: './item.html',
 })
-export class Item extends NodeElement implements OnInit {
+export class Item extends NodeElement {
   name = 'Item';
 
   private itemService = inject(ItemService);
@@ -30,6 +30,8 @@ export class Item extends NodeElement implements OnInit {
   // Crée un signal computed pour extraire la propriété
   itemData = computed(() => this.treeData().getContent());
   itemForm = computed(() => this.itemData().getItemForm());
+  itemId = computed(() => this.itemForm().id);
+  deleted = computed(() => this.itemForm().deleted());
   indeterminateState = false;
 
   crudModeData = computed(() => this.itemData().getCRUDMode());
@@ -40,46 +42,45 @@ export class Item extends NodeElement implements OnInit {
 
   constructor() {
     super();
-    // Utilise effect pour réagir aux changements de treeItemId
     effect(() => {
-      const isDeleted = this.itemForm().deleted();
-      this.addAction?.setVisible(!isDeleted);
-      this.deleteAction?.setVisible(!isDeleted);
-      this.undoToDeleteAction?.setVisible(isDeleted);
-      // Mise à jour du tableau pour déclencher les mises à jour des vues
-      this.buttonsData = [...this.buttonsData];
+      const itemId = this.itemId();
+      const deleted = this.deleted();
+      const rights = this.getRights(this.layoutData());
+      const buttons: IconButton[] = [];
+      if (rights.includes(Right.create)) {
+        if (this.addAction == null) {
+          this.addAction = new IconButton(
+            `${itemId}-add`,
+            'Ajouter un item',
+            'plus',
+            this.doAdd.bind(this, 'Nouvel item'),
+          );
+        }
+        buttons.push(this.addAction);
+      }
+      if (rights.includes(Right.delete)) {
+        if (this.deleteAction == null) {
+          this.deleteAction = new IconButton(
+            `${itemId}-delete`,
+            'Marquer à supprimer',
+            'cross',
+            this.markToDelete.bind(this),
+          );
+          this.undoToDeleteAction = new IconButton(
+            `${itemId}-undo-delete`,
+            'Annuler la suppression',
+            'plus',
+            this.undoToDelete.bind(this),
+          );
+        }
+        buttons.push(this.deleteAction);
+        buttons.push(this.undoToDeleteAction);
+      }
+      this.addAction?.setVisible(!deleted);
+      this.deleteAction?.setVisible(!deleted);
+      this.undoToDeleteAction?.setVisible(deleted);
+      this.buttonsData = buttons;
     });
-  }
-
-  ngOnInit(): void {
-    const rights = this.getRights(this.layoutData());
-    const buttons: IconButton[] = [];
-    if (rights.includes(Right.create)) {
-      this.addAction = new IconButton(
-        'addNewItem',
-        'Ajouter un item',
-        'plus',
-        this.doAdd.bind(this, 'Nouvel item'),
-      );
-      buttons.push(this.addAction);
-    }
-    if (rights.includes(Right.delete)) {
-      this.deleteAction = new IconButton(
-        'markToDelete',
-        'Marquer à supprimer',
-        'cross',
-        this.markToDelete.bind(this),
-      );
-      this.undoToDeleteAction = new IconButton(
-        'undoToDelete',
-        'Annuler la suppression',
-        'plus',
-        this.undoToDelete.bind(this),
-      );
-      buttons.push(this.deleteAction);
-      buttons.push(this.undoToDeleteAction);
-    }
-    this.buttonsData = buttons;
   }
 
   doAdd(title: string) {
