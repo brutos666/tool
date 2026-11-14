@@ -6,10 +6,11 @@ import { Component, input } from '@angular/core';
   styleUrl: './label-input.scss',
   templateUrl: './label-input.html',
   host: {
-    '[id]': 'id()',
+    '[id]': "for() + '-label'",
+    '[for]': 'for()',
   },
 })
 export class LabelInput {
   text = input.required<string>();
-  id = input.required<string>();
+  for = input.required<string>();
 }
