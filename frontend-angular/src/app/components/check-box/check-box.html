@@ -1,0 +1,12 @@
+<input 
+  type="checkbox"
+  [id]="id()"
+  [aria-label]="label()"
+  class="checkbox__input clickable"
+  [attr.disabled]="disabled() ? '': null"
+  [attr.indeterminate]="indeterminate() ? '': null"
+  [checked]="checked()"
+  (change)="toggle($event)"/>
+  @if (showLabel()) {
+    <label labelInput [text]="label()" [for]="id() + '-label'"></label>
+  }
