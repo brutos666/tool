@@ -1,49 +1,54 @@
-:host(.label-button),
-:host(.primary-button),
-:host(.drag-button),
 :host(.burger-button),
-:host(.item-like-button) {
-  text-align: center;
+:host(.drag-button),
+:host(.icon-button),
+:host(.item-like-button),
+:host(.label-button),
+:host(.menu-button),
+:host(.primary-button) {
   border-radius: var(--border-radius);
-  display: flex;
   align-items: center;
   justify-content: center;
-}
-
-:host(.primary-button) {
-  background-color: var(--color-bg-surface);
-  border: solid 1px var(--color-primary);
-  padding: var(--medium-padding);
-}
-:host(.icon-button),
-:host(.drag-button){
-  border-style: none;
-}
-:host(.item-like-button) {
-  border: dashed 1px var(--color-border);
-}
-:host(.label-button):hover,
-:host(.icon-button):hover,
-:host(.item-like-button):hover {
-  background-color: var(--color-bg-hover);
-  border-color: var(--color-border-hover);
-}
-:host(.primary-button):hover {
-  background-color: var(--color-primary-hover);
-  border: solid 1px var(--color-primary);
+  cursor: pointer;
 }
 
 :host(.burger-button),
 :host(.menu-button) {
   padding: var(--global-padding);
-  display: flex;
-  align-items: center;
-  width: max-content;
-  text-align: left;
-  border-radius: var(--border-radius);
 }
 
-:host(.label-button) {
+:host(.burger-button),
+:host(.drag-button),
+:host(.icon-button),
+:host(.menu-button) {
+  border: none;
+  background-color:transparent;
+}
+:host(.item-like-button) {
+  border: dashed 1px var(--color-border);
   background-color: var(--color-bg-surface);
+}
+:host(.primary-button) {
+  background-color: var(--color-bg-surface);
+  border: solid 1px var(--color-primary);
+}
+:host(.label-button) {
   border: solid 1px var(--color-border);
+  background-color: var(--color-bg-surface);
+}
+
+:host(.burger-button):hover,
+:host(.drag-button):hover,
+:host(.icon-button):hover,
+:host(.item-like-button):hover,
+:host(.label-button):hover,
+:host(.menu-button):hover {
+  background-color: var(--color-bg-hover);
+  border-color: var(--color-border-hover);
+}
+:host(.primary-button):hover {
+  background-color: var(--color-primary-hover);
+  border-color: var(--color-primary);
+}
+:host.rotate90 icon {
+  transform: rotate(90deg);
 }

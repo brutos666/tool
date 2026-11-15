@@ -2,7 +2,7 @@
   class="menu" role="menu">
   @for (item of menuItems(); track item.label) {
     <li class="menu__element">
-      <button actionButton [data]="item"></button>
+      <button focusable [data]="item"></button>
     </li>
   } @empty {
     No tabs available.

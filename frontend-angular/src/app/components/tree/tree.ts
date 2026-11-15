@@ -2,7 +2,7 @@ import { Component, effect, inject, input, OnInit, ViewChild } from '@angular/co
 import { Button } from '../action-button/button.js';
 import { TreeData } from '../../data/tree-data.js';
 import { NodeElement } from '../common/NodeElement.js';
-import { BasicButton } from '../basic-button/basic-button.js';
+import { NoFocusableButton } from '../action-button/no-focusable-button.js';
 import { TreeContent } from '../tree-content/tree-content';
 import { TreeNavigation } from '../../directives/tree-navigation.js';
 import { ItemData } from '../../data/item-data.js';
@@ -10,7 +10,7 @@ import { Layout } from '../common/Types.js';
 import { SelectTree } from '../../directives/select-tree.js';
 
 @Component({
-  imports: [BasicButton, TreeContent],
+  imports: [NoFocusableButton, TreeContent],
   selector: 'tree',
   styleUrl: './tree.scss',
   templateUrl: './tree.html',
@@ -31,7 +31,7 @@ export class Tree extends NodeElement implements OnInit {
   layoutData = input.required<Layout>();
   isRoot = input<boolean>(false);
 
-  @ViewChild('toggle') toggleComponent!: BasicButton;
+  @ViewChild('toggle') toggleComponent!: NoFocusableButton;
 
   constructor() {
     super();

@@ -1,6 +1,6 @@
 @for (buttonItem of buttons(); track buttonItem.label) {
   @if (buttonItem.isVisible()) {
-    <button actionButton [data]="buttonItem"></button>
+    <button focusable [data]="buttonItem"></button>
   }
 } @empty {
 No tabs available.

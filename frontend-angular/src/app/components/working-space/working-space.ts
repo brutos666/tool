@@ -14,9 +14,9 @@ import { SpaceHeader } from '../space/space-header';
 import { Space } from '../space/space.js';
 import { SpaceFooter } from '../space/space-footer';
 import { ItemLikeButton } from '../action-button/item-like-button.js';
-import { ActionButton } from '../action-button/action-button';
 import { TreeContent } from '../tree-content/tree-content';
 import { NotificationCenter } from '../notification-center/notification-center';
+import { FocusableButton } from '../action-button/focusable-button';
 
 @Component({
   imports: [
@@ -26,9 +26,10 @@ import { NotificationCenter } from '../notification-center/notification-center';
     SpaceBody,
     SpaceHeader,
     SpaceFooter,
-    ActionButton,
+    FocusableButton,
     TreeContent,
     NotificationCenter,
+    FocusableButton,
   ],
   standalone: true,
   selector: 'working-space',

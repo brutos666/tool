@@ -7,7 +7,6 @@ import {
   signal,
   ViewChild,
 } from '@angular/core';
-import { ActionButton } from '../action-button/action-button';
 import { Button } from '../action-button/button';
 import { MenuButton } from '../action-button/menu-button';
 import { Menu } from '../menu/menu.js';
@@ -16,9 +15,10 @@ import { Composite } from '../common/Composite.js';
 import { ManualNavigation } from '../../directives/manual-navigation.js';
 import { PopupButton } from '../../directives/popup-button';
 import { PopOverContainer } from '../../directives/popover-container';
+import { FocusableButton } from '../action-button/focusable-button';
 
 @Component({
-  imports: [ActionButton, Menu, PopupButton, PopOverContainer],
+  imports: [Menu, PopupButton, PopOverContainer, FocusableButton],
   selector: 'menu-bar',
   styleUrl: './menu-bar.scss',
   templateUrl: './menu-bar.html',

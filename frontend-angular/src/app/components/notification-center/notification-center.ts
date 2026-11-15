@@ -2,14 +2,14 @@ import { Component, effect, inject, signal } from '@angular/core';
 import { Notification } from '../notification/notification';
 import { IconButton } from '../action-button/icon-button.js';
 import { NotificationService } from '../../services/notification-service.js';
-import { ActionButton } from '../action-button/action-button';
 import { PopupButton } from '../../directives/popup-button.js';
 import { ArrowNavigation } from '../../directives/arrow-navigation.js';
 import { EnterTabNavigation } from '../../directives/enter-tab-navigation.js';
 import { PopOverContainer } from '../../directives/popover-container';
+import { FocusableButton } from '../action-button/focusable-button.js';
 
 @Component({
-  imports: [ActionButton, Notification, PopupButton, EnterTabNavigation, PopOverContainer],
+  imports: [FocusableButton, Notification, PopupButton, EnterTabNavigation, PopOverContainer],
   selector: 'notification-center',
   styleUrl: './notification-center.scss',
   templateUrl: './notification-center.html',

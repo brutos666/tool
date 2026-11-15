@@ -23,9 +23,6 @@
   user-select: none;
   border: none;
 }
-.readonly .action__button {
-  display: none;
-}
 
 .hidden {
   display: none !important;

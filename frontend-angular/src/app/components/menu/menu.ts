@@ -1,11 +1,11 @@
 import { AfterViewInit, Component, input, QueryList, ViewChildren } from '@angular/core';
 import { MenuButton } from '../action-button/menu-button.js';
-import { ActionButton } from '../action-button/action-button.js';
 import { ArrowNavigation } from '../../directives/arrow-navigation.js';
 import { NodeElement } from '../common/NodeElement.js';
+import { FocusableButton } from '../action-button/focusable-button.js';
 
 @Component({
-  imports: [ActionButton],
+  imports: [FocusableButton],
   selector: 'menu-content',
   styleUrl: './menu.scss',
   templateUrl: './menu.html',
@@ -15,7 +15,7 @@ export class Menu extends NodeElement implements AfterViewInit {
   menuItems = input.required<Array<MenuButton>>();
   navOrientation = input<'horizontal' | 'vertical'>('horizontal');
 
-  @ViewChildren(ActionButton) actionButtons!: QueryList<ActionButton>;
+  @ViewChildren(FocusableButton) actionButtons!: QueryList<FocusableButton>;
 
   private width!: number;
 

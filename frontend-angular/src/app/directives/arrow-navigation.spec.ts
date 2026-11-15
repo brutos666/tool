@@ -1,21 +1,21 @@
 import { Component, input } from '@angular/core';
 import { ArrowNavigation } from './arrow-navigation';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActionButton } from '../components/action-button/action-button.js';
 import { Button } from '../components/action-button/button.js';
 import { Composite } from '../components/common/Composite.js';
 import { NodeElement } from '../components/common/NodeElement';
+import { FocusableButton } from '../components/action-button/focusable-button';
 
 @Component({
-  imports: [ActionButton, NodeElement],
+  imports: [NodeElement, FocusableButton],
   hostDirectives: [{ directive: ArrowNavigation, inputs: ['navOrientation:orientation'] }],
   template: `<nav>
     <header>
       <element id="id0" aria-label="Pas de focus">Element non focusable</element>
     </header>
-    <button actionButton [data]="btnDataFocus1"></button>
-    <button actionButton [data]="btnDataFocus2"></button>
-    <button actionButton [data]="btnDataFocus3"></button>
+    <button focusable [data]="btnDataFocus1"></button>
+    <button focusable [data]="btnDataFocus2"></button>
+    <button focusable [data]="btnDataFocus3"></button>
   </nav>`,
 })
 class Test extends Composite {

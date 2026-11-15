@@ -1,9 +1,8 @@
 @if (menuOrientation.orientation() === 'vertical') {
   <li class="menu__element">
-    <button actionButton
+    <button focusable
       popup-button-directive target="menuContent" [opened]="menuOpened()"
       #burgerItem
-      class="menu__button"
       [data]="burgerItemData"></button>
   </li>
   <menu-content

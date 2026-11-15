@@ -6,7 +6,7 @@
       <tree-list [dataList]="rootItem().getChildren()" [orientation]="'vertical'" [layoutData]="navLayout"></tree-list>
     </space-body>
     <space-footer>
-      <button class="working-space__add-button" actionButton [data]="navAddButton"></button>
+      <button focusable class="working-space__add-button"  [data]="navAddButton"></button>
     </space-footer>
   </space>
 </aside>
@@ -22,7 +22,7 @@
         <tree-list [dataList]="currentTreeData.getChildren() || []" [orientation]="'horizontal'" [layoutData]="mainLayout"></tree-list>
       </space-body>
       <space-footer>
-        <button actionButton [data]="mainAddButton" class="working-space__add-button main-space__add-button"></button>
+        <button focusable [data]="mainAddButton" class="working-space__add-button main-space__add-button"></button>
       </space-footer>
     </space>
   } @else {
