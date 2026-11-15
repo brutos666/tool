@@ -17,6 +17,7 @@ import { ItemLikeButton } from '../action-button/item-like-button.js';
 import { TreeContent } from '../tree-content/tree-content';
 import { NotificationCenter } from '../notification-center/notification-center';
 import { FocusableButton } from '../action-button/focusable-button';
+import { Item } from '../item/item';
 
 @Component({
   imports: [
@@ -30,6 +31,7 @@ import { FocusableButton } from '../action-button/focusable-button';
     TreeContent,
     NotificationCenter,
     FocusableButton,
+    Item,
   ],
   standalone: true,
   selector: 'working-space',

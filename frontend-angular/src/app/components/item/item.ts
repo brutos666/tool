@@ -27,6 +27,8 @@ export class Item extends NodeElement {
   buttonsData: Button[] = [];
   layoutData = input.required<Layout>();
   treeData = input.required<TreeData<ItemData>>();
+  title = input<boolean>(false);
+
   // Crée un signal computed pour extraire la propriété
   itemData = computed(() => this.treeData().getContent());
   itemForm = computed(() => this.itemData().getItemForm());
@@ -109,6 +111,9 @@ export class Item extends NodeElement {
     return layout === Layout.Title || layout === Layout.Todo;
   }
   getRights(layout: Layout): Right[] {
+    if (this.title()) {
+      return [Right.update];
+    }
     if (this.isPostIt(layout)) {
       if (layout === Layout.Story) {
         return [Right.update];

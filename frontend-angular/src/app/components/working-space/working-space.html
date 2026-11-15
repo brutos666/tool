@@ -16,7 +16,7 @@
   @if (currentTreeData) {
     <space>
       <space-header class="main-space__header">
-        <tree-content [treeData]="currentTreeData" [layoutData]="mainLayout"></tree-content>
+        <item [treeData]="currentTreeData" [layoutData]="mainLayout" [title]="true"></item>
       </space-header>
       <space-body>
         <tree-list [dataList]="currentTreeData.getChildren() || []" [orientation]="'horizontal'" [layoutData]="mainLayout"></tree-list>
