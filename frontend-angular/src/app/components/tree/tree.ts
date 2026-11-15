@@ -45,6 +45,7 @@ export class Tree extends NodeElement implements OnInit {
       'node',
       'button',
       'icon',
+      this.onOpenClose.bind(this),
     );
   }
 

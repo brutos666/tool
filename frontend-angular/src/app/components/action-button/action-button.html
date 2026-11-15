@@ -2,5 +2,5 @@
   <icon [name]="data().icon"></icon>
 }
 @if (data().role === 'menuitem' || ['label', 'item-like'].includes(data().type)) {
-  <label labelInput [text]="data().label" [for]="data().id"></label>
+  <label labelInput [text]="data().label" [id]="data().id + '-label'"></label>
 }

@@ -8,5 +8,5 @@
   [checked]="checked()"
   (change)="toggle($event)"/>
   @if (showLabel()) {
-    <label labelInput [text]="label()" [for]="id() + '-label'"></label>
+    <label labelInput [text]="label()"  [id]="id() + '-label'" [for]="id()"></label>
   }
