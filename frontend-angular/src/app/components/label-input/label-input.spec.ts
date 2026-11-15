@@ -17,7 +17,7 @@ describe('LabelInput', () => {
     idSignal = signal<String>('inputId');
 
     fixture = TestBed.createComponent(LabelInput, {
-      bindings: [inputBinding('text', textSignal), inputBinding('id', idSignal)],
+      bindings: [inputBinding('text', textSignal), inputBinding('for', idSignal)],
     });
     component = fixture.componentInstance;
     await fixture.whenStable();

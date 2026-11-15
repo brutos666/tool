@@ -1,4 +1,4 @@
-import { Component, effect, inject, signal } from '@angular/core';
+import { Component, effect, inject, input, signal } from '@angular/core';
 import { Notification } from '../notification/notification';
 import { IconButton } from '../action-button/icon-button.js';
 import { NotificationService } from '../../services/notification-service.js';
@@ -21,6 +21,7 @@ export class NotificationCenter {
   // TODO : dans le service, ne stocker que les erreurs quand tout sera en place
   private notificationService = inject(NotificationService);
   private navigation = inject(ArrowNavigation);
+  navOrientation = input<'horizontal' | 'vertical'>('horizontal');
 
   notifications = this.notificationService.notificationsSignal;
   popNotifications = this.notificationService.popupNotificationsSignal;

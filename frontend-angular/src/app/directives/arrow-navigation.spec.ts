@@ -39,6 +39,8 @@ describe('ArrowNavigation', () => {
     element = fixture.nativeElement;
     directive = fixture.debugElement.injector.get(ArrowNavigation);
     directive.giveFocus();
+    // Active la navigation
+    directive.changeTabAccess(true);
   });
 
   it('should navigate to the right when right arrow key is down when menu is horizontal', async () => {
