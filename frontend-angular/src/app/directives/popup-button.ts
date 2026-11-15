@@ -4,6 +4,7 @@ import { Directive, input } from '@angular/core';
   selector: '[popup-button-directive]',
   host: {
     '[aria-expanded]': 'opened()',
+    '[aria-pressed]': 'opened()',
     '[aria-controls]': 'target()',
     'aria-haspopup': 'true',
     popovertargetaction: 'toggle',

@@ -14,7 +14,6 @@ import { SpaceHeader } from '../space/space-header';
 import { Space } from '../space/space.js';
 import { SpaceFooter } from '../space/space-footer';
 import { ItemLikeButton } from '../action-button/item-like-button.js';
-import { TreeContent } from '../tree-content/tree-content';
 import { NotificationCenter } from '../notification-center/notification-center';
 import { FocusableButton } from '../action-button/focusable-button';
 import { Item } from '../item/item';
@@ -28,7 +27,6 @@ import { Item } from '../item/item';
     SpaceHeader,
     SpaceFooter,
     FocusableButton,
-    TreeContent,
     NotificationCenter,
     FocusableButton,
     Item,

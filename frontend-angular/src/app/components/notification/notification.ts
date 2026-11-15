@@ -3,10 +3,10 @@ import { NotificationData } from '../../data/notification-data.js';
 import { NodeElement } from '../common/NodeElement.js';
 import { IconButton } from '../action-button/icon-button.js';
 import { NotificationService } from '../../services/notification-service.js';
-import { ActionButton } from '../action-button/action-button.js';
+import { FocusableButton } from '../action-button/focusable-button.js';
 
 @Component({
-  imports: [ActionButton],
+  imports: [FocusableButton],
   selector: 'notification',
   styleUrl: './notification.scss',
   templateUrl: './notification.html',

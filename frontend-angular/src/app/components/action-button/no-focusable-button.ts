@@ -12,6 +12,5 @@ import { LabelInput } from '../label-input/label-input.js';
   templateUrl: './action-button.html',
   standalone: true,
   hostDirectives: [NoFocusable],
-  providers: [{ provide: NodeElement, useExisting: NoFocusableButton }],
 })
 export class NoFocusableButton extends ActionButton {}

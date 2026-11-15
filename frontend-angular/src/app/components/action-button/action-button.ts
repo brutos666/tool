@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { NodeElement } from '../common/NodeElement.js';
 import { Icon } from '../icon/icon.js';
 import { LabelInput } from '../label-input/label-input.js';
@@ -12,7 +12,7 @@ import { Button } from './button.js';
   standalone: true,
   host: {
     '[id]': 'data().id',
-    type: 'button',
+    type: 'action-button',
     class: 'clickable',
     '[class]': "data().type + '-button' + (data().isVisible() ? '': ' hidden')",
     '[attr.aria-labelledby]': "data().id + '-label'",
@@ -38,12 +38,12 @@ export class ActionButton extends NodeElement {
   }
 
   onMouseDown(event: MouseEvent) {
-    // Certains boutons ne doivent pas faire perdre le focus courant car ils peuvent agir sur l'élément qui a le focus. Ce n'est pas le cas du burger menu qui agit sur l'ouverture/fermeture du menu
-    if (this.data().type === 'burger') {
-      return;
+    if (this.data().type === 'icon') {
+      // Certains boutons ne doivent pas faire perdre le focus courant car ils peuvent agir sur l'élément qui a le focus.
+      event.preventDefault();
     }
-    event.preventDefault();
   }
+
   onClick(event: MouseEvent) {
     this.data().onClick(event);
   }
