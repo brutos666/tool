@@ -1,4 +1,4 @@
-import { Directive, input } from '@angular/core';
+import { Directive, input, model } from '@angular/core';
 
 @Directive({
   selector: '[popup-button-directive]',

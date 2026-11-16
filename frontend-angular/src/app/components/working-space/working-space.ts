@@ -1,4 +1,4 @@
-import { Component, ElementRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, effect, ElementRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MenuBar } from '../menu-bar/menu-bar.js';
 import { TreeList } from '../tree-list/tree-list';
 import { ItemService } from '../../services/item-service.js';
@@ -17,6 +17,7 @@ import { FocusableButton } from '../action-button/focusable-button';
 import { Item } from '../item/item';
 import { Toolbar } from '../toolbar/toolbar';
 import { Button } from '../action-button/button.js';
+import { NotificationService } from '../../services/notification-service.js';
 
 @Component({
   imports: [
@@ -45,6 +46,8 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
   name = 'WorkingSpace';
 
   private itemService = inject(ItemService);
+  private notificationService = inject(NotificationService);
+
   static NEW_SPACE_LABEL = 'Saisir un espace';
   static NEW_ITEM_LABEL = 'Saisir un pense-bête';
 
@@ -78,6 +81,18 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
   private onPointerMoveEvent: Function = this.onPointerMove.bind(this);
   private onPointerUpEvent: Function = this.onPointerUp.bind(this);
 
+  constructor() {
+    super();
+    effect(() => {
+      if (this.currentItem()) {
+        this.notificationService.removeHelp();
+      } else if (this.rootItem().getChildren().length) {
+        this.notificationService.addNoSelectTreeHelp();
+      } else {
+        this.notificationService.addNoTreeHelp();
+      }
+    });
+  }
   ngOnInit(): void {
     this.menuItems.push(
       new Button('reload', 'Actualiser', 'rotate-right', this.loadAll.bind(this)),

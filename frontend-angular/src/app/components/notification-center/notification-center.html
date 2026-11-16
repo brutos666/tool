@@ -1,23 +1,30 @@
-<div 
-  popover-directive popover="manual"
-  [(show)]="show"
-  id="notificationCenter"
-  class="notification__center">
-  @if (show()) {
-    @for (notification of notifications(); track notification.getId()) {
-      <notification enter-tab-directive [data]="notification"></notification>
-    } @empty {
-      Pas de notification
-    }
-  } @else {
-    @for (notification of popNotifications(); track notification.getId()) {
+<div class="notification__center">
+  <div id="actions" class="notification__actions">
+    @if (show()) {
+      @for (notification of notifications(); track notification.getId()) {
+        <notification enter-tab-directive [data]="notification"></notification>
+      } @empty {
+        Pas de notification
+      }
+    } @else {
+      @for (notification of popNotifications(); track notification.getId()) {
       <notification [data]="notification"></notification>
+      }
     }
+  </div>
+  @if (showHelp() && this.notificationService.helpSignal().length > 0) {
+    <notification [data]="helpNotification()" id="notificationHelp"></notification>
   }
 </div>
-<button focusable
-  popup-button-directive
-  target="notificationCenter"
-  [opened]="show()"
-  [data]="notificationButton"
-  [buttonType]="'menu'"></button>
+
+<toolbar class="notification__buttons" [buttons]="[]">
+  <button focusable
+    show-popup-button-directive target="actions" [(show)]="show"
+    [data]="notificationButton"
+    [buttonType]="'menu'">
+  </button>
+  <button focusable
+    show-popup-button-directive target="notificationHelp" [(show)]="showHelp"
+    [data]="infoButton"
+    [buttonType]="'menu'"></button>
+</toolbar>

@@ -3,7 +3,11 @@
   <space>
     <space-header>Navigation</space-header>
     <space-body>
-      <tree-list [dataList]="rootItem().getChildren()" [orientation]="'vertical'" [layoutData]="navLayout"></tree-list>
+      <tree-list
+        [dataList]="rootItem().getChildren()"
+        [orientation]="'vertical'"
+        [layoutData]="navLayout"
+        [emptyMessage]="this.notificationService.INFO_WHEN_NO_TREE"></tree-list>
     </space-body>
     <space-footer>
       <button focusable class="working-space__add-button"  [data]="navAddButton" [buttonType]="'item-like'"></button>
@@ -27,7 +31,7 @@
       </space-footer>
     </space>
   } @else {
-    <p>Sélectionner un élément dans la navigation à gauche</p>
+    <p class="working-space__empty-state">{{this.notificationService.INFO_WHEN_NO_TREE_SELECTED}}</p>
   }
 </main>
 <notification-center navOrientation="vertical"></notification-center>

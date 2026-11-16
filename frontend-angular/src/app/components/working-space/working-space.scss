@@ -50,6 +50,12 @@
   width: calc(100% - 4px);
   overflow: hidden;
 }
+.working-space__empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
 
 .main-space__add-button {
   max-width: var(--item-width);

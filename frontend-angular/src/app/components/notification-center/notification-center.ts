@@ -1,15 +1,16 @@
-import { Component, effect, inject, input, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { Notification } from '../notification/notification';
 import { NotificationService } from '../../services/notification-service.js';
-import { PopupButton } from '../../directives/popup-button.js';
 import { ArrowNavigation } from '../../directives/arrow-navigation.js';
 import { EnterTabNavigation } from '../../directives/enter-tab-navigation.js';
-import { PopOverContainer } from '../../directives/popover-container';
 import { FocusableButton } from '../action-button/focusable-button.js';
 import { Button } from '../action-button/button.js';
+import { Toolbar } from '../toolbar/toolbar';
+import { ShowPopupButton } from '../../directives/show-popup-button';
+import { NotificationData } from '../../data/notification-data.js';
 
 @Component({
-  imports: [FocusableButton, Notification, PopupButton, EnterTabNavigation, PopOverContainer],
+  imports: [FocusableButton, Notification, EnterTabNavigation, Toolbar, ShowPopupButton],
   selector: 'notification-center',
   styleUrl: './notification-center.scss',
   templateUrl: './notification-center.html',
@@ -24,9 +25,15 @@ export class NotificationCenter {
 
   notifications = this.notificationService.notificationsSignal;
   popNotifications = this.notificationService.popupNotificationsSignal;
+  helpNotification = computed(
+    () => new NotificationData('0', this.notificationService.helpSignal(), 'info', false),
+  );
+
   show = signal<boolean>(false);
+  showHelp = signal<boolean>(true);
 
   notificationButton: Button = new Button('notificationButton', 'Centre de notification', 'bell');
+  infoButton: Button = new Button('infoButton', "Zone d'information", 'info');
 
   constructor() {
     effect(() => {

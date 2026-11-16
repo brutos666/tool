@@ -8,10 +8,8 @@
   flex-direction: row;
   align-items: center;
   padding: var(--global-padding);
-  gap: var(--global-gap)
-}
-.notification__message {
-  flex-grow: 1;
+  gap: var(--global-gap);
+  width: fit-content;
 }
 
 :host.show {

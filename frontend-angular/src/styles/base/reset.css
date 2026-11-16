@@ -12,6 +12,8 @@ select {
   color: inherit;
   font: inherit;
 }
+
+menu,
 ul,
 ol,
 li,
@@ -25,7 +27,6 @@ ul,
 ol,
 li {
   list-style: none;
-  padding: 0;
 }
 
 th {
@@ -36,5 +37,13 @@ button {
   border: none;
   background: transparent;
   padding: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+H5 {
+  margin: 0.4em 0;
 }
 

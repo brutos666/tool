@@ -1,19 +1,30 @@
 /* Conteneur des notifications (positionné en bas à droite) */
 :host {
-  --border-gap: var(--global-gap);
   position: fixed;
-  bottom: var(--border-gap);
-  right: var(--border-gap);
-}
-.notification__center {
-  inset: auto;
-  /* position + taille + marge + bord de l'icône + espacement souhaité */
-  bottom: calc(var(--border-gap) + var(--icon-width) + var(--icon-padding) * 2 + 2px + var(--medium-gap));
-  right: var(--border-gap);
-  max-width: 20%;
+  bottom: var(--global-gap);
+  right: var(--global-gap);
   display: flex;
   flex-direction: column;
-  gap: var(--border-gap);
+  gap: var(--global-gap);
+}
+
+.notification__center {
+  /* position + taille + marge + bord de l'icône + espacement souhaité */
+  display: flex;
+  flex-direction: column;
+  gap: var(--global-gap);
   border: none;
   background: transparent;
+}
+.notification__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--global-gap);
+  align-items: flex-end;
+}
+
+.notification__buttons {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
 }
