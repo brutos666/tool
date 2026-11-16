@@ -1,12 +1,12 @@
 :host.tree--node:not(.tree--root) {
-  padding-left: 24px;
+  padding-left: var(--icon-width);
 }
 
 /** Disposition **/
 :host {
   flex: 1;
   display: grid;
-  grid-template-columns: 24px 1fr;
+  grid-template-columns: var(--icon-width) 1fr;
   grid-template-rows: auto 1fr; 
 }
 .tree__toggle {

@@ -1,25 +1,25 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MenuBar } from './menu-bar';
 import { inputBinding, signal, Signal } from '@angular/core';
-import { MenuButton } from '../action-button/menu-button.js';
+import { Button } from '../action-button/button.js';
 
 describe('MenuBar', () => {
   let component: MenuBar;
   let fixture: ComponentFixture<MenuBar>;
-  let itemsDataSignal: Signal<Array<MenuButton>>;
+  let itemsDataSignal: Signal<Array<Button>>;
   let labelSignal: Signal<String>;
 
-  const menuItems: Array<MenuButton> = [];
-  menuItems.push(new MenuButton('id1', 'Action 1'));
-  menuItems.push(new MenuButton('id2', 'Action 2'));
-  menuItems.push(new MenuButton('id3', 'Action 3'));
+  const menuItems: Array<Button> = [];
+  menuItems.push(new Button('id1', 'Action 1', ''));
+  menuItems.push(new Button('id2', 'Action 2', ''));
+  menuItems.push(new Button('id3', 'Action 3', ''));
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [MenuBar],
     }).compileComponents();
 
-    itemsDataSignal = signal<Array<MenuButton>>(menuItems);
+    itemsDataSignal = signal<Array<Button>>(menuItems);
     labelSignal = signal<String>("Menu d'actions");
 
     fixture = TestBed.createComponent(MenuBar, {

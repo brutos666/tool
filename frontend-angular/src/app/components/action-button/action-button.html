@@ -1,6 +1,6 @@
 @if (data().icon) {
   <icon [name]="data().icon"></icon>
 }
-@if (data().role === 'menuitem' || ['label', 'item-like'].includes(data().type)) {
+@if (role() === 'menuitem' || ['label', 'item-like'].includes(buttonType())) {
   <label labelInput [text]="data().label" [id]="data().id + '-label'"></label>
 }

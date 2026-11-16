@@ -4,7 +4,6 @@ import { TextInput } from '../text-input/text-input';
 import { ItemService } from '../../services/item-service.js';
 import { Toolbar } from '../toolbar/toolbar.js';
 import { Button } from '../action-button/button.js';
-import { IconButton } from '../action-button/icon-button.js';
 import { TreeData } from '../../data/tree-data.js';
 import { Layout, Right } from '../common/Types.js';
 import { NodeElement } from '../common/NodeElement.js';
@@ -21,9 +20,9 @@ export class Item extends NodeElement {
 
   private itemService = inject(ItemService);
 
-  private addAction!: IconButton;
-  private deleteAction!: IconButton;
-  private undoToDeleteAction!: IconButton;
+  private addAction!: Button;
+  private deleteAction!: Button;
+  private undoToDeleteAction!: Button;
   buttonsData: Button[] = [];
   layoutData = input.required<Layout>();
   treeData = input.required<TreeData<ItemData>>();
@@ -48,10 +47,10 @@ export class Item extends NodeElement {
       const itemId = this.itemId();
       const deleted = this.deleted();
       const rights = this.getRights(this.layoutData());
-      const buttons: IconButton[] = [];
+      const buttons: Button[] = [];
       if (rights.includes(Right.create)) {
         if (this.addAction == null) {
-          this.addAction = new IconButton(
+          this.addAction = new Button(
             `${itemId}-add`,
             'Ajouter un item',
             'plus',
@@ -62,13 +61,13 @@ export class Item extends NodeElement {
       }
       if (rights.includes(Right.delete)) {
         if (this.deleteAction == null) {
-          this.deleteAction = new IconButton(
+          this.deleteAction = new Button(
             `${itemId}-delete`,
             'Marquer à supprimer',
             'cross',
             this.markToDelete.bind(this),
           );
-          this.undoToDeleteAction = new IconButton(
+          this.undoToDeleteAction = new Button(
             `${itemId}-undo-delete`,
             'Annuler la suppression',
             'plus',

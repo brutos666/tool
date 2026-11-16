@@ -13,15 +13,15 @@ import { FocusableButton } from '../components/action-button/focusable-button';
     <header>
       <element id="id0" aria-label="Pas de focus">Element non focusable</element>
     </header>
-    <button focusable [data]="btnDataFocus1"></button>
-    <button focusable [data]="btnDataFocus2"></button>
-    <button focusable [data]="btnDataFocus3"></button>
+    <button focusable [data]="btnDataFocus1" [buttonType]="'icon'"></button>
+    <button focusable [data]="btnDataFocus2" [buttonType]="'icon'"></button>
+    <button focusable [data]="btnDataFocus3" [buttonType]="'icon'"></button>
   </nav>`,
 })
 class Test extends Composite {
-  btnDataFocus1: Button = new Button('id1', 'Bouton 1', '', 'button', 'label');
-  btnDataFocus2: Button = new Button('id2', 'Bouton 2', '', 'button', 'label');
-  btnDataFocus3: Button = new Button('id3', 'Bouton 3', '', 'button', 'label');
+  btnDataFocus1: Button = new Button('id1', 'Bouton 1', '');
+  btnDataFocus2: Button = new Button('id2', 'Bouton 2', '');
+  btnDataFocus3: Button = new Button('id3', 'Bouton 3', '');
 
   orientation = input<'horizontal' | 'vertical'>('horizontal');
 }

@@ -1,9 +1,9 @@
 import { AfterViewInit, Component, computed, inject, input, signal } from '@angular/core';
 import { NotificationData } from '../../data/notification-data.js';
 import { NodeElement } from '../common/NodeElement.js';
-import { IconButton } from '../action-button/icon-button.js';
 import { NotificationService } from '../../services/notification-service.js';
 import { FocusableButton } from '../action-button/focusable-button.js';
+import { Button } from '../action-button/button.js';
 
 @Component({
   imports: [FocusableButton],
@@ -24,7 +24,7 @@ export class Notification extends NodeElement implements AfterViewInit {
   show = computed(() => this.data().isShortLived());
   hide = signal<boolean>(false);
 
-  trashButton: IconButton = new IconButton(
+  trashButton: Button = new Button(
     'notificationTrashButton',
     'Supprimer la notification',
     'trash',

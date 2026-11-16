@@ -38,7 +38,11 @@
   background-color: var(--color-border);
   cursor: ew-resize;
 }
-
+.working-space__toolbar {
+  margin: var(--global-margin);
+  background-color: var(--color-bg-surface);
+  border-radius: var(--border-radius);
+}
 .working-space__main {
   grid-row: 2;
   grid-column: 3;

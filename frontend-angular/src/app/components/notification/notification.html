@@ -1,4 +1,4 @@
 <span class="notification__message">{{data().getMessage()}}</span>
 @if (!data().isShortLived()) {
-  <button focusable class="notification__trash" [data]="trashButton"></button>
+  <button focusable class="notification__trash" [data]="trashButton" [buttonType]="'menu'"></button>
 }

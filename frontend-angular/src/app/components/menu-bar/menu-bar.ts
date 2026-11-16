@@ -1,14 +1,5 @@
-import {
-  ChangeDetectorRef,
-  Component,
-  effect,
-  inject,
-  input,
-  signal,
-  ViewChild,
-} from '@angular/core';
+import { ChangeDetectorRef, Component, effect, inject, input, signal } from '@angular/core';
 import { Button } from '../action-button/button';
-import { MenuButton } from '../action-button/menu-button';
 import { Menu } from '../menu/menu.js';
 import { MenuOrientation } from '../../directives/menu-orientation.js';
 import { Composite } from '../common/Composite.js';
@@ -31,7 +22,7 @@ export class MenuBar extends Composite {
   changeDetectorRef = inject(ChangeDetectorRef);
   menuOrientation = inject(MenuOrientation);
 
-  menuItems = input.required<Array<MenuButton>>();
+  menuItems = input.required<Array<Button>>();
   label = input.required<String>();
   menuOpened = signal<boolean>(false);
 
@@ -39,7 +30,7 @@ export class MenuBar extends Composite {
 
   constructor() {
     super();
-    this.burgerItemData = new Button('burgerButton', 'Ouvrir le menu', 'burger', 'button', 'menu');
+    this.burgerItemData = new Button('burgerButton', 'Ouvrir le menu', 'burger');
     effect(() => {
       if (this.menuOpened()) {
         this.setFocusIndex(1);

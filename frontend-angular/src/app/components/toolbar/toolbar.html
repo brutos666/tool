@@ -1,5 +1,5 @@
 @for (buttonItem of buttons(); track buttonItem.label) {
   @if (buttonItem.isVisible()) {
-    <button focusable [data]="buttonItem"></button>
+    <button focusable [data]="buttonItem" [buttonType]="toolbarType()"></button>
   }
 }

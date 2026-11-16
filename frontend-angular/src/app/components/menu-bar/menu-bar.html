@@ -3,7 +3,8 @@
     <button focusable
       popup-button-directive target="menuContent" [opened]="menuOpened()"
       #burgerItem
-      [data]="burgerItemData"></button>
+      [data]="burgerItemData"
+      [buttonType]="'menu'"></button>
   </li>
   <menu-content
     popover-directive [(show)]="menuOpened"
@@ -19,7 +20,7 @@
     class="menu__content"
     [navOrientation]="'horizontal'"
     [menuItems]="menuItems()">
-</menu-content>
+  </menu-content>
 }
 
 

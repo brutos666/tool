@@ -6,7 +6,7 @@
       <tree-list [dataList]="rootItem().getChildren()" [orientation]="'vertical'" [layoutData]="navLayout"></tree-list>
     </space-body>
     <space-footer>
-      <button focusable class="working-space__add-button"  [data]="navAddButton"></button>
+      <button focusable class="working-space__add-button"  [data]="navAddButton" [buttonType]="'item-like'"></button>
     </space-footer>
   </space>
 </aside>
@@ -14,6 +14,7 @@
 <main #mainSpace class="working-space__main">
   @let currentTreeData = currentItem();
   @if (currentTreeData) {
+    <toolbar class="working-space__toolbar" [buttons]="mainButtons" [toolbarType]="'menu'"></toolbar>
     <space>
       <space-header class="main-space__header">
         <item [treeData]="currentTreeData" [layoutData]="mainLayout" [title]="true"></item>
@@ -22,7 +23,7 @@
         <tree-list [dataList]="currentTreeData.getChildren() || []" [orientation]="'horizontal'" [layoutData]="mainLayout"></tree-list>
       </space-body>
       <space-footer>
-        <button focusable [data]="mainAddButton" class="working-space__add-button main-space__add-button"></button>
+        <button focusable [data]="mainAddButton" class="working-space__add-button main-space__add-button" [buttonType]="'item-like'"></button>
       </space-footer>
     </space>
   } @else {

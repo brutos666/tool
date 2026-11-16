@@ -1,22 +1,21 @@
-:host(.status-button),
 :host(.drag-button),
 :host(.icon-button),
 :host(.item-like-button),
 :host(.label-button),
 :host(.menu-button),
 :host(.primary-button) {
+  display: flex;
+  gap: var(--medium-gap);
   border-radius: var(--border-radius);
   align-items: center;
   justify-content: center;
   cursor: pointer;
 }
 
-:host(.status-button),
 :host(.menu-button) {
-  padding: var(--global-padding);
+  padding: var(--icon-padding);
 }
 
-:host(.status-button),
 :host(.drag-button),
 :host(.icon-button),
 :host(.menu-button) {
@@ -36,7 +35,6 @@
   background-color: var(--color-bg-surface);
 }
 
-:host(.status-button):hover,
 :host(.drag-button):hover,
 :host(.icon-button):hover,
 :host(.item-like-button):hover,

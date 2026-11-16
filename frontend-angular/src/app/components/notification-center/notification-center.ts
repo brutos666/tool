@@ -26,13 +26,7 @@ export class NotificationCenter {
   popNotifications = this.notificationService.popupNotificationsSignal;
   show = signal<boolean>(false);
 
-  notificationButton: Button = new Button(
-    'notificationButton',
-    'Centre de notification',
-    'bell',
-    'button',
-    'status',
-  );
+  notificationButton: Button = new Button('notificationButton', 'Centre de notification', 'bell');
 
   constructor() {
     effect(() => {

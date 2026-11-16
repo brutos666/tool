@@ -1,19 +1,19 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Menu } from './menu';
-import { MenuButton } from '../action-button/menu-button.js';
 import { inputBinding, signal } from '@angular/core';
 import { ArrowNavigation } from '../../directives/arrow-navigation.js';
+import { Button } from '../action-button/button.js';
 
 describe('Menu', () => {
   let component: Menu;
   let fixture: ComponentFixture<Menu>;
 
-  const menuItems: Array<MenuButton> = [];
-  menuItems.push(new MenuButton('id1', 'Action 1'));
-  menuItems.push(new MenuButton('id2', 'Action 2'));
-  menuItems.push(new MenuButton('id3', 'Action 3'));
+  const menuItems: Array<Button> = [];
+  menuItems.push(new Button('id1', 'Action 1', ''));
+  menuItems.push(new Button('id2', 'Action 2', ''));
+  menuItems.push(new Button('id3', 'Action 3', ''));
 
-  const itemsDataSignal = signal<Array<MenuButton>>(menuItems);
+  const itemsDataSignal = signal<Array<Button>>(menuItems);
   const orientationSignal = signal<'horizontal' | 'vertical'>('horizontal');
 
   beforeEach(async () => {

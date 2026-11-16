@@ -1,5 +1,4 @@
 import { Component, ElementRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { MenuButton } from '../action-button/menu-button.js';
 import { MenuBar } from '../menu-bar/menu-bar.js';
 import { TreeList } from '../tree-list/tree-list';
 import { ItemService } from '../../services/item-service.js';
@@ -13,10 +12,11 @@ import { SpaceBody } from '../space/space-body';
 import { SpaceHeader } from '../space/space-header';
 import { Space } from '../space/space.js';
 import { SpaceFooter } from '../space/space-footer';
-import { ItemLikeButton } from '../action-button/item-like-button.js';
 import { NotificationCenter } from '../notification-center/notification-center';
 import { FocusableButton } from '../action-button/focusable-button';
 import { Item } from '../item/item';
+import { Toolbar } from '../toolbar/toolbar';
+import { Button } from '../action-button/button.js';
 
 @Component({
   imports: [
@@ -30,6 +30,7 @@ import { Item } from '../item/item';
     NotificationCenter,
     FocusableButton,
     Item,
+    Toolbar,
   ],
   standalone: true,
   selector: 'working-space',
@@ -44,25 +45,31 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
   name = 'WorkingSpace';
 
   private itemService = inject(ItemService);
+  static NEW_SPACE_LABEL = 'Saisir un espace';
+  static NEW_ITEM_LABEL = 'Saisir un pense-bête';
 
   rootItem = toSignal(this.itemService.rootItem$, {
     initialValue: new TreeData<ItemData>(ItemService.rootItemData),
   });
   currentItem = this.itemService.currentItemSignal;
 
-  menuItems: Array<MenuButton> = [];
+  menuItems: Array<Button> = [];
+  mainButtons: Array<Button> = [];
   label: String = 'Menu des commandes';
   navLayout: Layout = Layout.Title;
   mainLayout: Layout = Layout.Todo;
-  navAddButton: ItemLikeButton = new ItemLikeButton(
+  navAddButton: Button = new Button(
     'addNewSpace',
     'Ajouter un élément',
-    this.doAddSpace.bind(this, 'Saisir un espace'),
+    '',
+    this.doAddSpace.bind(this),
   );
-  mainAddButton: ItemLikeButton = new ItemLikeButton(
+  mainLabel: String = 'Menu des commandes de la vue';
+  mainAddButton: Button = new Button(
     'addNewItem',
     'Ajouter un élément',
-    this.doAddItem.bind(this, 'Saisir un pense-bête'),
+    '',
+    this.doAddItem.bind(this),
   );
 
   @ViewChild('splitter') splitterRef!: ElementRef;
@@ -72,13 +79,25 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
   private onPointerUpEvent: Function = this.onPointerUp.bind(this);
 
   ngOnInit(): void {
-    this.menuItems.push(new MenuButton('reload', 'Actualiser', this.reload.bind(this)));
-    this.menuItems.push(new MenuButton('saveAll', 'Sauvegarder tout', this.saveAll.bind(this)));
     this.menuItems.push(
-      new MenuButton('save', 'Sauvegarder la vue courante', this.saveCurrent.bind(this)),
+      new Button('reload', 'Actualiser', 'rotate-right', this.loadAll.bind(this)),
     );
-    this.menuItems.push(new MenuButton('exportAll', 'Exporter tout'));
-    this.menuItems.push(new MenuButton('import', 'Importer'));
+    this.menuItems.push(new Button('saveAll', 'Sauvegarder tout', 'save', this.saveAll.bind(this)));
+    this.menuItems.push(
+      new Button('exportAll', 'Exporter tout', 'upload', this.exportAll.bind(this)),
+    );
+    this.menuItems.push(new Button('import', 'Importer', '', this.import.bind(this)));
+
+    const vue = 'la vue courante';
+    this.mainButtons.push(
+      new Button('reloadCurrent', `Actualiser ${vue}`, 'rotate-right', this.loadCurrent.bind(this)),
+    );
+    this.mainButtons.push(
+      new Button('saveCurrent', `Sauvegarder ${vue}`, 'save', this.saveCurrent.bind(this)),
+    );
+    this.mainButtons.push(
+      new Button('uploadCurrent', `Exporter ${vue}`, 'upload', this.exportCurrent.bind(this)),
+    );
   }
 
   ngOnDestroy() {
@@ -87,8 +106,11 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
     splitter.removeEventListener('pointerup', this.onPointerUpEvent, { once: true });
   }
 
-  reload() {
+  loadAll() {
     this.itemService.loadItems();
+  }
+  loadCurrent() {
+    this.itemService.loadCurrentItem();
   }
   saveAll() {
     this.itemService.saveAllItems();
@@ -96,14 +118,21 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
   saveCurrent() {
     this.itemService.saveCurrentItem();
   }
-
-  doAddSpace(title: string) {
-    this.itemService.addRootItem(title);
+  exportAll() {
+    this.itemService.exportAllItems();
   }
-  doAddItem(title: string) {
+  exportCurrent() {
+    this.itemService.exportCurrentItem();
+  }
+  import() {}
+
+  doAddSpace() {
+    this.itemService.addRootItem(WorkingSpace.NEW_SPACE_LABEL);
+  }
+  doAddItem() {
     const currentItem = this.currentItem();
     if (currentItem) {
-      this.itemService.addChildItem(currentItem, title);
+      this.itemService.addChildItem(currentItem, WorkingSpace.NEW_ITEM_LABEL);
     }
   }
 

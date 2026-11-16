@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { NodeElement } from '../common/NodeElement.js';
 import { Icon } from '../icon/icon.js';
 import { LabelInput } from '../label-input/label-input.js';
@@ -12,18 +12,19 @@ import { Button } from './button.js';
   standalone: true,
   host: {
     '[id]': 'data().id',
-    type: 'action-button',
     class: 'clickable',
-    '[class]': "data().type + '-button' + (data().isVisible() ? '': ' hidden')",
+    '[class]': "buttonType() + '-button' + (data().isVisible() ? '': ' hidden')",
     '[attr.aria-labelledby]': "data().id + '-label'",
     '[aria-label]': 'data().label',
-    '[attr.role]': 'data().role',
+    '[attr.role]': 'role()',
     '(click)': 'onClick($event)',
     '(mousedown)': 'onMouseDown($event)',
   },
 })
 export class ActionButton extends NodeElement {
   data = input.required<Button>();
+  buttonType = input.required<'icon' | 'menu' | 'label' | 'primary' | 'item-like'>();
+  role = input<'button' | 'menuitem'>('button');
 
   constructor() {
     super();
@@ -38,7 +39,7 @@ export class ActionButton extends NodeElement {
   }
 
   onMouseDown(event: MouseEvent) {
-    if (this.data().type === 'icon') {
+    if (this.buttonType() === 'icon') {
       // Certains boutons ne doivent pas faire perdre le focus courant car ils peuvent agir sur l'élément qui a le focus.
       event.preventDefault();
     }

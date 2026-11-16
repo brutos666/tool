@@ -23,7 +23,8 @@ export class ErrorInterceptor {
         //if (err.status === 401) inject(Router).navigate(['/login']);
         const response = err.error;
         const failedMessage = req.context.get(ErrorInterceptor.notificationMessage).getFailure();
-        notificationService.addNotification(`${failedMessage} (${response.error})`, 'error');
+        notificationService.addNotification(`${failedMessage} (${response.message})`, 'error');
+        console.error(err);
         return throwError(() => err);
       }),
       tap((event) => {

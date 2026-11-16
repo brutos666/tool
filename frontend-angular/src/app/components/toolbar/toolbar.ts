@@ -16,4 +16,5 @@ import { FocusableButton } from '../action-button/focusable-button';
 })
 export class Toolbar extends NodeElement {
   buttons = input.required<Array<Button>>();
+  toolbarType = input<'menu' | 'icon'>('icon');
 }

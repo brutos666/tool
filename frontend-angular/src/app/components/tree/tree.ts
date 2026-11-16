@@ -43,8 +43,6 @@ export class Tree extends NodeElement implements OnInit {
       `toggle${this.treeData().getTreeItemId()}`,
       'Ouvrir/Fermer le noeud',
       'node',
-      'button',
-      'icon',
       this.onOpenClose.bind(this),
     );
   }

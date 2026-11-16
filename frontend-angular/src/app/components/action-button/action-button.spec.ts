@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActionButton } from './action-button';
 import { Button } from './button.js';
-import { DebugElement, inputBinding, Signal, signal } from '@angular/core';
+import { inputBinding, Signal, signal } from '@angular/core';
 
 describe('ActionButton', () => {
   let component: ActionButton;
@@ -13,7 +13,7 @@ describe('ActionButton', () => {
       imports: [ActionButton],
     }).compileComponents();
 
-    buttonDataSignal = signal<Button>(new Button('', 'Libellé', '+', 'button', 'label'));
+    buttonDataSignal = signal<Button>(new Button('', 'Libellé', '+'));
     fixture = TestBed.createComponent(ActionButton, {
       bindings: [inputBinding('data', buttonDataSignal)],
     });
