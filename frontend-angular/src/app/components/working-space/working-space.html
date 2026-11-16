@@ -21,7 +21,7 @@
     <toolbar class="working-space__toolbar" [buttons]="mainButtons" [toolbarType]="'menu'"></toolbar>
     <space>
       <space-header class="main-space__header">
-        <item [treeData]="currentTreeData" [layoutData]="mainLayout" [title]="true"></item>
+        <item enter-tab-directive [treeData]="currentTreeData" [layoutData]="mainLayout" [title]="true"></item>
       </space-header>
       <space-body>
         <tree-list [dataList]="currentTreeData.getChildren() || []" [orientation]="'horizontal'" [layoutData]="mainLayout"></tree-list>

@@ -8,7 +8,7 @@ import {
   input,
   model,
   SecurityContext,
-  ViewChild,
+  viewChild,
 } from '@angular/core';
 import { NodeElement } from '../common/NodeElement.js';
 import { DomSanitizer } from '@angular/platform-browser';
@@ -31,7 +31,7 @@ export class TextInput extends NodeElement implements AfterViewInit {
   private sanitizer = inject(DomSanitizer);
   private focusable = inject(Focusable, { self: true });
 
-  @ViewChild('input') input!: ElementRef;
+  private input = viewChild.required<ElementRef>('input');
 
   id = input.required<string>();
   label = input.required<string>();
@@ -48,13 +48,13 @@ export class TextInput extends NodeElement implements AfterViewInit {
     // Astuce pour mettre à jour la valeur au format HTML lorsqu'il y a une actualisation des données
     afterRenderEffect(() => {
       if (this.value() && this.inside) {
-        this.input.nativeElement.innerText = this.input.nativeElement.innerHTML;
+        this.input().nativeElement.innerText = this.input().nativeElement.innerHTML;
       }
     });
   }
 
   ngAfterViewInit(): void {
-    this.focusable.setElement(this.input.nativeElement);
+    this.focusable.setElement(this.input().nativeElement);
   }
 
   isDisplayLabel(): boolean {
@@ -62,15 +62,17 @@ export class TextInput extends NodeElement implements AfterViewInit {
   }
 
   enter() {
+    const input = this.input();
     this.inside = true;
-    this.input.nativeElement.innerText = this.input.nativeElement.innerHTML;
+    input.nativeElement.innerText = input.nativeElement.innerHTML;
   }
   exit() {
+    const input = this.input();
     this.inside = false;
     const safeValue =
-      this.sanitizer.sanitize(SecurityContext.HTML, this.input.nativeElement.innerText) || '';
-    this.input.nativeElement.innerHTML = safeValue;
-    this.value.set(this.input.nativeElement.innerHTML);
+      this.sanitizer.sanitize(SecurityContext.HTML, input.nativeElement.innerText) || '';
+    input.nativeElement.innerHTML = safeValue;
+    this.value.set(input.nativeElement.innerHTML);
   }
 
   onKeyDown(event: KeyboardEvent) {

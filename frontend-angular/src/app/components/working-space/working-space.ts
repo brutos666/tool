@@ -18,6 +18,7 @@ import { Item } from '../item/item';
 import { Toolbar } from '../toolbar/toolbar';
 import { Button } from '../action-button/button.js';
 import { NotificationService } from '../../services/notification-service.js';
+import { EnterTabNavigation } from '../../directives/enter-tab-navigation';
 
 @Component({
   imports: [
@@ -32,6 +33,7 @@ import { NotificationService } from '../../services/notification-service.js';
     FocusableButton,
     Item,
     Toolbar,
+    EnterTabNavigation,
   ],
   standalone: true,
   selector: 'working-space',
