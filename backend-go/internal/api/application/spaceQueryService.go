@@ -20,3 +20,7 @@ func SpaceQueryService(repository domain.SpaceQueryRepository) SpaceQryService {
 func (queryService SpaceQryService) FindAll(ctx context.Context, dataAccessId int) ([]*domain.Space, error) {
 	return queryService.repository.FindAll(ctx, dataAccessId)
 }
+
+func (queryService SpaceQryService) Load(ctx context.Context, dataAccessId int, item domain.ItemInfos) (*domain.Space, error) {
+	return queryService.repository.Load(ctx, dataAccessId, item)
+}

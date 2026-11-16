@@ -38,7 +38,8 @@ func ConvertFlatToTree[F FlatEntity, T TreeEntity](rootIdKey string, flats []F) 
 func ConvertFlatEntitiesToTreeEntities(rootIdKey string, flatItems []FlatEntity) []TreeEntity {
 	groupedByParent := utilities.GroupBy(
 		flatItems,
-		func(flatItem FlatEntity) string { return flatItem.GetParentId() })
+		func(flatItem FlatEntity) string { return flatItem.GetParentId() },
+	)
 	// Trier les enfants directs entre eux
 	sortedItems := make(map[string][]TreeEntity)
 	for key, flatItems := range groupedByParent {

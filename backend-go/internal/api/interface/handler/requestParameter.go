@@ -28,6 +28,15 @@ func getJsonParameter[P any](requestMapper mapper.RequestMapper, request *http.R
 	return domainParameter, nil
 }
 
+func getQueryParameter[P any](qryRequestMapper mapper.QueryRequestMapper, request *http.Request) *P {
+	// Lecture des paramètres dans les queries de l'url
+	queryValue := qryRequestMapper.ConvertToDomain(request)
+	if queryValue != nil {
+		return queryValue.(*P)
+	}
+	return nil
+}
+
 func getFileParameter(request *http.Request) (io.Reader, error) {
 	if !strings.HasPrefix(request.Header.Get("Content-Type"), "multipart/form-data") {
 		return nil, domainMessage.NewError(INVALID_FILE)

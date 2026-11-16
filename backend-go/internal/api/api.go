@@ -74,6 +74,7 @@ func Serve() *http.ServeMux {
 
 	handler.HandlePostRoute(route.ITEM_SAVE, handler.AsParamDataAccessCall(spaceCommandService.Save, bddService.WRITE))
 	handler.HandleGetRoute(route.ITEM_FIND_ALL, handler.AsDataAccessCall(spaceQueryService.FindAll, bddService.READ))
+	handler.HandleGetRoute(route.ITEM_LOAD, handler.AsParamDataAccessCall(spaceQueryService.Load, bddService.READ))
 	handler.HandlePostRoute(route.ITEM_IMPORT, handler.AsFileParamCall(spaceFileService.Import))
 	handler.HandlePostRoute(route.ITEM_EXPORT, handler.AsConvertFileCall(spaceFileService.Export))
 

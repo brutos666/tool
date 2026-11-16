@@ -31,6 +31,7 @@ type (
 
 func GetCall[P, R any](serviceCall any, parameterType P) Call {
 	requestMapper := mapper.GetRequestMapper[P](parameterType)
+	qryRequestMapper := mapper.GetQueryRequestMapper[P](parameterType)
 
 	switch call := serviceCall.(type) {
 	case NoDataAccessCall[R]:
@@ -43,6 +44,11 @@ func GetCall[P, R any](serviceCall any, parameterType P) Call {
 		}
 	case ParamCall[P, R]:
 		return func(ctx context.Context, callContext CallContext, response http.ResponseWriter, request *http.Request) (any, error) {
+			// Lecture des paramètres dans les queries de l'url
+			parameter := getQueryParameter[P](qryRequestMapper, request)
+			if parameter != nil {
+				return call(ctx, callContext.GetDataAccessId(), *parameter)
+			}
 			parameter, err := getJsonParameter[P](requestMapper, request)
 			if err != nil {
 				return nil, err

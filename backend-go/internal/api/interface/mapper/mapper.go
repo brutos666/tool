@@ -2,6 +2,8 @@
 package mapper
 
 import (
+	"net/http"
+
 	"goTool/internal/api/domain"
 	"goTool/internal/api/domain/domainMessage"
 	"goTool/internal/api/interface/handler/responseMessage"
@@ -88,4 +90,36 @@ func GetResponseMapper(output any) ResponseMapper {
 	}
 
 	return ResponseMapper{ConvertToWebResult: convertToWebResult, login: forLogin}
+}
+
+type QueryRequestMapper struct {
+	ConvertToDomain func(request *http.Request) any
+}
+
+/** Construit la méthode à appeler en fonction du type attendu */
+func GetQueryRequestMapper[I any](input any) QueryRequestMapper {
+	var toCall func(request *http.Request) any
+
+	switch input.(type) {
+	case domain.ItemInfos:
+		toCall = func(request *http.Request) any {
+			id := getValueFunc(request, "id")
+			parentId := getValueFunc(request, "parentId")
+			if id != "" && parentId != "" {
+				return domain.CreateItemInfos(id, parentId)
+			}
+			return nil
+		}
+	default:
+		toCall = func(request *http.Request) any { return nil }
+	}
+	return QueryRequestMapper{ConvertToDomain: toCall}
+}
+
+func getValueFunc(request *http.Request, name string) string {
+	value := request.PathValue(name)
+	if value == "" {
+		value = request.FormValue(name)
+	}
+	return value
 }

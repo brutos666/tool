@@ -16,6 +16,7 @@ type SpaceCommandRepository interface {
 }
 type SpaceQueryRepository interface {
 	FindAll(ctx context.Context, dataAccessId int) ([]*Space, error)
+	Load(ctx context.Context, dataAccessId int, item ItemInfos) (*Space, error)
 }
 
 type SpaceFileRepository interface {
