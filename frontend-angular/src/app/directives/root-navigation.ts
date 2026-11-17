@@ -38,7 +38,6 @@ export class RootNavigation extends ManualNavigation {
       return;
     }
     // Chaque espace doit pouvoir être accédé par la touche Tab => on ne fera jamais changeTabAccess(false)
-    this.navigables[selectedIndex]?.removeFocus();
     this.setCurrentIndex(index);
   }
 

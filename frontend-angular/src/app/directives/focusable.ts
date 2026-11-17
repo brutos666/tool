@@ -4,6 +4,10 @@ import { Navigable } from '../components/common/Navigable.js';
 
 @Directive({
   selector: '[focusable-directive]',
+  host: {
+    '(focusin)': 'this.focusChanged(true)',
+    '(focusout)': 'this.focusChanged(false)',
+  },
 })
 export class Focusable implements Navigable {
   name = 'Focusable';
@@ -39,12 +43,11 @@ export class Focusable implements Navigable {
   getElement(): HTMLElement {
     return this.element;
   }
-
   giveFocus() {
     this.getElement().focus();
   }
-  removeFocus() {
-    this.containFocus = false;
+  focusChanged(focused: boolean) {
+    this.containFocus = focused;
   }
   isFocused(): boolean {
     return document.activeElement === this.getElement();
@@ -57,7 +60,7 @@ export class Focusable implements Navigable {
   /** Rend l'élément courant accessible via la touche Tab */
   changeTabAccess(access: boolean) {
     if (!access) {
-      this.removeFocus();
+      this.containFocus = false;
     }
     this.accessible = access;
     this.applyTabAccess();

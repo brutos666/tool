@@ -14,7 +14,7 @@ import { SelectTree } from '../../directives/select-tree.js';
   selector: 'tree',
   styleUrl: './tree.scss',
   templateUrl: './tree.html',
-  hostDirectives: [TreeNavigation, { directive: SelectTree, inputs: ['treeData', 'layoutData'] }],
+  hostDirectives: [TreeNavigation],
   host: {
     '[attr.item-id]': 'treeData().getItemId()',
     '[attr.tree-item-id]': 'treeData().getTreeItemId()',
@@ -25,6 +25,7 @@ import { SelectTree } from '../../directives/select-tree.js';
 })
 export class Tree extends NodeElement implements OnInit {
   treeNavigation = inject(TreeNavigation);
+  selectTreeDirective = inject(SelectTree, { optional: true, self: true });
 
   toggleIcon!: Button;
   treeData = input.required<TreeData<ItemData>>();

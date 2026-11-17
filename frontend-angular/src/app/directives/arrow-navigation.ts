@@ -1,7 +1,8 @@
-import { Directive, input } from '@angular/core';
+import { computed, Directive, input } from '@angular/core';
 import { Navigate } from '../components/common/Navigate.js';
 import { Navigable } from '../components/common/Navigable.js';
 import { MoveNavigation } from './move-navigation.js';
+import { NotificationService } from '../services/notification-service.js';
 
 @Directive({
   selector: '[arrow-navigation-directive]',
@@ -17,6 +18,14 @@ export class ArrowNavigation extends MoveNavigation {
   override name = 'ArrowNavigation';
 
   navOrientation = input<'horizontal' | 'vertical'>('horizontal');
+  override helpMessage = computed(() => {
+    if (!this.navEnabled()) {
+      return '';
+    }
+    return this.navOrientation() === 'horizontal'
+      ? NotificationService.ARROW_NAVIGATION_HORIZONTAL
+      : NotificationService.ARROW_NAVIGATION_VERTICAL;
+  });
 
   override interceptKeys() {
     const keys = [...super.interceptKeys()];

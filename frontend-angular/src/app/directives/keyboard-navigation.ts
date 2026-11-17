@@ -1,8 +1,7 @@
-import { Directive, effect, inject, model, OnDestroy } from '@angular/core';
+import { Directive, effect, model, OnDestroy } from '@angular/core';
 import { Navigable } from '../components/common/Navigable.js';
 import { Navigate } from '../components/common/Navigate.js';
 import { ManualNavigation } from './manual-navigation.js';
-import { NotificationService } from '../services/notification-service.js';
 
 /** Cette classe gère la navigation manuelle d'un composant focusable à un autre */
 @Directive({
@@ -17,8 +16,6 @@ import { NotificationService } from '../services/notification-service.js';
 })
 export class KeyboardNavigation extends ManualNavigation implements OnDestroy {
   override name = 'KeyboardNavigation';
-
-  private notificationService = inject(NotificationService);
 
   navEnabled = model<boolean>(false);
   #onKeyDownEvent = this.onKeyDown.bind(this);
@@ -59,7 +56,6 @@ export class KeyboardNavigation extends ManualNavigation implements OnDestroy {
     if (!this.navEnabled() || !this.navigables.length || !this.interceptKeys().includes(key)) {
       return;
     }
-    this.notificationService.addNavigationHelp();
     event.preventDefault();
 
     if (this.moveToDirection(key)) {

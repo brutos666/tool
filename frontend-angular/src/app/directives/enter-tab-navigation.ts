@@ -1,7 +1,8 @@
-import { Directive, model } from '@angular/core';
+import { computed, Directive, model } from '@angular/core';
 import { Navigate } from '../components/common/Navigate.js';
 import { Navigable } from '../components/common/Navigable.js';
 import { TabNavigation } from './tab-navigation.js';
+import { NotificationService } from '../services/notification-service.js';
 
 @Directive({
   selector: '[enter-tab-directive]',
@@ -17,6 +18,14 @@ export class EnterTabNavigation extends TabNavigation {
   override name = 'EnterTabNavigation';
 
   inside = model<boolean>(false);
+  override helpMessage = computed(() => {
+    if (!this.navEnabled()) {
+      return '';
+    }
+    return this.inside()
+      ? NotificationService.EXIT_NAVIGATION
+      : NotificationService.ENTER_NAVIGATION;
+  });
 
   override unregisterChild(navigable: Navigable) {
     if (this.inside()) {
@@ -27,7 +36,6 @@ export class EnterTabNavigation extends TabNavigation {
   }
 
   override onMouseDown(event: MouseEvent) {
-    this.containFocus = true;
     this.enter();
   }
 
@@ -68,7 +76,7 @@ export class EnterTabNavigation extends TabNavigation {
     this.inside.set(false);
     // Activer l'extérieur
     this.getElement().setAttribute('tabindex', '0');
-    this.getParentNavigation()?.startNavigation();
+    this.startNavigation();
   }
 
   override isFocusable(): boolean {
@@ -86,10 +94,7 @@ export class EnterTabNavigation extends TabNavigation {
       this.getElement().focus();
     }
   }
-  override removeFocus(): void {
-    this.inside.set(false);
-    super.removeFocus();
-  }
+
   override isFocused(): boolean {
     if (this.inside()) {
       return super.isFocused();

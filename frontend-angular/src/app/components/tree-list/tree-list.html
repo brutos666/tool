@@ -1,10 +1,13 @@
 @for (treeData of dataList();track treeData.getTreeItemId()) {
 <li class="element">
-  <tree class="element__tree" [treeData]="treeData" [layoutData]="layoutData()" [isRoot]=true >
-  </tree>
+  @if (canBeSelected()) {
+    <tree select-tree-directive class="element__tree" [treeData]="treeData" [layoutData]="layoutData()" [isRoot]=true></tree>
+  } @else {
+    <tree  class="element__tree" [treeData]="treeData" [layoutData]="layoutData()" [isRoot]=true ></tree>
+  }
 </li>
 } @empty {
-  <p class="empty-state">{{emptyMessage()}}</p>
+  <p class="empty-state" [innerHTML]="emptyMessage()"></p>
 }
 
 

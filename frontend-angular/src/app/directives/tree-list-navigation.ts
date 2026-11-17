@@ -1,8 +1,9 @@
-import { Directive, input } from '@angular/core';
+import { computed, Directive, input } from '@angular/core';
 import { Navigate } from '../components/common/Navigate.js';
 import { Navigable } from '../components/common/Navigable.js';
 import { TreeNavigation } from './tree-navigation.js';
 import { MoveNavigation } from './move-navigation.js';
+import { NotificationService } from '../services/notification-service.js';
 
 @Directive({
   selector: '[tree-list-navigation-directive]',
@@ -19,6 +20,14 @@ export class TreeListNavigation extends MoveNavigation {
   override name = 'TreeListNavigation';
 
   navOrientation = input<'horizontal' | 'vertical'>('vertical');
+  override helpMessage = computed(() => {
+    if (!this.navEnabled()) {
+      return '';
+    }
+    return this.navOrientation() === 'horizontal'
+      ? NotificationService.TREE_LIST_NAVIGATION_HORIZONTAL
+      : NotificationService.TREE_LIST_NAVIGATION_VERTICAL;
+  });
 
   override interceptKeys() {
     const keys = [...super.interceptKeys()];

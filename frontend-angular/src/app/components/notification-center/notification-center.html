@@ -12,8 +12,10 @@
       }
     }
   </div>
-  @if (showHelp() && this.notificationService.helpSignal().length > 0) {
-    <notification [data]="helpNotification()" id="notificationHelp"></notification>
+  @if (showHelp()) {
+    @for (notification of helpNotifications(); track notification.getId()) {
+    <notification [data]="notification"></notification>
+    }
   }
 </div>
 

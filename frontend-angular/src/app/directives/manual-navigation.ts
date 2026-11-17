@@ -1,7 +1,8 @@
-import { afterRenderEffect, Directive, ElementRef, inject, signal } from '@angular/core';
+import { afterRenderEffect, Directive, ElementRef, inject, Signal, signal } from '@angular/core';
 import { Navigable } from '../components/common/Navigable.js';
 import { Navigate } from '../components/common/Navigate.js';
 import { Focusable } from './focusable.js';
+import { NotificationService } from '../services/notification-service.js';
 
 /** Cette classe gère la navigation manuelle d'un composant focusable à un autre */
 @Directive({
@@ -13,11 +14,16 @@ import { Focusable } from './focusable.js';
   host: {
     '[attr.index-focus]': 'getFocusIndex()',
     '(mousedown)': 'onMouseDown($event)',
-    '(focusout)': 'onFocusOut($event)',
+    '(document:keydown)': 'this.showHelp(true)',
+    '(document:click)': 'this.showHelp(false)',
   },
 })
 export class ManualNavigation extends Focusable implements Navigate {
   override name = 'ManualNavigation';
+  protected notificationService = inject(NotificationService);
+  private helpMessageId = this.notificationService.giveHelpId();
+  protected helpMessage: Signal<string> = signal<string>('');
+  private showHelpMessage: boolean = false;
 
   elementRef = inject(ElementRef);
 
@@ -30,6 +36,7 @@ export class ManualNavigation extends Focusable implements Navigate {
 
   constructor() {
     super();
+
     afterRenderEffect({
       // Déclencher à la mise à jour d'un signal après mise à jour du DOM
       // Comme on veut modifier des attributs html tabindex, on le fait sur la phase write
@@ -51,6 +58,24 @@ export class ManualNavigation extends Focusable implements Navigate {
 
   startNavigation() {}
   stopNavigation() {}
+
+  showHelp(show: boolean) {
+    this.showHelpMessage = show;
+    this.displayHelp();
+  }
+
+  override focusChanged(focused: boolean) {
+    super.focusChanged(focused);
+    this.displayHelp();
+  }
+
+  displayHelp() {
+    if (this.showHelpMessage && this.containFocus && this.helpMessage().length) {
+      this.notificationService.addHelp(this.helpMessageId, this.helpMessage());
+    } else {
+      this.notificationService.removeHelp(this.helpMessageId);
+    }
+  }
 
   getFocusIndex(): number {
     return this.#selectedIndex;
@@ -93,27 +118,17 @@ export class ManualNavigation extends Focusable implements Navigate {
     });
   }
 
-  onFocusOut(event: FocusEvent) {
-    if (!event.relatedTarget || !(event.relatedTarget instanceof Element)) {
-      return;
-    }
-    if (!this.getElement().contains(event.relatedTarget)) {
-      this.removeFocus();
-    }
-  }
-
   onMouseDown(event: MouseEvent) {
     if (!event.target || !(event.target instanceof Element)) {
       return;
     }
     // Exclure les boutons notamment l'ouverture des noeuds
-    if (event.target.closest('button')) {
+    if (event.defaultPrevented) {
       event.stopPropagation();
       return;
     }
     const index = this.getNavigableIndex(event.target);
     if (index > -1) {
-      this.containFocus = true;
       this.changeCurrentIndex(index);
     } else {
       this.giveFocusIndex(this.getNavigableWithElement(event.target));
@@ -129,11 +144,12 @@ export class ManualNavigation extends Focusable implements Navigate {
 
   /** Modifie l'élément courant, le rend accessible via la touche Tab et lui donne le focus */
   giveFocusIndex(index: number): void {
-    this.changeCurrentIndex(index);
-    if (index >= 0 && index < this.navigables.length) {
-      this.navigables[index].changeTabAccess(true);
-      this.giveFocus();
+    if (!(index >= 0 && index < this.navigables.length)) {
+      return;
     }
+    this.changeCurrentIndex(index);
+    this.navigables[index].changeTabAccess(true);
+    this.giveFocus();
   }
   /** Modifie l'élément courant sans perdre le focus */
   setFocusIndex(index: number): void {
@@ -174,7 +190,7 @@ export class ManualNavigation extends Focusable implements Navigate {
 
   /** Donne le focus */
   override giveFocus() {
-    this.containFocus = true;
+    this.focusChanged(true);
     const components = this.navigables;
     if (components.length) {
       components[this.#selectedIndex].giveFocus();

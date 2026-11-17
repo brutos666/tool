@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, input, signal } from '@angular/core';
+import { Component, effect, inject, input, signal } from '@angular/core';
 import { Notification } from '../notification/notification';
 import { NotificationService } from '../../services/notification-service.js';
 import { ArrowNavigation } from '../../directives/arrow-navigation.js';
@@ -7,7 +7,6 @@ import { FocusableButton } from '../action-button/focusable-button.js';
 import { Button } from '../action-button/button.js';
 import { Toolbar } from '../toolbar/toolbar';
 import { ShowPopupButton } from '../../directives/show-popup-button';
-import { NotificationData } from '../../data/notification-data.js';
 
 @Component({
   imports: [FocusableButton, Notification, EnterTabNavigation, Toolbar, ShowPopupButton],
@@ -25,9 +24,7 @@ export class NotificationCenter {
 
   notifications = this.notificationService.notificationsSignal;
   popNotifications = this.notificationService.popupNotificationsSignal;
-  helpNotification = computed(
-    () => new NotificationData('0', this.notificationService.helpSignal(), 'info', false),
-  );
+  helpNotifications = this.notificationService.helpsSignal;
 
   show = signal<boolean>(false);
   showHelp = signal<boolean>(true);
