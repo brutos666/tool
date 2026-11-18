@@ -6,6 +6,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--global-gap);
+  max-width: 40%;
 }
 
 .notification__center {
@@ -15,11 +16,6 @@
   gap: var(--global-gap);
   border: none;
   background: transparent;
-}
-.notification__actions {
-  display: flex;
-  flex-direction: column;
-  gap: var(--global-gap);
   align-items: flex-end;
 }
 

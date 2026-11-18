@@ -1,29 +1,48 @@
-import { afterRenderEffect, Directive, ElementRef, inject, Signal, signal } from '@angular/core';
+import {
+  afterRenderEffect,
+  Directive,
+  effect,
+  ElementRef,
+  inject,
+  input,
+  model,
+  Signal,
+  signal,
+} from '@angular/core';
 import { Navigable } from '../components/common/Navigable.js';
 import { Navigate } from '../components/common/Navigate.js';
 import { Focusable } from './focusable.js';
-import { NotificationService } from '../services/notification-service.js';
+import { Help } from '../components/common/HelpMessage.js';
+import { HelpTooltip } from './help-tooltip.js';
+import { TooltipEnable } from '../components/common/TooltipEnable.js';
+import { TooltipService } from '../services/tooltip-service.js';
 
 /** Cette classe gère la navigation manuelle d'un composant focusable à un autre */
 @Directive({
   selector: '[basic-navigation-directive]',
+  hostDirectives: [HelpTooltip],
   providers: [
     { provide: Navigable, useExisting: ManualNavigation },
     { provide: Navigate, useExisting: ManualNavigation },
+    { provide: TooltipEnable, useExisting: ManualNavigation },
   ],
   host: {
     '[attr.index-focus]': 'getFocusIndex()',
     '(mousedown)': 'onMouseDown($event)',
-    '(document:keydown)': 'this.showHelp(true)',
-    '(document:click)': 'this.showHelp(false)',
   },
 })
-export class ManualNavigation extends Focusable implements Navigate {
+export class ManualNavigation extends Focusable implements Navigate, TooltipEnable {
   override name = 'ManualNavigation';
-  protected notificationService = inject(NotificationService);
-  private helpMessageId = this.notificationService.giveHelpId();
+  selected = model<boolean>(false);
+  selectable = input<boolean>(false);
+
+  protected tooltipService = inject(TooltipService);
+
   protected helpMessage: Signal<string> = signal<string>('');
-  private showHelpMessage: boolean = false;
+
+  tooltip = signal<string>('');
+  showTooltip = signal<boolean>(false);
+  tooltipPosition = signal<'top' | 'bottom' | 'right' | 'left'>('right');
 
   elementRef = inject(ElementRef);
 
@@ -36,7 +55,18 @@ export class ManualNavigation extends Focusable implements Navigate {
 
   constructor() {
     super();
-
+    effect(() => {
+      const show = this.tooltipService.showNavigateHelp();
+      if (!this.containFocus) {
+        return;
+      }
+      let message = this.helpMessage();
+      if (this.selectable()) {
+        message += Help.SELECT_NAVIGATION;
+      }
+      this.tooltip.set(message);
+      this.showTooltip.set(show);
+    });
     afterRenderEffect({
       // Déclencher à la mise à jour d'un signal après mise à jour du DOM
       // Comme on veut modifier des attributs html tabindex, on le fait sur la phase write
@@ -59,21 +89,13 @@ export class ManualNavigation extends Focusable implements Navigate {
   startNavigation() {}
   stopNavigation() {}
 
-  showHelp(show: boolean) {
-    this.showHelpMessage = show;
-    this.displayHelp();
-  }
-
   override focusChanged(focused: boolean) {
+    const wasFocused = this.containFocus;
     super.focusChanged(focused);
-    this.displayHelp();
-  }
-
-  displayHelp() {
-    if (this.showHelpMessage && this.containFocus && this.helpMessage().length) {
-      this.notificationService.addHelp(this.helpMessageId, this.helpMessage());
+    if (wasFocused) {
+      this.showTooltip.set(false);
     } else {
-      this.notificationService.removeHelp(this.helpMessageId);
+      this.showTooltip.set(this.tooltipService.showNavigateHelp());
     }
   }
 

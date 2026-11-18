@@ -17,8 +17,9 @@ import { FocusableButton } from '../action-button/focusable-button';
 import { Item } from '../item/item';
 import { Toolbar } from '../toolbar/toolbar';
 import { Button } from '../action-button/button.js';
-import { NotificationService } from '../../services/notification-service.js';
 import { EnterTabNavigation } from '../../directives/enter-tab-navigation';
+import { ArrowNavigation } from '../../directives/arrow-navigation';
+import { Help } from '../common/HelpMessage.js';
 
 @Component({
   imports: [
@@ -34,6 +35,7 @@ import { EnterTabNavigation } from '../../directives/enter-tab-navigation';
     Item,
     Toolbar,
     EnterTabNavigation,
+    ArrowNavigation,
   ],
   standalone: true,
   selector: 'working-space',
@@ -53,8 +55,8 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
   static NEW_SPACE_LABEL = 'Saisir un espace';
   static NEW_ITEM_LABEL = 'Saisir un pense-bête';
 
-  emptyStateNav = NotificationService.NO_TREE;
-  emptyStateMain = NotificationService.NO_TREE_SELECTED;
+  emptyStateNav = Help.NO_TREE;
+  emptyStateMain = Help.NO_TREE_SELECTED;
 
   rootItem = toSignal(this.itemService.rootItem$, {
     initialValue: new TreeData<ItemData>(ItemService.rootItemData),

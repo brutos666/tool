@@ -3,13 +3,15 @@ import { Navigate } from '../components/common/Navigate.js';
 import { Navigable } from '../components/common/Navigable.js';
 import { TreeNavigation } from './tree-navigation.js';
 import { MoveNavigation } from './move-navigation.js';
-import { NotificationService } from '../services/notification-service.js';
+import { Help } from '../components/common/HelpMessage.js';
+import { TooltipEnable } from '../components/common/TooltipEnable.js';
 
 @Directive({
   selector: '[tree-list-navigation-directive]',
   providers: [
     { provide: Navigable, useExisting: TreeListNavigation },
     { provide: Navigate, useExisting: TreeListNavigation },
+    { provide: TooltipEnable, useExisting: TreeListNavigation },
   ],
   host: {
     '[attr.aria-orientation]': 'navOrientation()',
@@ -21,12 +23,12 @@ export class TreeListNavigation extends MoveNavigation {
 
   navOrientation = input<'horizontal' | 'vertical'>('vertical');
   override helpMessage = computed(() => {
-    if (!this.navEnabled()) {
-      return '';
+    if (this.navEnabled()) {
+      return this.navOrientation() === 'horizontal'
+        ? Help.TREE_LIST_NAVIGATION_HORIZONTAL
+        : Help.TREE_LIST_NAVIGATION_VERTICAL;
     }
-    return this.navOrientation() === 'horizontal'
-      ? NotificationService.TREE_LIST_NAVIGATION_HORIZONTAL
-      : NotificationService.TREE_LIST_NAVIGATION_VERTICAL;
+    return '';
   });
 
   override interceptKeys() {

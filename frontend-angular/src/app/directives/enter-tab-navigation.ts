@@ -2,13 +2,15 @@ import { computed, Directive, model } from '@angular/core';
 import { Navigate } from '../components/common/Navigate.js';
 import { Navigable } from '../components/common/Navigable.js';
 import { TabNavigation } from './tab-navigation.js';
-import { NotificationService } from '../services/notification-service.js';
+import { Help } from '../components/common/HelpMessage.js';
+import { TooltipEnable } from '../components/common/TooltipEnable.js';
 
 @Directive({
   selector: '[enter-tab-directive]',
   providers: [
     { provide: Navigable, useExisting: EnterTabNavigation },
     { provide: Navigate, useExisting: EnterTabNavigation },
+    { provide: TooltipEnable, useExisting: EnterTabNavigation },
   ],
   host: {
     '[class]': 'inside() ? "inside" : "outside"',
@@ -18,14 +20,9 @@ export class EnterTabNavigation extends TabNavigation {
   override name = 'EnterTabNavigation';
 
   inside = model<boolean>(false);
-  override helpMessage = computed(() => {
-    if (!this.navEnabled()) {
-      return '';
-    }
-    return this.inside()
-      ? NotificationService.EXIT_NAVIGATION
-      : NotificationService.ENTER_NAVIGATION;
-  });
+  override helpMessage = computed(() =>
+    this.inside() ? Help.EXIT_NAVIGATION : Help.ENTER_NAVIGATION,
+  );
 
   override unregisterChild(navigable: Navigable) {
     if (this.inside()) {

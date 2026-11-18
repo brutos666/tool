@@ -2,6 +2,7 @@ import { Directive, effect, model, OnDestroy } from '@angular/core';
 import { Navigable } from '../components/common/Navigable.js';
 import { Navigate } from '../components/common/Navigate.js';
 import { ManualNavigation } from './manual-navigation.js';
+import { TooltipEnable } from '../components/common/TooltipEnable.js';
 
 /** Cette classe gère la navigation manuelle d'un composant focusable à un autre */
 @Directive({
@@ -9,6 +10,7 @@ import { ManualNavigation } from './manual-navigation.js';
   providers: [
     { provide: Navigable, useExisting: KeyboardNavigation },
     { provide: Navigate, useExisting: KeyboardNavigation },
+    { provide: TooltipEnable, useExisting: KeyboardNavigation },
   ],
   host: {
     '[attr.index-focus]': 'getFocusIndex()',
@@ -57,6 +59,7 @@ export class KeyboardNavigation extends ManualNavigation implements OnDestroy {
       return;
     }
     event.preventDefault();
+    this.tooltipService.correctKeyNavigation();
 
     if (this.moveToDirection(key)) {
       event.stopImmediatePropagation();

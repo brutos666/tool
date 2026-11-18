@@ -5,8 +5,8 @@ import { TreeListNavigation } from '../../directives/tree-list-navigation.js';
 import { NodeElement } from '../common/NodeElement.js';
 import { ItemData } from '../../data/item-data.js';
 import { Layout } from '../common/Types.js';
-import { NotificationService } from '../../services/notification-service.js';
 import { ItemService } from '../../services/item-service.js';
+import { Help } from '../common/HelpMessage.js';
 
 @Component({
   imports: [Tree],
@@ -27,7 +27,7 @@ export class TreeList extends NodeElement {
 
   dataList = input.required<Array<TreeData<ItemData>>>();
   layoutData = input.required<Layout>();
-  emptyMessage = input<string>(NotificationService.NO_CHILD);
+  emptyMessage = input<string>(Help.NO_CHILD);
   orientation = input<'horizontal' | 'vertical'>('vertical');
   canBeSelected = input<boolean>(false);
 }

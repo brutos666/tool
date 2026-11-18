@@ -1,0 +1,45 @@
+:host {
+  position: fixed;
+  z-index: 9999;
+  background: var(--color-info);
+  color: var(--color-text);
+  border-radius: var(--border-radius);
+  padding: var(--global-padding);
+  box-shadow: 0 4px 12px var(--color-box-shadow);
+  white-space: nowrap;
+  pointer-events: none;
+
+  &::after {
+    content: '';
+    position: absolute;
+    border: 6px solid transparent;
+  }
+}
+// La flèche pointe vers l'élément, donc elle est du côté opposé à la position
+:host.position-top::after {
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-top-color: var(--color-info);
+}
+
+:host.position-bottom::after {
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-bottom-color: var(--color-info);
+}
+
+:host.position-right::after {
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  border-right-color: var(--color-info);
+}
+
+:host.position-left::after {
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  border-left-color: var(--color-info);
+}

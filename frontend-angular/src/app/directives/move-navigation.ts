@@ -1,14 +1,15 @@
-import { computed, Directive, input, model } from '@angular/core';
+import { Directive } from '@angular/core';
 import { Navigable } from '../components/common/Navigable.js';
 import { Navigate } from '../components/common/Navigate.js';
 import { KeyboardNavigation } from './keyboard-navigation.js';
-import { NotificationService } from '../services/notification-service.js';
+import { TooltipEnable } from '../components/common/TooltipEnable.js';
 
 @Directive({
   selector: '[move-navigation-directive]',
   providers: [
     { provide: Navigable, useExisting: MoveNavigation },
     { provide: Navigate, useExisting: MoveNavigation },
+    { provide: TooltipEnable, useExisting: MoveNavigation },
   ],
   host: {
     '[aria-selected]': 'selectable() ? selected() : null',
@@ -16,16 +17,6 @@ import { NotificationService } from '../services/notification-service.js';
   },
 })
 export class MoveNavigation extends KeyboardNavigation {
-  selected = model<boolean>(false);
-  selectable = input<boolean>(false);
-
-  override helpMessage = computed(() => {
-    if (!this.navEnabled() || !this.selectable()) {
-      return '';
-    }
-    return NotificationService.SELECT_NAVIGATION;
-  });
-
   override onMouseDown(event: MouseEvent) {
     if (this.selectable()) {
       this.selected.set(true);

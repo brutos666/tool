@@ -2,10 +2,18 @@ import { Directive } from '@angular/core';
 import { Navigate } from '../components/common/Navigate.js';
 import { ManualNavigation } from './manual-navigation.js';
 import { Navigable } from '../components/common/Navigable.js';
+import { TooltipEnable } from '../components/common/TooltipEnable.js';
 
 @Directive({
   selector: '[workspace-navigation-directive]',
-  providers: [{ provide: Navigate, useExisting: RootNavigation }],
+  providers: [
+    { provide: Navigate, useExisting: RootNavigation },
+    { provide: TooltipEnable, useExisting: RootNavigation },
+  ],
+  host: {
+    '(keydown)': 'this.tooltipService.wrongKeyNavigation()',
+    '(click)': 'this.tooltipService.mouseNavigation()',
+  },
 })
 export class RootNavigation extends ManualNavigation {
   override name = 'RootNavigation';

@@ -3,59 +3,9 @@ import { NotificationData } from '../data/notification-data.js';
 
 @Service()
 export class NotificationService {
-  static NO_TREE_SELECTED = "Sélectionner un élément dans l'espace de navigation à gauche";
-  static NO_TREE = "Ajouter un élément dans l'espace de navigation";
-  static NO_CHILD = 'Ajouter un élément';
-
-  static TREE_LIST_NAVIGATION_VERTICAL = String.raw`<div>
-    <h4>Navigation arbre</h4>
-    <ul>
-      <li><strong>Ctrl + ↑ ↓</strong> : passer directement d'un arbre à l'autre</li>
-      <li><strong>↑ ↓</strong> : se déplacer d'un nœud à l'autre</li>
-      <li><strong>→</strong> : ouvrir un nœud replié (ou passer au premier enfant s'il est déjà ouvert)</li>
-      <li><strong>←</strong> : replier un nœud ouvert (ou revenir au parent s'il est déjà replié)</li>
-    </ul>
-  </div>`;
-  static TREE_LIST_NAVIGATION_HORIZONTAL = String.raw`<div>
-    <h4>Navigation clavier arbre</h4>
-    <ul>
-      <li><strong>Ctrl + ← →</strong> : passer directement d'un arbre à l'autre</li>
-      <li><strong>↑ ↓</strong> : se déplacer d'un nœud à l'autre</li>
-      <li><strong>→</strong> : ouvrir un nœud replié (ou passer au premier enfant s'il est déjà ouvert)</li>
-      <li><strong>←</strong> : replier un nœud ouvert (ou revenir au parent s'il est déjà replié)</li>
-    </ul>
-  </div>`;
-  static ENTER_NAVIGATION = String.raw`<div>
-    <h4>Navigation clavier tâche</h4>
-    <ul>
-      <li><strong>Espace (navigation)</strong> : afficher la sélection</li>
-      <li><strong>Entrée</strong> : entrer dans la tâche</li>
-      <li><strong>Échap</strong> : sortir de la tâche</li>
-    </ul>
-  </div>`;
-  static EXIT_NAVIGATION = String.raw`<strong>Échap</strong> : sortir de la tâche`;
-
-  static TAB_NAVIGATION = String.raw`<strong>Tab / Shift+Tab</strong> : se déplacer dans les différents éléments`;
-  static ARROW_NAVIGATION_HORIZONTAL = String.raw`<div>
-    <h4>Navigation clavier</h4>
-    <ul>
-      <li><strong>Flèches ← →</strong> : se déplacer</li>
-      <li><strong>Home (↖, Fn + ←)</strong> : aller sur le premier</li>
-      <li><strong>End (Fin, Fn + →)</strong> : aller sur sur le dernier</li>
-    </ul>
-    </div>`;
-  static ARROW_NAVIGATION_VERTICAL = String.raw`<div>
-    <h4>Navigation clavier</h4>
-    <ul>
-      <li><strong>↑ ↓</strong> : se déplacer</li>
-      <li><strong>Home (↖, Fn + ←)</strong> : aller sur le premier</li>
-      <li><strong>End (Fin, Fn + →)</strong> : aller sur sur le dernier</li>
-    </ul>
-    </div>`;
-
   notificationsSignal = signal<NotificationData[]>([]);
   popupNotificationsSignal = signal<NotificationData[]>([]);
-  helpsSignal = signal<NotificationData[]>([]);
+  helpNotificationsSignal = signal<NotificationData[]>([]);
 
   private notificationId: number = 0;
   helpMessageId: number = 0;
@@ -77,6 +27,7 @@ export class NotificationService {
   }
 
   deleteNotification(id: string) {
+    this.removeHelp(id);
     this.notificationsSignal.set(this.notificationsSignal().filter((n) => n.getId() !== id));
   }
 
@@ -89,22 +40,40 @@ export class NotificationService {
     return `help${this.helpMessageId}`;
   }
 
-  addHelp(id: string, message: string) {
+  setHelp(id: string, title: string, message: string) {
     if (!message.length) {
       return;
     }
-    if (!this.helpsSignal().find((h) => h.getId() === id)) {
-      this.helpsSignal.set([
-        ...this.helpsSignal(),
-        new NotificationData(id, id + ' ' + message, 'info', false),
-      ]);
+    const helpIndex = this.helpNotificationsSignal().findIndex((h) => h.getId() === id);
+    if (helpIndex === -1) {
+      this.addHelp(id, title, message);
+    } else {
+      this.replaceHelp(helpIndex, id, title, message);
     }
   }
 
-  removeHelp(id: string) {
-    const helpIndex = this.helpsSignal().findIndex((h) => h.getId() === id);
-    if (helpIndex > -1) {
-      this.helpsSignal.set(this.helpsSignal().filter((n) => n.getId() !== id));
+  private addHelp(id: string, title: string, message: string) {
+    this.helpNotificationsSignal.set([
+      ...this.helpNotificationsSignal(),
+      new NotificationData(id, `<h4>${title}</h4>${message}`, 'info', false),
+    ]);
+  }
+  private replaceHelp(index: number, id: string, title: string, message: string) {
+    const newHelps = [...this.helpNotificationsSignal()];
+    newHelps.splice(
+      index,
+      1,
+      new NotificationData(id, `<h4>${title}</h4>${message}`, 'info', false),
+    );
+    this.helpNotificationsSignal.set(newHelps);
+  }
+  removeHelp(id: string): void {
+    const help = this.helpNotificationsSignal().findIndex((h) => h.getId() === id);
+    if (help === -1) {
+      return;
     }
+    this.helpNotificationsSignal.set(
+      this.helpNotificationsSignal().filter((n) => n.getId() !== id),
+    );
   }
 }

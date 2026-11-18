@@ -2,13 +2,15 @@ import { computed, Directive, input } from '@angular/core';
 import { Navigate } from '../components/common/Navigate.js';
 import { Navigable } from '../components/common/Navigable.js';
 import { MoveNavigation } from './move-navigation.js';
-import { NotificationService } from '../services/notification-service.js';
+import { Help } from '../components/common/HelpMessage.js';
+import { TooltipEnable } from '../components/common/TooltipEnable.js';
 
 @Directive({
   selector: '[arrow-navigation-directive]',
   providers: [
     { provide: Navigable, useExisting: ArrowNavigation },
     { provide: Navigate, useExisting: ArrowNavigation },
+    { provide: TooltipEnable, useExisting: ArrowNavigation },
   ],
   host: {
     '[attr.aria-orientation]': 'navOrientation()',
@@ -19,12 +21,12 @@ export class ArrowNavigation extends MoveNavigation {
 
   navOrientation = input<'horizontal' | 'vertical'>('horizontal');
   override helpMessage = computed(() => {
-    if (!this.navEnabled()) {
-      return '';
+    if (this.navEnabled()) {
+      return this.navOrientation() === 'horizontal'
+        ? Help.ARROW_NAVIGATION_HORIZONTAL
+        : Help.ARROW_NAVIGATION_VERTICAL;
     }
-    return this.navOrientation() === 'horizontal'
-      ? NotificationService.ARROW_NAVIGATION_HORIZONTAL
-      : NotificationService.ARROW_NAVIGATION_VERTICAL;
+    return '';
   });
 
   override interceptKeys() {

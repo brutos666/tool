@@ -1,16 +1,24 @@
-import { Directive, input, signal } from '@angular/core';
+import { computed, Directive, input, signal } from '@angular/core';
 import { Navigate } from '../components/common/Navigate.js';
 import { MoveNavigation } from './move-navigation.js';
 import { Navigable } from '../components/common/Navigable.js';
+import { Help } from '../components/common/HelpMessage.js';
+import { TooltipEnable } from '../components/common/TooltipEnable.js';
 
 @Directive({
   selector: '[tree-navigation-directive]',
-  providers: [{ provide: Navigate, useExisting: TreeNavigation }],
+  providers: [
+    { provide: Navigate, useExisting: TreeNavigation },
+    { provide: TooltipEnable, useExisting: TreeNavigation },
+  ],
 })
 export class TreeNavigation extends MoveNavigation {
   override name = 'TreeNavigation';
   navOrientation = input<'horizontal' | 'vertical'>('vertical');
   openState = signal<boolean>(false);
+  override helpMessage = computed(
+    () => (this.navigateInRoot() && this.navEnabled() && Help.TREE_NAVIGATION) || '',
+  );
 
   changeOpenState(open: boolean) {
     this.openState.set(open);
@@ -61,7 +69,7 @@ export class TreeNavigation extends MoveNavigation {
     }
   }
 
-  treeNavigate(key: string): boolean {
+  private treeNavigate(key: string): boolean {
     // Gauche/Droite
     if (this.isLeaf()) {
       return false;
@@ -88,10 +96,10 @@ export class TreeNavigation extends MoveNavigation {
     }
     return false;
   }
-  goOnNode() {
+  private goOnNode() {
     this.giveFocusIndex(0);
   }
-  goOnFirstTree(): boolean {
+  private goOnFirstTree(): boolean {
     // Recherche du 1er focusable après 0
     const nextIndex = this.getNextIndex(this.navigables, 0, 'Next');
     if (nextIndex > -1) {
@@ -147,10 +155,13 @@ export class TreeNavigation extends MoveNavigation {
     return super.isFocusable();
   }
 
-  getTreeChildNav(index: number): TreeNavigation | undefined {
+  private getTreeChildNav(index: number): TreeNavigation | undefined {
     return this.getTreeChildrenNav()[index - 1];
   }
-  getTreeChildrenNav(): TreeNavigation[] {
+  private getTreeChildrenNav(): TreeNavigation[] {
     return this.navigables.slice(1).map((navigable) => navigable as TreeNavigation);
+  }
+  private navigateInRoot() {
+    return !this.getElement().closest('[role="treeitem"] [role="group"]');
   }
 }
