@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, computed, effect, inject, input, signal } from '@angular/core';
+import { AfterViewInit, Component, computed, inject, input, signal } from '@angular/core';
 import { NotificationData } from '../../data/notification-data.js';
 import { NodeElement } from '../common/NodeElement.js';
 import { NotificationService } from '../../services/notification-service.js';
@@ -14,6 +14,7 @@ import { Button } from '../action-button/button.js';
     '[class]': 'data().getType()',
     '[class.show]': 'show()',
     '[class.hide]': 'hide()',
+    'aria-label': 'Notification',
   },
 })
 export class Notification extends NodeElement implements AfterViewInit {

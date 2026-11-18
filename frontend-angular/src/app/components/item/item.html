@@ -20,7 +20,7 @@
       [disabled]="itemForm().deleted()">
     </text-input>
 
-    <toolbar [buttons]="buttonsData" aria-controls="itemArticle" class="item__toolbar"></toolbar>
+    <toolbar [buttons]="buttonsData" aria-controls="itemArticle" class="item__toolbar" label="Barre d'outils de la tâche"></toolbar>
   </header>
   @if (this.hasText(layout)) {
     <text-input #text 

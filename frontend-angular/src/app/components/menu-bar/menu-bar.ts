@@ -23,7 +23,7 @@ export class MenuBar extends Composite {
   menuOrientation = inject(MenuOrientation);
 
   menuItems = input.required<Array<Button>>();
-  label = input.required<String>();
+  label = input.required<string>();
   menuOpened = signal<boolean>(false);
 
   burgerItemData!: Button;

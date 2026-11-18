@@ -17,6 +17,7 @@ import { ItemService } from '../../services/item-service.js';
   host: {
     '[attr.aria-orientation]': 'orientation()',
     role: 'group',
+    'aria-label': 'Arbres',
   },
 })
 export class TreeList extends NodeElement {

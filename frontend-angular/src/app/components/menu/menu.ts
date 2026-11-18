@@ -10,10 +10,14 @@ import { Button } from '../action-button/button.js';
   styleUrl: './menu.scss',
   templateUrl: './menu.html',
   hostDirectives: [{ directive: ArrowNavigation, inputs: ['navOrientation'] }],
+  host: {
+    '[aria-label]': 'label()',
+  },
 })
 export class Menu extends NodeElement implements AfterViewInit {
   menuItems = input.required<Array<Button>>();
   navOrientation = input<'horizontal' | 'vertical'>('horizontal');
+  label = input.required<string>();
 
   @ViewChildren(FocusableButton) actionButtons!: QueryList<FocusableButton>;
 

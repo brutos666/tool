@@ -20,7 +20,7 @@
 <main #mainSpace class="working-space__main">
   @let currentTreeData = currentItem();
   @if (currentTreeData) {
-    <toolbar class="working-space__toolbar" [buttons]="mainButtons" [toolbarType]="'menu'"></toolbar>
+    <toolbar class="working-space__toolbar" [buttons]="mainButtons" [toolbarType]="'menu'" [label]="mainLabel"></toolbar>
     <space>
       <space-header class="main-space__header">
         <item enter-tab-directive [treeData]="currentTreeData" [layoutData]="mainLayout" [title]="true"></item>

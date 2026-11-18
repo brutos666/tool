@@ -42,6 +42,7 @@ import { EnterTabNavigation } from '../../directives/enter-tab-navigation';
   hostDirectives: [RootNavigation],
   host: {
     class: 'working-space',
+    'aria-label': 'Espace de travail',
   },
 })
 export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
@@ -62,7 +63,7 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
 
   menuItems: Array<Button> = [];
   mainButtons: Array<Button> = [];
-  label: String = 'Menu des commandes';
+  label: string = 'Menu des commandes';
   navLayout: Layout = Layout.Title;
   mainLayout: Layout = Layout.Todo;
   navAddButton: Button = new Button(
@@ -71,7 +72,7 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
     '',
     this.doAddSpace.bind(this),
   );
-  mainLabel: String = 'Menu des commandes de la vue';
+  mainLabel: string = 'Menu des commandes de la vue';
   mainAddButton: Button = new Button(
     'addNewItem',
     'Ajouter un élément',

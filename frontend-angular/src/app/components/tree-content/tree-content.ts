@@ -11,6 +11,9 @@ import { EnterTabNavigation } from '../../directives/enter-tab-navigation.js';
   styleUrl: './tree-content.scss',
   templateUrl: './tree-content.html',
   hostDirectives: [EnterTabNavigation],
+  host: {
+    'aria-label': 'Tâche',
+  },
 })
 export class TreeContent {
   treeData = input.required<TreeData<ItemData>>();

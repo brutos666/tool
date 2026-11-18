@@ -11,10 +11,12 @@ import { FocusableButton } from '../action-button/focusable-button';
   templateUrl: './toolbar.html',
   hostDirectives: [ArrowNavigation],
   host: {
+    '[aria-label]': 'label()',
     role: 'toolbar',
   },
 })
 export class Toolbar extends NodeElement {
   buttons = input.required<Array<Button>>();
   toolbarType = input<'menu' | 'icon'>('icon');
+  label = input.required<string>();
 }
