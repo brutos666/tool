@@ -1,7 +1,8 @@
-import { Directive } from '@angular/core';
+import { computed, Directive, input, model } from '@angular/core';
 import { Navigable } from '../components/common/Navigable.js';
 import { Navigate } from '../components/common/Navigate.js';
 import { KeyboardNavigation } from './keyboard-navigation.js';
+import { NotificationService } from '../services/notification-service.js';
 
 @Directive({
   selector: '[move-navigation-directive]',
@@ -9,24 +10,54 @@ import { KeyboardNavigation } from './keyboard-navigation.js';
     { provide: Navigable, useExisting: MoveNavigation },
     { provide: Navigate, useExisting: MoveNavigation },
   ],
+  host: {
+    '[aria-selected]': 'selectable() ? selected() : null',
+    '[aria-description]': 'selectable() ? "Barre d\'espace pour sélectionner" : null',
+  },
 })
 export class MoveNavigation extends KeyboardNavigation {
+  selected = model<boolean>(false);
+  selectable = input<boolean>(false);
+
+  override helpMessage = computed(() => {
+    if (!this.navEnabled() || !this.selectable()) {
+      return '';
+    }
+    return NotificationService.SELECT_NAVIGATION;
+  });
+
+  override onMouseDown(event: MouseEvent) {
+    if (this.selectable()) {
+      this.selected.set(true);
+    }
+    super.onMouseDown(event);
+  }
+
   override interceptKeys(): String[] {
+    if (this.selectable()) {
+      return [' ', 'Home', 'End'];
+    }
     return ['Home', 'End'];
   }
 
   override moveToDirection(key: string): boolean {
-    if (key === 'Home') {
-      this.goFirst();
-    } else if (key === 'End') {
-      this.goLast();
-    } else {
-      const nextIndex = this.getNextIndex(this.navigables, this.getFocusIndex(), key);
-      if (nextIndex > -1) {
-        this.moveToIndex(key, nextIndex);
-        return true;
-      }
-      return false;
+    switch (key) {
+      case 'Home':
+        this.goFirst();
+        break;
+      case 'End':
+        this.goLast();
+        break;
+      case ' ':
+        this.selected.set(true);
+        break;
+      default:
+        const nextIndex = this.getNextIndex(this.navigables, this.getFocusIndex(), key);
+        if (nextIndex > -1) {
+          this.moveToIndex(key, nextIndex);
+          return true;
+        }
+        return false;
     }
     return true;
   }

@@ -38,7 +38,7 @@ export class TreeNavigation extends MoveNavigation {
   }
 
   override interceptKeys() {
-    const keys = ['ArrowLeft', 'ArrowRight'];
+    const keys = [...super.interceptKeys(), 'ArrowLeft', 'ArrowRight'];
     const orientation = this.navOrientation();
     if (orientation === 'vertical') {
       keys.push('ArrowUp');
@@ -48,9 +48,20 @@ export class TreeNavigation extends MoveNavigation {
   }
 
   override moveToDirection(key: string): boolean {
-    if (['ArrowUp', 'ArrowDown'].includes(key)) {
-      return super.moveToDirection(key === 'ArrowDown' ? 'Next' : 'Previous');
+    switch (key) {
+      case 'ArrowDown':
+        return super.moveToDirection('Next');
+      case 'ArrowUp':
+        return super.moveToDirection('Previous');
+      case 'ArrowLeft':
+      case 'ArrowRight':
+        return this.treeNavigate(key);
+      default:
+        return super.moveToDirection(key);
     }
+  }
+
+  treeNavigate(key: string): boolean {
     // Gauche/Droite
     if (this.isLeaf()) {
       return false;

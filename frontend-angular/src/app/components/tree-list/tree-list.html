@@ -1,7 +1,15 @@
 @for (treeData of dataList();track treeData.getTreeItemId()) {
 <li class="element">
   @if (canBeSelected()) {
-    <tree select-tree-directive class="element__tree" [treeData]="treeData" [layoutData]="layoutData()" [isRoot]=true></tree>
+    <tree
+      [selectable]="true"
+      [selected]="this.itemService.isCurrentItem(treeData)"
+      (selectedChange)="$event && this.itemService.setCurrentItem(treeData)"
+      class="element__tree"
+      [treeData]="treeData"
+      [layoutData]="layoutData()"
+      [isRoot]=true
+     ></tree>
   } @else {
     <tree  class="element__tree" [treeData]="treeData" [layoutData]="layoutData()" [isRoot]=true ></tree>
   }
