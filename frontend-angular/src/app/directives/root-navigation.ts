@@ -11,6 +11,7 @@ import { TooltipEnable } from '../components/common/TooltipEnable.js';
     { provide: TooltipEnable, useExisting: RootNavigation },
   ],
   host: {
+    'aria-label': 'Outils de saisie des tâches',
     '(keydown)': 'this.tooltipService.wrongKeyNavigation()',
     '(click)': 'this.tooltipService.mouseNavigation()',
   },
