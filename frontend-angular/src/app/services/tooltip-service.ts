@@ -16,6 +16,13 @@ export class TooltipService {
     left: 'right',
     right: 'left',
   };
+  private readonly otherOrientation: Record<TooltipPosition, TooltipPosition> = {
+    top: 'left',
+    bottom: 'right',
+    left: 'bottom',
+    right: 'top',
+  };
+
   private tooltips: TooltipRef[] = [];
   private timer: number | undefined;
   private current: TooltipRef | undefined;
@@ -91,11 +98,15 @@ export class TooltipService {
     const tooltipEl = tooltip.element;
     let position = tooltip.position;
     // Si la position demandée ne tient pas, on tente l'opposée
-    if (
-      !this.fits(position, tooltipEl, parentRect) &&
-      this.fits(this.opposite[position], tooltipEl, parentRect)
-    ) {
-      position = this.opposite[position];
+    if (!this.fits(position, tooltipEl, parentRect)) {
+      if (this.fits(this.opposite[position], tooltipEl, parentRect)) {
+        position = this.opposite[position];
+      } else if (this.fits(this.otherOrientation[position], tooltipEl, parentRect)) {
+        // Si l'opposée ne tient pas, on tente une disposition contraire (si gauche/droite, on tente au dessus en dessous et inversement)
+        position = this.otherOrientation[position];
+      } else if (this.fits(this.otherOrientation[this.opposite[position]], tooltipEl, parentRect)) {
+        position = this.otherOrientation[this.opposite[position]];
+      }
     }
 
     const { left, top, arrowLeft, arrowTop } = this.coords(position, tooltipEl, parentRect);
