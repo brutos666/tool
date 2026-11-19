@@ -1,9 +1,9 @@
-import { computed, Directive, input, signal } from '@angular/core';
+import { computed, Directive, input, Signal, signal } from '@angular/core';
 import { Navigate } from '../components/common/Navigate.js';
 import { MoveNavigation } from './move-navigation.js';
 import { Navigable } from '../components/common/Navigable.js';
 import { Help } from '../components/common/HelpMessage.js';
-import { TooltipEnable } from '../components/common/TooltipEnable.js';
+import { TooltipEnable, TooltipPosition } from '../components/common/TooltipEnable.js';
 
 @Directive({
   selector: '[tree-navigation-directive]',
@@ -19,6 +19,7 @@ export class TreeNavigation extends MoveNavigation {
   override helpMessage = computed(
     () => (this.navigateInRoot() && this.navEnabled() && Help.TREE_NAVIGATION) || '',
   );
+  override tooltipPosition: Signal<TooltipPosition> = signal<TooltipPosition>('bottom');
 
   changeOpenState(open: boolean) {
     this.openState.set(open);

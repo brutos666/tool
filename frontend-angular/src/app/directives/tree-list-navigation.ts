@@ -30,6 +30,9 @@ export class TreeListNavigation extends MoveNavigation {
     }
     return '';
   });
+  override tooltipPosition = computed(() =>
+    this.navOrientation() === 'horizontal' ? 'right' : 'bottom',
+  );
 
   override interceptKeys() {
     const keys = [...super.interceptKeys()];
