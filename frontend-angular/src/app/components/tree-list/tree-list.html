@@ -1,18 +1,11 @@
 @for (treeData of dataList();track treeData.getTreeItemId()) {
 <li class="element">
-  @if (canBeSelected()) {
-    <tree
-      [selectable]="true"
-      [selected]="this.itemService.isCurrentItem(treeData)"
-      (selectedChange)="$event && this.itemService.setCurrentItem(treeData)"
-      class="element__tree"
-      [treeData]="treeData"
-      [layoutData]="layoutData()"
-      [isRoot]=true
-     ></tree>
-  } @else {
-    <tree  class="element__tree" [treeData]="treeData" [layoutData]="layoutData()" [isRoot]=true ></tree>
-  }
+  <tree
+    class="element__tree"
+    [selectable]="canBeSelected()"
+    [treeData]="treeData"
+    [layoutData]="layoutData()"
+    [isRoot]=true></tree>
 </li>
 } @empty {
   <p class="empty-state" [innerHTML]="emptyMessage()"></p>

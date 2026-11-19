@@ -60,11 +60,9 @@ export class ManualNavigation extends Focusable implements Navigate, TooltipEnab
       if (!this.containFocus) {
         return;
       }
-      let message = this.helpMessage();
-      if (this.selectable()) {
-        message += Help.SELECT_NAVIGATION;
-      }
-      this.tooltip.set(message);
+      this.tooltip.set(
+        this.helpMessage() + (this.selectable() && this.isFocused() ? Help.SELECT_NAVIGATION : ''),
+      );
       this.showTooltip.set(show);
     });
     afterRenderEffect({

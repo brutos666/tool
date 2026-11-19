@@ -40,6 +40,9 @@ export class EnterTabNavigation extends TabNavigation {
     if (this.inside()) {
       return [...super.interceptKeys(), 'Escape'];
     }
+    if (this.selectable()) {
+      return [' ', 'Enter'];
+    }
     return ['Enter'];
   }
 

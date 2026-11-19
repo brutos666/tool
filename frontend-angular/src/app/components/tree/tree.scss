@@ -31,27 +31,29 @@
 }
 
 /* -- Apparence -- */
-:host[aria-selected="true"] > .tree__content,
-:host[aria-selected="true"] > .tree__toggle {
+:host > .tree__toggle {
+  border-radius: 0;
+}
+/* Le bouton doit avoir le même comportement que son voisin */
+.tree__toggle:has(+ [aria-selected="true"]) {
   background-color: var(--color-bg-current);
 }
-.current :host[aria-selected="true"] > .tree__content,
-.current :host[aria-selected="true"] > .tree__toggle {
+.current .tree__toggle:has(+ [aria-selected="true"]) {
   background-color: var(--color-bg-focus);
+}
+.tree__content {
+  border-left: none;
 }
 
 /* Encadrer tree__toggle et tree__content lorsque tree__content a le focus ou est survolée par drag&drop de la souris */
-:host.tree__toggle {
-  border-radius: 0;
-}
-:host >.tree__content:focus {
-  border: var(--color-border-focus-item) solid 2px;
-  outline: none;
-}
 
-:host.tree--node:has( > .tree__content:focus) > .tree__toggle {
+.tree__toggle:has(+ .tree__content:focus) {
   border: var(--color-border-focus-item) solid 2px;
   border-right: none;
+}
+.tree__content:focus {
+  border: var(--color-border-focus-item) solid 2px;
+  outline: none;
 }
 :host.tree--node > .tree__content:focus {
   border-left: none;

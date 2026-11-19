@@ -14,9 +14,7 @@ import { ItemService } from '../../services/item-service.js';
   selector: 'tree',
   styleUrl: './tree.scss',
   templateUrl: './tree.html',
-  hostDirectives: [
-    { directive: TreeNavigation, inputs: ['selected', 'selectable'], outputs: ['selectedChange'] },
-  ],
+  hostDirectives: [TreeNavigation],
   host: {
     '[attr.item-id]': 'treeData().getItemId()',
     '[attr.tree-item-id]': 'treeData().getTreeItemId()',
@@ -35,7 +33,6 @@ export class Tree extends NodeElement implements OnInit {
   layoutData = input.required<Layout>();
   isRoot = input<boolean>(false);
   selectable = input<boolean>(false);
-  selected = model<boolean>(false);
 
   @ViewChild('toggle') toggleComponent!: NoFocusableButton;
 

@@ -1,13 +1,17 @@
 <button noFocusable #toggle class="tree__toggle" [data]="toggleIcon" [buttonType]="'icon'"></button>
-<tree-content class="tree__content" [layoutData]="layoutData()" [treeData]="treeData()">
+<tree-content 
+  class="tree__content"
+  [selectable]="selectable()"
+  [selected]="this.itemService.isCurrentItem(treeData())"
+  (selectedChange)="$event && this.itemService.setCurrentItem(treeData())"
+  [layoutData]="layoutData()"
+  [treeData]="treeData()">
 </tree-content>
 <ul #treeList class="tree__list hidden" aria-orientation="vertical" role="group">
   @for (child of treeData().getChildren(); track child.getTreeItemId()) {
     @if (selectable()) {
       <tree
         [selectable]="true"
-        [selected]="this.itemService.isCurrentItem(child)"
-        (selectedChange)="$event && this.itemService.setCurrentItem(child)"
         [treeData]="child"
         [layoutData]="layoutData()"></tree>
     } @else {

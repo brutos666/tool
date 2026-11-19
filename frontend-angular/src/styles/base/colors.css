@@ -16,3 +16,9 @@ body {
   outline: var(--color-info) solid 1px;
 }
 
+[aria-selected="true"] {
+  background-color: var(--color-bg-current);
+}
+.current [aria-selected="true"] {
+  background-color: var(--color-bg-focus);
+}
