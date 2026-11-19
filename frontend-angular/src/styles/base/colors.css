@@ -12,3 +12,7 @@ body {
   --color-border-focus-item: var(--color-border-drag-over);
 }
 
+.has-tool-tip {
+  outline: var(--color-info) solid 1px;
+}
+

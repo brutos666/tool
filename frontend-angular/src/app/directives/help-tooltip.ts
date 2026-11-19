@@ -10,9 +10,7 @@ import {
   OnDestroy,
 } from '@angular/core';
 import { Tooltip } from '../components/tooltip/tooltip.js';
-import { TooltipEnable } from '../components/common/TooltipEnable.js';
-
-type Position = 'top' | 'bottom' | 'right' | 'left';
+import { TooltipEnable, TooltipPosition } from '../components/common/TooltipEnable.js';
 
 @Directive({
   selector: '[help-tooltip]',
@@ -25,7 +23,7 @@ export class HelpTooltip implements OnDestroy {
   private envInjector = inject(EnvironmentInjector);
   private ref: ComponentRef<Tooltip> | null = null;
 
-  private readonly opposite: Record<Position, Position> = {
+  private readonly opposite: Record<TooltipPosition, TooltipPosition> = {
     top: 'bottom',
     bottom: 'top',
     left: 'right',
@@ -44,7 +42,15 @@ export class HelpTooltip implements OnDestroy {
     this.hideTooltip();
   }
 
+  private onViewportChange = () => {
+    if (!this.ref) return;
+    this.place();
+  };
+
   private showTooltip() {
+    window.addEventListener('resize', this.onViewportChange);
+    window.addEventListener('scroll', this.onViewportChange, true);
+
     this.ref = createComponent(Tooltip, { environmentInjector: this.envInjector });
     this.ref.setInput('text', this.tooltipProperties.tooltip());
     this.ref.setInput('position', this.tooltipProperties.tooltipPosition());
@@ -53,6 +59,7 @@ export class HelpTooltip implements OnDestroy {
     document.body.appendChild(this.ref.location.nativeElement);
     this.ref.changeDetectorRef.detectChanges();
 
+    this.element.classList.add('has-tool-tip');
     this.place();
   }
 
@@ -65,22 +72,32 @@ export class HelpTooltip implements OnDestroy {
       position = this.opposite[position];
     }
 
-    const { left, top } = this.coords(position, tip, r);
-    tip.classList.remove(`position-${this.tooltipProperties.tooltipPosition()}`);
+    const { left, top, arrowLeft, arrowTop } = this.coords(position, tip, r);
+    tip.classList.remove('position-top', 'position-bottom', 'position-left', 'position-right');
     tip.classList.add(`position-${position}`);
 
     tip.style.left = `${Math.max(4, left)}px`;
     tip.style.top = `${Math.max(4, top)}px`;
+    const arrow = tip.querySelector('.arrow') as HTMLElement;
+    if (arrow) {
+      arrow.style.left = arrowLeft === 'unset' ? 'unset' : `${arrowLeft}px`;
+      arrow.style.top = arrowTop === 'unset' ? 'unset' : `${arrowTop}px`;
+    }
   }
 
   private hideTooltip() {
     if (!this.ref) return;
+
+    window.removeEventListener('resize', this.onViewportChange);
+    window.removeEventListener('scroll', this.onViewportChange, true);
+
+    this.element.classList.remove('has-tool-tip');
     this.appRef.detachView(this.ref.hostView);
     this.ref.destroy();
     this.ref = null;
   }
 
-  private fits(position: Position, tip: HTMLElement, r: DOMRect): boolean {
+  private fits(position: TooltipPosition, tip: HTMLElement, r: DOMRect): boolean {
     const { left, top } = this.coords(position, tip, r);
     return (
       left >= 0 &&
@@ -89,20 +106,50 @@ export class HelpTooltip implements OnDestroy {
       top + tip.offsetHeight <= window.innerHeight
     );
   }
-  private coords(position: Position, tip: HTMLElement, r: DOMRect) {
+  private coords(position: TooltipPosition, tip: HTMLElement, r: DOMRect) {
     const gap = 8;
     const w = tip.offsetWidth;
     const h = tip.offsetHeight;
+    const verticalTop = Math.max(
+      4,
+      Math.min(window.innerHeight - tip.offsetHeight - gap, r.top + r.height / 2 - h / 2),
+    );
+    const verticalMiddle = r.top + r.height / 2;
+    const horizontalLeft = Math.max(
+      Math.min(window.innerWidth - tip.offsetWidth - gap, r.left + r.width / 2 - w / 2),
+      4,
+    );
+    const horizontalMiddle = r.left + r.width / 2;
 
     switch (position) {
       case 'top':
-        return { left: r.left + r.width / 2 - w / 2, top: r.top - h - gap };
+        return {
+          left: horizontalLeft,
+          top: r.top - h - gap,
+          arrowLeft: horizontalMiddle - horizontalLeft,
+          arrowTop: '100%',
+        };
       case 'bottom':
-        return { left: r.left + r.width / 2 - w / 2, top: r.bottom + gap };
+        return {
+          left: horizontalLeft,
+          top: r.bottom + gap,
+          arrowLeft: horizontalMiddle - horizontalLeft,
+          arrowTop: 'unset',
+        };
       case 'right':
-        return { left: r.right + gap, top: r.top + r.height / 2 - h / 2 };
+        return {
+          left: r.right + gap,
+          top: verticalTop,
+          arrowLeft: 'unset',
+          arrowTop: verticalMiddle - verticalTop,
+        };
       case 'left':
-        return { left: r.left - w - gap, top: r.top + r.height / 2 - h / 2 };
+        return {
+          left: r.left - w - gap,
+          top: verticalTop,
+          arrowLeft: '100%',
+          arrowTop: verticalMiddle - verticalTop,
+        };
     }
   }
 }

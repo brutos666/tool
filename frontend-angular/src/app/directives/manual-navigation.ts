@@ -14,7 +14,7 @@ import { Navigate } from '../components/common/Navigate.js';
 import { Focusable } from './focusable.js';
 import { Help } from '../components/common/HelpMessage.js';
 import { HelpTooltip } from './help-tooltip.js';
-import { TooltipEnable } from '../components/common/TooltipEnable.js';
+import { TooltipEnable, TooltipPosition } from '../components/common/TooltipEnable.js';
 import { TooltipService } from '../services/tooltip-service.js';
 
 /** Cette classe gère la navigation manuelle d'un composant focusable à un autre */
@@ -42,7 +42,7 @@ export class ManualNavigation extends Focusable implements Navigate, TooltipEnab
 
   tooltip = signal<string>('');
   showTooltip = signal<boolean>(false);
-  tooltipPosition = signal<'top' | 'bottom' | 'right' | 'left'>('right');
+  tooltipPosition: Signal<TooltipPosition> = signal<TooltipPosition>('right');
 
   elementRef = inject(ElementRef);
 

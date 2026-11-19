@@ -8,36 +8,34 @@
   box-shadow: 0 4px 12px var(--color-box-shadow);
   white-space: nowrap;
   pointer-events: none;
-
-  &::after {
-    content: '';
-    position: absolute;
-    border: 6px solid transparent;
-  }
+}
+.arrow {
+  position: absolute;
+  border: 6px solid transparent;
 }
 // La flèche pointe vers l'élément, donc elle est du côté opposé à la position
-:host.position-top::after {
+:host.position-top .arrow {
   top: 100%;
   left: 50%;
   transform: translateX(-50%);
   border-top-color: var(--color-info);
 }
 
-:host.position-bottom::after {
+:host.position-bottom .arrow {
   bottom: 100%;
   left: 50%;
   transform: translateX(-50%);
   border-bottom-color: var(--color-info);
 }
 
-:host.position-right::after {
+:host.position-right .arrow {
   right: 100%;
   top: 50%;
   transform: translateY(-50%);
   border-right-color: var(--color-info);
 }
 
-:host.position-left::after {
+:host.position-left .arrow {
   left: 100%;
   top: 50%;
   transform: translateY(-50%);

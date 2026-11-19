@@ -1,4 +1,5 @@
 import { Component, input } from '@angular/core';
+import { TooltipPosition } from '../common/TooltipEnable.js';
 
 @Component({
   selector: 'tooltip',
@@ -8,10 +9,9 @@ import { Component, input } from '@angular/core';
   host: {
     role: 'tooltip',
     '[class]': "'position-' + position()",
-    '[innerHtml]': 'text()',
   },
 })
 export class Tooltip {
   text = input('');
-  position = input<'top' | 'bottom' | 'right' | 'left'>('top');
+  position = input<TooltipPosition>('top');
 }
