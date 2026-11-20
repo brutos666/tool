@@ -3,6 +3,7 @@ export class Button {
   label!: string;
   icon!: string;
   onClick!: Function;
+  upload: boolean;
 
   private visible: boolean = true;
 
@@ -12,14 +13,22 @@ export class Button {
    * @param {string} label - Label du bouton
    * @param {string|undefined} icon - Icône du bouton
    * @param {Function} onClick - méthode à appeler sur le click d'un bouton
+   * @param {boolean} upload - Icône du bouton
    */
-  constructor(id: string, label: string, icon: string | undefined, onClick: Function = () => {}) {
+  constructor(
+    id: string,
+    label: string,
+    icon: string | undefined,
+    onClick: Function = () => {},
+    upload: boolean = false,
+  ) {
     this.id = id;
     this.label = label;
     if (icon) {
       this.icon = icon;
     }
     this.onClick = onClick;
+    this.upload = upload;
   }
 
   setVisible(visible: boolean) {

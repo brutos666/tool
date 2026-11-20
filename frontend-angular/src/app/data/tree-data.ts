@@ -67,6 +67,9 @@ export class TreeData<T extends Data> {
   replaceChild(toReplace: TreeData<T>, replaceBy: TreeData<T>) {
     this.children.splice(this.children.indexOf(toReplace), 1, replaceBy);
   }
+  addChildren(children: TreeData<T>[]) {
+    this.children = [...this.children, ...children];
+  }
 
   getPrevious(child: TreeData<T>): TreeData<T> | null {
     const children = this.getChildren();

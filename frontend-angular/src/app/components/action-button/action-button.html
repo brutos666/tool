@@ -4,3 +4,6 @@
 @if (role() === 'menuitem' || ['label', 'item-like'].includes(buttonType())) {
   <label labelInput [text]="data().label" [id]="data().id + '-label'"></label>
 }
+@if (data().upload) {
+  <input #file type="file" hidden (change)="data().onClick($event)" />
+}

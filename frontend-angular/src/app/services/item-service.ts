@@ -34,6 +34,10 @@ export class ItemService {
     'Export terminé',
     "Une erreur est survenue lors de l'export",
   );
+  private importNotificationMessage = new NotificationMessage(
+    'Import terminé',
+    "Une erreur est survenue lors de l'import",
+  );
 
   constructor() {
     this.loadItems();
@@ -44,7 +48,7 @@ export class ItemService {
       '/api/item/findAllItems',
       this.getJsonOptions(this.loadNotificationMessage),
     );
-    this.treeItemsResponse(request);
+    this.treeItemsResponse(request, 'replaceAll');
   }
   public loadCurrentItem() {
     const currentItem = this.currentItemSignal();
@@ -77,9 +81,29 @@ export class ItemService {
     }
   }
 
+  public importAllItems(file: File, replace: boolean) {
+    this.importItems(file, replace ? 'replaceAll' : 'append');
+  }
+  public importCurrentItem(file: File) {
+    const currentItem = this.currentItemSignal();
+    if (currentItem) {
+      this.importItems(file, 'replaceCurrent');
+    }
+  }
+
   private loadItem(treeItem: TreeData<ItemData>) {
     const rootItem = this.rootItemSubject.value;
+    if (!treeItem.getParentTreeItemId().length) {
+      this.loadItems();
+      return;
+    }
     const parentItem = rootItem.getTreeByTreeId(treeItem.getParentTreeItemId());
+    if (treeItem?.getContent().isNew()) {
+      if (parentItem) {
+        this.loadItem(parentItem);
+      }
+      return;
+    }
     const requestObservable = this.http.get<TreeItemData>(
       `/api/item/load?id=${treeItem.getItemId()}&parentId=${parentItem?.getItemId()}`,
       this.getJsonOptions(this.loadNotificationMessage),
@@ -112,6 +136,17 @@ export class ItemService {
       this.getFileOptions(this.exportNotificationMessage),
     );
     this.fileResponse(requestObservable, fileName);
+  }
+  private importItems(file: File, action: 'replaceAll' | 'replaceCurrent' | 'append') {
+    const formData = new FormData();
+    formData.append('fileToUpload', file, file.name);
+
+    const requestObservable = this.http.post<TreeItemData[]>(
+      '/api/import/items',
+      formData,
+      this.getJsonOptions(this.importNotificationMessage),
+    );
+    this.treeItemsResponse(requestObservable, action);
   }
 
   private getJsonOptions(message: NotificationMessage) {
@@ -161,24 +196,52 @@ export class ItemService {
       });
   }
 
-  private treeItemsResponse(request: Observable<TreeItemData[]>) {
-    this.treeItemId = 0;
-    const rootItem = new TreeData<ItemData>(ItemService.rootItemData);
+  private treeItemsResponse(
+    request: Observable<TreeItemData[]>,
+    action: 'replaceAll' | 'replaceCurrent' | 'append',
+  ) {
+    const responseItem = new TreeData<ItemData>(ItemService.rootItemData);
+    if (action === 'replaceAll') {
+      this.treeItemId = 0;
+    }
     request
       .pipe(
         catchError(() => []),
         map((treeItems) =>
+          // Récupère tous les arbres en tant qu'enfants de responseItem
           treeItems
             .map((treeItemObj) => this.convertToTreeData(treeItemObj, '0'))
             .reduce((accumulator, current) => {
               accumulator.addChild(current);
               return accumulator;
-            }, rootItem),
+            }, responseItem),
         ),
       )
-      .subscribe((rootItem) => {
-        // next met à jour le sujet avec la valeur
-        this.propageUpdates(rootItem);
+      .subscribe((responseItem) => {
+        if (!responseItem.getChildren().length) {
+          return;
+        }
+        const rootItem = this.rootItemSubject.value;
+        switch (action) {
+          case 'append':
+            rootItem.addChildren(responseItem.getChildren());
+            this.rootItemSubject.next(rootItem.copy());
+            break;
+          case 'replaceAll':
+            this.propageUpdates(responseItem);
+            break;
+          case 'replaceCurrent':
+            const currentItem = this.currentItemSignal();
+            if (currentItem) {
+              const toReplace = responseItem.getChildren()[0];
+              // Remplacement du courant
+              const parentItem = rootItem.getTreeByTreeId(currentItem.getParentTreeItemId());
+              this.replaceItem(parentItem, currentItem, toReplace);
+            }
+            break;
+          default:
+            break;
+        }
       });
   }
 
@@ -195,15 +258,21 @@ export class ItemService {
   }
 
   private replaceItem(
-    parent: TreeData<ItemData>,
+    parent: TreeData<ItemData> | null,
     toReplace: TreeData<ItemData>,
     replaceBy: TreeData<ItemData>,
   ) {
+    if (!parent) {
+      return;
+    }
     const rootItem = this.rootItemSubject.value;
     if (replaceBy.getContent().isToRemove()) {
       parent.removeChild(toReplace);
     } else {
       parent.replaceChild(toReplace, replaceBy);
+      if (this.currentItemSignal() === toReplace) {
+        this.currentItemSignal.set(replaceBy);
+      }
     }
     this.propageUpdates(rootItem);
   }

@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, ElementRef, input, viewChild } from '@angular/core';
 import { NodeElement } from '../common/NodeElement.js';
 import { Icon } from '../icon/icon.js';
 import { LabelInput } from '../label-input/label-input.js';
@@ -26,6 +26,8 @@ export class ActionButton extends NodeElement {
   buttonType = input.required<'icon' | 'menu' | 'label' | 'primary' | 'item-like'>();
   role = input<'button' | 'menuitem'>('button');
 
+  private inputFile = viewChild<ElementRef>('file');
+
   constructor() {
     super();
   }
@@ -46,6 +48,16 @@ export class ActionButton extends NodeElement {
   }
 
   onClick(event: MouseEvent) {
-    this.data().onClick(event);
+    const inputFile = this.inputFile()?.nativeElement;
+    if (event.target === inputFile) {
+      // Le click du fichier provoque le click du bouton car ce dernier se trouve à l'intérieur du bouton
+      return;
+    }
+
+    if (this.data().upload) {
+      this.inputFile()?.nativeElement.click();
+    } else {
+      this.data().onClick(event);
+    }
   }
 }

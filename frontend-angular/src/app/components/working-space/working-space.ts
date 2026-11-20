@@ -96,7 +96,9 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
     this.menuItems.push(
       new Button('exportAll', 'Exporter tout', 'upload', this.exportAll.bind(this)),
     );
-    this.menuItems.push(new Button('import', 'Importer', '', this.import.bind(this)));
+    this.menuItems.push(
+      new Button('import', 'Importer', 'download', this.importAll.bind(this, false), true),
+    );
 
     const vue = 'la vue courante';
     this.mainButtons.push(
@@ -107,6 +109,9 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
     );
     this.mainButtons.push(
       new Button('uploadCurrent', `Exporter ${vue}`, 'upload', this.exportCurrent.bind(this)),
+    );
+    this.mainButtons.push(
+      new Button('import', `Importer dans ${vue}`, 'download', this.importCurrent.bind(this), true),
     );
   }
 
@@ -134,7 +139,22 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
   exportCurrent() {
     this.itemService.exportCurrentItem();
   }
-  import() {}
+  importAll(replace: boolean, event: Event) {
+    const inputFile = event.target as HTMLInputElement;
+    const file = inputFile.files?.[0];
+    if (!file) return;
+
+    this.itemService.importAllItems(file, replace);
+    inputFile.value = '';
+  }
+  importCurrent(event: Event) {
+    const inputFile = event.target as HTMLInputElement;
+    const file = inputFile.files?.[0];
+    if (!file) return;
+
+    this.itemService.importCurrentItem(file);
+    inputFile.value = '';
+  }
 
   doAddSpace() {
     this.itemService.addRootItem(WorkingSpace.NEW_SPACE_LABEL);
