@@ -34,6 +34,7 @@ export class EnterTabNavigation extends TabNavigation {
 
   override onMouseDown(event: MouseEvent) {
     this.enter();
+    super.onMouseDown(event);
   }
 
   override interceptKeys(): String[] {
