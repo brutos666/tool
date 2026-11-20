@@ -9,9 +9,9 @@ describe('Menu', () => {
   let fixture: ComponentFixture<Menu>;
 
   const menuItems: Array<Button> = [];
-  menuItems.push(new Button('id1', 'Action 1', ''));
-  menuItems.push(new Button('id2', 'Action 2', ''));
-  menuItems.push(new Button('id3', 'Action 3', ''));
+  menuItems.push(new Button('id1', 'Action 1', 'Description 1', ''));
+  menuItems.push(new Button('id2', 'Action 2', 'Description 2', ''));
+  menuItems.push(new Button('id3', 'Action 3', 'Description 3', ''));
 
   const itemsDataSignal = signal<Array<Button>>(menuItems);
   const orientationSignal = signal<'horizontal' | 'vertical'>('horizontal');

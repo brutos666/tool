@@ -1,6 +1,7 @@
 export class Button {
   id!: string;
   label!: string;
+  description!: string;
   icon!: string;
   onClick!: Function;
   upload: boolean;
@@ -11,6 +12,7 @@ export class Button {
    * @constructor
    * @param {string} id - Label du bouton
    * @param {string} label - Label du bouton
+   * @param {string} description - Label du bouton
    * @param {string|undefined} icon - Icône du bouton
    * @param {Function} onClick - méthode à appeler sur le click d'un bouton
    * @param {boolean} upload - Icône du bouton
@@ -18,12 +20,14 @@ export class Button {
   constructor(
     id: string,
     label: string,
+    description: string,
     icon: string | undefined,
     onClick: Function = () => {},
     upload: boolean = false,
   ) {
     this.id = id;
     this.label = label;
+    this.description = description;
     if (icon) {
       this.icon = icon;
     }

@@ -39,7 +39,13 @@ export class NotificationCenter {
   notificationButton: Button = new Button(
     'notificationButton',
     'Afficher les notifications',
+    'Affiche les notifications',
     'bell',
   );
-  infoButton: Button = new Button('infoButton', "Afficher les messages d'informations", 'info');
+  infoButton: Button = new Button(
+    'infoButton',
+    "Afficher l'aide'",
+    "Affiche les messages d'aide à l'utilisation de l'interface",
+    'info',
+  );
 }

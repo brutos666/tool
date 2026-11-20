@@ -16,6 +16,7 @@ import { Button } from './button.js';
     '[class]': "buttonType() + '-button' + (data().isVisible() ? '': ' hidden')",
     '[attr.aria-labelledby]': "data().id + '-label'",
     '[aria-label]': 'data().label',
+    '[aria-description]': 'data().description',
     '[attr.role]': 'role()',
     '(click)': 'onClick($event)',
     '(mousedown)': 'onMouseDown($event)',

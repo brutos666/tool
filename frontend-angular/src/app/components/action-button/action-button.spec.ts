@@ -13,7 +13,7 @@ describe('ActionButton', () => {
       imports: [ActionButton],
     }).compileComponents();
 
-    buttonDataSignal = signal<Button>(new Button('', 'Libellé', '+'));
+    buttonDataSignal = signal<Button>(new Button('id', 'Libellé', 'Description', '+'));
     fixture = TestBed.createComponent(ActionButton, {
       bindings: [inputBinding('data', buttonDataSignal)],
     });

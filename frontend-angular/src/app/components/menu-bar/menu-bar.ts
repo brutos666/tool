@@ -30,7 +30,7 @@ export class MenuBar extends Composite {
 
   constructor() {
     super();
-    this.burgerItemData = new Button('burgerButton', 'Ouvrir le menu', 'burger');
+    this.burgerItemData = new Button('burgerButton', 'Ouvrir le menu', 'Affiche le menu', 'burger');
     effect(() => {
       if (this.menuOpened()) {
         this.setFocusIndex(1);

@@ -45,6 +45,7 @@ export class Tree extends NodeElement implements OnInit {
     this.toggleIcon = new Button(
       `toggle${this.treeData().getTreeItemId()}`,
       'Ouvrir/Fermer le noeud',
+      "Ouvre ou ferme le noeud de l'arbre des tâches",
       'node',
       this.onOpenClose.bind(this),
     );

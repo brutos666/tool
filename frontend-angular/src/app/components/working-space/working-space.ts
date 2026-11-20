@@ -71,6 +71,7 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
   navAddButton: Button = new Button(
     'addNewSpace',
     'Ajouter un élément',
+    'Ajoute un espace',
     '',
     this.doAddSpace.bind(this),
   );
@@ -78,6 +79,7 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
   mainAddButton: Button = new Button(
     'addNewItem',
     'Ajouter un élément',
+    'Ajoute une tâche à la vue courante',
     '',
     this.doAddItem.bind(this),
   );
@@ -90,28 +92,80 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.menuItems.push(
-      new Button('reload', 'Actualiser', 'rotate-right', this.loadAll.bind(this)),
+      new Button(
+        'reload',
+        'Actualiser',
+        'Recharger les tâches',
+        'refresh',
+        this.loadAll.bind(this),
+      ),
     );
-    this.menuItems.push(new Button('saveAll', 'Sauvegarder tout', 'save', this.saveAll.bind(this)));
     this.menuItems.push(
-      new Button('exportAll', 'Exporter tout', 'upload', this.exportAll.bind(this)),
+      new Button(
+        'saveAll',
+        'Sauvegarder tout',
+        'Sauver les modifications',
+        'save',
+        this.saveAll.bind(this),
+      ),
     );
     this.menuItems.push(
-      new Button('import', 'Importer', 'download', this.importAll.bind(this, false), true),
+      new Button(
+        'exportAll',
+        'Exporter tout',
+        'Sauvegarde les tâches dans un fichier',
+        'upload',
+        this.exportAll.bind(this),
+      ),
+    );
+    this.menuItems.push(
+      new Button(
+        'importAll',
+        'Importer',
+        'Charge les tâches depuis un fichier',
+        'download',
+        this.importAll.bind(this, false),
+        true,
+      ),
     );
 
     const vue = 'la vue courante';
     this.mainButtons.push(
-      new Button('reloadCurrent', `Actualiser ${vue}`, 'rotate-right', this.loadCurrent.bind(this)),
+      new Button(
+        'reloadCurrent',
+        `Actualiser ${vue}`,
+        'Recharge la tâche courante',
+        'refresh',
+        this.loadCurrent.bind(this),
+      ),
     );
     this.mainButtons.push(
-      new Button('saveCurrent', `Sauvegarder ${vue}`, 'save', this.saveCurrent.bind(this)),
+      new Button(
+        'saveCurrent',
+        `Sauvegarder ${vue}`,
+        'Sauvegarde la tâche courante',
+        'save',
+        this.saveCurrent.bind(this),
+      ),
     );
     this.mainButtons.push(
-      new Button('uploadCurrent', `Exporter ${vue}`, 'upload', this.exportCurrent.bind(this)),
+      new Button(
+        'uploadCurrent',
+        `Exporter ${vue}`,
+        'Sauvegarde la tâche dans un fichier',
+        'upload',
+        this.exportCurrent.bind(this),
+      ),
     );
     this.mainButtons.push(
-      new Button('import', `Importer dans ${vue}`, 'download', this.importCurrent.bind(this), true),
+      new Button(
+        'importCurrent',
+        `Importer dans ${vue}`,
+        "Charge la tâche à partir d'un fichier",
+        'download',
+        this.importCurrent.bind(this),
+        true,
+      ),
     );
   }
 

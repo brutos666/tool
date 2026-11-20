@@ -19,9 +19,9 @@ import { FocusableButton } from '../components/action-button/focusable-button';
   </nav>`,
 })
 class Test extends Composite {
-  btnDataFocus1: Button = new Button('id1', 'Bouton 1', '');
-  btnDataFocus2: Button = new Button('id2', 'Bouton 2', '');
-  btnDataFocus3: Button = new Button('id3', 'Bouton 3', '');
+  btnDataFocus1: Button = new Button('id1', 'Bouton 1', 'Description 1', '');
+  btnDataFocus2: Button = new Button('id2', 'Bouton 2', 'Description 2', '');
+  btnDataFocus3: Button = new Button('id3', 'Bouton 3', 'Description 3', '');
 
   orientation = input<'horizontal' | 'vertical'>('horizontal');
 }

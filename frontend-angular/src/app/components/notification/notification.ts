@@ -28,6 +28,7 @@ export class Notification extends NodeElement implements AfterViewInit {
   trashButton: Button = new Button(
     'notificationTrashButton',
     'Supprimer la notification',
+    'Supprime la notification',
     'trash',
     this.remove.bind(this),
   );

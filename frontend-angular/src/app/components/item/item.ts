@@ -52,7 +52,8 @@ export class Item extends NodeElement {
         if (this.addAction == null) {
           this.addAction = new Button(
             `${itemId}-add`,
-            'Ajouter un item',
+            'Ajouter',
+            "Ajout d'une sous-tâche à la tâche courante",
             'plus',
             this.doAdd.bind(this, 'Nouvel item'),
           );
@@ -64,13 +65,15 @@ export class Item extends NodeElement {
           this.deleteAction = new Button(
             `${itemId}-delete`,
             'Marquer à supprimer',
+            'Marque la tâche comme supprimée. La suppression définitive est effectuée lors de la sauvegarde',
             'cross',
             this.markToDelete.bind(this),
           );
           this.undoToDeleteAction = new Button(
             `${itemId}-undo-delete`,
             'Annuler la suppression',
-            'plus',
+            'Annule le marquage comme supprimée',
+            'undo',
             this.undoToDelete.bind(this),
           );
         }
