@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strings"
 
+	"goTool/internal/api/domain"
 	"goTool/internal/api/domain/domainMessage"
 	"goTool/internal/api/interface/mapper"
 )
@@ -37,7 +38,7 @@ func getQueryParameter[P any](qryRequestMapper mapper.QueryRequestMapper, reques
 	return nil
 }
 
-func getFileParameter(request *http.Request) (io.Reader, error) {
+func getFileParameter(request *http.Request) (domain.FileReader, error) {
 	if !strings.HasPrefix(request.Header.Get("Content-Type"), "multipart/form-data") {
 		return nil, domainMessage.NewError(INVALID_FILE)
 	}
@@ -48,7 +49,7 @@ func getFileParameter(request *http.Request) (io.Reader, error) {
 	return getFileReader(reader)
 }
 
-func getFileReader(reader *multipart.Reader) (io.Reader, error) {
+func getFileReader(reader *multipart.Reader) (domain.FileReader, error) {
 	for {
 		part, err := reader.NextPart()
 		if errors.Is(err, io.EOF) {

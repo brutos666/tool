@@ -3,7 +3,6 @@ package domain
 import (
 	"bytes"
 	"context"
-	"io"
 )
 
 type DataInitRepository interface {
@@ -13,6 +12,7 @@ type DataInitRepository interface {
 type SpaceCommandRepository interface {
 	SaveCurrentSpace(ctx context.Context, dataAccessId int, nodeSpace *NodeSpace) error
 	SaveSpaces(ctx context.Context, dataAccessId int, spaces *Spaces) error
+	ReplaceSpaces(ctx context.Context, dataAccessId int, spaces *Spaces) error
 }
 type SpaceQueryRepository interface {
 	FindAll(ctx context.Context, dataAccessId int) ([]*Space, error)
@@ -21,7 +21,7 @@ type SpaceQueryRepository interface {
 
 type SpaceFileRepository interface {
 	Write(ctx context.Context, nodeSpace NodeSpace) (*bytes.Buffer, error)
-	Load(ctx context.Context, sourceFile io.Reader) ([]*Space, error)
+	Load(ctx context.Context, sourceFile FileReader) ([]*Space, error)
 }
 
 type UserCommandRepository interface {

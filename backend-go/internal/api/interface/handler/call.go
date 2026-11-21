@@ -3,7 +3,6 @@ package handler
 import (
 	"bytes"
 	"context"
-	"io"
 	"net/http"
 
 	"goTool/internal/api/domain"
@@ -17,13 +16,14 @@ var validate = validator.New()
 
 // Répertorie tous les appels possibles côté application
 type (
-	NoDataAccessCall[R any] func(context context.Context) (R, error)
-	DataAccessCall[R any]   func(context context.Context, dataAccessId int) (R, error)
-	ParamCall[P, R any]     func(context context.Context, dataAccessId int, parameter P) (R, error)
-	FileParamCall[R any]    func(context context.Context, reader io.Reader) (R, error)
-	FileConvertCall[P any]  func(context context.Context, parameter P) (*bytes.Buffer, error)
-	LoginCall[P, R any]     func(context context.Context, dataAccessId int, tokenGeneration domain.TokensProduct, parameter P) (R, error)
-	RefreshCall             func(context context.Context, dataAccessId int, tokenGeneration domain.TokensProduct, user domain.ConnectedUser) (*domain.LoggedUser, error)
+	NoDataAccessCall[R any]  func(context context.Context) (R, error)
+	DataAccessCall[R any]    func(context context.Context, dataAccessId int) (R, error)
+	ParamCall[P, R any]      func(context context.Context, dataAccessId int, parameter P) (R, error)
+	FileToConvertCall[R any] func(context context.Context, reader domain.FileReader) (R, error)
+	FileToSaveCall[R any]    func(context context.Context, dataAccessId int, reader domain.FileReader) (R, error)
+	ConvertToFileCall[P any] func(context context.Context, parameter P) (*bytes.Buffer, error)
+	LoginCall[P, R any]      func(context context.Context, dataAccessId int, tokenGeneration domain.TokensProduct, parameter P) (R, error)
+	RefreshCall              func(context context.Context, dataAccessId int, tokenGeneration domain.TokensProduct, user domain.ConnectedUser) (*domain.LoggedUser, error)
 
 	responseRequestCall func(context context.Context, callContext CallContext, response http.ResponseWriter, request *http.Request)
 	Call                func(ctx context.Context, callContext CallContext, response http.ResponseWriter, request *http.Request) (any, error)
@@ -67,7 +67,7 @@ func GetCall[P, R any](serviceCall any, parameterType P) Call {
 		return func(ctx context.Context, callContext CallContext, response http.ResponseWriter, request *http.Request) (any, error) {
 			return call(ctx, callContext.GetDataAccessId(), callContext.GetTokenGenerator(), *callContext.GetConnectedUser())
 		}
-	case FileConvertCall[P]:
+	case ConvertToFileCall[P]:
 		return func(ctx context.Context, callContext CallContext, response http.ResponseWriter, request *http.Request) (any, error) {
 			parameter, err := getJsonParameter[P](requestMapper, request)
 			if err != nil {
@@ -75,7 +75,7 @@ func GetCall[P, R any](serviceCall any, parameterType P) Call {
 			}
 			return call(ctx, *parameter)
 		}
-	case FileParamCall[R]:
+	case FileToConvertCall[R]:
 		return func(ctx context.Context, callContext CallContext, response http.ResponseWriter, request *http.Request) (any, error) {
 			reader, err := getFileParameter(request)
 			if err != nil {
@@ -83,9 +83,17 @@ func GetCall[P, R any](serviceCall any, parameterType P) Call {
 			}
 			return call(ctx, reader)
 		}
+	case FileToSaveCall[R]:
+		return func(ctx context.Context, callContext CallContext, response http.ResponseWriter, request *http.Request) (any, error) {
+			reader, err := getFileParameter(request)
+			if err != nil {
+				return nil, err
+			}
+			return call(ctx, callContext.GetDataAccessId(), reader)
+		}
 	default:
 		return func(ctx context.Context, callContext CallContext, response http.ResponseWriter, request *http.Request) (any, error) {
-			return nil, domainMessage.Errorf("La forme de la méthode du service %s n'est pas définie dans la liste", serviceCall)
+			return nil, domainMessage.Errorf("L'appel de la méthode '%T' n'a pas été implémentée", serviceCall)
 		}
 	}
 }
@@ -115,10 +123,14 @@ func AsRefreshCall(callback RefreshCall, accessType string) responseRequestCall 
 	return Wrap[any, *domain.LoggedUser]{}.callService(callback).addDataAccess(accessType).loginBuild()
 }
 
-func AsFileParamCall[R any](callback FileParamCall[R]) responseRequestCall {
+func AsFileToSaveCall[R any](callback FileToSaveCall[R], accessType string) responseRequestCall {
+	return Wrap[any, R]{}.callService(callback).addDataAccess(accessType).build()
+}
+
+func AsFileToConvertCall[R any](callback FileToConvertCall[R]) responseRequestCall {
 	return Wrap[any, R]{}.callService(callback).build()
 }
 
-func AsConvertFileCall[P any](callback FileConvertCall[P]) responseRequestCall {
+func AsConvertFileCall[P any](callback ConvertToFileCall[P]) responseRequestCall {
 	return Wrap[P, any]{}.callService(callback).fileBuild()
 }

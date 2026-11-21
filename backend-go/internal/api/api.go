@@ -65,7 +65,7 @@ func start() {
 func Serve() *http.ServeMux {
 	// Services : lien entre le métier (service) et les données (repository). Ici les données sont en base et la base de données est configurable
 	spaceQueryService := application.SpaceQueryService(repository.SpaceQuery())
-	spaceFileService := application.SpaceFileService(repository.SpaceFile())
+	spaceFileService := application.SpaceFileService(repository.SpaceFile(), repository.SpaceCommand())
 	spaceCommandService := application.SpaceCommandService(repository.SpaceCommand())
 
 	// Routes : les transformations des paramètres des requêtes et du retour sont faites dans la partie interface
@@ -75,7 +75,8 @@ func Serve() *http.ServeMux {
 	handler.HandlePostRoute(route.ITEM_SAVE, handler.AsParamDataAccessCall(spaceCommandService.Save, bddService.WRITE))
 	handler.HandleGetRoute(route.ITEM_FIND_ALL, handler.AsDataAccessCall(spaceQueryService.FindAll, bddService.READ))
 	handler.HandleGetRoute(route.ITEM_LOAD, handler.AsParamDataAccessCall(spaceQueryService.Load, bddService.READ))
-	handler.HandlePostRoute(route.ITEM_IMPORT, handler.AsFileParamCall(spaceFileService.Import))
+	handler.HandlePostRoute(route.ITEM_OPEN, handler.AsFileToSaveCall(spaceFileService.OpenFile, bddService.WRITE))
+	handler.HandlePostRoute(route.ITEM_IMPORT, handler.AsFileToConvertCall(spaceFileService.Import))
 	handler.HandlePostRoute(route.ITEM_EXPORT, handler.AsConvertFileCall(spaceFileService.Export))
 
 	return http.DefaultServeMux

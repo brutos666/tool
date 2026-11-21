@@ -22,7 +22,7 @@ func SpaceFile() domain.SpaceFileRepository {
 	return &spaceFRepository{}
 }
 
-func (repo *spaceFRepository) Load(ctx context.Context, sourceFile io.Reader) ([]*domain.Space, error) {
+func (repo *spaceFRepository) Load(ctx context.Context, sourceFile domain.FileReader) ([]*domain.Space, error) {
 	flatItems, err := convertCsvToFlatItems(sourceFile)
 	if err != nil {
 		return nil, err
@@ -60,7 +60,7 @@ func (repo *spaceFRepository) Write(ctx context.Context, nodeSpace domain.NodeSp
 	return &buf, nil
 }
 
-func convertCsvToFlatItems(sourceFile io.Reader) ([]FlatItem, error) {
+func convertCsvToFlatItems(sourceFile domain.FileReader) ([]FlatItem, error) {
 	csvReader := csv.NewReader(sourceFile)
 	csvReader.Comma = CSV_SEPARATOR
 	csvReader.FieldsPerRecord = 6

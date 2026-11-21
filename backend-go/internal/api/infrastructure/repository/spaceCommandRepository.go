@@ -17,6 +17,7 @@ const (
 	UPDATE_NEXT_NULL_SQL string = "UPDATE item SET next_id = null where id=? and next_id is not null"
 	UPDATE_SQL                  = "UPDATE item SET title=:title, text=:text, state=:state, parent_id=:parent_id, next_id=:next_id where id=:id"
 	DELETE_SQL           string = "DELETE FROM item WHERE id IN (?)"
+	DELETE_ALL_SQL       string = "DELETE FROM item"
 )
 
 func SpaceCommand() domain.SpaceCommandRepository {
@@ -29,6 +30,10 @@ func (repo *spaceCmdRepository) SaveCurrentSpace(ctx context.Context, dataAccess
 
 func (repo *spaceCmdRepository) SaveSpaces(ctx context.Context, dataAccessId int, spaces *domain.Spaces) error {
 	return saveSpaces(ctx, bddAccessService.RetrieveWriteAccess(dataAccessId), spaces)
+}
+
+func (repo *spaceCmdRepository) ReplaceSpaces(ctx context.Context, dataAccessId int, spaces *domain.Spaces) error {
+	return replaceSpaces(ctx, bddAccessService.RetrieveWriteAccess(dataAccessId), spaces)
 }
 
 func saveSpace(ctx context.Context, dataBase bddService.WriteCommands, nodeSpace *domain.NodeSpace) error {
@@ -70,6 +75,36 @@ func saveSpaces(ctx context.Context, dataBase bddService.WriteCommands, spaces *
 	}
 	if nbUpdated > 0 {
 		log.Printf("%v lignes modifiées ou déplacées", nbUpdated)
+	}
+	if nbNextIdUpdated > 0 {
+		log.Printf("%v identifiants ligne suivante mis à jour", nbNextIdUpdated)
+	}
+	return nil
+}
+
+func replaceSpaces(ctx context.Context, dataBase bddService.WriteCommands, spaces *domain.Spaces) error {
+	nbRows, err := deleteAllSpaces(ctx, dataBase)
+	if err != nil {
+		return err
+	}
+	if nbRows > 0 {
+		log.Printf("%v lignes supprimées", nbRows)
+	}
+
+	nbRows, err = createSpacesInBase(ctx, dataBase, spaces, domain.ROOT_ID)
+	if err != nil {
+		return err
+	}
+	if nbRows > 0 {
+		log.Printf("%v lignes créées", nbRows)
+	}
+	// Une fois les éléments créés, on peut mettre sereinement à jour les modifications en récupérant les nouveaux identifiants
+	nbUpdated, nbNextIdUpdated, err := updateSpacesInBase(ctx, dataBase, spaces, domain.ROOT_ID)
+	if err != nil {
+		return err
+	}
+	if nbUpdated > 0 {
+		log.Printf("%v lignes modifiées", nbUpdated)
 	}
 	if nbNextIdUpdated > 0 {
 		log.Printf("%v identifiants ligne suivante mis à jour", nbNextIdUpdated)
@@ -210,6 +245,10 @@ func deleteSpaces(ctx context.Context, dataBase bddService.WriteCommands, itemsI
 		return dataBase.DeleteIn(ctx, DELETE_SQL, itemsIdToDelete)
 	}
 	return 0, nil
+}
+
+func deleteAllSpaces(ctx context.Context, dataBase bddService.WriteCommands) (int, error) {
+	return dataBase.Update(ctx, DELETE_ALL_SQL)
 }
 
 func createSpace(ctx context.Context, dataBase bddService.WriteCommands, space *domain.Space, parentId, nextId string) error {
