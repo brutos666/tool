@@ -106,6 +106,6 @@ func (w Wrap[P, R]) fileBuild() responseRequestCall {
 		// Transforme la date du jour au format "YYYY-MM-DD"
 		now := time.Now().UTC().Format(time.DateOnly)
 		fileName := "toolTache" + now
-		sendCsvResponse(response, requestPath, buffer.(*bytes.Buffer), fileName)
+		sendTxtResponse(response, buffer.(*bytes.Buffer), fileName)
 	}
 }
