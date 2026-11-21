@@ -1,4 +1,4 @@
-import { Component, ElementRef, input, viewChild } from '@angular/core';
+import { Component, computed, ElementRef, input, viewChild } from '@angular/core';
 import { NodeElement } from '../common/NodeElement.js';
 import { Icon } from '../icon/icon.js';
 import { LabelInput } from '../label-input/label-input.js';
@@ -24,8 +24,14 @@ import { Button } from './button.js';
 })
 export class ActionButton extends NodeElement {
   data = input.required<Button>();
-  buttonType = input.required<'icon' | 'menu' | 'label' | 'primary' | 'item-like'>();
+  buttonType = input.required<'icon' | 'menu' | 'label' | 'primary' | 'ghost' | 'item-like'>();
   role = input<'button' | 'menuitem'>('button');
+
+  labelButton = computed(
+    () =>
+      this.role() === 'menuitem' ||
+      ['label', 'primary', 'ghost', 'item-like'].includes(this.buttonType()),
+  );
 
   private inputFile = viewChild<ElementRef>('file');
 

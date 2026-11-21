@@ -15,7 +15,7 @@ export class Button {
    * @param {string} description - Label du bouton
    * @param {string|undefined} icon - Icône du bouton
    * @param {Function} onClick - méthode à appeler sur le click d'un bouton
-   * @param {boolean} upload - Icône du bouton
+   * @param {boolean} upload - Sélection d'un fichier
    */
   constructor(
     id: string,

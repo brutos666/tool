@@ -1,0 +1,16 @@
+<div 
+  role="alertdialog"
+  aria-labelledby="dialog_label"
+  aria-describedby="dialog_desc"
+  aria-modal="true">
+  <h3 id="dialog_label">Confirmation</h3>
+  <div id="dialog_desc" class="description" [innerHTML]="question()"></div>
+  <ul tab-navigation-directive class="buttons">
+    <li>
+      <button focusable [data]="cancelButton" [buttonType]="'ghost'"></button>
+    </li>
+    <li>
+      <button focusable [data]="confirmButton" [buttonType]="'primary'"></button>
+    </li>
+  </ul>
+</div>

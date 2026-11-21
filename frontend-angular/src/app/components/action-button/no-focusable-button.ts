@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { NodeElement } from '../common/NodeElement.js';
 import { Icon } from '../icon/icon.js';
 import { NoFocusable } from '../../directives/no-focusable.js';
 import { ActionButton } from './action-button.js';

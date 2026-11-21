@@ -48,6 +48,9 @@ export class SvgUtilities {
       case 'info':
         svgHtml = getInfoIcon();
         break;
+      case 'folder':
+        svgHtml = getFolderIcon();
+        break;
       default:
         break;
     }
@@ -152,10 +155,16 @@ function getDownloadIcon() {
 }
 
 function getInfoIcon() {
-  return String.raw`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  return String.raw`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="afficher les informations">
     <circle cx="12" cy="12" r="10"></circle>
     <line x1="12" y1="16" x2="12" y2="12"></line>
     <line x1="12" y1="8" x2="12.01" y2="8"></line>
+  </svg>`;
+}
+
+function getFolderIcon() {
+  return String.raw`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="sélectionner un fichier">
+    <path d="M11 21H4a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h5l2 3h9a2 2 0 0 1 2 2v2M19 15v6M16 18h6"/>
   </svg>`;
 }
 export default SvgUtilities;

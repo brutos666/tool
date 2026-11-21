@@ -9,8 +9,9 @@
   /* cartes, boutons, panels */
   --color-bg-surface: light-dark(oklch(0.91 0.01 var(--hue-primary)), oklch(0.34 0.014 var(--hue-primary)));
   --color-bg-hover: light-dark(oklch(0.8 0.013 var(--hue-primary)), oklch(0.5 0.02 var(--hue-primary)));
+  
   /* modals, dropdowns */
-  --color-bg-elevated: light-dark(oklch(0.8 0.013 var(--hue-primary)), oklch(0.5 0.02 var(--hue-primary)));
+  --color-bg-elevated: light-dark(oklch(0.8 0.013 var(--hue-primary)), oklch(0.1 0.02 var(--hue-primary)));
   /* courant */
   --color-bg-current: light-dark(oklch(0.85 0.04 var(--hue-primary)), oklch(0.4 0.06 var(--hue-primary)));
   --color-bg-selected: light-dark(oklch(0.55 0.18 var(--hue-secondary)), oklch(0.68 0.16 var(--hue-secondary)));
@@ -22,6 +23,7 @@
 
   /* === PRIMAIRE === */
   /* Primaire — la couleur de marque, pour les boutons principaux, liens, éléments actifs. */
+  --light-color-primary: light-dark(oklch(0.5 0.22 var(--hue-primary) / 0.5), oklch(0.65 0.2 var(--hue-primary) / 0.5));
   --color-primary: light-dark(oklch(0.5 0.22 var(--hue-primary)), oklch(0.65 0.2 var(--hue-primary)));
   --color-primary-hover: light-dark(oklch(0.42 0.22 var(--hue-primary)), oklch(0.72 0.2 var(--hue-primary)));
   --color-primary-active: light-dark(oklch(0.35 0.22 var(--hue-primary)), oklch(0.78 0.2 var(--hue-primary)));

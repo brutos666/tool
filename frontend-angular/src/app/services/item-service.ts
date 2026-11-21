@@ -8,6 +8,8 @@ import { TreeInfoData } from '../data/tree-info-data.js';
 import { ErrorInterceptor } from '../errors/error-interceptor.js';
 import { NotificationMessage } from '../errors/notification-messages.js';
 
+type LoadAction = 'replaceAll' | 'replaceCurrent' | 'append';
+
 @Service()
 export class ItemService {
   static rootItemData = new ItemData('-1', 'Racine', '', '', '', '');
@@ -37,6 +39,10 @@ export class ItemService {
   private importNotificationMessage = new NotificationMessage(
     'Import terminé',
     "Une erreur est survenue lors de l'import",
+  );
+  private openNotificationMessage = new NotificationMessage(
+    'Ouverture terminée',
+    "Une erreur est survenue lors de l'ouverture du fichier",
   );
 
   constructor() {
@@ -68,10 +74,9 @@ export class ItemService {
     }
   }
 
-  public exportAllItems() {
+  public exportAllItems(fileName: string) {
     const rootItem = this.rootItemSubject.value;
-    const fileName = 'toutes_mes_taches.txt';
-    this.exportItem(rootItem, fileName);
+    this.exportItem(rootItem, fileName || 'toutes_mes_taches.txt');
   }
   public exportCurrentItem() {
     const currentItem = this.currentItemSignal();
@@ -81,8 +86,11 @@ export class ItemService {
     }
   }
 
-  public importAllItems(file: File, replace: boolean) {
-    this.importItems(file, replace ? 'replaceAll' : 'append');
+  public openFile(file: File) {
+    return this.openItems(file);
+  }
+  public importAllItems(file: File) {
+    this.importItems(file, 'append');
   }
   public importCurrentItem(file: File) {
     const currentItem = this.currentItemSignal();
@@ -137,7 +145,7 @@ export class ItemService {
     );
     this.fileResponse(requestObservable, fileName);
   }
-  private importItems(file: File, action: 'replaceAll' | 'replaceCurrent' | 'append') {
+  private importItems(file: File, action: LoadAction) {
     const formData = new FormData();
     formData.append('fileToUpload', file, file.name);
 
@@ -146,7 +154,18 @@ export class ItemService {
       formData,
       this.getJsonOptions(this.importNotificationMessage),
     );
-    this.treeItemsResponse(requestObservable, action);
+    return this.treeItemsResponse(requestObservable, action);
+  }
+  private openItems(file: File) {
+    const formData = new FormData();
+    formData.append('fileToUpload', file, file.name);
+
+    const requestObservable = this.http.post<TreeItemData[]>(
+      '/api/item/open',
+      formData,
+      this.getJsonOptions(this.openNotificationMessage),
+    );
+    return this.treeItemsResponse(requestObservable, 'replaceAll');
   }
 
   private getJsonOptions(message: NotificationMessage) {
@@ -196,10 +215,7 @@ export class ItemService {
       });
   }
 
-  private treeItemsResponse(
-    request: Observable<TreeItemData[]>,
-    action: 'replaceAll' | 'replaceCurrent' | 'append',
-  ) {
+  private treeItemsResponse(request: Observable<TreeItemData[]>, action: LoadAction) {
     const responseItem = new TreeData<ItemData>(ItemService.rootItemData);
     if (action === 'replaceAll') {
       this.treeItemId = 0;

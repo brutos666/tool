@@ -3,7 +3,8 @@
 :host(.item-like-button),
 :host(.label-button),
 :host(.menu-button),
-:host(.primary-button) {
+:host(.primary-button),
+:host(.ghost-button) {
   display: flex;
   gap: var(--medium-gap);
   border-radius: var(--border-radius);
@@ -14,6 +15,11 @@
 
 :host(.menu-button) {
   padding: var(--icon-padding);
+}
+:host.label-button,
+:host.primary-button,
+:host(.ghost-button) {
+  padding: var(--medium-padding);
 }
 
 :host(.drag-button),
@@ -26,9 +32,16 @@
   border: dashed 1px var(--color-border);
   background-color: var(--color-bg-surface);
 }
+
 :host(.primary-button) {
-  background-color: var(--color-bg-surface);
+  background-color: var(--color-primary);
   border: solid 1px var(--color-primary);
+  color: var(--color-text-on-primary);
+}
+:host(.ghost-button) {
+  background: transparent;
+  border: solid 1px var(--color-primary);
+  color: var(--color-primary);
 }
 :host(.label-button) {
   border: solid 1px var(--color-border);
@@ -40,25 +53,23 @@
 :host(.item-like-button):hover,
 :host(.label-button):hover,
 :host(.menu-button):hover {
-  background-color: var(--color-bg-hover);
+  box-shadow: inset 0 0 0 999px var(--light-color-primary);
   border-color: var(--color-border-hover);
+}
+:host(.ghost-button):hover {
+  box-shadow: inset 0 0 0 999px var(--light-color-primary);
+  border-color: var(--color-primary-hover);
+  color: var(--color-primary-hover)
 }
 :host(.primary-button):hover {
   background-color: var(--color-primary-hover);
-  border-color: var(--color-primary);
 }
-
 :host[aria-pressed="true"] {
   border: solid 1px var(--color-primary);
 }
 :host[aria-pressed="true"]:hover {
   border: solid 1px var(--color-primary);
   background-color: var(--color-primary-hover);
-}
-
-:host(.primary-button):hover {
-  background-color: var(--color-primary-hover);
-  border-color: var(--color-primary);
 }
 
 :host.rotate90 icon {

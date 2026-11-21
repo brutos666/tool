@@ -1,4 +1,4 @@
-import { Component, ElementRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, inject, model, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MenuBar } from '../menu-bar/menu-bar.js';
 import { TreeList } from '../tree-list/tree-list';
 import { ItemService } from '../../services/item-service.js';
@@ -20,6 +20,7 @@ import { Button } from '../action-button/button.js';
 import { EnterTabNavigation } from '../../directives/enter-tab-navigation';
 import { ArrowNavigation } from '../../directives/arrow-navigation';
 import { Help } from '../common/HelpMessage.js';
+import { ConfirmationDialog } from '../confirm-dialog/confirm-dialog';
 
 @Component({
   imports: [
@@ -36,6 +37,7 @@ import { Help } from '../common/HelpMessage.js';
     Toolbar,
     EnterTabNavigation,
     ArrowNavigation,
+    ConfirmationDialog,
   ],
   standalone: true,
   selector: 'working-space',
@@ -51,9 +53,14 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
   name = 'WorkingSpace';
 
   private itemService = inject(ItemService);
+  private fileName: string = '';
 
   static NEW_SPACE_LABEL = 'Saisir un espace';
   static NEW_ITEM_LABEL = 'Saisir un pense-bête';
+
+  showConfirm = model<boolean>(false);
+  confirmAction: Function = () => {};
+  confirmQuestion: string = 'Vous êtes vraiment sûr de vouloir faire ce truc insensé ?';
 
   emptyStateNav = Help.NO_TREE;
   emptyStateMain = Help.NO_TREE_SELECTED;
@@ -93,18 +100,19 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.menuItems.push(
       new Button(
-        'reload',
-        'Actualiser',
-        'Recharger les tâches',
-        'refresh',
-        this.loadAll.bind(this),
+        'open',
+        'Ouvrir',
+        "Charge les tâches à partir d'un fichier",
+        'folder',
+        this.askBeforeOpen.bind(this),
+        true,
       ),
     );
     this.menuItems.push(
       new Button(
         'saveAll',
-        'Sauvegarder tout',
-        'Sauver les modifications',
+        'Sauvegarder',
+        'Sauvegarde les tâches dans la base de données',
         'save',
         this.saveAll.bind(this),
       ),
@@ -112,8 +120,8 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
     this.menuItems.push(
       new Button(
         'exportAll',
-        'Exporter tout',
-        'Sauvegarde les tâches dans un fichier',
+        'Télécharger',
+        'Télécharge les tâches',
         'upload',
         this.exportAll.bind(this),
       ),
@@ -122,23 +130,24 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
       new Button(
         'importAll',
         'Importer',
-        'Charge les tâches depuis un fichier',
+        'Ajoute les tâches depuis dans un fichier',
         'download',
-        this.importAll.bind(this, false),
+        this.importAll.bind(this),
         true,
+      ),
+    );
+    this.menuItems.push(
+      new Button(
+        'reload',
+        'Actualiser',
+        'Recharger les tâches',
+        'refresh',
+        this.loadAll.bind(this),
       ),
     );
 
     const vue = 'la vue courante';
-    this.mainButtons.push(
-      new Button(
-        'reloadCurrent',
-        `Actualiser ${vue}`,
-        'Recharge la tâche courante',
-        'refresh',
-        this.loadCurrent.bind(this),
-      ),
-    );
+
     this.mainButtons.push(
       new Button(
         'saveCurrent',
@@ -167,6 +176,15 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
         true,
       ),
     );
+    this.mainButtons.push(
+      new Button(
+        'reloadCurrent',
+        `Actualiser ${vue}`,
+        'Recharge la tâche courante',
+        'refresh',
+        this.loadCurrent.bind(this),
+      ),
+    );
   }
 
   ngOnDestroy() {
@@ -181,6 +199,21 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
   loadCurrent() {
     this.itemService.loadCurrentItem();
   }
+  askBeforeOpen(event: Event) {
+    this.confirmQuestion =
+      '<p>Les tâches ci-dessous seront perdues.</p><p>Êtes-vous sûr de vouloir ouvrir ce fichier?</p>';
+    this.confirmAction = this.open.bind(this, event);
+    this.showConfirm.set(true);
+  }
+  open(event: Event) {
+    const inputFile = event.target as HTMLInputElement;
+    const file = inputFile.files?.[0];
+    if (!file) return;
+
+    this.itemService.openFile(file);
+    this.fileName = file.name;
+    inputFile.value = '';
+  }
   saveAll() {
     this.itemService.saveAllItems();
   }
@@ -188,17 +221,17 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
     this.itemService.saveCurrentItem();
   }
   exportAll() {
-    this.itemService.exportAllItems();
+    this.itemService.exportAllItems(this.fileName);
   }
   exportCurrent() {
     this.itemService.exportCurrentItem();
   }
-  importAll(replace: boolean, event: Event) {
+  importAll(event: Event) {
     const inputFile = event.target as HTMLInputElement;
     const file = inputFile.files?.[0];
     if (!file) return;
 
-    this.itemService.importAllItems(file, replace);
+    this.itemService.importAllItems(file);
     inputFile.value = '';
   }
   importCurrent(event: Event) {

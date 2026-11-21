@@ -37,3 +37,6 @@
   }
 </main>
 <notification-center arrow-navigation-directive [navOrientation]="'vertical'"></notification-center>
+@if (showConfirm()) {
+  <confirm-dialog [(show)]="showConfirm" [doCallback]="confirmAction" [question]="confirmQuestion"></confirm-dialog>
+}
