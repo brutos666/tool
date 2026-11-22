@@ -2,12 +2,12 @@
   display: flex;
   flex-direction: column;
 }
-.element {
+.tree__element {
   padding: var(--medium-padding);
   display: flex;
   flex-direction: column;
 }
-.element__tree {
+.tree-list__tree {
   background: var(--color-bg-surface);
   border-radius: var(--border-radius);
   box-shadow: 3px 3px 4px var(--color-box-shadow);
@@ -21,4 +21,10 @@
   padding: 0;
   align-items: start;
   align-content: start;
+}
+
+/* Encadrer le noeud de l'arbre dont un enfant a le focus ou du drag&drop */
+.tree-list__tree:has(> .tree__list > .tree__element > tree > .tree__content *:focus),
+.tree-list__tree:has(> .tree__list > .tree__element > tree > .tree__content:focus) {
+  outline: 1px solid var(--color-border-focus);
 }

@@ -1,4 +1,4 @@
-:host.tree--node:not(.tree--root) {
+.tree__element {
   padding-left: var(--icon-width);
 }
 
@@ -57,4 +57,10 @@
 }
 :host.tree--node > .tree__content:focus {
   border-left: none;
+}
+
+/* Encadrer le noeud de l'arbre dont un enfant a le focus ou du drag&drop */
+.tree--node:has(> .tree__list > .tree__element > tree > .tree__content *:focus),
+.tree--node:has(> .tree__list > .tree__element > tree > .tree__content:focus) {
+  outline: 1px solid var(--color-border-focus);
 }

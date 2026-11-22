@@ -9,13 +9,15 @@
 </tree-content>
 <ul #treeList class="tree__list hidden" aria-orientation="vertical" role="group">
   @for (child of treeData().getChildren(); track child.getTreeItemId()) {
-    @if (selectable()) {
-      <tree
+    <li class="tree__element">
+      @if (selectable()) {
+        <tree
         [selectable]="true"
         [treeData]="child"
         [layoutData]="layoutData()"></tree>
     } @else {
       <tree [treeData]="child" [layoutData]="layoutData()"></tree>
     }
+    </li>
   }
 </ul>
