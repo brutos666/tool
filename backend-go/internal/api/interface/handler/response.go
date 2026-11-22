@@ -26,14 +26,14 @@ func sendJsonResponse(response http.ResponseWriter, requestPath string, webResul
 
 func sendTxtResponse(response http.ResponseWriter, buffer *bytes.Buffer, fileName string) {
 	response.Header().Set("Content-Type", "text/plain; charset=utf-8")
-	response.Header().Set("Content-Disposition", fmt.Sprintf("inline; filename=%s.txt", fileName))
+	response.Header().Set("Content-Disposition", fmt.Sprintf("inline; filename=%s", fileName))
 	response.WriteHeader(http.StatusOK)
 	size, err := response.Write(buffer.Bytes())
 	if err != nil {
 		// Supposition : si l'écriture échoue ici, c'est qu'il y a quelque chose de grave...
 		panic(err)
 	}
-	log.Printf("Export du fichier %s.txt : %d octets", fileName, size)
+	log.Printf("Export du fichier %s : %d octets", fileName, size)
 }
 
 func sendError(response http.ResponseWriter, requestPath string, err error) {

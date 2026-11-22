@@ -1,4 +1,13 @@
-import { Component, ElementRef, inject, model, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {
+  Component,
+  effect,
+  ElementRef,
+  inject,
+  model,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { MenuBar } from '../menu-bar/menu-bar.js';
 import { TreeList } from '../tree-list/tree-list';
 import { ItemService } from '../../services/item-service.js';
@@ -21,6 +30,7 @@ import { EnterTabNavigation } from '../../directives/enter-tab-navigation';
 import { ArrowNavigation } from '../../directives/arrow-navigation';
 import { Help } from '../common/HelpMessage.js';
 import { ConfirmationDialog } from '../confirm-dialog/confirm-dialog';
+import { Field } from '../field/field';
 
 @Component({
   imports: [
@@ -38,6 +48,7 @@ import { ConfirmationDialog } from '../confirm-dialog/confirm-dialog';
     EnterTabNavigation,
     ArrowNavigation,
     ConfirmationDialog,
+    Field,
   ],
   standalone: true,
   selector: 'working-space',
@@ -53,14 +64,16 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
   name = 'WorkingSpace';
 
   private itemService = inject(ItemService);
-  private fileName: string = '';
 
   static NEW_SPACE_LABEL = 'Saisir un espace';
   static NEW_ITEM_LABEL = 'Saisir un pense-bête';
 
+  fileName = model<string>('');
   showConfirm = model<boolean>(false);
   confirmAction: Function = () => {};
   confirmQuestion: string = 'Vous êtes vraiment sûr de vouloir faire ce truc insensé ?';
+  confirmForRoot: boolean = true;
+  rootFileName: string | undefined;
 
   emptyStateNav = Help.NO_TREE;
   emptyStateMain = Help.NO_TREE_SELECTED;
@@ -97,6 +110,16 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
   private onPointerMoveEvent: Function = this.onPointerMove.bind(this);
   private onPointerUpEvent: Function = this.onPointerUp.bind(this);
 
+  constructor() {
+    super();
+    effect(() => {
+      const fileName = this.fileName();
+      if (this.confirmForRoot) {
+        this.rootFileName = fileName;
+      }
+    });
+  }
+
   ngOnInit(): void {
     this.menuItems.push(
       new Button(
@@ -123,7 +146,7 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
         'Télécharger',
         'Télécharge les tâches',
         'upload',
-        this.exportAll.bind(this),
+        this.askBeforeExport.bind(this, 'root'),
       ),
     );
     this.menuItems.push(
@@ -163,7 +186,7 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
         `Exporter ${vue}`,
         'Sauvegarde la tâche dans un fichier',
         'upload',
-        this.exportCurrent.bind(this),
+        this.askBeforeExport.bind(this, 'current'),
       ),
     );
     this.mainButtons.push(
@@ -200,6 +223,13 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
     this.itemService.loadCurrentItem();
   }
   askBeforeOpen(event: Event) {
+    const inputFile = event.target as HTMLInputElement;
+    const file = inputFile.files?.[0];
+    if (!file) return;
+
+    this.confirmForRoot = true;
+    this.fileName.set(file.name);
+
     this.confirmQuestion =
       '<p>Les tâches ci-dessous seront perdues.</p><p>Êtes-vous sûr de vouloir ouvrir ce fichier?</p>';
     this.confirmAction = this.open.bind(this, event);
@@ -211,7 +241,6 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
     if (!file) return;
 
     this.itemService.openFile(file);
-    this.fileName = file.name;
     inputFile.value = '';
   }
   saveAll() {
@@ -220,11 +249,25 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
   saveCurrent() {
     this.itemService.saveCurrentItem();
   }
-  exportAll() {
-    this.itemService.exportAllItems(this.fileName);
+  askBeforeExport(chooseItem: 'root' | 'current') {
+    const item = chooseItem == 'current' ? this.currentItem() : this.rootItem();
+    if (!item) {
+      return;
+    }
+    if (chooseItem == 'root') {
+      this.confirmForRoot = true;
+      this.fileName.set(this.rootFileName || this.itemService.proposeFileName(item));
+    } else {
+      this.confirmForRoot = false;
+      this.fileName.set(this.itemService.proposeFileName(item));
+    }
+    this.confirmQuestion =
+      "Veuillez saisir le nom du fichier à exporter avant de confirmer l'export";
+    this.confirmAction = this.exportItem.bind(this, item);
+    this.showConfirm.set(true);
   }
-  exportCurrent() {
-    this.itemService.exportCurrentItem();
+  exportItem(item: TreeData<ItemData>) {
+    this.itemService.exportItem(item, this.fileName());
   }
   importAll(event: Event) {
     const inputFile = event.target as HTMLInputElement;

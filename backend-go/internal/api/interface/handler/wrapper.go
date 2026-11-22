@@ -3,6 +3,7 @@ package handler
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -98,14 +99,21 @@ func (w Wrap[P, R]) fileBuild() responseRequestCall {
 	call := w.call
 	return func(ctx context.Context, callContext CallContext, response http.ResponseWriter, request *http.Request) {
 		requestPath := request.URL.Path
+		// Lire le nom du fichier possiblement indiqué dans l'url
 		buffer, err := call(ctx, callContext, response, request)
 		if err != nil {
 			sendError(response, requestPath, err)
 			return
 		}
-		// Transforme la date du jour au format "YYYY-MM-DD"
-		now := time.Now().UTC().Format(time.DateOnly)
-		fileName := "toolTache" + now
+		fileName := request.PathValue("file")
+		if fileName == "" {
+			fileName = request.FormValue("file")
+		}
+		if len(fileName) == 0 {
+			// Transforme la date du jour au format "YYYY-MM-DD"
+			now := time.Now().UTC().Format(time.DateOnly)
+			fileName = fmt.Sprintf("toolTache%s.txt", now)
+		}
 		sendTxtResponse(response, buffer.(*bytes.Buffer), fileName)
 	}
 }

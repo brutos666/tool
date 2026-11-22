@@ -1,0 +1,12 @@
+@if (showLabel()) {
+<label labelInput [text]="label()" [id]="id() + '-label'" [for]="id()"></label>
+}
+<input 
+  #input
+  type="text"
+  [id]="id()"
+  [aria-label]="label()"
+  class="text__input"
+  [attr.disabled]="disabled() ? '': null"
+  [value]="value()"
+  (input)="value.set($event.target.value)"/>

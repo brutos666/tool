@@ -1,16 +1,30 @@
 <div 
+  id="confirmDialog"
   role="alertdialog"
   aria-labelledby="dialog_label"
   aria-describedby="dialog_desc"
   aria-modal="true">
-  <h3 id="dialog_label">Confirmation</h3>
+  <header>
+    <h3 id="dialog_label">Confirmation</h3>
+  </header>
   <div id="dialog_desc" class="description" [innerHTML]="question()"></div>
-  <ul tab-navigation-directive class="buttons">
-    <li>
-      <button focusable [data]="cancelButton" [buttonType]="'ghost'"></button>
-    </li>
-    <li>
-      <button focusable [data]="confirmButton" [buttonType]="'primary'"></button>
-    </li>
-  </ul>
+  <ng-content></ng-content>
+  <footer>
+    <ul class="buttons">
+      <li>
+        <button focusable 
+          show-button-directive target="confirmDialog" [(show)]="show"
+          [data]="cancelButton"
+          [buttonType]="'ghost'">
+        </button>
+      </li>
+      <li>
+        <button focusable
+          show-button-directive target="confirmDialog" [(show)]="show"
+          [data]="confirmButton"
+          [buttonType]="'primary'">
+          </button>
+      </li>
+    </ul>
+  </footer>
 </div>

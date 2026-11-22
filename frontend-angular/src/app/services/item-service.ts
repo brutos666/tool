@@ -12,7 +12,7 @@ type LoadAction = 'replaceAll' | 'replaceCurrent' | 'append';
 
 @Service()
 export class ItemService {
-  static rootItemData = new ItemData('-1', 'Racine', '', '', '', '');
+  static rootItemData = new ItemData('-1', 'Mes tâches', '', '', '', '');
   private http = inject(HttpClient);
   private rootItemSubject = new BehaviorSubject<TreeData<ItemData>>(
     new TreeData<ItemData>(ItemService.rootItemData),
@@ -74,16 +74,8 @@ export class ItemService {
     }
   }
 
-  public exportAllItems(fileName: string) {
-    const rootItem = this.rootItemSubject.value;
-    this.exportItem(rootItem, fileName || 'toutes_mes_taches.txt');
-  }
-  public exportCurrentItem() {
-    const currentItem = this.currentItemSignal();
-    if (currentItem) {
-      const fileName = `${currentItem.getContent().getTitle().replaceAll(' ', '_')}.txt`;
-      this.exportItem(currentItem, fileName);
-    }
+  public exportItem(item: TreeData<ItemData>, fileName: string) {
+    this.export(item, fileName);
   }
 
   public openFile(file: File) {
@@ -97,6 +89,13 @@ export class ItemService {
     if (currentItem) {
       this.importItems(file, 'replaceCurrent');
     }
+  }
+
+  public proposeFileName(currentItem: TreeData<ItemData>): string {
+    const title = new DOMParser()
+      .parseFromString(currentItem.getContent().getTitle(), 'text/html')
+      .body.textContent.replaceAll(' ', '_');
+    return `${title}.txt`;
   }
 
   private loadItem(treeItem: TreeData<ItemData>) {
@@ -134,12 +133,12 @@ export class ItemService {
     this.treeInfosResponse(treeItem, requestObservable);
   }
 
-  private exportItem(treeItem: TreeData<ItemData>, fileName: string) {
+  private export(treeItem: TreeData<ItemData>, fileName: string) {
     const rootItem = this.rootItemSubject.value;
     const parentItem = rootItem.getTreeByTreeId(treeItem.getParentTreeItemId());
     const treeInfosData = this.getTreeInfoData(parentItem, treeItem);
     const requestObservable = this.http.post<Blob>(
-      '/api/export/items',
+      `/api/export/items?file=${fileName}`,
       treeInfosData,
       this.getFileOptions(this.exportNotificationMessage),
     );

@@ -38,5 +38,7 @@
 </main>
 <notification-center arrow-navigation-directive [navOrientation]="'vertical'"></notification-center>
 @if (showConfirm()) {
-  <confirm-dialog [(show)]="showConfirm" [doCallback]="confirmAction" [question]="confirmQuestion"></confirm-dialog>
+  <confirm-dialog [(show)]="showConfirm" [doCallback]="confirmAction" [question]="confirmQuestion">
+    <field id="inputFileName" label="Nom du fichier" [(value)]="fileName"></field>
+  </confirm-dialog>
 }

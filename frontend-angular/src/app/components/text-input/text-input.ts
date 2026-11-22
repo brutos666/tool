@@ -35,7 +35,6 @@ export class TextInput extends NodeElement implements AfterViewInit {
 
   id = input.required<string>();
   label = input.required<string>();
-  displayLabel = input<string>('false');
   value = model<string>('');
 
   safeValue = computed(() => this.sanitizer.sanitize(SecurityContext.HTML, this.value()) || '');
@@ -55,10 +54,6 @@ export class TextInput extends NodeElement implements AfterViewInit {
 
   ngAfterViewInit(): void {
     this.focusable.setElement(this.input().nativeElement);
-  }
-
-  isDisplayLabel(): boolean {
-    return this.displayLabel() === 'true';
   }
 
   enter() {
