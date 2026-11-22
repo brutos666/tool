@@ -12,7 +12,7 @@ import { TooltipEnable } from '../components/common/TooltipEnable.js';
   ],
   host: {
     'aria-label': 'Outils de saisie des tâches',
-    '(keydown)': 'this.tooltipService.wrongKeyNavigation()',
+    '(keydown)': 'onKeyDown($event)',
     '(click)': 'this.tooltipService.mouseNavigation()',
   },
 })
@@ -38,6 +38,17 @@ export class RootNavigation extends ManualNavigation {
     const index = this.navigables.findIndex((nav) => nav.getElement() === event.currentTarget);
     if (index > -1) {
       this.changeCurrentIndex(index);
+    }
+  }
+
+  onKeyDown(event: KeyboardEvent) {
+    if (['Tab', 'Shift'].includes(event.key)) {
+      return;
+    }
+    if (event.key === 'Escape' && this.tooltipService.showNavigateHelp()) {
+      this.tooltipService.correctKeyNavigation();
+    } else {
+      this.tooltipService.wrongKeyNavigation();
     }
   }
 
