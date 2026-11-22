@@ -4,6 +4,9 @@
     <space-header>Navigation</space-header>
     <space-body>
       <tree-list
+        display-place-holder-directive
+        [overId]="placeHolderService.overId()"
+        [position]="placeHolderService.position()" 
         [dataList]="rootItem().getChildren()"
         [orientation]="'vertical'"
         [layoutData]="navLayout"
@@ -26,7 +29,13 @@
         <item enter-tab-directive [treeData]="currentTreeData" [layoutData]="mainLayout" [title]="true"></item>
       </space-header>
       <space-body>
-        <tree-list [dataList]="currentTreeData.getChildren() || []" [orientation]="'horizontal'" [layoutData]="mainLayout"></tree-list>
+        <tree-list 
+          display-place-holder-directive
+          [overId]="placeHolderService.overId()"
+          [position]="placeHolderService.position()" 
+          [dataList]="currentTreeData.getChildren() || []"
+          [orientation]="'horizontal'"
+          [layoutData]="mainLayout"></tree-list>
       </space-body>
       <space-footer>
         <button focusable [data]="mainAddButton" class="working-space__add-button main-space__add-button" [buttonType]="'item-like'"></button>

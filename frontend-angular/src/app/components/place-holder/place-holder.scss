@@ -1,0 +1,103 @@
+:host {
+  --indicator-round-size: 6px;
+  --indicator-thickness: 2px;
+  z-index: 1;
+  position: relative;
+  outline: none;
+  display: flex;
+}
+:host[direction="column"] {
+  top: 0px;
+  margin-left: var(--medium-padding);
+  margin-right: var(--medium-padding);
+}
+:host[direction="row"] {
+  left: 0px;
+  margin-top: var(--medium-padding);
+  margin-bottom: var(--medium-padding);
+}
+.placeholder {
+  position: absolute;
+  display: flex;
+}
+:host[direction="column"] .placeholder {
+  flex-direction: row;
+  top: 0;
+  width: 100%;
+}
+:host[direction="row"] .placeholder {
+  flex-direction: column;
+  left: 0;
+  height: 100%;
+}
+
+.round {
+  width: var(--indicator-round-size);
+  height: var(--indicator-round-size);
+  border: var(--indicator-thickness) solid var(--color-border-drag-over);
+  border-radius: 50%;
+}
+:host[direction="column"] .line {
+  height: 0;
+  width: calc(100% - var(--indicator-round-size) - var(--indicator-thickness) * 2);
+  border: var(--indicator-thickness) solid var(--color-border-drag-over);
+  justify-self: flex-end;
+  align-self: center;
+  border-radius: var(--border-radius);
+}
+:host[direction="row"] .line {
+  height: calc(100% - var(--indicator-round-size) - var(--indicator-thickness) * 2);
+  width: 0;
+  border: var(--indicator-thickness) solid var(--color-border-drag-over);
+  justify-self: flex-end;
+  align-self: center;
+  border-radius: var(--border-radius);
+}
+
+
+
+/*
+:host::before {
+  content: "";
+  display: inline-block;
+  position: relative;
+  border: var(--indicator-thickness) solid var(--color-border-drag-over);
+  width: var(--indicator-round-size);
+  height: var(--indicator-round-size);
+  border-radius: 50%;
+}
+
+
+
+:host[direction="column"][position="before"] {
+  top: 0;
+}
+
+:host[direction="column"][position="after"] {
+  top: 100%;
+}
+
+:host[direction="column"]::before {
+  top: calc((var(--indicator-round-size) + var(--indicator-thickness)) * -1 / 2);
+  left: calc(-1 * (var(--indicator-round-size) + var(--indicator-thickness)));
+}
+
+:host[direction="row"] {
+  width: var(--indicator-thickness);
+  height: calc(100% - var(--indicator-round-size) - var(--indicator-thickness) * 2);
+  align-self: flex-end;
+}
+
+:host[direction="row"][position="before"] {
+  left: 0;
+}
+
+:host[direction="row"][position="after"] {
+  left: 100%;
+}
+
+:host[direction="row"]::before {
+  left: calc((var(--indicator-round-size) + var(--indicator-thickness)) * -1 / 2);
+  top: calc(-1 * (var(--indicator-round-size) + var(--indicator-thickness)));
+}
+  */

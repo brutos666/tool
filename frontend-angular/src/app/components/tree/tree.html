@@ -12,11 +12,12 @@
     <li class="tree__element">
       @if (selectable()) {
         <tree
+        [attr.over-id]=child.getTreeItemId()
         [selectable]="true"
         [treeData]="child"
         [layoutData]="layoutData()"></tree>
     } @else {
-      <tree [treeData]="child" [layoutData]="layoutData()"></tree>
+      <tree [attr.over-id]=child.getTreeItemId() [treeData]="child" [layoutData]="layoutData()"></tree>
     }
     </li>
   }

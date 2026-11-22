@@ -31,6 +31,8 @@ import { ArrowNavigation } from '../../directives/arrow-navigation';
 import { Help } from '../common/HelpMessage.js';
 import { ConfirmationDialog } from '../confirm-dialog/confirm-dialog';
 import { Field } from '../field/field';
+import { DisplayPlaceHolder } from '../../directives/display-place-holder';
+import { PlaceHolderService } from '../../services/place-holder-service.js';
 
 @Component({
   imports: [
@@ -49,6 +51,7 @@ import { Field } from '../field/field';
     ArrowNavigation,
     ConfirmationDialog,
     Field,
+    DisplayPlaceHolder,
   ],
   standalone: true,
   selector: 'working-space',
@@ -64,6 +67,7 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
   name = 'WorkingSpace';
 
   private itemService = inject(ItemService);
+  private placeHolderService = inject(PlaceHolderService);
 
   static NEW_SPACE_LABEL = 'Saisir un espace';
   static NEW_ITEM_LABEL = 'Saisir un pense-bête';

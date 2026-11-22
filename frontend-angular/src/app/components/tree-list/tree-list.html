@@ -1,6 +1,7 @@
 @for (treeData of dataList();track treeData.getTreeItemId()) {
 <li class="tree__element">
   <tree
+    [attr.over-id]=treeData.getTreeItemId()
     class="tree-list__tree"
     [selectable]="canBeSelected()"
     [treeData]="treeData"

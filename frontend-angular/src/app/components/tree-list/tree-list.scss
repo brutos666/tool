@@ -7,6 +7,9 @@
   display: flex;
   flex-direction: column;
 }
+:host[aria-orientation="horizontal"] .tree__element {
+  flex-direction: row;
+}
 .tree-list__tree {
   background: var(--color-bg-surface);
   border-radius: var(--border-radius);

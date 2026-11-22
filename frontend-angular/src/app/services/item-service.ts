@@ -23,6 +23,7 @@ export class ItemService {
 
   // Identifiant unique indépendant de l'identifiant issu de la base de données. Permet d'identifiant les nouveaux éléments non sauvegardés
   private treeItemId: number = 0;
+  private uniqueId: number = 0;
 
   private loadNotificationMessage = new NotificationMessage(
     'Chargement effectué',
@@ -47,6 +48,10 @@ export class ItemService {
 
   constructor() {
     this.loadItems();
+  }
+
+  public giveUniqueId() {
+    return this.uniqueId++;
   }
 
   public loadItems() {

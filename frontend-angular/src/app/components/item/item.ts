@@ -1,4 +1,13 @@
-import { Component, computed, effect, inject, input, ViewChild } from '@angular/core';
+import {
+  AfterContentInit,
+  Component,
+  computed,
+  effect,
+  inject,
+  input,
+  signal,
+  ViewChild,
+} from '@angular/core';
 import { ItemData } from '../../data/item-data.js';
 import { TextInput } from '../text-input/text-input';
 import { ItemService } from '../../services/item-service.js';
@@ -8,31 +17,34 @@ import { TreeData } from '../../data/tree-data.js';
 import { Layout, Right } from '../common/Types.js';
 import { NodeElement } from '../common/NodeElement.js';
 import { CheckBox } from '../check-box/check-box.js';
+import { FocusableButton } from '../action-button/focusable-button';
+import { PlaceHolderService } from '../../services/place-holder-service.js';
 
 @Component({
-  imports: [TextInput, Toolbar, CheckBox],
+  imports: [TextInput, Toolbar, CheckBox, FocusableButton],
   selector: 'item',
   styleUrl: './item.scss',
   templateUrl: './item.html',
 })
-export class Item extends NodeElement {
+export class Item extends NodeElement implements AfterContentInit {
   name = 'Item';
 
   private itemService = inject(ItemService);
+  private placeHolderService = inject(PlaceHolderService);
 
-  private addIntoAction!: Button;
-  private addUnderAction!: Button;
-  private deleteAction!: Button;
-  private undoToDeleteAction!: Button;
-  buttonsData: Button[] = [];
   layoutData = input.required<Layout>();
   treeData = input.required<TreeData<ItemData>>();
   title = input<boolean>(false);
 
+  showAddInto = signal<boolean>(false);
+  showAddUnder = signal<boolean>(false);
+  showDelete = signal<boolean>(false);
+  showUndoDelete = signal<boolean>(false);
+
   // Crée un signal computed pour extraire la propriété
   itemData = computed(() => this.treeData().getContent());
   itemForm = computed(() => this.itemData().getItemForm());
-  itemId = computed(() => this.itemForm().id);
+  itemId = this.itemService.giveUniqueId();
   deleted = computed(() => this.itemForm().deleted());
   leaf = computed(() => this.treeData().getChildren().length === 0);
   indeterminateState = false;
@@ -43,61 +55,54 @@ export class Item extends NodeElement {
   @ViewChild('title') titleComponent!: TextInput;
   @ViewChild('text') textComponent!: TextInput;
 
+  addIntoAction = new Button(
+    `addInto${this.itemId}`,
+    'Ajouter',
+    "Ajout d'une sous-tâche à la tâche courante",
+    'plus',
+    this.doAddInto.bind(this, 'Nouvel item'),
+  );
+  addUnderAction = new Button(
+    `addAfter${this.itemId}`,
+    'Ajouter en dessous',
+    'Ajout tâche en dessous de la tâche courante',
+    'arrowDownPlus',
+    this.doAddUnder.bind(this, 'Nouvel item'),
+  );
+  deleteAction = new Button(
+    `delete${this.itemId}`,
+    'Marquer à supprimer',
+    'Marque la tâche comme supprimée. La suppression définitive est effectuée lors de la sauvegarde',
+    'cross',
+    this.markToDelete.bind(this),
+  );
+  undoToDeleteAction = new Button(
+    `undoDelete${this.itemId}`,
+    'Annuler la suppression',
+    'Annule le marquage comme supprimée',
+    'undo',
+    this.undoToDelete.bind(this),
+  );
+
   constructor() {
     super();
     effect(() => {
-      const itemId = this.itemId();
       const deleted = this.deleted();
       const leaf = this.leaf();
       const rights = this.getRights(this.layoutData());
-      const buttons: Button[] = [];
       if (rights.includes(Right.create)) {
-        if (this.addIntoAction == null) {
-          this.addIntoAction = new Button(
-            `${itemId}-add`,
-            'Ajouter',
-            "Ajout d'une sous-tâche à la tâche courante",
-            'plus',
-            this.doAddInto.bind(this, 'Nouvel item'),
-          );
-          this.addUnderAction = new Button(
-            `${itemId}-add-after`,
-            'Ajouter en dessous',
-            'Ajout tâche en dessous de la tâche courante',
-            'arrowDownPlus',
-            this.doAddUnder.bind(this, 'Nouvel item'),
-          );
-        }
-        buttons.push(this.addUnderAction);
-        if (leaf) {
-          buttons.push(this.addIntoAction);
-        }
+        this.showAddInto.set(!deleted && leaf);
+        this.showAddUnder.set(true);
       }
       if (rights.includes(Right.delete)) {
-        if (this.deleteAction == null) {
-          this.deleteAction = new Button(
-            `${itemId}-delete`,
-            'Marquer à supprimer',
-            'Marque la tâche comme supprimée. La suppression définitive est effectuée lors de la sauvegarde',
-            'cross',
-            this.markToDelete.bind(this),
-          );
-          this.undoToDeleteAction = new Button(
-            `${itemId}-undo-delete`,
-            'Annuler la suppression',
-            'Annule le marquage comme supprimée',
-            'undo',
-            this.undoToDelete.bind(this),
-          );
-        }
-        buttons.push(this.deleteAction);
-        buttons.push(this.undoToDeleteAction);
+        this.showDelete.set(!deleted);
+        this.showUndoDelete.set(deleted);
       }
-      this.addIntoAction?.setVisible(!deleted);
-      this.deleteAction?.setVisible(!deleted);
-      this.undoToDeleteAction?.setVisible(deleted);
-      this.buttonsData = buttons;
     });
+  }
+
+  ngAfterContentInit(): void {
+    const itemId = this.itemId;
   }
 
   doAddInto(title: string) {

@@ -7,6 +7,9 @@ body {
 *:focus {
   outline: var(--color-border-focus) solid 2px;
 }
+.drag-over-parent {
+  border: var(--color-border-drag-over) solid 1px;
+}
 
 .drag-drop-mode {
   --color-border-focus-item: var(--color-border-drag-over);

@@ -20,7 +20,26 @@
       [disabled]="itemForm().deleted()">
     </text-input>
 
-    <toolbar [buttons]="buttonsData" aria-controls="itemArticle" class="item__toolbar" label="Barre d'outils de la tâche"></toolbar>
+    <toolbar [buttons]="[]" aria-controls="itemArticle" class="item__toolbar" label="Barre d'outils de la tâche">
+      @if (showAddUnder()) {
+        <button focusable 
+          [data]="addUnderAction" [buttonType]="'icon'" 
+          (mouseover)="placeHolderService.setPlaceHolder(treeData().getTreeItemId(), 'after',addUnderAction.id)" 
+          (mouseleave)="placeHolderService.removePlaceHolder()"
+          (focus)="placeHolderService.setPlaceHolder(treeData().getTreeItemId(), 'after',addUnderAction.id)"
+          (blur)="placeHolderService.removePlaceHolder()">
+          </button>
+      }
+      @if (showAddInto()) {
+        <button focusable [data]="addIntoAction" [buttonType]="'icon'"></button>
+      }
+      @if (showDelete()) {
+        <button focusable [data]="deleteAction" [buttonType]="'icon'"></button>
+      }
+      @if (showUndoDelete()) {
+        <button focusable [data]="undoToDeleteAction" [buttonType]="'icon'"></button>
+      }
+    </toolbar>
   </header>
   @if (this.hasText(layout)) {
     <text-input #text 
