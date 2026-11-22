@@ -48,6 +48,14 @@ export class TreeData<T extends Data> {
   addChild(tree: TreeData<T>) {
     this.children.push(tree);
   }
+  addAfterChild(after: TreeData<T>, tree: TreeData<T>) {
+    const index = this.getChildren().findIndex(
+      (treeChild) => treeChild.getTreeItemId() === after.getTreeItemId(),
+    );
+    if (index >= 0) {
+      this.getChildren().splice(index + 1, 0, tree);
+    }
+  }
   removeChild(tree: TreeData<T>) {
     const index = this.getChildren().findIndex(
       (treeChild) => treeChild.getTreeItemId() === tree.getTreeItemId(),

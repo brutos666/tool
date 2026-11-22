@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, input, OnInit, ViewChild } from '@angular/core';
+import { Component, computed, effect, inject, input, ViewChild } from '@angular/core';
 import { ItemData } from '../../data/item-data.js';
 import { TextInput } from '../text-input/text-input';
 import { ItemService } from '../../services/item-service.js';
@@ -20,7 +20,8 @@ export class Item extends NodeElement {
 
   private itemService = inject(ItemService);
 
-  private addAction!: Button;
+  private addIntoAction!: Button;
+  private addUnderAction!: Button;
   private deleteAction!: Button;
   private undoToDeleteAction!: Button;
   buttonsData: Button[] = [];
@@ -33,6 +34,7 @@ export class Item extends NodeElement {
   itemForm = computed(() => this.itemData().getItemForm());
   itemId = computed(() => this.itemForm().id);
   deleted = computed(() => this.itemForm().deleted());
+  leaf = computed(() => this.treeData().getChildren().length === 0);
   indeterminateState = false;
 
   crudModeData = computed(() => this.itemData().getCRUDMode());
@@ -46,19 +48,30 @@ export class Item extends NodeElement {
     effect(() => {
       const itemId = this.itemId();
       const deleted = this.deleted();
+      const leaf = this.leaf();
       const rights = this.getRights(this.layoutData());
       const buttons: Button[] = [];
       if (rights.includes(Right.create)) {
-        if (this.addAction == null) {
-          this.addAction = new Button(
+        if (this.addIntoAction == null) {
+          this.addIntoAction = new Button(
             `${itemId}-add`,
             'Ajouter',
             "Ajout d'une sous-tâche à la tâche courante",
             'plus',
-            this.doAdd.bind(this, 'Nouvel item'),
+            this.doAddInto.bind(this, 'Nouvel item'),
+          );
+          this.addUnderAction = new Button(
+            `${itemId}-add-after`,
+            'Ajouter en dessous',
+            'Ajout tâche en dessous de la tâche courante',
+            'arrowDownPlus',
+            this.doAddUnder.bind(this, 'Nouvel item'),
           );
         }
-        buttons.push(this.addAction);
+        buttons.push(this.addUnderAction);
+        if (leaf) {
+          buttons.push(this.addIntoAction);
+        }
       }
       if (rights.includes(Right.delete)) {
         if (this.deleteAction == null) {
@@ -80,16 +93,20 @@ export class Item extends NodeElement {
         buttons.push(this.deleteAction);
         buttons.push(this.undoToDeleteAction);
       }
-      this.addAction?.setVisible(!deleted);
+      this.addIntoAction?.setVisible(!deleted);
       this.deleteAction?.setVisible(!deleted);
       this.undoToDeleteAction?.setVisible(deleted);
       this.buttonsData = buttons;
     });
   }
 
-  doAdd(title: string) {
+  doAddInto(title: string) {
     const treeData = this.treeData();
     this.itemService.addChildItem(treeData, title);
+  }
+  doAddUnder(title: string) {
+    const treeData = this.treeData();
+    this.itemService.addAfterItem(treeData, title);
   }
   markToDelete() {
     const treeData = this.treeData();

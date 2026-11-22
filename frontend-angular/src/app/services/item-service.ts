@@ -324,6 +324,21 @@ export class ItemService {
     }
   }
 
+  public addAfterItem(treeData: TreeData<ItemData>, title: string) {
+    const rootItem = this.rootItemSubject.value;
+    let parentItem = rootItem.getTreeByTreeId(treeData.getParentTreeItemId());
+    if (!parentItem) {
+      parentItem = rootItem;
+    }
+    const callback = (tree: TreeData<ItemData>) => {
+      const newTreeItem = this.createNewItem(tree.getTreeItemId(), title);
+      tree.addAfterChild(treeData, newTreeItem);
+    };
+    if (this.applyNodes(rootItem, parentItem, callback)) {
+      this.propageUpdates(rootItem);
+    }
+  }
+
   public markToDelete(treeData: TreeData<ItemData>) {
     const rootItem = this.rootItemSubject.value;
     const callback = treeData.getContent().isNew()
@@ -377,6 +392,10 @@ export class ItemService {
     treeData: TreeData<ItemData>,
     callback: Function,
   ): boolean {
+    if (parentTree.getTreeItemId() === treeData.getTreeItemId()) {
+      callback(treeData, parentTree);
+      return true;
+    }
     const nodes = parentTree.getChildren();
     for (let i = 0; i < nodes.length; i++) {
       if (nodes[i].getTreeItemId() === treeData.getTreeItemId()) {
