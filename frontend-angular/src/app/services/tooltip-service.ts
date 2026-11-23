@@ -96,19 +96,7 @@ export class TooltipService {
   place(tooltip: TooltipRef) {
     const parentRect = tooltip.parent.getBoundingClientRect();
     const tooltipEl = tooltip.element;
-    let position = tooltip.position;
-    // Si la position demandée ne tient pas, on tente l'opposée
-    if (!this.fits(position, tooltipEl, parentRect)) {
-      if (this.fits(this.opposite[position], tooltipEl, parentRect)) {
-        position = this.opposite[position];
-      } else if (this.fits(this.otherOrientation[position], tooltipEl, parentRect)) {
-        // Si l'opposée ne tient pas, on tente une disposition contraire (si gauche/droite, on tente au dessus en dessous et inversement)
-        position = this.otherOrientation[position];
-      } else if (this.fits(this.otherOrientation[this.opposite[position]], tooltipEl, parentRect)) {
-        position = this.otherOrientation[this.opposite[position]];
-      }
-    }
-
+    const position = this.giveFitPosition(tooltip.position, tooltipEl, tooltip.parent);
     const { left, top, arrowLeft, arrowTop } = this.coords(position, tooltipEl, parentRect);
     tooltipEl.classList.remove(
       'position-top',
@@ -126,6 +114,27 @@ export class TooltipService {
       arrow.style.top = arrowTop === 'unset' ? 'unset' : `${arrowTop}px`;
     }
   }
+  private giveFitPosition(
+    tooltipPosition: TooltipPosition,
+    tooltipEl: HTMLElement,
+    parentEl: HTMLElement,
+  ) {
+    const parentRect = parentEl.getBoundingClientRect();
+    // Si la position demandée ne tient pas, on tente l'opposée
+    if (!this.fits(tooltipPosition, tooltipEl, parentRect)) {
+      if (this.fits(this.opposite[tooltipPosition], tooltipEl, parentRect)) {
+        return this.opposite[tooltipPosition];
+      }
+      if (this.fits(this.otherOrientation[tooltipPosition], tooltipEl, parentRect)) {
+        // Si l'opposée ne tient pas, on tente une disposition contraire (si gauche/droite, on tente au dessus en dessous et inversement)
+        return this.otherOrientation[tooltipPosition];
+      }
+      if (this.fits(this.otherOrientation[this.opposite[tooltipPosition]], tooltipEl, parentRect)) {
+        return this.otherOrientation[this.opposite[tooltipPosition]];
+      }
+    }
+    return tooltipPosition;
+  }
   private fits(position: TooltipPosition, tooltipEl: HTMLElement, parentRect: DOMRect): boolean {
     const { left, top } = this.coords(position, tooltipEl, parentRect);
     return (
@@ -136,9 +145,11 @@ export class TooltipService {
     );
   }
   private coords(position: TooltipPosition, tooltipEl: HTMLElement, parentRect: DOMRect) {
-    const gap = 8;
-    const w = tooltipEl.offsetWidth;
-    const h = tooltipEl.offsetHeight;
+    const gap = parseFloat(getComputedStyle(tooltipEl).getPropertyValue('--arrow-size'));
+    const tooltipRect = tooltipEl.getBoundingClientRect();
+    const w = tooltipRect.width;
+    const h = tooltipRect.height;
+
     const verticalTop = Math.max(
       this.MARGIN,
       Math.min(
@@ -186,5 +197,34 @@ export class TooltipService {
           arrowTop: verticalMiddle - verticalTop,
         };
     }
+  }
+
+  public giveVerticalPosition(tooltipEl: HTMLElement, parentRect: DOMRect) {
+    const gap = parseFloat(getComputedStyle(tooltipEl).getPropertyValue('--arrow-size'));
+    const tooltipRect = tooltipEl.getBoundingClientRect();
+    if (this.isTopOk(tooltipEl, parentRect.bottom + gap)) {
+      return 'bottom';
+    }
+    if (this.isTopOk(tooltipEl, parentRect.top - tooltipRect.height - gap)) {
+      return 'top';
+    }
+    return '';
+  }
+  public giveHorizontalPosition(tooltipEl: HTMLElement, parentRect: DOMRect) {
+    const gap = parseFloat(getComputedStyle(tooltipEl).getPropertyValue('--arrow-size'));
+    const tooltipRect = tooltipEl.getBoundingClientRect();
+    if (this.isLeftOk(tooltipEl, parentRect.right + gap)) {
+      return 'right';
+    }
+    if (this.isLeftOk(tooltipEl, parentRect.left - tooltipRect.width - gap)) {
+      return 'left';
+    }
+    return '';
+  }
+  private isTopOk(tooltipEl: HTMLElement, top: number) {
+    return top >= 0 && top + tooltipEl.offsetHeight <= window.innerHeight;
+  }
+  private isLeftOk(tooltipEl: HTMLElement, left: number) {
+    return left >= 0 && left + tooltipEl.offsetWidth <= window.innerWidth;
   }
 }

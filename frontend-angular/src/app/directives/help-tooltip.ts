@@ -29,7 +29,7 @@ export class HelpTooltip implements OnDestroy {
   constructor() {
     effect(() => {
       this.hideTooltip();
-      if (this.tooltipProperties.showTooltip() && this.tooltipProperties.tooltip()) {
+      if (this.tooltipProperties.showTooltip() && this.tooltipProperties.tooltip) {
         this.showTooltip();
       }
     });
@@ -49,12 +49,12 @@ export class HelpTooltip implements OnDestroy {
     window.addEventListener('scroll', this.onViewportChange, true);
 
     this.ref = createComponent(Tooltip, { environmentInjector: this.envInjector });
-    this.ref.setInput('text', this.tooltipProperties.tooltip());
-    this.ref.setInput('position', this.tooltipProperties.tooltipPosition());
+    this.ref.setInput('text', this.tooltipProperties.tooltip);
+    this.ref.setInput('position', this.tooltipProperties.tooltipPosition);
     this.tooltipRef = {
       parent: this.element,
       element: this.ref.location.nativeElement,
-      position: this.tooltipProperties.tooltipPosition(),
+      position: this.tooltipProperties.tooltipPosition,
     };
 
     this.appRef.attachView(this.ref.hostView);

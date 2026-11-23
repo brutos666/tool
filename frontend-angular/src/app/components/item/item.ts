@@ -65,7 +65,7 @@ export class Item extends NodeElement implements AfterContentInit {
   addUnderAction = new Button(
     `addAfter${this.itemId}`,
     'Ajouter en dessous',
-    'Ajout tâche en dessous de la tâche courante',
+    "Ajout d'une tâche en dessous de la tâche courante",
     'arrowDownPlus',
     this.doAddUnder.bind(this, 'Nouvel item'),
   );

@@ -1,0 +1,83 @@
+:host {
+  --max-text-size: 300px;
+  --arrow-size: 20px;
+  position: fixed;
+  z-index: 9999;
+}
+.halo {
+  position: absolute;
+}
+.tip {
+  position: absolute;
+  display: flex;
+}
+:host.position-bottom .tip {
+  top: 80%;
+  left: 50%;
+  flex-direction: column;
+}
+:host.position-top .tip {
+  left: 50%;
+  transform: translateY(-100%);
+  flex-direction: column-reverse;
+}
+:host.position-top .arrow,
+:host.position-bottom .arrow {
+  width: 1px;
+  height: 0px;
+  transition: height 0.6s;
+}
+:host.position-top.tooltip--show .arrow,
+:host.position-bottom.tooltip--show .arrow {
+  height: var(--arrow-size);
+  transition: height 0.6s;
+}
+:host.position-top .line,
+:host.position-bottom .line {
+  width: 0px;
+  height: 1px;
+  transition: width 0.6s;
+}
+:host.position-top.tooltip--show .line,
+:host.position-bottom.tooltip--show .line {
+  width: 100%;
+  transition: width 0.6s;
+}
+:host.position-left .arrow,
+:host.position-left .line,
+:host.position-left .text {
+  transform: translateX(-100%);
+}
+
+.arrow, .line {
+  background: var(--color-text);
+}
+.tip,
+.arrow,
+.line,
+.text,
+:host.tooltip--show .tip,
+:host.tooltip--show .arrow,
+:host.tooltip--show .line,
+:host.tooltip--show .text {
+  pointer-events: none;
+}
+
+.text {
+  width: max-content;
+  max-width: var(--max-text-size);
+  padding: var(--medium-padding);
+  background-color: var(--color-bg);
+
+  opacity: 0;
+  visibility: hidden;
+  -webkit-transition: opacity 0.7s ease, visibility 0.7s ease;
+  transition: opacity 0.7s ease, visibility 0.7s ease;
+}
+:host.tooltip--show .text {
+  opacity: 1;
+  visibility: visible;
+  -webkit-transition: opacity 0.7s ease, visibility 0.7s ease;
+  transition: opacity 0.7s ease, visibility 0.7s ease;
+}
+

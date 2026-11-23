@@ -1,4 +1,5 @@
 :host {
+  --arrow-size: 6px;
   position: fixed;
   z-index: 9999;
   background: var(--color-info);
@@ -11,7 +12,7 @@
 }
 .arrow {
   position: absolute;
-  border: 6px solid transparent;
+  border: var(--arrow-size) solid transparent;
 }
 // La flèche pointe vers l'élément, donc elle est du côté opposé à la position
 :host.position-top .arrow {
@@ -20,21 +21,18 @@
   transform: translateX(-50%);
   border-top-color: var(--color-info);
 }
-
 :host.position-bottom .arrow {
   bottom: 100%;
   left: 50%;
   transform: translateX(-50%);
   border-bottom-color: var(--color-info);
 }
-
 :host.position-right .arrow {
   right: 100%;
   top: 50%;
   transform: translateY(-50%);
   border-right-color: var(--color-info);
 }
-
 :host.position-left .arrow {
   left: 100%;
   top: 50%;

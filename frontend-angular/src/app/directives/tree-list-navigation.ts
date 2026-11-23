@@ -24,15 +24,13 @@ export class TreeListNavigation extends MoveNavigation {
   navOrientation = input<'horizontal' | 'vertical'>('vertical');
   override helpMessage = computed(() => {
     if (this.navEnabled()) {
+      this.tooltipPosition = this.navOrientation() === 'horizontal' ? 'right' : 'bottom';
       return this.navOrientation() === 'horizontal'
         ? Help.TREE_LIST_NAVIGATION_HORIZONTAL
         : Help.TREE_LIST_NAVIGATION_VERTICAL;
     }
     return '';
   });
-  override tooltipPosition = computed(() =>
-    this.navOrientation() === 'horizontal' ? 'right' : 'bottom',
-  );
 
   override interceptKeys() {
     const keys = [...super.interceptKeys()];

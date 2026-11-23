@@ -1,8 +1,9 @@
-import { Component, computed, ElementRef, input, viewChild } from '@angular/core';
+import { Component, computed, effect, ElementRef, input, signal, viewChild } from '@angular/core';
 import { NodeElement } from '../common/NodeElement.js';
 import { Icon } from '../icon/icon.js';
 import { LabelInput } from '../label-input/label-input.js';
 import { Button } from './button.js';
+import { TooltipEnable, TooltipPosition } from '../common/TooltipEnable.js';
 
 @Component({
   imports: [Icon, LabelInput],
@@ -20,12 +21,19 @@ import { Button } from './button.js';
     '[attr.role]': 'role()',
     '(click)': 'onClick($event)',
     '(mousedown)': 'onMouseDown($event)',
+    '(mouseover)': 'this.showTooltip.set(true)',
+    '(mouseleave)': 'this.showTooltip.set(false)',
+    '(focus)': 'this.showTooltip.set(true)',
+    '(blur)': 'this.showTooltip.set(false)',
   },
 })
-export class ActionButton extends NodeElement {
+export class ActionButton extends NodeElement implements TooltipEnable {
   data = input.required<Button>();
   buttonType = input.required<'icon' | 'menu' | 'label' | 'primary' | 'ghost' | 'item-like'>();
   role = input<'button' | 'menuitem'>('button');
+  tooltip: string = '';
+  showTooltip = signal<boolean>(false);
+  tooltipPosition: TooltipPosition = 'top';
 
   labelButton = computed(
     () =>
@@ -37,6 +45,7 @@ export class ActionButton extends NodeElement {
 
   constructor() {
     super();
+    effect(() => (this.tooltip = this.data().description));
   }
 
   rotate90(rotate: boolean) {

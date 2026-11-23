@@ -19,7 +19,7 @@ export class TreeNavigation extends MoveNavigation {
   override helpMessage = computed(
     () => (this.navigateInRoot() && this.navEnabled() && Help.TREE_NAVIGATION) || '',
   );
-  override tooltipPosition: Signal<TooltipPosition> = signal<TooltipPosition>('bottom');
+  override tooltipPosition: TooltipPosition = 'bottom';
 
   changeOpenState(open: boolean) {
     this.openState.set(open);

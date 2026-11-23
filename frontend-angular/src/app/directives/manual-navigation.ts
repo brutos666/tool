@@ -40,9 +40,9 @@ export class ManualNavigation extends Focusable implements Navigate, TooltipEnab
 
   protected helpMessage: Signal<string> = signal<string>('');
 
-  tooltip = signal<string>('');
   showTooltip = signal<boolean>(false);
-  tooltipPosition: Signal<TooltipPosition> = signal<TooltipPosition>('right');
+  tooltip: string = '';
+  tooltipPosition: TooltipPosition = 'right';
 
   elementRef = inject(ElementRef);
 
@@ -60,9 +60,8 @@ export class ManualNavigation extends Focusable implements Navigate, TooltipEnab
       if (!this.containFocus) {
         return;
       }
-      this.tooltip.set(
-        this.helpMessage() + (this.selectable() && this.isFocused() ? Help.SELECT_NAVIGATION : ''),
-      );
+      this.tooltip =
+        this.helpMessage() + (this.selectable() && this.isFocused() ? Help.SELECT_NAVIGATION : '');
       this.showTooltip.set(show);
     });
     afterRenderEffect({
