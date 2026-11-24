@@ -40,7 +40,7 @@ Voici la liste non exhaustive :
 - Angular 22
   - RxJS : sujet, observable
   - signaux
-  - directives : gestion de la navigation avec des directives
+  - directives : gestion de la navigation et de l'affichage des tooltips via des directives
   - services
   - intercepteur pour afficher les messages de succès ou d'erreur
   - formulaire avec signaux (dans le repo cartographie) (https://angular.dev/essentials/signal-forms)
@@ -48,6 +48,8 @@ Voici la liste non exhaustive :
   - Modifications pour externaliser ce qui doit l'être (configs, sql, port, listen, ...)
   - création des fichiers DockerFile et docker-compose
   - Pouvoir modifier les sources et debugger dans un environnement lancé via docker compose
+- Wails
+  - Permet de faire tourner l'application en local sans navigateur
 
 # Outil de gestion de tâches à faire
 

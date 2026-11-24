@@ -131,7 +131,7 @@ backend-go/
 
 # La logique métier :
 
-## Les utilisateurs :
+## Les utilisateurs (NOTE : inutiles aujourd'hui car rien n'est rattaché à un utilisateur) :
 
 - l'utilisateur connecté
 - l'utilisateur ADMIN (à faire)
@@ -158,12 +158,14 @@ Un espace avec une arborescence incohérente apparaît en erreur quand il appara
 
 ### Actions
 
-- Alimenter l'espace de navigation avec la liste des espaces
+- Charger l'espace de navigation avec la liste des espaces précédemment sauvegarder en base de données
 - Sauvegarder tous les espaces ou l'espace courant (qui est également celui visualisé dans la zone de droite)
+- Télécharger (ou Exporter) les espaces ou l'espace courant dans un fichier
+- Importer les espaces à la suite des tâches existantes ou remplacer l'espace depuis un fichier
+- Ouverture : permet de visualiser les tâches précédemment exporter dans un fichier (les données en base seront remplacée !!!)
 
 ### A faire :
 
-- import/export (fait en Java)
 - associer un espace à un utilisateur
 - gestion intelligente de la case à cocher TODO
 - associer une vue à un espace "racine" (todo list/sample mapping)
