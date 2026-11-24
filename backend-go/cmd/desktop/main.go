@@ -19,6 +19,9 @@ import (
 //go:embed frontend/dist/frontend-angular/browser
 var assets embed.FS
 
+//go:embed schema-sqlite.sql
+var schemaSQLite string
+
 func main() {
 	app := application.New(application.Options{
 		Name:        "BrutosTool",

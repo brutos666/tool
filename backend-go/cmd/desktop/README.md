@@ -7,6 +7,8 @@ Compiler angular (NOTE: Les parenthèses permettent de lancer la commande dans u
 (cd ../../../frontend-angular/ && npm run build)
 # Copie du résultat
 cp -r ../../../frontend-angular/dist ./frontend
+# Copie du fichier Sql pour qu'il soit compilé dans l'exécutable
+cp ../../schema-sqlite.sql .
 ## Compilation (embarque le front)
 go build -o wails-tool .
 

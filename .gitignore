@@ -9,6 +9,9 @@ backend-tool/*.log
 node_modules/
 backend-go/cmd/desktop/frontend/
 
+# wails
+wails-tool
+
 # Database
 database/*
 
