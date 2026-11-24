@@ -73,7 +73,7 @@
   --medium-space: calc(var(--small-space) * 2);
   --global-space: calc(var(--small-space) * 3);
   --large-space: calc(var(--small-space) * 4);
-  --icon-width: 24px;
+  --icon-size: 24px;
   --icon-padding: var(--global-space);
 
   --global-padding: var(--global-space);

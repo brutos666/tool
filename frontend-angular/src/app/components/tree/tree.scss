@@ -1,12 +1,12 @@
 .tree__element {
-  padding-left: var(--icon-width);
+  padding-left: var(--icon-size);
 }
 
 /** Disposition **/
 :host {
   flex: 1;
   display: grid;
-  grid-template-columns: var(--icon-width) 1fr;
+  grid-template-columns: var(--icon-size) 1fr;
   grid-template-rows: auto 1fr; 
 }
 .tree__toggle {
