@@ -1,15 +1,15 @@
-import { computed, Directive, input, Signal, signal } from '@angular/core';
+import { computed, Directive, input, signal } from '@angular/core';
 import { Navigate } from '../components/common/Navigate.js';
 import { MoveNavigation } from './move-navigation.js';
 import { Navigable } from '../components/common/Navigable.js';
 import { Help } from '../components/common/HelpMessage.js';
-import { TooltipEnable, TooltipPosition } from '../components/common/TooltipEnable.js';
+import { TooltipPosition, WithPositionedTooltip } from '../components/common/WithPositionedTooltip.js';
 
 @Directive({
   selector: '[tree-navigation-directive]',
   providers: [
     { provide: Navigate, useExisting: TreeNavigation },
-    { provide: TooltipEnable, useExisting: TreeNavigation },
+    { provide: WithPositionedTooltip, useExisting: TreeNavigation },
   ],
 })
 export class TreeNavigation extends MoveNavigation {

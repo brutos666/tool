@@ -3,9 +3,10 @@ import { FocusableButton } from '../action-button/focusable-button';
 import { Button } from '../action-button/button.js';
 import { Popup } from '../common/Popup.js';
 import { ShowButton } from '../../directives/show-button';
+import { InfoTooltip } from '../../directives/info-tooltip';
 
 @Component({
-  imports: [FocusableButton, ShowButton],
+  imports: [FocusableButton, ShowButton, InfoTooltip],
   selector: 'confirm-dialog',
   styleUrl: './confirm-dialog.scss',
   templateUrl: './confirm-dialog.html',

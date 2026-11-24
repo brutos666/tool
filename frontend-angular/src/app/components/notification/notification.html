@@ -1,4 +1,5 @@
 <span class="notification__message" [innerHtml]="data().getMessage()"></span>
 @if (!data().isShortLived()) {
-  <button focusable class="notification__trash" [data]="trashButton" [buttonType]="'icon'"></button>
+<button focusable class="notification__trash" [data]="trashButton" [buttonType]="'icon'"
+  [tooltip]="trashButton.description"></button>
 }

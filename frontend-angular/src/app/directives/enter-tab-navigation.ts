@@ -3,14 +3,14 @@ import { Navigate } from '../components/common/Navigate.js';
 import { Navigable } from '../components/common/Navigable.js';
 import { TabNavigation } from './tab-navigation.js';
 import { Help } from '../components/common/HelpMessage.js';
-import { TooltipEnable } from '../components/common/TooltipEnable.js';
+import { WithPositionedTooltip } from '../components/common/WithPositionedTooltip.js';
 
 @Directive({
   selector: '[enter-tab-directive]',
   providers: [
     { provide: Navigable, useExisting: EnterTabNavigation },
     { provide: Navigate, useExisting: EnterTabNavigation },
-    { provide: TooltipEnable, useExisting: EnterTabNavigation },
+    { provide: WithPositionedTooltip, useExisting: EnterTabNavigation },
   ],
   host: {
     '[class]': 'inside() ? "inside" : "outside"',

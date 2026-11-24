@@ -1,28 +1,12 @@
 @if (menuOrientation.orientation() === 'vertical') {
-  <li class="menu__element">
-    <button focusable
-      popup-button-directive target="menuContent" [opened]="menuOpened()"
-      #burgerItem
-      [data]="burgerItemData"
-      [buttonType]="'menu'"></button>
-  </li>
-  <menu-content
-    popover-directive [(show)]="menuOpened"
-    #menu
-    id="menuContent"
-    class="menu__content"
-    [navOrientation]="'vertical'"
-    [menuItems]="menuItems()"
-    [label]="label()">
-  </menu-content>
+<li class="menu__element">
+  <button focusable popup-button-directive target="menuContent" [opened]="menuOpened()" #burgerItem
+    [data]="burgerItemData" [buttonType]="'menu'" [tooltip]="burgerItemData.description"></button>
+</li>
+<menu-content popover-directive [(show)]="menuOpened" #menu id="menuContent" class="menu__content"
+  [navOrientation]="'vertical'" [menuItems]="menuItems()" [label]="label()">
+</menu-content>
 } @else {
-  <menu-content
-    #menu
-    class="menu__content"
-    [navOrientation]="'horizontal'"
-    [menuItems]="menuItems()"
-    [label]="label()">
-  </menu-content>
+<menu-content #menu class="menu__content" [navOrientation]="'horizontal'" [menuItems]="menuItems()" [label]="label()">
+</menu-content>
 }
-
-

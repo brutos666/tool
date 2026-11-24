@@ -3,19 +3,13 @@
   <space>
     <space-header>Navigation</space-header>
     <space-body>
-      <tree-list
-        display-place-holder-directive
-        [overId]="placeHolderService.overId()"
-        [position]="placeHolderService.position()" 
-        [dataList]="rootItem().getChildren()"
-        [orientation]="'vertical'"
-        [layoutData]="navLayout"
-        [emptyMessage]="emptyStateNav"
-        [canBeSelected]="true"
-        ></tree-list>
+      <tree-list display-place-holder-directive [overId]="placeHolderService.overId()"
+        [position]="placeHolderService.position()" [dataList]="rootItem().getChildren()" [orientation]="'vertical'"
+        [layoutData]="navLayout" [emptyMessage]="emptyStateNav" [canBeSelected]="true"></tree-list>
     </space-body>
     <space-footer>
-      <button focusable class="working-space__add-button"  [data]="navAddButton" [buttonType]="'item-like'"></button>
+      <button focusable class="working-space__add-button" [data]="navAddButton" [buttonType]="'item-like'"
+        [tooltip]="navAddButton.description"></button>
     </space-footer>
   </space>
 </aside>
@@ -23,31 +17,28 @@
 <main #mainSpace class="working-space__main">
   @let currentTreeData = currentItem();
   @if (currentTreeData) {
-    <toolbar class="working-space__toolbar" [buttons]="mainButtons" [toolbarType]="'menu'" [label]="mainLabel"></toolbar>
-    <space>
-      <space-header class="main-space__header">
-        <item enter-tab-directive [treeData]="currentTreeData" [layoutData]="mainLayout" [title]="true"></item>
-      </space-header>
-      <space-body>
-        <tree-list 
-          display-place-holder-directive
-          [overId]="placeHolderService.overId()"
-          [position]="placeHolderService.position()" 
-          [dataList]="currentTreeData.getChildren() || []"
-          [orientation]="'horizontal'"
-          [layoutData]="mainLayout"></tree-list>
-      </space-body>
-      <space-footer>
-        <button focusable [data]="mainAddButton" class="working-space__add-button main-space__add-button" [buttonType]="'item-like'"></button>
-      </space-footer>
-    </space>
+  <toolbar class="working-space__toolbar" [buttons]="mainButtons" [toolbarType]="'menu'" [label]="mainLabel"></toolbar>
+  <space>
+    <space-header class="main-space__header">
+      <item enter-tab-directive [treeData]="currentTreeData" [layoutData]="mainLayout" [title]="true"></item>
+    </space-header>
+    <space-body>
+      <tree-list display-place-holder-directive [overId]="placeHolderService.overId()"
+        [position]="placeHolderService.position()" [dataList]="currentTreeData.getChildren() || []"
+        [orientation]="'horizontal'" [layoutData]="mainLayout"></tree-list>
+    </space-body>
+    <space-footer>
+      <button focusable [data]="mainAddButton" class="working-space__add-button main-space__add-button"
+        [buttonType]="'item-like'" [tooltip]="mainAddButton.description"></button>
+    </space-footer>
+  </space>
   } @else {
-    <p class="working-space__empty-state" [innerHTML]="emptyStateMain"></p>
+  <p class="working-space__empty-state" [innerHTML]="emptyStateMain"></p>
   }
 </main>
 <notification-center arrow-navigation-directive [navOrientation]="'vertical'"></notification-center>
 @if (showConfirm()) {
-  <confirm-dialog [(show)]="showConfirm" [doCallback]="confirmAction" [question]="confirmQuestion">
-    <field id="inputFileName" label="Nom du fichier" [(value)]="fileName"></field>
-  </confirm-dialog>
+<confirm-dialog [(show)]="showConfirm" [doCallback]="confirmAction" [question]="confirmQuestion">
+  <field id="inputFileName" label="Nom du fichier" [(value)]="fileName"></field>
+</confirm-dialog>
 }

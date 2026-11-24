@@ -1,10 +1,9 @@
-<menu
-  class="menu" role="menu">
+<menu class="menu" role="menu">
   @for (item of menuItems(); track item.label) {
-    <li class="menu__element">
-      <button focusable [data]="item" [buttonType]="'menu'" [role]="'menuitem'"></button>
-    </li>
+  <li class="menu__element">
+    <button focusable [data]="item" [buttonType]="'menu'" [role]="'menuitem'" [tooltip]="item.description"></button>
+  </li>
   } @empty {
-    No tabs available.
+  No tabs available.
   }
 </menu>

@@ -3,14 +3,14 @@ import { Navigate } from '../components/common/Navigate.js';
 import { Navigable } from '../components/common/Navigable.js';
 import { MoveNavigation } from './move-navigation.js';
 import { Help } from '../components/common/HelpMessage.js';
-import { TooltipEnable } from '../components/common/TooltipEnable.js';
+import { WithPositionedTooltip } from '../components/common/WithPositionedTooltip.js';
 
 @Directive({
   selector: '[arrow-navigation-directive]',
   providers: [
     { provide: Navigable, useExisting: ArrowNavigation },
     { provide: Navigate, useExisting: ArrowNavigation },
-    { provide: TooltipEnable, useExisting: ArrowNavigation },
+    { provide: WithPositionedTooltip, useExisting: ArrowNavigation },
   ],
   host: {
     '[attr.aria-orientation]': 'navOrientation()',

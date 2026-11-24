@@ -14,7 +14,7 @@ import { Navigate } from '../components/common/Navigate.js';
 import { Focusable } from './focusable.js';
 import { Help } from '../components/common/HelpMessage.js';
 import { HelpTooltip } from './help-tooltip.js';
-import { TooltipEnable, TooltipPosition } from '../components/common/TooltipEnable.js';
+import { TooltipPosition, WithPositionedTooltip } from '../components/common/WithPositionedTooltip.js';
 import { TooltipService } from '../services/tooltip-service.js';
 
 /** Cette classe gère la navigation manuelle d'un composant focusable à un autre */
@@ -24,14 +24,15 @@ import { TooltipService } from '../services/tooltip-service.js';
   providers: [
     { provide: Navigable, useExisting: ManualNavigation },
     { provide: Navigate, useExisting: ManualNavigation },
-    { provide: TooltipEnable, useExisting: ManualNavigation },
+    { provide: WithPositionedTooltip, useExisting: ManualNavigation },
   ],
   host: {
     '[attr.index-focus]': 'getFocusIndex()',
+    '[attr.tooltip]': 'helpMessage()',
     '(mousedown)': 'onMouseDown($event)',
   },
 })
-export class ManualNavigation extends Focusable implements Navigate, TooltipEnable {
+export class ManualNavigation extends Focusable implements Navigate, WithPositionedTooltip {
   override name = 'ManualNavigation';
   selected = model<boolean>(false);
   selectable = input<boolean>(false);

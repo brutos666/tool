@@ -2,7 +2,7 @@ import { Directive, effect, model, OnDestroy } from '@angular/core';
 import { Navigable } from '../components/common/Navigable.js';
 import { Navigate } from '../components/common/Navigate.js';
 import { ManualNavigation } from './manual-navigation.js';
-import { TooltipEnable } from '../components/common/TooltipEnable.js';
+import { WithPositionedTooltip } from '../components/common/WithPositionedTooltip.js';
 
 /** Cette classe gère la navigation manuelle d'un composant focusable à un autre */
 @Directive({
@@ -10,7 +10,7 @@ import { TooltipEnable } from '../components/common/TooltipEnable.js';
   providers: [
     { provide: Navigable, useExisting: KeyboardNavigation },
     { provide: Navigate, useExisting: KeyboardNavigation },
-    { provide: TooltipEnable, useExisting: KeyboardNavigation },
+    { provide: WithPositionedTooltip, useExisting: KeyboardNavigation },
   ],
   host: {
     '[attr.index-focus]': 'getFocusIndex()',

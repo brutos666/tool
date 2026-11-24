@@ -2,13 +2,13 @@ import { Directive } from '@angular/core';
 import { Navigate } from '../components/common/Navigate.js';
 import { ManualNavigation } from './manual-navigation.js';
 import { Navigable } from '../components/common/Navigable.js';
-import { TooltipEnable } from '../components/common/TooltipEnable.js';
+import { WithPositionedTooltip } from '../components/common/WithPositionedTooltip.js';
 
 @Directive({
   selector: '[workspace-navigation-directive]',
   providers: [
     { provide: Navigate, useExisting: RootNavigation },
-    { provide: TooltipEnable, useExisting: RootNavigation },
+    { provide: WithPositionedTooltip, useExisting: RootNavigation },
   ],
   host: {
     'aria-label': 'Outils de saisie des tâches',

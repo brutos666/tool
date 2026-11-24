@@ -4,18 +4,17 @@ import { Navigable } from '../components/common/Navigable.js';
 import { TreeNavigation } from './tree-navigation.js';
 import { MoveNavigation } from './move-navigation.js';
 import { Help } from '../components/common/HelpMessage.js';
-import { TooltipEnable } from '../components/common/TooltipEnable.js';
+import { WithPositionedTooltip } from '../components/common/WithPositionedTooltip.js';
 
 @Directive({
   selector: '[tree-list-navigation-directive]',
   providers: [
     { provide: Navigable, useExisting: TreeListNavigation },
     { provide: Navigate, useExisting: TreeListNavigation },
-    { provide: TooltipEnable, useExisting: TreeListNavigation },
+    { provide: WithPositionedTooltip, useExisting: TreeListNavigation },
   ],
   host: {
     '[attr.aria-orientation]': 'navOrientation()',
-    'aria-description': "Ctrl+ flèche directionnelle pour aller d'un arbre à l'autre",
   },
 })
 export class TreeListNavigation extends MoveNavigation {

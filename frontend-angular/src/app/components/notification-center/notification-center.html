@@ -1,26 +1,26 @@
 <div class="notification__center">
-    @if (show()) {
-      @for (notification of notifications(); track notification.getId()) {
-        <notification enter-tab-directive [data]="notification"></notification>
-      } @empty {
-        Pas de notification
-      }
-    } @else {
-      @for (notification of popNotifications(); track notification.getId()) {
-      <notification [data]="notification"></notification>
-      }
-    }
-    @if (showHelp()) {
-      @for (notification of helpNotifications(); track notification.getId()) {
-      <notification enter-tab-directive [data]="notification"></notification>
-      }
-    }
+  @if (show()) {
+  @for (notification of notifications(); track notification.getId()) {
+  <notification enter-tab-directive [data]="notification"></notification>
+  } @empty {
+  Pas de notification
+  }
+  } @else {
+  @for (notification of popNotifications(); track notification.getId()) {
+  <notification [data]="notification"></notification>
+  }
+  }
+  @if (showHelp()) {
+  @for (notification of helpNotifications(); track notification.getId()) {
+  <notification enter-tab-directive [data]="notification"></notification>
+  }
+  }
 </div>
 
 <toolbar class="notification__buttons" [buttons]="[]" label="Barre d'outil des notifications">
   <button focusable show-popup-button-directive target="actions" [(show)]="show" [data]="notificationButton"
-    [buttonType]="'menu'">
+    [buttonType]="'menu'" [tooltip]="notificationButton.description">
   </button>
   <button focusable show-popup-button-directive target="notificationHelp" [(show)]="showHelp" [data]="infoButton"
-    [buttonType]="'menu'"></button>
+    [buttonType]="'menu'" [tooltip]="infoButton.description"></button>
 </toolbar>

@@ -1,8 +1,4 @@
-<div 
-  id="confirmDialog"
-  role="alertdialog"
-  aria-labelledby="dialog_label"
-  aria-describedby="dialog_desc"
+<div id="confirmDialog" role="alertdialog" aria-labelledby="dialog_label" aria-describedby="dialog_desc"
   aria-modal="true">
   <header>
     <h3 id="dialog_label">Confirmation</h3>
@@ -12,18 +8,14 @@
   <footer>
     <ul class="buttons">
       <li>
-        <button focusable 
-          show-button-directive target="confirmDialog" [(show)]="show"
-          [data]="cancelButton"
-          [buttonType]="'ghost'">
+        <button focusable show-button-directive target="confirmDialog" [(show)]="show" [data]="cancelButton"
+          [buttonType]="'ghost'" [tooltip]="cancelButton.description">
         </button>
       </li>
       <li>
-        <button focusable
-          show-button-directive target="confirmDialog" [(show)]="show"
-          [data]="confirmButton"
-          [buttonType]="'primary'">
-          </button>
+        <button focusable show-button-directive target="confirmDialog" [(show)]="show" [data]="confirmButton"
+          [buttonType]="'primary'" [tooltip]="confirmButton.description">
+        </button>
       </li>
     </ul>
   </footer>

@@ -1,5 +1,5 @@
 import { Component, input } from '@angular/core';
-import { TooltipPosition } from '../common/TooltipEnable.js';
+import { TooltipPosition } from '../common/WithPositionedTooltip.js';
 
 @Component({
   selector: 'tooltip',

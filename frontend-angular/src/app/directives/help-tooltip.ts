@@ -10,15 +10,15 @@ import {
   OnDestroy,
 } from '@angular/core';
 import { Tooltip } from '../components/tooltip/tooltip.js';
-import { TooltipEnable } from '../components/common/TooltipEnable.js';
 import { TooltipRef, TooltipService } from '../services/tooltip-service.js';
+import { WithPositionedTooltip } from '../components/common/WithPositionedTooltip.js';
 
 @Directive({
   selector: '[help-tooltip]',
 })
 export class HelpTooltip implements OnDestroy {
   private element = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
-  private tooltipProperties = inject(TooltipEnable);
+  private tooltipProperties = inject(WithPositionedTooltip);
   private tooltipService = inject(TooltipService);
 
   private appRef = inject(ApplicationRef);

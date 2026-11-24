@@ -1,57 +1,43 @@
 @let layout=layoutData();
 <article class="item {{getClassForCRUDMode(crudModeData())}} {{getClassForLayout(layoutData())}}">
-    <header class="item__header">
-      @if (this.hasDone(layout)) {
-        <check-box #done
-          [id]="itemForm().id + '-done'"
-          label="Effectué/non effectué"
-          [checked]="itemForm().done()"
-          (checkedChange)="itemForm().done.set($event)"
-          [indeterminate]="itemForm().indeterminate()"
-          (indeterminateChange)="itemForm().indeterminate.set($event)"
-          [disabled]="itemForm().deleted()">
-        </check-box>
-      }
-    <text-input #title
-      [id]="itemForm().id + '-title'"
-      label="Titre de l'item" class="item__title"
-      [value]="itemForm().title()"
-      (valueChange)="itemForm().title.set($event)"
-      [disabled]="itemForm().deleted()">
+  <header class="item__header">
+    @if (this.hasDone(layout)) {
+    <check-box #done [id]="itemForm().id + '-done'" label="Effectué/non effectué" [checked]="itemForm().done()"
+      (checkedChange)="itemForm().done.set($event)" [indeterminate]="itemForm().indeterminate()"
+      (indeterminateChange)="itemForm().indeterminate.set($event)" [disabled]="itemForm().deleted()">
+    </check-box>
+    }
+    <text-input #title [id]="itemForm().id + '-title'" label="Titre de l'item" class="item__title"
+      [value]="itemForm().title()" (valueChange)="itemForm().title.set($event)" [disabled]="itemForm().deleted()">
     </text-input>
 
     <toolbar [buttons]="[]" aria-controls="itemArticle" class="item__toolbar" label="Barre d'outils de la tâche">
       @if (showAddUnder()) {
-        <button focusable 
-          [data]="addUnderAction" [buttonType]="'icon'" 
-          (mouseover)="placeHolderService.setPlaceHolder(treeData().getTreeItemId(), 'after',addUnderAction.id)" 
-          (mouseleave)="placeHolderService.removePlaceHolder()"
-          (focus)="placeHolderService.setPlaceHolder(treeData().getTreeItemId(), 'after',addUnderAction.id)"
-          (blur)="placeHolderService.removePlaceHolder()">
-          </button>
+      <button focusable [data]="addUnderAction" [buttonType]="'icon'" [tooltip]="addUnderAction.description"
+        (mouseover)="placeHolderService.setPlaceHolder(treeData().getTreeItemId(), 'after',addUnderAction.id)"
+        (mouseleave)="placeHolderService.removePlaceHolder()"
+        (focus)="placeHolderService.setPlaceHolder(treeData().getTreeItemId(), 'after',addUnderAction.id)"
+        (blur)="placeHolderService.removePlaceHolder()">
+      </button>
       }
       @if (showAddInto()) {
-        <button focusable [data]="addIntoAction" [buttonType]="'icon'"></button>
+      <button focusable [data]="addIntoAction" [buttonType]="'icon'" [tooltip]="addIntoAction.description"></button>
       }
       @if (showDelete()) {
-        <button focusable [data]="deleteAction" [buttonType]="'icon'"></button>
+      <button focusable [data]="deleteAction" [buttonType]="'icon'" [tooltip]="deleteAction.description"></button>
       }
       @if (showUndoDelete()) {
-        <button focusable [data]="undoToDeleteAction" [buttonType]="'icon'"></button>
+      <button focusable [data]="undoToDeleteAction" [buttonType]="'icon'"
+        [tooltip]="undoToDeleteAction.description"></button>
       }
     </toolbar>
   </header>
   @if (this.hasText(layout)) {
-    <text-input #text 
-      [id]="itemForm().id + '-text'"
-      label="Détail de l'item"
-      class="item__text"
-      [value]="itemForm().text()"
-      (valueChange)="itemForm().text.set($event)"
-      [disabled]="itemForm().deleted()">
+  <text-input #text [id]="itemForm().id + '-text'" label="Détail de l'item" class="item__text"
+    [value]="itemForm().text()" (valueChange)="itemForm().text.set($event)" [disabled]="itemForm().deleted()">
   </text-input>
   }
   @if (this.hasFooterToolbar(layout)) {
-    <footer class="item__footer"></footer>
+  <footer class="item__footer"></footer>
   }
 </article>

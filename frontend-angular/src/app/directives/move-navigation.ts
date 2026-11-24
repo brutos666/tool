@@ -2,14 +2,14 @@ import { Directive } from '@angular/core';
 import { Navigable } from '../components/common/Navigable.js';
 import { Navigate } from '../components/common/Navigate.js';
 import { KeyboardNavigation } from './keyboard-navigation.js';
-import { TooltipEnable } from '../components/common/TooltipEnable.js';
+import { WithPositionedTooltip } from '../components/common/WithPositionedTooltip.js';
 
 @Directive({
   selector: '[move-navigation-directive]',
   providers: [
     { provide: Navigable, useExisting: MoveNavigation },
     { provide: Navigate, useExisting: MoveNavigation },
-    { provide: TooltipEnable, useExisting: MoveNavigation },
+    { provide: WithPositionedTooltip, useExisting: MoveNavigation },
   ],
   host: {
     '[aria-selected]': 'selectable() ? selected() : null',

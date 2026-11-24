@@ -1,5 +1,5 @@
 import { Service, signal } from '@angular/core';
-import { TooltipPosition } from '../components/common/TooltipEnable.js';
+import { TooltipPosition } from '../components/common/WithPositionedTooltip.js';
 
 export type TooltipRef = { parent: HTMLElement; element: HTMLElement; position: TooltipPosition };
 

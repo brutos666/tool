@@ -7,21 +7,25 @@ import {
   ElementRef,
   EnvironmentInjector,
   inject,
+  input,
   OnDestroy,
+  OnInit,
+  signal,
 } from '@angular/core';
 import { TooltipService } from '../services/tooltip-service.js';
 import { PointTooltip } from '../components/point-tooltip/point-tooltip.js';
-import { TooltipEnable } from '../components/common/TooltipEnable.js';
 
 @Directive({
   selector: '[info-tooltip]',
 })
-export class InfoTooltip implements OnDestroy {
+export class InfoTooltip implements OnDestroy, OnInit {
   static SHOW_TIP_DELAY = 1000;
   static HIDE_TIP_DELAY = 2000;
   private element = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
-  private tooltipProperties = inject(TooltipEnable);
   private tooltipService = inject(TooltipService);
+  private show = signal<boolean>(false);
+
+  tooltip = input<string>('');
 
   private appRef = inject(ApplicationRef);
   private envInjector = inject(EnvironmentInjector);
@@ -33,24 +37,36 @@ export class InfoTooltip implements OnDestroy {
       this.place();
     }
   };
+  private onEnterOnElement = () => this.show.set(true);
+  private onLeaveElement = () => this.show.set(false);
 
   private timerId!: number;
   private timerHideId!: number;
 
   constructor() {
     effect(() => {
-      const show = this.tooltipProperties.showTooltip();
+      const show = this.show();
       if (show) {
         this.showAfterDelay();
-      } else {
-        clearTimeout(this.timerId);
-        clearTimeout(this.timerHideId);
-        this.hideProgressively();
+        return;
       }
+      clearTimeout(this.timerId);
+      clearTimeout(this.timerHideId);
+      this.hideProgressively();
     });
+  }
+  ngOnInit(): void {
+    this.element.addEventListener('focus', this.onEnterOnElement);
+    this.element.addEventListener('blur', this.onLeaveElement);
+    this.element.addEventListener('mouseover', this.onEnterOnElement);
+    this.element.addEventListener('mouseleave', this.onLeaveElement);
   }
   ngOnDestroy(): void {
     this.hideTooltip();
+    this.element.removeEventListener('focus', this.onEnterOnElement);
+    this.element.removeEventListener('blur', this.onLeaveElement);
+    this.element.removeEventListener('mouseover', this.onEnterOnElement);
+    this.element.removeEventListener('mouseleave', this.onLeaveElement);
   }
 
   private showAfterDelay() {
@@ -74,7 +90,7 @@ export class InfoTooltip implements OnDestroy {
     window.addEventListener('scroll', this.onViewportChange, true);
 
     this.ref = createComponent(PointTooltip, { environmentInjector: this.envInjector });
-    this.ref.setInput('text', this.tooltipProperties.tooltip);
+    this.ref.setInput('text', this.tooltip());
     this.tooltipEl = this.ref.location.nativeElement;
 
     this.appRef.attachView(this.ref.hostView);

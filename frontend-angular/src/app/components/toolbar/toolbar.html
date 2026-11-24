@@ -1,6 +1,6 @@
 @for (buttonItem of buttons(); track buttonItem.label) {
-  @if (buttonItem.isVisible()) {
-    <button focusable [data]="buttonItem" [buttonType]="toolbarType()"></button>
-  }
+@if (buttonItem.isVisible()) {
+<button focusable [data]="buttonItem" [buttonType]="toolbarType()" [tooltip]="buttonItem.description"></button>
+}
 }
 <ng-content select="[focusable]"></ng-content>
