@@ -47,17 +47,70 @@
                   "maximumError": "8kB"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "fileReplacements": [
+                {
+                  "replace": "src/app/config/environment.ts",
+                  "with": "src/app/config/environment.prod.ts"
+                },
+                {
+                  "replace": "src/app/services/desktop-file.service.ts",
+                  "with": "src/app/services/desktop-file.service.stub.ts"
+                }
+              ]
             },
             "development": {
               "optimization": false,
               "extractLicenses": false,
-              "sourceMap": true
+              "sourceMap": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/app/services/desktop-file-service.ts",
+                  "with": "src/app/services/desktop-file-service.stub.ts"
+                }
+              ]
             },
             "dev-wails": {
               "optimization": false,
               "extractLicenses": false,
-              "sourceMap": true
+              "sourceMap": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/app/config/environment.ts",
+                  "with": "src/app/config/environment.dev-wails.ts"
+                },
+                {
+                  "replace": "src/app/services/desktop-file-service.ts",
+                  "with": "src/app/services/desktop-file-service.wails.ts"
+                }
+              ],
+              "outputPath": "../backend-go/cmd/desktop/frontend/dist"
+            },
+            "prod-wails": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "500kB",
+                  "maximumError": "1MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "4kB",
+                  "maximumError": "8kB"
+                }
+              ],
+              "outputHashing": "all",
+              "fileReplacements": [
+                {
+                  "replace": "src/app/config/environment.ts",
+                  "with": "src/app/config/environment.prod-wails.ts"
+                },
+                {
+                  "replace": "src/app/services/desktop-file-service.ts",
+                  "with": "src/app/services/desktop-file-service.wails.ts"
+                }
+              ],
+              "outputPath": "../backend-go/cmd/desktop/frontend/dist"
             }
           },
           "defaultConfiguration": "production"
@@ -75,7 +128,7 @@
               "buildTarget": "frontend-angular:build:development"
             },
             "dev-wails": {
-              "buildTarget": "frontend-angular:build:development"
+              "buildTarget": "frontend-angular:build:dev-wails"
             }
           },
           "defaultConfiguration": "development"

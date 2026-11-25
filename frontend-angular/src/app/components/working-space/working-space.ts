@@ -33,6 +33,7 @@ import { ConfirmationDialog } from '../confirm-dialog/confirm-dialog';
 import { Field } from '../field/field';
 import { DisplayPlaceHolder } from '../../directives/display-place-holder';
 import { PlaceHolderService } from '../../services/place-holder-service.js';
+import { FILE_SERVICE } from '../../services/file-service.js';
 
 @Component({
   imports: [
@@ -68,6 +69,7 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
 
   private itemService = inject(ItemService);
   private placeHolderService = inject(PlaceHolderService);
+  private fileService = inject(FILE_SERVICE);
 
   static NEW_SPACE_LABEL = 'Saisir un espace';
   static NEW_ITEM_LABEL = 'Saisir un pense-bête';
@@ -132,7 +134,6 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
         "Charge les tâches à partir d'un fichier",
         'folder',
         this.askBeforeOpen.bind(this),
-        true,
       ),
     );
     this.menuItems.push(
@@ -226,9 +227,8 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
   loadCurrent() {
     this.itemService.loadCurrentItem();
   }
-  askBeforeOpen(event: Event) {
-    const inputFile = event.target as HTMLInputElement;
-    const file = inputFile.files?.[0];
+  async askBeforeOpen() {
+    const file = await this.fileService.pick('*.txt;*.csv');
     if (!file) return;
 
     this.confirmForRoot = true;
@@ -236,16 +236,11 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
 
     this.confirmQuestion =
       '<p>Les tâches ci-dessous seront perdues.</p><p>Êtes-vous sûr de vouloir ouvrir ce fichier?</p>';
-    this.confirmAction = this.open.bind(this, event);
+    this.confirmAction = this.open.bind(this, file);
     this.showConfirm.set(true);
   }
-  open(event: Event) {
-    const inputFile = event.target as HTMLInputElement;
-    const file = inputFile.files?.[0];
-    if (!file) return;
-
+  open(file: File) {
     this.itemService.openFile(file);
-    inputFile.value = '';
   }
   saveAll() {
     this.itemService.saveAllItems();

@@ -96,7 +96,7 @@ tasks:
   frontend:dev:npm:
     dir: ../../../frontend-angular
     cmds:
-      - npm run start -- --port {{.VITE_PORT}}
+      - npm run start:dev-wails -- --port {{.VITE_PORT}}
 
   update:build-assets:
     summary: Update build assets

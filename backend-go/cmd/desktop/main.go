@@ -16,7 +16,7 @@ import (
 	"github.com/wailsapp/wails/v3/pkg/application"
 )
 
-//go:embed frontend/dist/frontend-angular/browser
+//go:embed frontend/dist/browser
 var assets embed.FS
 
 //go:embed schema-sqlite.sql
@@ -24,13 +24,14 @@ var schemaSQLite string
 
 func main() {
 	app := application.New(application.Options{
-		Name:        "BrutosTool",
-		Description: "Outils de suivi des choses à faire",
+		Name:        "TasksForBrutos",
+		Description: "Permet d'organiser le travail à faire",
 		Assets: application.AssetOptions{
 			Handler: router(),
 		},
 		Services: []application.Service{
 			application.NewService(&services.LogService{}),
+			application.NewService(&services.FileService{}),
 		},
 	})
 
@@ -39,7 +40,7 @@ func main() {
 	api.StartDesktop()
 
 	app.Window.NewWithOptions(application.WebviewWindowOptions{
-		Title:      "Mes tâches",
+		Title:      "TasksForBrutos : organiser le travail à faire",
 		StartState: application.WindowStateMaximised,
 	})
 	if err := app.Run(); err != nil {
@@ -50,11 +51,6 @@ func main() {
 func router() *http.ServeMux {
 	apiHandler := api.Serve()
 	apiHandler.Handle("/", application.AssetFileServerFS(assets))
-	/*
-		mux := http.NewServeMux()
-		mux.Handle("/api/", api.Serve())
-		mux.Handle("/", application.AssetFileServerFS(assets))
-	*/
 	return apiHandler
 }
 

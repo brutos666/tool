@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	APP_NAME      = "brutosTool"
+	APP_NAME      = "TasksForBrutos"
 	USER_APP_PATH = "$%{USER_APP_PATH}"
 	// Permettra par exemple de remplacer la propriété de "database.path" dans "database.url=file:${database.path}/tool.db"
 	// Fonctionne aussi pour les variables d'environnements

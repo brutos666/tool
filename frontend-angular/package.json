@@ -5,6 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "start:dev-wails": "ng serve --configuration dev-wails",
     "build:dev-wails": "ng build --configuration dev-wails",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
