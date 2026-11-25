@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Name=TasksForBrutos
+Comment=Permet d'organiser le travail à faire
+# The Exec line includes %u to pass the URL to the application
+Exec=/usr/local/bin/TasksForBrutos %u
+Terminal=false
+Type=Application
+Icon=TasksForBrutos
+Categories=Utility;
+StartupWMClass=TasksForBrutos
+
+ 

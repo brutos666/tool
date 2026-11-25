@@ -1,15 +1,24 @@
+# Installer Wails 3
+
+Suivre le guide "get Started" de Wails : https://wails.io/quick-start/installation/
+
 # Déploiement
 
 Compiler angular (NOTE: Les parenthèses permettent de lancer la commande dans un sous-shell. Comme cela on ne perd pas le chemin courant)
 
 ```bash
-# Compilation front (NOTE: Les parenthèses permettent de lancer la commande dans un sous-shell sans perte répertoire courant)
-(cd ../../../frontend-angular/ && npm run build)
-# Copie du résultat
-cp -r ../../../frontend-angular/dist ./frontend
-# Copie du fichier Sql pour qu'il soit compilé dans l'exécutable
-cp ../../schema-sqlite.sql .
-## Compilation (embarque le front)
+# Démarrer en mode déveoppement
+wails3 dev
+# Compilation pour la production
+wails3 build
+# Construction du paquet linux si on est sur une distribution Linux
+wails3 package
+# Construction du paquet Windows en utilisant docker
+task setup:docker
+wails3 build GOOS=windows
+wails3 package GOOS=window
+
+## Compilation rapide partie Go (embarque le front et le fichier SQL)
 go build -o wails-tool .
 
 ```

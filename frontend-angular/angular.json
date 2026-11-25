@@ -53,6 +53,11 @@
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
+            },
+            "dev-wails": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
             }
           },
           "defaultConfiguration": "production"
@@ -67,6 +72,9 @@
               "buildTarget": "frontend-angular:build:production"
             },
             "development": {
+              "buildTarget": "frontend-angular:build:development"
+            },
+            "dev-wails": {
               "buildTarget": "frontend-angular:build:development"
             }
           },
