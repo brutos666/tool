@@ -82,6 +82,10 @@ func (bddAccess *Writer) Cancel() error {
 	return connection.Rollback(bddAccess.connection)
 }
 
+func (bddAccess Writer) Exec(ctx context.Context, sql string, args ...any) (int, error) {
+	return requestSQL.ExecArgs(ctx, *bddAccess.connection, sql, args...)
+}
+
 func (bddAccess Writer) Insert(ctx context.Context, sql string, modelInOut any) error {
 	return requestSQL.ExecWithReturn(ctx, *bddAccess.connection, modelInOut, modelInOut, sql)
 }

@@ -16,6 +16,7 @@ type ReadCommands interface {
 // WriteCommands Comportement de mise à jour dans la base de données
 type WriteCommands interface {
 	ReadCommands
+	Exec(ctx context.Context, sql string, args ...any) (int, error)
 	Insert(ctx context.Context, sql string, modelInOut any) error
 	Update(ctx context.Context, sql string, args ...any) (int, error)
 	UpdateModel(ctx context.Context, sql string, modelIn any) (int, error)

@@ -11,19 +11,20 @@ import (
 )
 
 type SpaceFService struct {
-	repository        domain.SpaceFileRepository
-	commandRepository domain.SpaceCommandRepository
+	repository      domain.SpaceFileRepository
+	spaceRepository domain.SpaceCommandRepository
+	fileRepository  domain.FileCommandRepository
 }
 
-func SpaceFileService(repository domain.SpaceFileRepository, commandRepository domain.SpaceCommandRepository) SpaceFService {
-	return SpaceFService{repository: repository, commandRepository: commandRepository}
+func SpaceFileService(repository domain.SpaceFileRepository, commandRepository domain.SpaceCommandRepository, fileRepository domain.FileCommandRepository) SpaceFService {
+	return SpaceFService{repository: repository, spaceRepository: commandRepository, fileRepository: fileRepository}
 }
 
 func (fileService SpaceFService) OpenFile(ctx context.Context, dataAccessId int, sourceFile domain.FileReader) ([]*domain.Space, error) {
-	// TODO sauvegarder l'ancienne version dans un fichier local. Faire une table "status" permettant de stocker le nom du dernier fichier ouvert, la date d'ouverture, la date du dernier upload, la date de la dernière sauvegarde. Permettre à l'utilisateur de récupérer les anciennes versions ou de les supprimer. Informer l'utilisateur qu'il doit faire du ménage au delà d'un certain nombre de sauvegarde. Ne sauvegarder dans un fichier que si pas eu d'export avant
+	// NOTE : En mode desktop, la sauvegarde enregistrera également dans ce fichier
+	// NOTE : En mode navigateur, la sauvegarde mettra a jour un indicateur qui restera affiché tant que les espaces n'auront pas été téléchargés. A l'ouverture, un message alertera l'utilisateur si l'indicateur est affiché
 
-	// TODO 1. sauvegarder les taches dans un fichier si pas eu d'export (sourceFile.FileName())
-	// 2. Importer les tâches
+	// 1. Importer les tâches
 	spacesList, err := fileService.Import(ctx, sourceFile)
 	if err != nil {
 		return nil, err
@@ -31,11 +32,13 @@ func (fileService SpaceFService) OpenFile(ctx context.Context, dataAccessId int,
 	spaces := new(domain.Spaces)
 	spaces.SetList(spacesList)
 	// 3. Supprimer les tâches de la base de données et les remplacer par les nouvelles
-	err = fileService.commandRepository.ReplaceSpaces(ctx, dataAccessId, spaces)
+	err = fileService.spaceRepository.ReplaceSpaces(ctx, dataAccessId, spaces)
 	if err != nil {
 		return nil, err
 	}
 	spaces.ApplyModification()
+	// Stocker le fichier ouvert dans la table des fichiers ouverts
+	err = fileService.fileRepository.AddFile(ctx, dataAccessId, sourceFile.FileName())
 	return spacesList, nil
 }
 

@@ -5,6 +5,7 @@ import (
 )
 
 type Properties struct {
+	Desktop          bool
 	ListenAddr       string
 	DatabaseURL      string
 	DatabasePath     string // Chemin où doit se trouver la base de données (pour sqlite)
@@ -29,3 +30,9 @@ func (p Properties) GetRefreshTokenDuration() time.Duration {
 	return time.Duration(dayDuration*24) * time.Hour
 }
 func (p Properties) GetSecretKey() []byte { return p.JWTSecret }
+func (p Properties) GetPlatForm() string {
+	if p.Desktop {
+		return "desktop"
+	}
+	return "browser"
+}

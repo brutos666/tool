@@ -16,6 +16,10 @@ func (c BddAccessMock) Select(ctx context.Context, sql string, modelsOut any, ar
 	return nil
 }
 
+func (c BddAccessMock) Exec(ctx context.Context, sql string, args ...any) (int, error) {
+	return 0, nil
+}
+
 func (c BddAccessMock) Insert(ctx context.Context, sql string, modelInOut any) error {
 	return nil
 }

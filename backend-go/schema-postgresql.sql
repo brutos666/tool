@@ -44,3 +44,13 @@ comment on column item.state is 'Etat';
 comment on column item.id is 'Identifiant unique';
 comment on column item.parent_id is 'Identifiant de l''item parent';
 comment on column item.next_id is 'Identifiant de l''item suivant';
+
+CREATE TABLE if not exists file (
+    name        TEXT PRIMARY KEY,
+    platform    VARCHAR(10) NOT NULL CHECK (platform IN ('desktop', 'browser')),
+    opened_at   TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    exported_at TIMESTAMPTZ,
+);
+
+CREATE INDEX if not exists idx_file_recent
+    ON file(opened_at DESC);

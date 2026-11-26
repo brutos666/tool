@@ -29,3 +29,13 @@ CREATE TABLE IF NOT EXISTS item (
 );
 
 CREATE INDEX IF NOT EXISTS idx_item_parent ON item(parent_id);
+
+CREATE TABLE IF NOT EXISTS file (
+    name        TEXT PRIMARY KEY,
+    platform    TEXT NOT NULL CHECK (platform IN ('desktop', 'browser')),
+    opened_at   TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    exported_at TEXT,
+);
+
+CREATE INDEX IF NOT EXISTS idx_file_recent
+    ON file(opened_at DESC);

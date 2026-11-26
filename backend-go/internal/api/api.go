@@ -65,7 +65,7 @@ func start() {
 func Serve() *http.ServeMux {
 	// Services : lien entre le métier (service) et les données (repository). Ici les données sont en base et la base de données est configurable
 	spaceQueryService := application.SpaceQueryService(repository.SpaceQuery())
-	spaceFileService := application.SpaceFileService(repository.SpaceFile(), repository.SpaceCommand())
+	spaceFileService := application.SpaceFileService(repository.SpaceFile(), repository.SpaceCommand(), repository.FileCommand())
 	spaceCommandService := application.SpaceCommandService(repository.SpaceCommand())
 
 	// Routes : les transformations des paramètres des requêtes et du retour sont faites dans la partie interface

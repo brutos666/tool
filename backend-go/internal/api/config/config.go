@@ -25,6 +25,7 @@ var (
 	configProperties Properties
 	baseConnection   baseDescription
 	initConfig       Properties = Properties{
+		Desktop:          false,
 		ListenAddr:       ":8090",
 		DatabaseURL:      "file:${database.path}/tool.db?_pragma=journal_mode(WAL)&_pragma=busy_timeout(5000)&_time_format=sqlite",
 		DatabaseDriver:   "sqlite",
@@ -63,6 +64,7 @@ func GetBaseConnection() connection.DatabaseConnection {
 func loadFile(filePath string, defaultConfig Properties) Properties {
 	props := properties.MustLoadFile(filePath, properties.UTF8)
 	return Properties{
+		Desktop:          false,
 		ListenAddr:       readFileProperty(props, "listen.addr", defaultConfig.ListenAddr),
 		DatabaseURL:      readFileProperty(props, "database.url", defaultConfig.DatabaseURL),
 		DatabasePath:     readFileProperty(props, "database.path", defaultConfig.DatabasePath),
@@ -77,6 +79,7 @@ func loadFile(filePath string, defaultConfig Properties) Properties {
 
 func loadEnv(defaultConfig Properties) Properties {
 	return Properties{
+		Desktop:          defaultConfig.Desktop,
 		ListenAddr:       readEnv("LISTEN_ADDR", defaultConfig.ListenAddr),
 		DatabaseURL:      readEnv("DATABASE_URL", defaultConfig.DatabaseURL),
 		DatabasePath:     readEnv("DATABASE_PATH", defaultConfig.DatabasePath),
@@ -92,6 +95,7 @@ func loadEnv(defaultConfig Properties) Properties {
 func loadDesktopConfig() Properties {
 	// Aujourd'hui, il n'existe pas de propriétés intéressantes à paramétrer en mode desktop
 	loadConfig := Properties{
+		Desktop:          true,
 		ListenAddr:       initConfig.ListenAddr,
 		DatabaseURL:      replaceUserAppPath("file:$%{USER_APP_PATH}/tool.db?_pragma=journal_mode(WAL)&_pragma=busy_timeout(5000)&_time_format=sqlite"),
 		DatabasePath:     "",

@@ -32,3 +32,9 @@ type UserCommandRepository interface {
 type UserQueryRepository interface {
 	FindAll(ctx context.Context, dataAccessId int) ([]*User, error)
 }
+
+type FileCommandRepository interface {
+	AddFile(ctx context.Context, dataAccessId int, name string) error
+	SetExported(ctx context.Context, dataAccessId int, name string) error
+	DeleteOldFiles(ctx context.Context, dataAccessId int) error
+}

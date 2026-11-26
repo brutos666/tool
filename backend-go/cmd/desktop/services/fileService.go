@@ -2,7 +2,6 @@ package services
 
 import (
 	"os"
-	"path/filepath"
 	"sync"
 	"time"
 	"uuid"
@@ -41,7 +40,7 @@ func (s *FileService) Pick(accept string) (*PickedFile, error) {
 	pickedPaths[id] = path
 	mu.Unlock()
 
-	return &PickedFile{ID: id, Name: filepath.Base(path), Content: data}, nil
+	return &PickedFile{ID: id, Name: path, Content: data}, nil
 }
 
 func (s *FileService) SaveFile(name string, content string) (string, error) {
@@ -56,5 +55,5 @@ func (s *FileService) SaveFile(name string, content string) (string, error) {
 	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
 		return path, err
 	}
-	return filepath.Base(path), nil
+	return path, nil
 }
