@@ -53,6 +53,12 @@ func LoadServerConfig() {
 	configProperties = loadEnv(configProps)
 }
 
+func LoadTestConfig() {
+	configProperties = Properties{
+		MustAuthenticate: true,
+	}
+}
+
 func GetProperties() Properties {
 	return configProperties
 }

@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"goTool/internal/api/config"
 	"goTool/internal/api/domain"
 	"goTool/internal/api/domain/domainMessage"
 	"goTool/internal/api/generic"
@@ -104,6 +105,7 @@ func (s *HandlerTestSuite) BeforeEach(t *gotest.T) {
 	InitServerService(&httpServiceMock{})
 	srvService.ServerStart()
 	s.bddProvider = &generic.DataAccessProviderMock{}
+	config.LoadTestConfig()
 }
 
 // AfterEach : pour chaque fonction TestXxx(t *gotest.T), PAS pour chaque t.It
