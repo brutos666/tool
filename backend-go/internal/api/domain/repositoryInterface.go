@@ -35,6 +35,10 @@ type UserQueryRepository interface {
 
 type FileCommandRepository interface {
 	AddFile(ctx context.Context, dataAccessId int, name string) error
-	SetExported(ctx context.Context, dataAccessId int, name string) error
+	SetExported(ctx context.Context, dataAccessId int) error
 	DeleteOldFiles(ctx context.Context, dataAccessId int) error
+}
+
+type FileQueryRepository interface {
+	GiveLastOpened(ctx context.Context, dataAccessId int) ([]*File, error)
 }

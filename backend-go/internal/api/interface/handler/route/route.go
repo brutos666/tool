@@ -11,6 +11,7 @@ const (
 	ITEM_OPEN     string = "/api/item/open"
 	ITEM_IMPORT   string = "/api/import/items"
 	ITEM_EXPORT   string = "/api/export/items"
+	INFOS         string = "/api/infos"
 	STOP          string = "/stop"
 	START         string = "/start"
 	TEST          string = "/test"

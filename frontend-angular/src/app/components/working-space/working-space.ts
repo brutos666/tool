@@ -142,7 +142,9 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
       new Button(
         'saveAll',
         'Sauvegarder',
-        'Sauvegarde les tâches dans la base de données',
+        environment.desktop
+          ? 'Sauvegarde les tâches'
+          : 'Sauvegarde les tâches dans la base de données',
         'save',
         this.saveAll.bind(this),
       ),

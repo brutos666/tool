@@ -72,6 +72,8 @@ func GetResponseMapper(output any) ResponseMapper {
 		convertToWebResult = func(domainParam any) any { return ConvertUserToWebResult(domainParam.(*domain.User)) }
 	case []*domain.User:
 		convertToWebResult = func(domainParam any) any { return ConvertUsersToWebResult(domainParam.([]*domain.User)) }
+	case []*domain.File:
+		convertToWebResult = func(domainParam any) any { return ConvertFilesToWebResult(domainParam.([]*domain.File)) }
 	case *responseMessage.Message:
 		convertToWebResult = func(domainParam any) any {
 			return ConvertHttpMessageToWebResult(domainParam.(*responseMessage.Message))

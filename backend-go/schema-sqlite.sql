@@ -30,12 +30,16 @@ CREATE TABLE IF NOT EXISTS item (
 
 CREATE INDEX IF NOT EXISTS idx_item_parent ON item(parent_id);
 
+DROP TABLE IF EXISTS file;
+
 CREATE TABLE IF NOT EXISTS file (
     name        TEXT PRIMARY KEY,
-    platform    TEXT NOT NULL CHECK (platform IN ('desktop', 'browser')),
-    opened_at   TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    exported_at TEXT,
+    platform    TEXT NOT NULL
+        CHECK (platform IN ('desktop', 'browser')),
+    opened_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    saved_at    TIMESTAMP,
+    exported_at TIMESTAMP
 );
 
-CREATE INDEX IF NOT EXISTS idx_file_recent
+CREATE INDEX IF NOT EXISTS idx_file_opened_at
     ON file(opened_at DESC);

@@ -16,7 +16,7 @@ func SpaceCommandService(repository domain.SpaceCommandRepository) SpaceCmdServi
 
 func (commandService SpaceCmdService) Save(ctx context.Context, dataAccessId int, nodeSpace domain.NodeSpace) (*domain.NodeSpace, error) {
 	// Le navigateur ne distingue pas encore espaces qui est la liste des espaces (Navigation) de l'espace courant qui est visualisé à droite. On va faire la distinction ici
-	if len(nodeSpace.GetParentId()) == 0 {
+	if nodeSpace.IsRoot() {
 		spaces, err := commandService.SaveSpaces(ctx, dataAccessId, nodeSpace.GetSpace().GetChildrenSpaces())
 		if err != nil {
 			return nil, err

@@ -49,7 +49,8 @@ CREATE TABLE if not exists file (
     name        TEXT PRIMARY KEY,
     platform    VARCHAR(10) NOT NULL CHECK (platform IN ('desktop', 'browser')),
     opened_at   TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    exported_at TIMESTAMPTZ,
+    saved_at 		TIMESTAMPTZ,
+    exported_at TIMESTAMPTZ
 );
 
 CREATE INDEX if not exists idx_file_recent

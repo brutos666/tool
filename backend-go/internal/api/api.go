@@ -67,17 +67,19 @@ func Serve() *http.ServeMux {
 	spaceQueryService := application.SpaceQueryService(repository.SpaceQuery())
 	spaceFileService := application.SpaceFileService(repository.SpaceFile(), repository.SpaceCommand(), repository.FileCommand())
 	spaceCommandService := application.SpaceCommandService(repository.SpaceCommand())
+	appService := application.AppInfosService(repository.FileQuery())
 
 	// Routes : les transformations des paramètres des requêtes et du retour sont faites dans la partie interface
 	handler.HandleGetRoute(route.START, handler.AsNoDataAccessCall(handler.VerifyIfStarted))
 	handler.HandleGetRoute(route.STOP, handler.AsNoDataAccessCall(handler.StopApp))
 
+	handler.HandleGetRoute(route.INFOS, handler.AsDataAccessCall(appService.GiveInfos, bddService.READ))
 	handler.HandlePostRoute(route.ITEM_SAVE, handler.AsParamDataAccessCall(spaceCommandService.Save, bddService.WRITE))
 	handler.HandleGetRoute(route.ITEM_FIND_ALL, handler.AsDataAccessCall(spaceQueryService.FindAll, bddService.READ))
 	handler.HandleGetRoute(route.ITEM_LOAD, handler.AsParamDataAccessCall(spaceQueryService.Load, bddService.READ))
 	handler.HandlePostRoute(route.ITEM_OPEN, handler.AsFileToSaveCall(spaceFileService.OpenFile, bddService.WRITE))
 	handler.HandlePostRoute(route.ITEM_IMPORT, handler.AsFileToConvertCall(spaceFileService.Import))
-	handler.HandlePostRoute(route.ITEM_EXPORT, handler.AsConvertFileCall(spaceFileService.Export))
+	handler.HandlePostRoute(route.ITEM_EXPORT, handler.AsConvertFileCall(spaceFileService.Export, bddService.WRITE))
 
 	return http.DefaultServeMux
 }

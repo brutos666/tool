@@ -18,6 +18,7 @@ func (nodeSpace NodeSpace) GetPreviousId() string            { return nodeSpace.
 func (nodeSpace *NodeSpace) SetPreviousId(previousId string) { nodeSpace.previousId = previousId }
 func (nodeSpace NodeSpace) GetNextId() string                { return nodeSpace.nextId }
 func (nodeSpace *NodeSpace) SetNextId(nextId string)         { nodeSpace.nextId = nextId }
+func (nodeSpace NodeSpace) IsRoot() bool                     { return len(nodeSpace.parentId) == 0 }
 func (nodeSpace NodeSpace) ApplyModification() {
 	if nodeSpace.space.IsToDelete() {
 		nodeSpace.space.crudMode = TO_REMOVE

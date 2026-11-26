@@ -21,7 +21,7 @@ type (
 	ParamCall[P, R any]      func(context context.Context, dataAccessId int, parameter P) (R, error)
 	FileToConvertCall[R any] func(context context.Context, reader domain.FileReader) (R, error)
 	FileToSaveCall[R any]    func(context context.Context, dataAccessId int, reader domain.FileReader) (R, error)
-	ConvertToFileCall[P any] func(context context.Context, parameter P) (*bytes.Buffer, error)
+	ConvertToFileCall[P any] func(context context.Context, dataAccessId int, parameter P) (*bytes.Buffer, error)
 	LoginCall[P, R any]      func(context context.Context, dataAccessId int, tokenGeneration domain.TokensProduct, parameter P) (R, error)
 	RefreshCall              func(context context.Context, dataAccessId int, tokenGeneration domain.TokensProduct, user domain.ConnectedUser) (*domain.LoggedUser, error)
 
@@ -73,7 +73,7 @@ func GetCall[P, R any](serviceCall any, parameterType P) Call {
 			if err != nil {
 				return nil, err
 			}
-			return call(ctx, *parameter)
+			return call(ctx, callContext.GetDataAccessId(), *parameter)
 		}
 	case FileToConvertCall[R]:
 		return func(ctx context.Context, callContext CallContext, response http.ResponseWriter, request *http.Request) (any, error) {
@@ -131,6 +131,6 @@ func AsFileToConvertCall[R any](callback FileToConvertCall[R]) responseRequestCa
 	return Wrap[any, R]{}.callService(callback).build()
 }
 
-func AsConvertFileCall[P any](callback ConvertToFileCall[P]) responseRequestCall {
-	return Wrap[P, any]{}.callService(callback).fileBuild()
+func AsConvertFileCall[P any](callback ConvertToFileCall[P], accessType string) responseRequestCall {
+	return Wrap[P, any]{}.callService(callback).addDataAccess(accessType).fileBuild()
 }
