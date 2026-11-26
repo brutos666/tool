@@ -55,16 +55,6 @@ export class ActionButton extends NodeElement {
   }
 
   onClick(event: MouseEvent) {
-    const inputFile = this.inputFile()?.nativeElement;
-    if (event.target === inputFile) {
-      // Le click du fichier provoque le click du bouton car ce dernier se trouve à l'intérieur du bouton
-      return;
-    }
-
-    if (this.data().upload) {
-      this.inputFile()?.nativeElement.click();
-    } else {
-      this.data().onClick(event);
-    }
+    this.data().onClick(event);
   }
 }

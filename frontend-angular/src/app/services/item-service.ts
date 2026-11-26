@@ -12,7 +12,7 @@ type LoadAction = 'replaceAll' | 'replaceCurrent' | 'append';
 
 @Service()
 export class ItemService {
-  static rootItemData = new ItemData('-1', 'Mes tâches', '', '', '', '');
+  static rootItemData = new ItemData('-1', 'Travail à faire', '', '', '', '');
   private http = inject(HttpClient);
   private rootItemSubject = new BehaviorSubject<TreeData<ItemData>>(
     new TreeData<ItemData>(ItemService.rootItemData),

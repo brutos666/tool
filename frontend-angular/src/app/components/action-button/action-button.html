@@ -1,9 +1,6 @@
 @if (data().icon) {
-  <icon [name]="data().icon"></icon>
+<icon [name]="data().icon"></icon>
 }
 @if (labelButton()) {
-  <label labelInput [text]="data().label" [id]="data().id + '-label'"></label>
-}
-@if (data().upload) {
-  <input #file type="file" hidden (change)="data().onClick($event)" />
+<label labelInput [text]="data().label" [id]="data().id + '-label'"></label>
 }
