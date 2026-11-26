@@ -11,11 +11,12 @@ export class BrowserFileService implements FileService {
     });
   }
 
-  async save(name: string, content: string) {
-    const url = URL.createObjectURL(new Blob([content]));
+  async save(name: string, blob: Blob) {
+    const url = window.URL.createObjectURL(blob);
     const a = Object.assign(document.createElement('a'), { href: url, download: name });
     a.click();
-    URL.revokeObjectURL(url);
-    return true;
+
+    window.URL.revokeObjectURL(url);
+    return name;
   }
 }

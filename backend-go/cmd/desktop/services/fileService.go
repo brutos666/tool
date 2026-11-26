@@ -12,8 +12,6 @@ import (
 
 const READ_FILE_TIMEOUT = 100 * time.Second
 
-var currentOpenedFile string
-
 type PickedFile struct {
 	ID      string `json:"id"`
 	Name    string `json:"name"`
@@ -46,17 +44,17 @@ func (s *FileService) Pick(accept string) (*PickedFile, error) {
 	return &PickedFile{ID: id, Name: filepath.Base(path), Content: data}, nil
 }
 
-func (s *FileService) SaveFile(name string, content string) (bool, error) {
+func (s *FileService) SaveFile(name string, content string) (string, error) {
 	path, err := application.Get().Dialog.SaveFile().
 		SetMessage("Enregistrer sous").
 		SetFilename(name).
 		PromptForSingleSelection()
 	if err != nil || path == "" {
-		return false, err
+		return path, err
 	}
 
 	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
-		return false, err
+		return path, err
 	}
-	return true, nil
+	return filepath.Base(path), nil
 }

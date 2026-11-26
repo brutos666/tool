@@ -48,6 +48,9 @@ export class SvgUtilities {
       case 'save':
         svgHtml = getSaveIcon();
         break;
+      case 'saveAs':
+        svgHtml = getSaveAsIcon();
+        break;
       case 'info':
         svgHtml = getInfoIcon();
         break;
@@ -142,6 +145,14 @@ function getSaveIcon() {
     <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
     <polyline points="17 21 17 13 7 13 7 21"></polyline>
     <polyline points="7 3 7 8 15 8"></polyline>
+  </svg>`;
+}
+
+function getSaveAsIcon() {
+  return String.raw`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="sauvegarder sous">
+    <polyline points="7 3 7 8 15 8"></polyline>
+    <polyline points="15 13 7 13 7 21"></polyline>
+    <path d="M13 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v3M19 15v6M16 18h6"/>
   </svg>`;
 }
 

@@ -2,7 +2,7 @@ import { inject, Service, signal } from '@angular/core';
 import { TreeData } from '../data/tree-data.js';
 import { ItemData } from '../data/item-data.js';
 import { HttpClient, HttpContext, HttpClientCommonOptions } from '@angular/common/http';
-import { BehaviorSubject, catchError, map, Observable } from 'rxjs';
+import { BehaviorSubject, catchError, firstValueFrom, map, Observable } from 'rxjs';
 import { TreeItemData } from '../data/tree-item-data.js';
 import { TreeInfoData } from '../data/tree-info-data.js';
 import { ErrorInterceptor } from '../errors/error-interceptor.js';
@@ -79,8 +79,8 @@ export class ItemService {
     }
   }
 
-  public exportItem(item: TreeData<ItemData>, fileName: string) {
-    this.export(item, fileName);
+  public exportItem(item: TreeData<ItemData>, fileName: string): Promise<Blob> {
+    return this.export(item, fileName);
   }
 
   public openFile(file: File) {
@@ -138,7 +138,7 @@ export class ItemService {
     this.treeInfosResponse(treeItem, requestObservable);
   }
 
-  private export(treeItem: TreeData<ItemData>, fileName: string) {
+  private export(treeItem: TreeData<ItemData>, fileName: string): Promise<Blob> {
     const rootItem = this.rootItemSubject.value;
     const parentItem = rootItem.getTreeByTreeId(treeItem.getParentTreeItemId());
     const treeInfosData = this.getTreeInfoData(parentItem, treeItem);
@@ -147,7 +147,7 @@ export class ItemService {
       treeInfosData,
       this.getFileOptions(this.exportNotificationMessage),
     );
-    this.fileResponse(requestObservable, fileName);
+    return firstValueFrom(requestObservable);
   }
   private importItems(file: File, action: LoadAction) {
     const formData = new FormData();
@@ -263,18 +263,6 @@ export class ItemService {
             break;
         }
       });
-  }
-
-  private fileResponse(request: Observable<Blob>, fileName: string) {
-    request.pipe(catchError(() => [])).subscribe((blob) => {
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = fileName;
-      a.click();
-
-      window.URL.revokeObjectURL(url);
-    });
   }
 
   private replaceItem(

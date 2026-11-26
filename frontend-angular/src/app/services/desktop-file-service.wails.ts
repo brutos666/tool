@@ -10,7 +10,7 @@ export class DesktopFileService implements FileService {
     return new File([bytes], r.name);
   }
 
-  save(name: string, content: string) {
-    return FS.SaveFile(name, content);
+  async save(name: string, blob: Blob) {
+    return FS.SaveFile(name, await blob.text());
   }
 }
