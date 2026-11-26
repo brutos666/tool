@@ -52,10 +52,12 @@
 .arrow, .line {
   background: var(--color-text);
 }
+.halo,
 .tip,
 .arrow,
 .line,
 .text,
+:host.tooltip--show .halo,
 :host.tooltip--show .tip,
 :host.tooltip--show .arrow,
 :host.tooltip--show .line,
