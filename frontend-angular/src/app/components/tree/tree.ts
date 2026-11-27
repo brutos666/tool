@@ -49,6 +49,10 @@ export class Tree extends NodeElement implements OnInit {
       'node',
       this.onOpenClose.bind(this),
     );
+    // Pour les TODO liste, on ouvre directement tous les arbres pour un niveau
+    if (this.isRoot() && this.layoutData() === Layout.Todo) {
+      this.onOpenClose();
+    }
   }
 
   onOpenClose() {
