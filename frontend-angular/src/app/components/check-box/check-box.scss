@@ -17,7 +17,6 @@
   position: relative;
   flex-shrink: 0;
 }
-
 .checkbox__input:hover {
   border-color: var(--color-primary-hover);
 }
@@ -26,7 +25,9 @@
   background: var(--color-primary);
   border-color: var(--color-primary);
 }
-
+.checkbox__input:checked:hover {
+  background: var(--color-primary-hover);
+}
 .checkbox__input:checked::after {
   content: "";
   position: absolute;
@@ -44,7 +45,9 @@
   background: var(--color-primary);
   border-color: var(--color-primary);
 }
-
+.checkbox__input[indeterminate]:hover {
+  background: var(--color-primary-hover);
+}
 .checkbox__input[indeterminate]::after {
   content: "";
   position: absolute;

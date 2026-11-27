@@ -53,11 +53,11 @@
 :host(.item-like-button):hover,
 :host(.label-button):hover,
 :host(.menu-button):hover {
-  box-shadow: inset 0 0 0 999px var(--light-color-primary);
+  box-shadow: inset 0 0 0 999px var(--much-lighter-primary);
   border-color: var(--color-border-hover);
 }
 :host(.ghost-button):hover {
-  box-shadow: inset 0 0 0 999px var(--light-color-primary);
+  box-shadow: inset 0 0 0 999px var(--much-lighter-primary);
   border-color: var(--color-primary-hover);
   color: var(--color-primary-hover)
 }

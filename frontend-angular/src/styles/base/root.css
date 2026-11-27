@@ -2,47 +2,95 @@
   color-scheme: light dark;
   /* === TEINTE DE BASE === */
   --hue-primary: 250; /* bleu */
-  --hue-secondary: 70; /* complémentaire = hue + 180 — mais on peut choisir */
+  --hue-secondary: 90; /* complémentaire = hue + 180 — mais on peut choisir */
+  /* === Facteur de la teinte == */
+  --hue-light: 0.02;
+  --hue-medium: 0.14; /* Pour les post-it*/
+  --hue-strong: 0.4;
+  /* === Facteur de luminosité === */
+  /* 1.25 max pour la version clair */
+  --light-app: 1.10;
+  @media (prefers-color-scheme: dark) {
+    --light-app: 0.10;
+  }
+  /* luminosité des composants colorés (post-it, notification) */
+  --light-color: 0;
 
-  /* === FOND (moins blanc / moins noir) === */
-  --color-bg: light-dark(oklch(0.96 0.008 var(--hue-primary)), oklch(0.25 0.015 var(--hue-primary)));
-  /* cartes, boutons, panels */
-  --color-bg-surface: light-dark(oklch(0.91 0.01 var(--hue-primary)), oklch(0.34 0.014 var(--hue-primary)));
-  --color-bg-hover: light-dark(oklch(0.8 0.013 var(--hue-primary)), oklch(0.5 0.02 var(--hue-primary)));
-  
-  /* modals, dropdowns */
-  --color-bg-elevated: light-dark(oklch(0.8 0.013 var(--hue-primary)), oklch(0.1 0.02 var(--hue-primary)));
-  /* courant */
-  --color-bg-current: light-dark(oklch(0.85 0.04 var(--hue-primary)), oklch(0.4 0.06 var(--hue-primary)));
-  --color-bg-selected: light-dark(oklch(0.55 0.18 var(--hue-secondary)), oklch(0.68 0.16 var(--hue-secondary)));
-
-  /* === TEXTE === */
-  --color-text: light-dark(oklch(0.22 0.015 var(--hue-primary)), oklch(0.92 0.01 var(--hue-primary)));
-  --color-text-muted: light-dark(oklch(0.48 0.02 var(--hue-primary)), oklch(0.65 0.015 var(--hue-primary)));
-  --color-text-on-primary: oklch(0.99 0 0);
+  /* == Écarts entre les différentes luminosités == */
+  --light-app0: min(1, var(--light-app));
+  --light-app1: min(1, calc(var(--light-app) - 0.10));
+  --light-app2: calc(var(--light-app) - 0.20);
+  --light-app3: calc(var(--light-app) - 0.30);
+  --light-app4: calc(var(--light-app) - 0.40);
+  --light-app5: calc(var(--light-app) - 0.50);
+  --light-app6: calc(var(--light-app) - 0.60);
+  --light-app7: calc(var(--light-app) - 0.70);
+  --light-app8: calc(var(--light-app) - 0.80);
+  --light-app9: max(0, calc(var(--light-app) - 0.90));
+  --light-app10: max(0, calc(var(--light-app) - 1));
+  @media (prefers-color-scheme: dark) {
+    --light-app0: max(0, var(--light-app));
+    --light-app1: max(0, calc(var(--light-app) + 0.10));
+    --light-app2: calc(var(--light-app) + 0.20);
+    --light-app3: calc(var(--light-app) + 0.30);
+    --light-app4: calc(var(--light-app) + 0.40);
+    --light-app5: calc(var(--light-app) + 0.50);
+    --light-app6: calc(var(--light-app) + 0.60);
+    --light-app7: calc(var(--light-app) + 0.70);
+    --light-app8: calc(var(--light-app) + 0.80);
+    --light-app9: min(1, calc(var(--light-app) + 0.90));
+    --light-app10: min(1, calc(var(--light-app) + 1));
+  }
+  --light-color0: min(1, var(--light-color));
+  --light-color1: min(1, calc(var(--light-color) + 0.10));
+  --light-color2: calc(var(--light-color) + 0.20);
+  --light-color3: calc(var(--light-color) + 0.30);
+  --light-color4: calc(var(--light-color) + 0.40);
+  --light-color5: calc(var(--light-color) + 0.50);
+  --light-color6: calc(var(--light-color) + 0.60);
+  --light-color7: calc(var(--light-color) + 0.70);
+  --light-color8: calc(var(--light-color) + 0.80);
+  --light-color9: max(0, calc(var(--light-color) + 0.90));
+  --light-color10: max(0, calc(var(--light-color) + 1));
 
   /* === PRIMAIRE === */
   /* Primaire — la couleur de marque, pour les boutons principaux, liens, éléments actifs. */
-  --light-color-primary: light-dark(oklch(0.5 0.22 var(--hue-primary) / 0.5), oklch(0.65 0.2 var(--hue-primary) / 0.5));
-  --color-primary: light-dark(oklch(0.5 0.22 var(--hue-primary)), oklch(0.65 0.2 var(--hue-primary)));
-  --color-primary-hover: light-dark(oklch(0.42 0.22 var(--hue-primary)), oklch(0.72 0.2 var(--hue-primary)));
-  --color-primary-active: light-dark(oklch(0.35 0.22 var(--hue-primary)), oklch(0.78 0.2 var(--hue-primary)));
-  --color-primary-subtle: light-dark(oklch(0.5 0.22 var(--hue-primary) / 0.1), oklch(0.65 0.2 var(--hue-primary) / 0.15));
+  --color-primary: oklch(var(--light-color6) var(--hue-strong) var(--hue-primary));
+  --color-primary-hover: oklch(var(--light-color7) var(--hue-strong) var(--hue-primary));
+  --color-primary-active: oklch(var(--light-color8) var(--hue-strong) var(--hue-primary));
+  --lighter-primary: oklch(var(--light-color6) var(--hue-strong) var(--hue-primary) / 0.25);
+  --much-lighter-primary: oklch(var(--light-color6) var(--hue-strong) var(--hue-primary) / 0.5);
+  --color-text-on-primary: oklch(var(--light-color10) var(--hue-light) 0);
 
   /* === SECONDAIRE === */
   /* Secondaire — couleur d'accentuation complémentaire, pour les badges, tags, éléments secondaires. */
-  --color-secondary: light-dark(oklch(0.55 0.18 var(--hue-secondary)), oklch(0.68 0.16 var(--hue-secondary)));
-  --color-secondary-hover: light-dark(oklch(0.47 0.18 var(--hue-secondary)), oklch(0.74 0.16 var(--hue-secondary)));
+  --color-secondary: oklch(var(--light-color6) var(--hue-strong) var(--hue-secondary));
+  --color-secondary-hover: oklch(var(--light-color7) var(--hue-strong) var(--hue-secondary));
+  --lighter-secondary: oklch(var(--light-color6) var(--hue-strong) var(--hue-secondary) / 0.25);
+  --much-lighter-secondary: oklch(var(--light-color6) var(--hue-strong) var(--hue-secondary) / 0.5);
+  --color-text-on-secondary: oklch(var(--light-color10) var(--hue-light) 0);
+
+  /* === FOND (moins blanc / moins noir) === */
+  --color-bg: oklch(var(--light-app2) var(--hue-light) var(--hue-primary));
+  /* cartes, boutons, panels */
+  --color-bg-surface: oklch(var(--light-app3) var(--hue-light) var(--hue-primary));
+  --color-bg-hover: oklch(var(--light-app4) var(--hue-light) var(--hue-primary));
+  /* modals, dropdowns */
+  --color-bg-elevated: oklch(var(--light-app0) var(--hue-light) var(--hue-primary));
+  /* courant */
+  --color-bg-current: oklch(var(--light-app5) var(--hue-strong) var(--hue-primary));
+  --color-bg-selected: var(--color-secondary);
+
+  /* === TEXTE === */
+  --color-text: oklch(var(--light-app10) var(--hue-light) var(--hue-primary));
+  --color-text-muted: oklch(var(--light-app6) var(--hue-light) var(--hue-primary));
 
   /* === BORDURES === */
-  --color-border: light-dark(oklch(0.76 0.014 var(--hue-primary)), oklch(0.42 0.016 var(--hue-primary)));
-  --color-border-hover: light-dark(oklch(0.62 0.018 var(--hue-primary)), oklch(0.54 0.018 var(--hue-primary)));
+  --color-border: oklch(var(--light-app4) var(--hue-light) var(--hue-primary));
+  --color-border-hover: oklch(var(--light-app5) var(--hue-light) var(--hue-primary));
   --color-box-shadow: light-dark(oklch(0.5 0 0), oklch(0 0 0));
   --color-border-drag-over: var(--color-primary);
   --color-border-focus: var(--color-secondary);
-
-  /* === FOCUS === */
-  --color-bg-focus: light-dark(oklch(0.5 0.22 var(--hue-primary) / 0.25), oklch(0.65 0.2 var(--hue-primary) / 0.3));
 
   /* === COMPOSANTS === */
   --color-control-border: var(--color-border);
@@ -52,21 +100,21 @@
   --color-control-track-off: var(--color-border);
 
   /* === SÉMANTIQUE === */
-  --color-success: light-dark(oklch(0.55 0.16 140), oklch(0.72 0.15 140));
-  --color-warning: light-dark(oklch(0.6 0.16 90), oklch(0.75 0.15 90));
-  --color-error: light-dark(oklch(0.52 0.2 30), oklch(0.7 0.18 30));
-  --color-info: light-dark(oklch(0.55 0.16 220), oklch(0.55 0.15 220));
+  --color-success: oklch(var(--light-color7) var(--hue-strong) 130);
+  --color-warning: oklch(var(--light-color7) var(--hue-strong) 90);
+  --color-error: oklch(var(--light-color7) var(--hue-strong) 20);
+  --color-info: oklch(var(--light-color7) var(--hue-strong) 220);
 
-  --color-created: light-dark(oklch(0.8 0.3 142), oklch(0.86 0.3 142));
-  --color-updated:light-dark(oklch(0.8 0.3 220), oklch(0.86 0.3 220));
-  --color-deleted: light-dark(oklch(0.52 0.2 30), oklch(0.7 0.18 30));
+  --color-created: oklch(var(--light-color7) var(--hue-strong) 130);
+  --color-updated: oklch(var(--light-color7) var(--hue-strong) 210);
+  --color-deleted: oklch(var(--light-color7) var(--hue-strong) 40);
 
-  --color-sample: light-dark(oklch(0.9 0.1 140), oklch(0.9 0.1 140));
-  --color-rules: light-dark(oklch(0.8 0.1 251), oklch(0.8 0.1 251));
-  --color-story: light-dark(oklch(0.9 0.1 104), oklch(0.9 0.1 104));
-  --color-question: light-dark(oklch(0.9 0.1 15), oklch(0.9 0.1 15));
-  --color-classic: light-dark(oklch(0.9 0.1 104), oklch(0.9 0.1 104));
-  --color-text-on-post-it: oklch(0.22 0.015 var(--hue-primary));
+  --color-sample: oklch(var(--light-color9) var(--hue-medium) 140);
+  --color-rules: oklch(var(--light-color9) var(--hue-medium) 250);
+  --color-story: oklch(var(--light-color9) var(--hue-medium) 105);
+  --color-question: oklch(var(--light-color9) var(--hue-medium) 30);
+  --color-classic: oklch(var(--light-color9) var(--hue-medium) 105);
+  --color-text-on-post-it: oklch(var(--light-color0) var(--hue-light) var(--hue-primary));
 
   /* === DIVERS === */
   --small-space: 4px;
@@ -95,6 +143,6 @@
   --font-family: sans-serif;
   --line-height: 1.5;
   --zoom: 1;
-  --checkbox-width: 16px;
+  --checkbox-width: 20px;
 }
 

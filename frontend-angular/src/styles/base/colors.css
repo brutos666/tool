@@ -20,8 +20,5 @@ body {
 }
 
 [aria-selected="true"] {
-  background-color: var(--color-bg-current);
-}
-.current [aria-selected="true"] {
-  background-color: var(--color-bg-focus);
+  background-color: var(--much-lighter-secondary);
 }

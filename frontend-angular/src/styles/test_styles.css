@@ -1,0 +1,8 @@
+@layer base, components, modules, decorators, utilities;
+
+@import "base/root.css" layer(base);
+@import "base/colors.css" layer(base);
+@import "base/item-colors.css" layer(base);
+@import "base/reset.css" layer(base);
+@import "utilities/utils.css" layer(utilities);
+
