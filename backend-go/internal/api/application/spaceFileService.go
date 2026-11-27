@@ -54,9 +54,9 @@ func (fileService SpaceFService) Import(ctx context.Context, sourceFile domain.F
 	return spaces, nil
 }
 
-func (fileService SpaceFService) Export(ctx context.Context, dataAccessId int, nodeSpace domain.NodeSpace) (*bytes.Buffer, error) {
+func (fileService SpaceFService) Export(ctx context.Context, dataAccessId int, fileName string, nodeSpace domain.NodeSpace) (*bytes.Buffer, error) {
 	if nodeSpace.IsRoot() {
-		err := fileService.fileRepository.SetExported(ctx, dataAccessId)
+		err := fileService.fileRepository.AddFile(ctx, dataAccessId, fileName)
 		if err != nil {
 			return nil, nil
 		}

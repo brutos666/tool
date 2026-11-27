@@ -10,7 +10,6 @@ import (
 
 const (
 	INSERT_FILE string = "INSERT INTO file (name, platform, opened_at) VALUES (?, ?, CURRENT_TIMESTAMP) ON CONFLICT(name) DO UPDATE SET opened_at = CURRENT_TIMESTAMP"
-	UPDATE_FILE string = "UPDATE file SET exported_at = CURRENT_TIMESTAMP WHERE name = (SELECT name FROM file ORDER BY opened_at DESC LIMIT 1)"
 	DELETE_FILE string = "DELETE FROM file WHERE name NOT IN (SELECT name FROM file ORDER BY opened_at DESC LIMIT 10)"
 )
 
@@ -24,10 +23,6 @@ func (repository *fileCmdRepository) AddFile(ctx context.Context, dataAccessId i
 	return doAddFile(ctx, bddAccessService.RetrieveWriteAccess(dataAccessId), name)
 }
 
-func (repository *fileCmdRepository) SetExported(ctx context.Context, dataAccessId int) error {
-	return doSetExported(ctx, bddAccessService.RetrieveWriteAccess(dataAccessId))
-}
-
 func (repository *fileCmdRepository) DeleteOldFiles(ctx context.Context, dataAccessId int) error {
 	return doDeleteFiles(ctx, bddAccessService.RetrieveWriteAccess(dataAccessId))
 }
@@ -38,11 +33,6 @@ func doAddFile(ctx context.Context, dataBase bddService.WriteCommands, name stri
 		return err
 	}
 	return nil
-}
-
-func doSetExported(ctx context.Context, dataBase bddService.WriteCommands) error {
-	_, err := dataBase.Update(ctx, UPDATE_FILE)
-	return err
 }
 
 func doDeleteFiles(ctx context.Context, dataBase bddService.WriteCommands) error {

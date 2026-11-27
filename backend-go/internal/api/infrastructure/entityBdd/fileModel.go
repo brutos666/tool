@@ -7,11 +7,10 @@ import (
 )
 
 type FileModel struct {
-	Name        string     `db:"name"`
-	Platform    string     `db:"platform"`
-	Opened_at   time.Time  `db:"opened_at"`
-	Saved_at    *time.Time `db:"saved_at"`
-	Exported_at *time.Time `db:"exported_at"`
+	Name      string     `db:"name"`
+	Platform  string     `db:"platform"`
+	Opened_at time.Time  `db:"opened_at"`
+	Saved_at  *time.Time `db:"saved_at"`
 }
 
 func (fileBdd FileModel) ConvertToUser() *domain.File {
@@ -20,6 +19,5 @@ func (fileBdd FileModel) ConvertToUser() *domain.File {
 	user.SetPlatform(fileBdd.Platform)
 	user.SetOpenedAt(fileBdd.Opened_at)
 	user.SetSavedAt(fileBdd.Saved_at)
-	user.SetExportedAt(fileBdd.Exported_at)
 	return user
 }

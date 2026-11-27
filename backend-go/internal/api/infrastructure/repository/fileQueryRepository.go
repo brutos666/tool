@@ -8,7 +8,7 @@ import (
 	"goTool/internal/api/infrastructure/entityBdd"
 )
 
-const SELECT_FILE_NAMES string = "SELECT name, platform, opened_at, saved_at, exported_at FROM file ORDER BY opened_at"
+const SELECT_FILE_NAMES string = "SELECT name, platform, opened_at, saved_at FROM file ORDER BY opened_at DESC"
 
 type fileQryRepository struct{}
 

@@ -7,11 +7,10 @@ import (
 )
 
 type FileWebResult struct {
-	Name       string     `json:"name"`
-	Platform   string     `json:"platform"`
-	OpenedAt   time.Time  `json:"openedAt"`
-	SavedAt    *time.Time `json:"savedAt"`
-	ExportedAt *time.Time `json:"exportedAt"`
+	Name     string     `json:"name"`
+	Platform string     `json:"platform"`
+	OpenedAt time.Time  `json:"openedAt"`
+	SavedAt  *time.Time `json:"savedAt"`
 }
 
 func ConvertFileToWebResult(file *domain.File) *FileWebResult {
@@ -20,7 +19,6 @@ func ConvertFileToWebResult(file *domain.File) *FileWebResult {
 	fileWebResult.Platform = file.GetPlatform()
 	fileWebResult.OpenedAt = file.GetOpenedAt()
 	fileWebResult.SavedAt = file.GetSavedAt()
-	fileWebResult.ExportedAt = file.GetExportedAt()
 	return fileWebResult
 }
 
