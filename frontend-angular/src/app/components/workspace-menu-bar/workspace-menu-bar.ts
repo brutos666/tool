@@ -79,7 +79,7 @@ export class WorkspaceMenuBar implements OnInit {
       new Button(
         'importAll',
         'Importer',
-        'Ajoute les tâches depuis dans un fichier',
+        'Ajoute les tâches depuis un fichier',
         'download',
         this.importAll.bind(this),
       ),
@@ -128,8 +128,7 @@ export class WorkspaceMenuBar implements OnInit {
   askBeforeExport() {
     this.proposeFileName();
     this.showFileName = true;
-    this.confirmQuestion =
-      "Veuillez saisir le nom du fichier à exporter avant de confirmer l'export";
+    this.confirmQuestion = 'Veuillez saisir le nom du fichier à exporter';
     this.confirmAction = this.exportAll.bind(this);
     this.showConfirm.set(true);
   }
