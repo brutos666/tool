@@ -3,9 +3,12 @@
   height: var(--menu-height);
   list-style-type: none;
   display: flex;
-  justify-content: flex-start;
   align-items: center;
   background-color: var(--color-bg-surface);
   padding-left: var(--global-padding);
-  flex-grow: 1;
+  gap:var(--global-gap)
 }
+.menu__file {
+  flex-grow:1;
+}
+

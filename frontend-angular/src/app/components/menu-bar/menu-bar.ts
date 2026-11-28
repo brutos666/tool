@@ -7,9 +7,10 @@ import { ManualNavigation } from '../../directives/manual-navigation.js';
 import { PopupButton } from '../../directives/popup-button';
 import { PopOverContainer } from '../../directives/popover-container';
 import { FocusableButton } from '../action-button/focusable-button';
+import { FileInfos } from '../file-infos/file-infos';
 
 @Component({
-  imports: [Menu, PopupButton, PopOverContainer, FocusableButton],
+  imports: [Menu, PopupButton, PopOverContainer, FocusableButton, FileInfos],
   selector: 'menu-bar',
   styleUrl: './menu-bar.scss',
   templateUrl: './menu-bar.html',

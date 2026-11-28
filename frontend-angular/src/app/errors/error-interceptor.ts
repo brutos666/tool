@@ -44,7 +44,10 @@ export class ErrorInterceptor {
       tap((event) => {
         if (event.type === HttpEventType.Response) {
           const successMessage = req.context.get(ErrorInterceptor.notificationMessage).getSuccess();
-          notificationService.addNotification(successMessage, 'success');
+          if (successMessage.length) {
+            // Les succès n'ont pas tous intérêt à être notifié
+            notificationService.addNotification(successMessage, 'success');
+          }
         }
       }),
     );

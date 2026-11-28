@@ -35,6 +35,7 @@ import { DisplayPlaceHolder } from '../../directives/display-place-holder';
 import { PlaceHolderService } from '../../services/place-holder-service.js';
 import { FILE_SERVICE } from '../../services/file-service.js';
 import { environment } from '../../config/environment.js';
+import { InfosService } from '../../services/infos-service.js';
 
 @Component({
   imports: [
@@ -69,6 +70,7 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
   name = 'WorkingSpace';
 
   private itemService = inject(ItemService);
+  private infosService = inject(InfosService);
   private placeHolderService = inject(PlaceHolderService);
   private fileService = inject(FILE_SERVICE);
 
@@ -80,8 +82,6 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
   showFileName: boolean = false;
   confirmAction: Function = () => {};
   confirmQuestion: string = 'Vous êtes vraiment sûr de vouloir faire ce truc insensé ?';
-  proposeRootFileName: boolean = true;
-  rootFileName: string | undefined;
 
   emptyStateNav = Help.NO_TREE;
   emptyStateMain = Help.NO_TREE_SELECTED;
@@ -120,12 +120,6 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
 
   constructor() {
     super();
-    effect(() => {
-      const fileName = this.fileName();
-      if (this.proposeRootFileName) {
-        this.rootFileName = fileName;
-      }
-    });
   }
 
   ngOnInit(): void {
@@ -156,7 +150,7 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
           'Enregistrer sous',
           'Sauvegarde les tâches dans un nouveau fichier',
           'saveAs',
-          this.saveAs.bind(this, 'root'),
+          this.saveAs.bind(this),
         ),
       );
     } else {
@@ -201,27 +195,15 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
         this.saveCurrent.bind(this),
       ),
     );
-    if (environment.desktop) {
-      this.mainButtons.push(
-        new Button(
-          'saveCurrentAs',
-          `Sauvegarder sous ${vue}`,
-          `Sauvegarde ${vue} dans un fichier`,
-          'saveAs',
-          this.saveAs.bind(this, 'current'),
-        ),
-      );
-    } else {
-      this.mainButtons.push(
-        new Button(
-          'uploadCurrent',
-          `Exporter ${vue}`,
-          'Sauvegarde la tâche dans un fichier',
-          'upload',
-          this.askBeforeExport.bind(this, 'current'),
-        ),
-      );
-    }
+    this.mainButtons.push(
+      new Button(
+        'uploadCurrent',
+        `Exporter ${vue}`,
+        'Sauvegarde la tâche dans un fichier',
+        'upload',
+        this.askBeforeExport.bind(this, 'current'),
+      ),
+    );
     this.mainButtons.push(
       new Button(
         'importCurrent',
@@ -264,8 +246,7 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
     this.showConfirm.set(true);
   }
   open(file: File) {
-    this.itemService.openFile(file);
-    this.rootFileName = file.name;
+    this.itemService.openFile(file).then(() => this.infosService.loadInfos());
   }
   saveAll() {
     this.itemService.saveAllItems();
@@ -274,30 +255,34 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
     this.itemService.saveCurrentItem();
   }
   askBeforeExport(chooseItem: 'root' | 'current') {
-    const item = chooseItem == 'current' ? this.currentItem() : this.rootItem();
-    if (!item) {
+    if (chooseItem == 'current' && !this.currentItem()) {
       return;
     }
     this.proposeFileName(chooseItem);
     this.showFileName = true;
     this.confirmQuestion =
       "Veuillez saisir le nom du fichier à exporter avant de confirmer l'export";
-    this.confirmAction = this.exportItem.bind(this, item);
+    this.confirmAction =
+      chooseItem == 'current' ? this.exportCurrent.bind(this) : this.exportAll.bind(this);
     this.showConfirm.set(true);
   }
 
   // Version desktop uniquement
-  async saveAs(chooseItem: 'root' | 'current') {
-    const item = chooseItem == 'current' ? this.currentItem() : this.rootItem();
-    if (!item) {
+  saveAs() {
+    this.proposeFileName('root');
+    this.exportAll();
+  }
+  async exportAll() {
+    const blob = await this.itemService.exportItem(this.rootItem(), this.fileName());
+    await this.fileService.save(this.fileName(), blob);
+    this.infosService.loadInfos();
+  }
+  async exportCurrent(item: TreeData<ItemData>) {
+    const currentItem = this.currentItem();
+    if (!currentItem) {
       return;
     }
-    this.proposeFileName(chooseItem);
-    const fileName = await this.exportItem(item);
-    this.fileName.set(fileName);
-  }
-  async exportItem(item: TreeData<ItemData>) {
-    const blob = await this.itemService.exportItem(item, this.fileName());
+    const blob = await this.itemService.exportItem(currentItem, this.fileName());
     return this.fileService.save(this.fileName(), blob);
   }
   async importAll() {
@@ -325,11 +310,11 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
 
   private proposeFileName(chooseItem: 'root' | 'current') {
     if (chooseItem == 'root') {
-      this.proposeRootFileName = true;
-      this.fileName.set(this.rootFileName || this.itemService.proposeFileName(this.rootItem()));
+      this.fileName.set(
+        this.infosService.currentFileName() || this.itemService.proposeFileName(this.rootItem()),
+      );
       return;
     }
-    this.proposeRootFileName = false;
     const currentItem = this.currentItem();
     if (currentItem) {
       this.fileName.set(this.itemService.proposeFileName(currentItem));

@@ -1,17 +1,19 @@
 import { inject, Service, signal } from '@angular/core';
 import { TreeData } from '../data/tree-data.js';
 import { ItemData } from '../data/item-data.js';
-import { HttpClient, HttpContext, HttpClientCommonOptions } from '@angular/common/http';
-import { BehaviorSubject, catchError, firstValueFrom, map, Observable } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, lastValueFrom } from 'rxjs';
 import { TreeItemData } from '../data/tree-item-data.js';
 import { TreeInfoData } from '../data/tree-info-data.js';
-import { ErrorInterceptor } from '../errors/error-interceptor.js';
 import { NotificationMessage } from '../errors/notification-messages.js';
+import { RequestService } from './request-service.js';
 
 type LoadAction = 'replaceAll' | 'replaceCurrent' | 'append';
 
 @Service()
 export class ItemService {
+  private requestService = inject(RequestService);
+
   static rootItemData = new ItemData('-1', 'Travail à faire', '', '', '', '');
   private http = inject(HttpClient);
   private rootItemSubject = new BehaviorSubject<TreeData<ItemData>>(
@@ -46,6 +48,8 @@ export class ItemService {
     "Une erreur est survenue lors de l'ouverture du fichier",
   );
 
+  #giveIdCall = this.giveTreeItemId.bind(this);
+
   constructor() {
     this.loadItems();
   }
@@ -53,13 +57,18 @@ export class ItemService {
   public giveUniqueId() {
     return this.uniqueId++;
   }
+  public giveTreeItemId() {
+    return `${this.treeItemId++}`;
+  }
 
-  public loadItems() {
+  public async loadItems() {
     const request = this.http.get<TreeItemData[]>(
       '/api/item/findAllItems',
-      this.getJsonOptions(this.loadNotificationMessage),
+      this.requestService.getJsonOptions(this.loadNotificationMessage),
     );
-    this.treeItemsResponse(request, 'replaceAll');
+    this.treeItemId = 0;
+    const treeItem = await this.requestService.convertTreesToTreeItem(request, this.#giveIdCall);
+    this.majModel('replaceAll', treeItem);
   }
   public loadCurrentItem() {
     const currentItem = this.currentItemSignal();
@@ -79,13 +88,14 @@ export class ItemService {
     }
   }
 
-  public exportItem(item: TreeData<ItemData>, fileName: string): Promise<Blob> {
+  public exportItem(item: TreeData<ItemData>, fileName: string) {
     return this.export(item, fileName);
   }
 
   public openFile(file: File) {
     return this.openItems(file);
   }
+
   public importAllItems(file: File) {
     this.importItems(file, 'append');
   }
@@ -103,9 +113,10 @@ export class ItemService {
     return `${title}.txt`;
   }
 
-  private loadItem(treeItem: TreeData<ItemData>) {
+  private async loadItem(treeItem: TreeData<ItemData>) {
     const rootItem = this.rootItemSubject.value;
-    if (!treeItem.getParentTreeItemId().length) {
+    const parentTreeItemId = treeItem.getParentTreeItemId();
+    if (!parentTreeItemId.length) {
       this.loadItems();
       return;
     }
@@ -118,11 +129,17 @@ export class ItemService {
     }
     const requestObservable = this.http.get<TreeItemData>(
       `/api/item/load?id=${treeItem.getItemId()}&parentId=${parentItem?.getItemId()}`,
-      this.getJsonOptions(this.loadNotificationMessage),
+      this.requestService.getJsonOptions(this.loadNotificationMessage),
     );
-    this.treeDataResponse(treeItem, requestObservable);
+    const loadTreeItem = await this.requestService.convertToTreeItem(
+      parentTreeItemId,
+      requestObservable,
+      this.#giveIdCall,
+    );
+    this.replaceTreeItem(treeItem, loadTreeItem);
   }
-  private saveItem(treeItem: TreeData<ItemData>) {
+
+  private async saveItem(treeItem: TreeData<ItemData>) {
     const rootItem = this.rootItemSubject.value;
     const parentItem = rootItem.getTreeByTreeId(treeItem.getParentTreeItemId());
     if (parentItem?.getContent().isNew()) {
@@ -133,136 +150,93 @@ export class ItemService {
     const requestObservable = this.http.post<TreeInfoData>(
       '/api/item/save',
       treeInfosData,
-      this.getJsonOptions(this.saveNotificationMessage),
+      this.requestService.getJsonOptions(this.saveNotificationMessage),
     );
-    this.treeInfosResponse(treeItem, requestObservable);
+    const loadTreeItem = await this.requestService.convertTreeInfosDataToTreeItem(
+      treeItem.getParentTreeItemId(),
+      requestObservable,
+      this.#giveIdCall,
+    );
+    this.replaceTreeItem(treeItem, loadTreeItem);
   }
 
-  private export(treeItem: TreeData<ItemData>, fileName: string): Promise<Blob> {
+  private export(treeItem: TreeData<ItemData>, fileName: string) {
     const rootItem = this.rootItemSubject.value;
     const parentItem = rootItem.getTreeByTreeId(treeItem.getParentTreeItemId());
     const treeInfosData = this.getTreeInfoData(parentItem, treeItem);
     const requestObservable = this.http.post<Blob>(
       `/api/export/items?file=${fileName}`,
       treeInfosData,
-      this.getFileOptions(this.exportNotificationMessage),
+      this.requestService.getFileOptions(this.exportNotificationMessage),
     );
-    return firstValueFrom(requestObservable);
+    return this.requestService.get<Blob>(requestObservable);
   }
-  private importItems(file: File, action: LoadAction) {
+
+  private async importItems(file: File, action: LoadAction) {
     const formData = new FormData();
     formData.append('fileToUpload', file, file.name);
 
     const requestObservable = this.http.post<TreeItemData[]>(
       '/api/import/items',
       formData,
-      this.getJsonOptions(this.importNotificationMessage),
+      this.requestService.getJsonOptions(this.importNotificationMessage),
     );
-    return this.treeItemsResponse(requestObservable, action);
+    const treeItem = await this.requestService.convertTreesToTreeItem(
+      requestObservable,
+      this.#giveIdCall,
+    );
+    this.majModel(action, treeItem);
   }
-  private openItems(file: File) {
+  private async openItems(file: File) {
     const formData = new FormData();
     formData.append('fileToUpload', file, file.name);
 
     const requestObservable = this.http.post<TreeItemData[]>(
       '/api/item/open',
       formData,
-      this.getJsonOptions(this.openNotificationMessage),
+      this.requestService.getJsonOptions(this.openNotificationMessage),
     );
-    return this.treeItemsResponse(requestObservable, 'replaceAll');
+    this.treeItemId = 0;
+    const treeItem = await this.requestService.convertTreesToTreeItem(
+      requestObservable,
+      this.#giveIdCall,
+    );
+    this.majModel('replaceAll', treeItem);
   }
 
-  private getJsonOptions(message: NotificationMessage) {
-    return {
-      context: new HttpContext().set(ErrorInterceptor.notificationMessage, message),
-    };
-  }
-  private getFileOptions(message: NotificationMessage): {
-    responseType: 'blob';
-  } & HttpClientCommonOptions {
-    return {
-      context: new HttpContext().set(ErrorInterceptor.notificationMessage, message),
-      responseType: 'blob',
-    };
-  }
-  private treeInfosResponse(treeItem: TreeData<ItemData>, request: Observable<TreeInfoData>) {
-    request
-      .pipe(
-        catchError(() => []),
-        map((treeInfoObj) => {
-          return this.convertTreeInfosData(treeInfoObj, treeItem.getParentTreeItemId());
-        }),
-      )
-      .subscribe((newTreeItem) => {
-        const rootItem = this.rootItemSubject.value;
-        const parentItem = rootItem.getTreeByTreeId(treeItem.getParentTreeItemId());
-        if (parentItem) {
-          this.replaceItem(parentItem, treeItem, newTreeItem);
-        } else {
-          this.propageUpdates(newTreeItem);
-        }
-      });
-  }
-
-  private treeDataResponse(treeItem: TreeData<ItemData>, request: Observable<TreeItemData>) {
-    request
-      .pipe(
-        catchError(() => []),
-        map((treeItemObj) => this.convertToTreeData(treeItemObj, treeItem.getParentTreeItemId())),
-      )
-      .subscribe((loadTreeItem) => {
-        const rootItem = this.rootItemSubject.value;
-        const parentItem = rootItem.getTreeByTreeId(treeItem.getParentTreeItemId());
-        if (parentItem) {
-          this.replaceItem(parentItem, treeItem, loadTreeItem);
-        }
-      });
-  }
-
-  private treeItemsResponse(request: Observable<TreeItemData[]>, action: LoadAction) {
-    const responseItem = new TreeData<ItemData>(ItemService.rootItemData);
-    if (action === 'replaceAll') {
-      this.treeItemId = 0;
+  private majModel(action: string, treeItem: TreeData<ItemData>) {
+    if (!treeItem.getChildren().length) {
+      return;
     }
-    request
-      .pipe(
-        catchError(() => []),
-        map((treeItems) =>
-          // Récupère tous les arbres en tant qu'enfants de responseItem
-          treeItems
-            .map((treeItemObj) => this.convertToTreeData(treeItemObj, '0'))
-            .reduce((accumulator, current) => {
-              accumulator.addChild(current);
-              return accumulator;
-            }, responseItem),
-        ),
-      )
-      .subscribe((responseItem) => {
-        if (!responseItem.getChildren().length) {
-          return;
-        }
+    switch (action) {
+      case 'append':
         const rootItem = this.rootItemSubject.value;
-        switch (action) {
-          case 'append':
-            rootItem.addChildren(responseItem.getChildren());
-            this.rootItemSubject.next(rootItem.copy());
-            break;
-          case 'replaceAll':
-            this.propageUpdates(responseItem);
-            break;
-          case 'replaceCurrent':
-            const currentItem = this.currentItemSignal();
-            if (currentItem) {
-              const toReplace = responseItem.getChildren()[0];
-              // Remplacement du courant
-              const parentItem = rootItem.getTreeByTreeId(currentItem.getParentTreeItemId());
-              this.replaceItem(parentItem, currentItem, toReplace);
-            }
-            break;
-          default:
-            break;
+        rootItem.addChildren(treeItem.getChildren());
+        this.rootItemSubject.next(rootItem.copy());
+        break;
+      case 'replaceAll':
+        this.propageUpdates(treeItem);
+        break;
+      case 'replaceCurrent':
+        const currentItem = this.currentItemSignal();
+        if (currentItem) {
+          const toReplace = treeItem.getChildren()[0];
+          this.replaceTreeItem(currentItem, toReplace);
         }
-      });
+        break;
+      default:
+        break;
+    }
+  }
+
+  private replaceTreeItem(oldTreeItem: TreeData<ItemData>, loadTreeItem: TreeData<ItemData>) {
+    const rootItem = this.rootItemSubject.value;
+    const parentItem = rootItem.getTreeByTreeId(oldTreeItem.getParentTreeItemId());
+    if (parentItem) {
+      this.replaceItem(parentItem, oldTreeItem, loadTreeItem);
+    } else {
+      this.propageUpdates(loadTreeItem);
+    }
   }
 
   private replaceItem(
@@ -290,7 +264,7 @@ export class ItemService {
     treeItem: TreeData<ItemData>,
   ): TreeInfoData {
     const treeInfosData = new TreeInfoData();
-    treeInfosData.item = this.convertToTreeItemData(treeItem);
+    treeInfosData.item = convertToTreeItemData(treeItem);
     if (parentItem) {
       treeInfosData.parentItemId = parentItem.getItemId();
       treeInfosData.previousItemId = parentItem.getPrevious(treeItem)?.getItemId() || '';
@@ -412,37 +386,16 @@ export class ItemService {
       this.applyTree(nodes[i], callback);
     }
   }
-
-  private convertTreeInfosData(json: TreeInfoData, parentTreeItemId: string): TreeData<ItemData> {
-    return this.convertToTreeData(json.item, parentTreeItemId);
-  }
-
-  private convertToTreeData(json: TreeItemData, parentTreeItemId: string): TreeData<ItemData> {
-    const treeData = new TreeData(
-      new ItemData(json.id, json.title, json.text, json.state, json.status, json.CRUDMode),
-    );
-    this.treeItemId++;
-    const treeItemId = `${this.treeItemId}`;
-    treeData.setTreeItemId(treeItemId);
-    treeData.setParentTreeItemId(parentTreeItemId);
-    treeData.setChildren(
-      json.children.map((treeItem: any) => this.convertToTreeData(treeItem, treeItemId)),
-    );
-    return treeData;
-  }
-
-  private convertToTreeItemData(treeData: TreeData<ItemData>): TreeItemData {
-    const itemData = treeData.getContent();
-    const treeItemData = new TreeItemData();
-    treeItemData.id = itemData.getId();
-    treeItemData.title = itemData.getTitle();
-    treeItemData.text = itemData.getText();
-    treeItemData.state = itemData.getState();
-    treeItemData.status = itemData.getStatus();
-    treeItemData.CRUDMode = itemData.getCRUDMode();
-    treeItemData.children = treeData
-      .getChildren()
-      .map((child) => this.convertToTreeItemData(child));
-    return treeItemData;
-  }
+}
+function convertToTreeItemData(treeData: TreeData<ItemData>): TreeItemData {
+  const itemData = treeData.getContent();
+  const treeItemData = new TreeItemData();
+  treeItemData.id = itemData.getId();
+  treeItemData.title = itemData.getTitle();
+  treeItemData.text = itemData.getText();
+  treeItemData.state = itemData.getState();
+  treeItemData.status = itemData.getStatus();
+  treeItemData.CRUDMode = itemData.getCRUDMode();
+  treeItemData.children = treeData.getChildren().map((child) => convertToTreeItemData(child));
+  return treeItemData;
 }

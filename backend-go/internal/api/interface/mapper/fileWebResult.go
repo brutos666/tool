@@ -1,24 +1,24 @@
 package mapper
 
 import (
-	"time"
-
 	"goTool/internal/api/domain"
 )
 
 type FileWebResult struct {
-	Name     string     `json:"name"`
-	Platform string     `json:"platform"`
-	OpenedAt time.Time  `json:"openedAt"`
-	SavedAt  *time.Time `json:"savedAt"`
+	Name     string `json:"name"`
+	Platform string `json:"platform"`
+	OpenedAt string `json:"openedAt"`
+	SavedAt  string `json:"savedAt"`
 }
 
 func ConvertFileToWebResult(file *domain.File) *FileWebResult {
 	fileWebResult := new(FileWebResult)
 	fileWebResult.Name = file.GetName()
 	fileWebResult.Platform = file.GetPlatform()
-	fileWebResult.OpenedAt = file.GetOpenedAt()
-	fileWebResult.SavedAt = file.GetSavedAt()
+	fileWebResult.OpenedAt = file.GetOpenedAt().Format("02/01/2006 15:04")
+	if file.GetSavedAt() != nil {
+		fileWebResult.SavedAt = file.GetSavedAt().Format("02/01/2006 15:04")
+	}
 	return fileWebResult
 }
 
