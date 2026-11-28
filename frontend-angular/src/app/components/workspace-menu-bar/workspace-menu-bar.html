@@ -1,0 +1,8 @@
+<menu-bar class="working-space__menu" [label]="label" [menuItems]="menuItems"></menu-bar>
+@if (showConfirm()) {
+<confirm-dialog [(show)]="showConfirm" [doCallback]="confirmAction" [question]="confirmQuestion">
+  @if (showFileName) {
+  <field id="inputFileName" label="Nom du fichier" [(value)]="fileName"></field>
+  }
+</confirm-dialog>
+}
