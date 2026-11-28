@@ -1,0 +1,12 @@
+<space>
+  <space-header>Navigation</space-header>
+  <space-body>
+    <tree-list display-place-holder-directive [overId]="this.placeHolderService.overId()"
+      [position]="this.placeHolderService.position()" [dataList]="rootItem().getChildren()" [orientation]="'vertical'"
+      [layoutData]="navLayout" [emptyMessage]="emptyStateNav" [canBeSelected]="true"></tree-list>
+  </space-body>
+  <space-footer>
+    <button focusable class="working-space__add-button" [data]="navAddButton" [buttonType]="'item-like'"
+      [tooltip]="navAddButton.description"></button>
+  </space-footer>
+</space>

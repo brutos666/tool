@@ -1,9 +1,6 @@
 import { Component, ElementRef, inject, OnDestroy, ViewChild } from '@angular/core';
 import { TreeList } from '../tree-list/tree-list';
 import { ItemService } from '../../services/item-service.js';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { TreeData } from '../../data/tree-data.js';
-import { ItemData } from '../../data/item-data.js';
 import { Layout } from '../common/Types.js';
 import { RootNavigation } from '../../directives/root-navigation.js';
 import { NodeElement } from '../common/NodeElement.js';
@@ -22,6 +19,7 @@ import { DisplayPlaceHolder } from '../../directives/display-place-holder';
 import { PlaceHolderService } from '../../services/place-holder-service.js';
 import { WorkspaceMenuBar } from '../workspace-menu-bar/workspace-menu-bar';
 import { WorkspaceMainToolbar } from '../workspace-main-toolbar/workspace-main-toolbar';
+import { WorkspaceNav } from '../workspace-nav/workspace-nav';
 
 @Component({
   imports: [
@@ -39,6 +37,7 @@ import { WorkspaceMainToolbar } from '../workspace-main-toolbar/workspace-main-t
     DisplayPlaceHolder,
     WorkspaceMenuBar,
     WorkspaceMainToolbar,
+    WorkspaceNav,
   ],
   standalone: true,
   selector: 'working-space',
@@ -56,26 +55,13 @@ export class WorkingSpace extends NodeElement implements OnDestroy {
   private itemService = inject(ItemService);
   placeHolderService = inject(PlaceHolderService);
 
-  static NEW_SPACE_LABEL = 'Saisir un espace';
   static NEW_ITEM_LABEL = 'Saisir un pense-bête';
 
-  emptyStateNav = Help.NO_TREE;
   emptyStateMain = Help.NO_TREE_SELECTED;
 
-  rootItem = toSignal(this.itemService.rootItem$, {
-    initialValue: new TreeData<ItemData>(ItemService.rootItemData),
-  });
   currentItem = this.itemService.currentItemSignal;
 
-  navLayout: Layout = Layout.Title;
   mainLayout: Layout = Layout.Todo;
-  navAddButton: Button = new Button(
-    'addNewSpace',
-    'Ajouter un élément',
-    'Ajoute un espace',
-    '',
-    this.doAddSpace.bind(this),
-  );
   mainAddButton: Button = new Button(
     'addNewItem',
     'Ajouter un élément',
@@ -100,9 +86,6 @@ export class WorkingSpace extends NodeElement implements OnDestroy {
     splitter.removeEventListener('pointerup', this.onPointerUpEvent, { once: true });
   }
 
-  doAddSpace() {
-    this.itemService.addRootItem(WorkingSpace.NEW_SPACE_LABEL);
-  }
   doAddItem() {
     const currentItem = this.currentItem();
     if (currentItem) {

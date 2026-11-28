@@ -5,7 +5,6 @@ import { ItemService } from '../../services/item-service.js';
 import { FILE_SERVICE } from '../../services/file-service.js';
 import { ConfirmationDialog } from '../confirm-dialog/confirm-dialog';
 import { Field } from '../field/field';
-import { TreeData } from '../../data/tree-data.js';
 
 @Component({
   imports: [Toolbar, ConfirmationDialog, Field],

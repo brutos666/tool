@@ -1,17 +1,6 @@
 <workspace-menu-bar class="working-space__menu"></workspace-menu-bar>
 <aside #navSpace class="working-space__nav" aria-current="true">
-  <space>
-    <space-header>Navigation</space-header>
-    <space-body>
-      <tree-list display-place-holder-directive [overId]="placeHolderService.overId()"
-        [position]="placeHolderService.position()" [dataList]="rootItem().getChildren()" [orientation]="'vertical'"
-        [layoutData]="navLayout" [emptyMessage]="emptyStateNav" [canBeSelected]="true"></tree-list>
-    </space-body>
-    <space-footer>
-      <button focusable class="working-space__add-button" [data]="navAddButton" [buttonType]="'item-like'"
-        [tooltip]="navAddButton.description"></button>
-    </space-footer>
-  </space>
+  <workspace-nav></workspace-nav>
 </aside>
 <div #splitter class="working-space__splitter" (pointerdown)="onPointerDown($event)">&nbsp;</div>
 <main #mainSpace class="working-space__main">
