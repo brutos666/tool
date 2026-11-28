@@ -34,7 +34,7 @@ type UserQueryRepository interface {
 }
 
 type FileCommandRepository interface {
-	AddFile(ctx context.Context, dataAccessId int, name string) error
+	AddFile(ctx context.Context, dataAccessId int, name string) (*File, error)
 	DeleteOldFiles(ctx context.Context, dataAccessId int) error
 }
 

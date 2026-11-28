@@ -6,10 +6,11 @@ import (
 	"goTool/internal/api/config"
 	"goTool/internal/api/domain"
 	"goTool/internal/api/infrastructure/bddService"
+	"goTool/internal/api/infrastructure/entityBdd"
 )
 
 const (
-	INSERT_FILE string = "INSERT INTO file (name, platform, opened_at) VALUES (?, ?, CURRENT_TIMESTAMP) ON CONFLICT(name) DO UPDATE SET opened_at = CURRENT_TIMESTAMP"
+	INSERT_FILE string = "INSERT INTO file (name, platform, opened_at) VALUES (:name, :platform, CURRENT_TIMESTAMP) ON CONFLICT(name) DO UPDATE SET opened_at = CURRENT_TIMESTAMP RETURNING *"
 	DELETE_FILE string = "DELETE FROM file WHERE name NOT IN (SELECT name FROM file ORDER BY opened_at DESC LIMIT 10)"
 )
 
@@ -19,7 +20,7 @@ func FileCommand() domain.FileCommandRepository {
 
 type fileCmdRepository struct{}
 
-func (repository *fileCmdRepository) AddFile(ctx context.Context, dataAccessId int, name string) error {
+func (repository *fileCmdRepository) AddFile(ctx context.Context, dataAccessId int, name string) (*domain.File, error) {
 	return doAddFile(ctx, bddAccessService.RetrieveWriteAccess(dataAccessId), name)
 }
 
@@ -27,12 +28,13 @@ func (repository *fileCmdRepository) DeleteOldFiles(ctx context.Context, dataAcc
 	return doDeleteFiles(ctx, bddAccessService.RetrieveWriteAccess(dataAccessId))
 }
 
-func doAddFile(ctx context.Context, dataBase bddService.WriteCommands, name string) error {
-	_, err := dataBase.Exec(ctx, INSERT_FILE, name, config.GetProperties().GetPlatForm())
+func doAddFile(ctx context.Context, dataBase bddService.WriteCommands, name string) (*domain.File, error) {
+	fileModel := &entityBdd.FileModel{Name: name, Platform: config.GetProperties().GetPlatForm()}
+	err := dataBase.Insert(ctx, INSERT_FILE, fileModel)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return fileModel.ConvertToFile(), nil
 }
 
 func doDeleteFiles(ctx context.Context, dataBase bddService.WriteCommands) error {

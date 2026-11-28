@@ -246,10 +246,19 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
     this.showConfirm.set(true);
   }
   open(file: File) {
-    this.itemService.openFile(file).then(() => this.infosService.loadInfos());
+    this.itemService.openFile(file).then(() => this.infosService.registerFile(file.name));
   }
   saveAll() {
-    this.itemService.saveAllItems();
+    const currentFileName = this.infosService.currentFileName();
+    if (environment.desktop && currentFileName.length) {
+      // Sauvegarde de la base de données, puis sauvegarde dans le dernier fichier ouvert
+      this.itemService
+        .saveAllItems()
+        .then(() => this.itemService.exportItem(this.rootItem(), currentFileName))
+        .then((blob) => this.fileService.save(currentFileName, blob));
+    } else {
+      this.itemService.saveAllItems();
+    }
   }
   saveCurrent() {
     this.itemService.saveCurrentItem();
@@ -266,16 +275,17 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
       chooseItem == 'current' ? this.exportCurrent.bind(this) : this.exportAll.bind(this);
     this.showConfirm.set(true);
   }
-
   // Version desktop uniquement
   saveAs() {
     this.proposeFileName('root');
     this.exportAll();
   }
+
   async exportAll() {
     const blob = await this.itemService.exportItem(this.rootItem(), this.fileName());
-    await this.fileService.save(this.fileName(), blob);
-    this.infosService.loadInfos();
+    this.fileService
+      .saveAs(this.fileName(), blob)
+      .then((fileName) => this.infosService.registerFile(fileName));
   }
   async exportCurrent(item: TreeData<ItemData>) {
     const currentItem = this.currentItem();
@@ -283,7 +293,7 @@ export class WorkingSpace extends NodeElement implements OnInit, OnDestroy {
       return;
     }
     const blob = await this.itemService.exportItem(currentItem, this.fileName());
-    return this.fileService.save(this.fileName(), blob);
+    return this.fileService.saveAs(this.fileName(), blob);
   }
   async importAll() {
     const file = await this.fileService.pick('*.txt;*.csv');

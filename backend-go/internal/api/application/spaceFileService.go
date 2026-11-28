@@ -37,8 +37,6 @@ func (fileService SpaceFService) OpenFile(ctx context.Context, dataAccessId int,
 		return nil, err
 	}
 	spaces.ApplyModification()
-	// Stocker le fichier ouvert dans la table des fichiers ouverts
-	err = fileService.fileRepository.AddFile(ctx, dataAccessId, sourceFile.FileName())
 	return spacesList, nil
 }
 
@@ -54,12 +52,6 @@ func (fileService SpaceFService) Import(ctx context.Context, sourceFile domain.F
 	return spaces, nil
 }
 
-func (fileService SpaceFService) Export(ctx context.Context, dataAccessId int, fileName string, nodeSpace domain.NodeSpace) (*bytes.Buffer, error) {
-	if nodeSpace.IsRoot() {
-		err := fileService.fileRepository.AddFile(ctx, dataAccessId, fileName)
-		if err != nil {
-			return nil, nil
-		}
-	}
+func (fileService SpaceFService) Export(ctx context.Context, nodeSpace domain.NodeSpace) (*bytes.Buffer, error) {
 	return fileService.repository.Write(ctx, nodeSpace)
 }

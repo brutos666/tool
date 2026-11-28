@@ -43,7 +43,7 @@ func (s *FileService) Pick(accept string) (*PickedFile, error) {
 	return &PickedFile{ID: id, Name: path, Content: data}, nil
 }
 
-func (s *FileService) SaveFile(name string, content string) (string, error) {
+func (s *FileService) SaveAs(name string, content string) (string, error) {
 	path, err := application.Get().Dialog.SaveFile().
 		SetMessage("Enregistrer sous").
 		SetFilename(name).
@@ -51,9 +51,9 @@ func (s *FileService) SaveFile(name string, content string) (string, error) {
 	if err != nil || path == "" {
 		return path, err
 	}
+	return path, s.Save(path, content)
+}
 
-	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
-		return path, err
-	}
-	return path, nil
+func (s *FileService) Save(path string, content string) error {
+	return os.WriteFile(path, []byte(content), 0o644)
 }

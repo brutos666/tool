@@ -13,6 +13,10 @@ export function Pick(accept: string): $CancellablePromise<$models.PickedFile | n
     return $Call.ByID(576962580, accept);
 }
 
-export function SaveFile(name: string, content: string): $CancellablePromise<string> {
-    return $Call.ByID(3557280082, name, content);
+export function Save(path: string, content: string): $CancellablePromise<void> {
+    return $Call.ByID(3750849188, path, content);
+}
+
+export function SaveAs(name: string, content: string): $CancellablePromise<string> {
+    return $Call.ByID(1616856292, name, content);
 }

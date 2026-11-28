@@ -28,7 +28,7 @@ func selectAllFiles(ctx context.Context, dataBase bddService.ReadCommands) ([]*d
 	}
 	files := make([]*domain.File, len(filesModel))
 	for index := range filesModel {
-		files[index] = filesModel[index].ConvertToUser()
+		files[index] = filesModel[index].ConvertToFile()
 	}
 	return files, nil
 }

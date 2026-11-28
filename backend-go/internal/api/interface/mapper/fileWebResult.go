@@ -11,6 +11,13 @@ type FileWebResult struct {
 	SavedAt  string `json:"savedAt"`
 }
 
+func (file FileWebResult) ConvertToDomain() *domain.File {
+	fileParam := new(domain.File)
+	fileParam.SetName(file.Name)
+	fileParam.SetPlatform(file.Platform)
+	return fileParam
+}
+
 func ConvertFileToWebResult(file *domain.File) *FileWebResult {
 	fileWebResult := new(FileWebResult)
 	fileWebResult.Name = file.GetName()

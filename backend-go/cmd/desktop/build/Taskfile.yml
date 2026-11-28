@@ -78,13 +78,12 @@ tasks:
   copy:schema:
     summary: Copie le schéma SQLite dans le répertoire de build
     run: once
-    dir: build
     sources:
-      - ../../../schema-sqlite.sql
+      - ../../schema-sqlite.sql
     generates:
       - schema-sqlite.sql
     cmds:
-      - cp ../../../schema-sqlite.sql .
+      - cp ../../schema-sqlite.sql .
 
   dev:frontend:
     summary: Runs the frontend in development mode

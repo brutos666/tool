@@ -79,7 +79,7 @@ export class ItemService {
 
   public saveAllItems() {
     const rootItem = this.rootItemSubject.value;
-    this.saveItem(rootItem);
+    return this.saveItem(rootItem);
   }
   public saveCurrentItem() {
     const currentItem = this.currentItemSignal();

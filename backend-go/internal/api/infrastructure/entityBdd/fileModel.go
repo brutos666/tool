@@ -13,11 +13,11 @@ type FileModel struct {
 	Saved_at  *time.Time `db:"saved_at"`
 }
 
-func (fileBdd FileModel) ConvertToUser() *domain.File {
-	user := new(domain.File)
-	user.SetName(fileBdd.Name)
-	user.SetPlatform(fileBdd.Platform)
-	user.SetOpenedAt(fileBdd.Opened_at)
-	user.SetSavedAt(fileBdd.Saved_at)
-	return user
+func (fileBdd FileModel) ConvertToFile() *domain.File {
+	file := new(domain.File)
+	file.SetName(fileBdd.Name)
+	file.SetPlatform(fileBdd.Platform)
+	file.SetOpenedAt(fileBdd.Opened_at)
+	file.SetSavedAt(fileBdd.Saved_at)
+	return file
 }

@@ -37,6 +37,9 @@ func GetRequestMapper[I any](input any) RequestMapper {
 	var convertToDomainCall func(requestParam any) any
 
 	switch input.(type) {
+	case domain.File:
+		getWebResultCall = func() any { return new(FileWebResult) }
+		convertToDomainCall = func(requestParam any) any { return requestParam.(*FileWebResult).ConvertToDomain() }
 	case domain.NodeSpace:
 		getWebResultCall = func() any { return new(NodeSpaceWebResult) }
 		convertToDomainCall = func(requestParam any) any { return requestParam.(*NodeSpaceWebResult).ConvertToDomain() }
@@ -74,6 +77,8 @@ func GetResponseMapper(output any) ResponseMapper {
 		convertToWebResult = func(domainParam any) any { return ConvertUsersToWebResult(domainParam.([]*domain.User)) }
 	case []*domain.File:
 		convertToWebResult = func(domainParam any) any { return ConvertFilesToWebResult(domainParam.([]*domain.File)) }
+	case *domain.File:
+		convertToWebResult = func(domainParam any) any { return ConvertFileToWebResult(domainParam.(*domain.File)) }
 	case *responseMessage.Message:
 		convertToWebResult = func(domainParam any) any {
 			return ConvertHttpMessageToWebResult(domainParam.(*responseMessage.Message))
