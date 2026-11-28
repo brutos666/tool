@@ -9,6 +9,7 @@ import { Field } from '../field/field';
 @Component({
   imports: [Toolbar, ConfirmationDialog, Field],
   selector: 'workspace-main-toolbar',
+  styleUrl: './workspace-main-toolbar.scss',
   templateUrl: './workspace-main-toolbar.html',
 })
 export class WorkspaceMainToolbar implements OnInit {

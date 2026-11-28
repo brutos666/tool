@@ -6,21 +6,8 @@
 <main #mainSpace class="working-space__main">
   @let currentTreeData = currentItem();
   @if (currentTreeData) {
-  <workspace-main-toolbar class="working-space__toolbar"></workspace-main-toolbar>
-  <space>
-    <space-header class="main-space__header">
-      <item enter-tab-directive [treeData]="currentTreeData" [layoutData]="mainLayout" [title]="true"></item>
-    </space-header>
-    <space-body>
-      <tree-list display-place-holder-directive [overId]="this.placeHolderService.overId()"
-        [position]="this.placeHolderService.position()" [dataList]="currentTreeData.getChildren() || []"
-        [orientation]="'horizontal'" [layoutData]="mainLayout"></tree-list>
-    </space-body>
-    <space-footer>
-      <button focusable [data]="mainAddButton" class="working-space__add-button main-space__add-button"
-        [buttonType]="'item-like'" [tooltip]="mainAddButton.description"></button>
-    </space-footer>
-  </space>
+  <workspace-main-toolbar></workspace-main-toolbar>
+  <workspace-todo-list [treeData]="currentTreeData"></workspace-todo-list>
   } @else {
   <p class="working-space__empty-state" [innerHTML]="emptyStateMain"></p>
   }

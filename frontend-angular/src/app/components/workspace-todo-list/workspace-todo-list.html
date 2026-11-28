@@ -1,0 +1,14 @@
+<space>
+  <space-header>
+    <item enter-tab-directive [treeData]="treeData()" [layoutData]="mainLayout" [title]="true"></item>
+  </space-header>
+  <space-body>
+    <tree-list display-place-holder-directive [overId]="this.placeHolderService.overId()"
+      [position]="this.placeHolderService.position()" [dataList]="treeData().getChildren() || []"
+      [orientation]="'horizontal'" [layoutData]="mainLayout"></tree-list>
+  </space-body>
+  <space-footer>
+    <button focusable [data]="mainAddButton" class="add-button" [buttonType]="'item-like'"
+      [tooltip]="mainAddButton.description"></button>
+  </space-footer>
+</space>
