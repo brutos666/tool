@@ -17,14 +17,14 @@
 <main #mainSpace class="working-space__main">
   @let currentTreeData = currentItem();
   @if (currentTreeData) {
-  <toolbar class="working-space__toolbar" [buttons]="mainButtons" [toolbarType]="'menu'" [label]="mainLabel"></toolbar>
+  <workspace-main-toolbar class="working-space__toolbar"></workspace-main-toolbar>
   <space>
     <space-header class="main-space__header">
       <item enter-tab-directive [treeData]="currentTreeData" [layoutData]="mainLayout" [title]="true"></item>
     </space-header>
     <space-body>
-      <tree-list display-place-holder-directive [overId]="placeHolderService.overId()"
-        [position]="placeHolderService.position()" [dataList]="currentTreeData.getChildren() || []"
+      <tree-list display-place-holder-directive [overId]="this.placeHolderService.overId()"
+        [position]="this.placeHolderService.position()" [dataList]="currentTreeData.getChildren() || []"
         [orientation]="'horizontal'" [layoutData]="mainLayout"></tree-list>
     </space-body>
     <space-footer>
@@ -37,10 +37,3 @@
   }
 </main>
 <notification-center arrow-navigation-directive [navOrientation]="'vertical'"></notification-center>
-@if (showConfirm()) {
-<confirm-dialog [(show)]="showConfirm" [doCallback]="confirmAction" [question]="confirmQuestion">
-  @if (showFileName) {
-  <field id="inputFileName" label="Nom du fichier" [(value)]="fileName"></field>
-  }
-</confirm-dialog>
-}
